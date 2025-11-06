@@ -2,7 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.7'
 	id 'io.spring.dependency-management' version '1.1.7'
-	id 'jacoco'
+	id "jacoco" // fuer Test-Coverage
+	id "org.sonarqube" version "7.0.1.6134"
 }
 
 group = 'de.hs-rm.de'
@@ -28,4 +29,11 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+sonar {
+	properties {
+		property "sonar.host.url", "http://localhost:9000/sonar"
+		property "sonar.token", "sqa_e6aa5c7c2ead31899b13054d90dfd55fd71f3f49"
+	} 
 }
