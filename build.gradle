@@ -31,9 +31,17 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
 sonar {
 	properties {
 		property "sonar.host.url", "http://localhost:9000/sonar"
 		property "sonar.token", "sqa_e6aa5c7c2ead31899b13054d90dfd55fd71f3f49"
+		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
 	} 
 }
