@@ -5,6 +5,7 @@ import GameBoard from './components/GameBoard.vue';
 </script>
 
 <template>
+  <!-- Einbindung des Hauptspielfelds-->
     <GameBoard class="game-board"/>
 </template>
 

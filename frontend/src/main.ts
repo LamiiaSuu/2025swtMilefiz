@@ -8,6 +8,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
+// Registriert alle Three.js Objekte für TresJS (wichtig für 3D-Komponenten)
 extend(THREE)
 const app = createApp(App)
 
