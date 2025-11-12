@@ -15,4 +15,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+    server: {
+    proxy: {   // die folgenden URI-Pfade werden vom Frontend-Development-Server durchgeleitet
+      '/api': 'http://localhost:8080',
+}, },
 })
