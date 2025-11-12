@@ -2,6 +2,15 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import GameBoard from './components/GameBoard.vue';
+import { useBoardStore } from './stores/BoardStore';
+import { onMounted } from 'vue'
+
+const boardStore = useBoardStore();
+// Board-Daten laden wenn die App startet
+onMounted(async () => {
+  console.log('App mounted - loading board data...')
+  await boardStore.getBoard()
+})
 </script>
 
 <template>
