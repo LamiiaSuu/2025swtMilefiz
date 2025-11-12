@@ -46,3 +46,10 @@ sonar {
 		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
 	} 
 }
+
+task build_frontend(type: Exec) {
+  workingDir "${projectDir}/frontend"
+  commandLine "/bin/bash", "-c", "npm clean-install && npm audit fix && npm run build && rm -rf ../src/main/resources/public && cp -rv dist ../src/main/resources/public"
+}
+
+bootJar.dependsOn build_frontend
