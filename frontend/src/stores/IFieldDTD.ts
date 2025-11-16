@@ -4,13 +4,13 @@
  */
 export interface IFieldDTD{
     /** Eindeutige Feld-ID */
-    id: number
+    id: string
     
     /** Verkettung zum jeweiligen Nachbarfeld (optional) */
-    north?: number
-    south?: number
-    west?: number
-    east?: number
+    north?: string
+    south?: string
+    west?: string
+    east?: string
     
     /** Art von Feld: Start von Farbe, Normal, Ziel */
     type: string
