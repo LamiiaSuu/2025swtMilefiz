@@ -4,15 +4,18 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import GameBoard from '@/components/GameBoard.vue';
 
 // const milefizStore = useMilefizStore();
-const { startMilefizLiveUpdate } = useMilefizStore();
+const { gamedata, startMilefizLiveUpdate, sendSocketMessage } = useMilefizStore();
 startMilefizLiveUpdate();
 
-console.log('Home view!')
+setTimeout(function () {
+  sendSocketMessage({ msg: "Hello World" });
+  console.log('Home view!!')
+}, 5000);
 </script>
 
 <template>
   <main>
     <TheWelcome />
-    <GameBoard class="game-board"/>
+    <GameBoard class="game-board" />
   </main>
 </template>

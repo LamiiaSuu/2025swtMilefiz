@@ -8,6 +8,13 @@ const DEST = '/topic/milefiz'
 let stompclient: Client | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
+
+  // Beispiele für Daten
+  const gamedata = reactive<{ id: string; mana: number }>({
+    id: "", // UUID vom Spieler
+    mana: 100,
+  })
+
   function startMilefizLiveUpdate() {
     console.log('Starting Liveupdater for Milefiz')
     // Nur eine Instanz
@@ -34,7 +41,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       }
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe(DEST, (message) => {
-        console.log('Message received: ' + message)
+        console.log('Message received: ' + message + "\nBody:\n" + message.body)
         // const eventobjekt: IZutatDTD = JSON.parse(message.body)
         // console.log(JSON.stringify(eventobjekt))
         // if (eventobjekt.type === 'DOENER') {
@@ -52,7 +59,29 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     // Verbindung zum Broker aufbauen
     stompclient.activate()
   }
+
+  function sendSocketMessage(payload: any) {
+    if (!stompclient || !stompclient.connected) {
+      console.error("Cannot send message: STOMP client not connected.")
+      return
+    }
+
+    const body = JSON.stringify(payload)
+
+    try {
+      stompclient.publish({
+        destination: "/app/milefiz",
+        body,
+      })
+      console.log("Message sent to /app/milefiz: " + body)
+    } catch (err) {
+      console.error("Error sending message:", err)
+    }
+  }
+
   return {
+    gamedata,
     startMilefizLiveUpdate,
+    sendSocketMessage,
   }
 })
