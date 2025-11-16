@@ -2,7 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import GameBoard from './components/GameBoard.vue';
-import { useBoardStore } from './stores/BoardStore';
+import { useBoardStore } from './stores/boardStore';
 import { onMounted } from 'vue'
 
 const boardStore = useBoardStore();

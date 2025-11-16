@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
-import {ref, computed} from 'vue'
 import type { IBoardDTD } from './IBoardDTD'
-import type { IFieldDTD } from './IFieldDTD'
 
 /**
  * Pinia Store für das Spielbrett.
@@ -9,12 +7,10 @@ import type { IFieldDTD } from './IFieldDTD'
  */
 export const useBoardStore = defineStore('board', {
     state: () =>({
-        board: {
             /** Status ob das Board erfolgreich geladen wurde */
             ok: false,
-            /** Liste aller Spielfelder */
-            fieldList: [] as IFieldDTD[]
-        },
+            /** Das komplette Spielbrett mit allen Feldern */
+            board: null as IBoardDTD | null
     }),
     actions: {
         /**
@@ -29,16 +25,16 @@ export const useBoardStore = defineStore('board', {
                     console.error('Error while recieving Data:\n', resp.statusText)
                     throw new Error(resp.statusText)
                 }
-                const fieldList = await resp.json() as IFieldDTD[]
+                const boardData = await resp.json() as IBoardDTD
 
-                this.board.ok = true
-                this.board.fieldList = fieldList
+                this.ok = true
+                this.board = boardData
 
                 console.log('GameBoard successfully loaded')
-            }catch(reason){
-                console.log(reason)
-                this.board.ok = false
-                this.board.fieldList = []
+            }catch(error_){
+                console.log(error_)
+                this.ok = false
+                this.board = null
             }
         }
     }
