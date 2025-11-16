@@ -3,15 +3,25 @@ import {ref, computed} from 'vue'
 import type { IBoardDTD } from './IBoardDTD'
 import type { IFieldDTD } from './IFieldDTD'
 
+/**
+ * Pinia Store für das Spielbrett.
+ * Lädt Spielfelddaten vom Backend und verwaltet den Zustand.
+ */
 export const useBoardStore = defineStore('board', {
     state: () =>({
         board: {
+            /** Status ob das Board erfolgreich geladen wurde */
             ok: false,
+            /** Liste aller Spielfelder */
             fieldList: [] as IFieldDTD[]
         },
     }),
     actions: {
-        async getBoard() {
+        /**
+         * Lädt das Spielbrett vom Backend.
+         * Setzt ok=true bei Erfolg, leert bei Fehler den State.
+         */
+        async getBoard() {
             console.log('Start receiving Gameboard Data...')
             try{
                 const resp = await fetch('/api/game/getBoard')
