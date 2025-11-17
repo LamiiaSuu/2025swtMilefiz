@@ -3,6 +3,7 @@ import { ref, shallowRef, onMounted, onUnmounted } from 'vue'
 import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
+import Tile from './Tile.vue'
 import Camera from './Camera.vue'
 
 const gameCharRef = shallowRef<TresObject | null>(null)
