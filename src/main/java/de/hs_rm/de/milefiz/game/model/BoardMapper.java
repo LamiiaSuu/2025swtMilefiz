@@ -1,8 +1,8 @@
 package de.hs_rm.de.milefiz.game.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
@@ -16,7 +16,7 @@ public class BoardMapper {
      */
     public static BoardDTO mapToDTO(Field startField) {
         Stack<Field> remaining = new Stack<>(); 
-        HashMap<Direction, Field> currentNeighbours;
+        Map<Direction, Field> currentNeighbours;
         List<Field> visited = new ArrayList<>();
         BoardDTO out = new BoardDTO();
 

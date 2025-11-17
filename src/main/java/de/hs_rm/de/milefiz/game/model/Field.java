@@ -1,6 +1,7 @@
 package de.hs_rm.de.milefiz.game.model;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 public class Field {
     
     private UUID id;
-    private HashMap<Direction, Field> neighbours = new HashMap<>();
+    private Map<Direction, Field> neighbours = new HashMap<>();
     private boolean isBarrier = false;
     private FieldType type;
     private Meeple occupant = null;
@@ -30,11 +31,27 @@ public class Field {
         this.position = position;
     }
 
+    public Field getNorth() {
+        return neighbours.keySet().contains(Direction.NORTH) ? neighbours.get(Direction.NORTH) : null;
+    }
+
+    public Field getEast() {
+        return neighbours.keySet().contains(Direction.EAST) ? neighbours.get(Direction.EAST) : null;
+    }
+
+    public Field getSouth() {
+        return neighbours.keySet().contains(Direction.SOUTH) ? neighbours.get(Direction.SOUTH) : null;
+    }
+
+    public Field getWest() {
+        return neighbours.keySet().contains(Direction.WEST) ? neighbours.get(Direction.WEST) : null;
+    }
+
     public UUID getId() {
         return id;
     }
 
-    public HashMap<Direction, Field> getNeighbours() {
+    public Map<Direction, Field> getNeighbours() {
         return neighbours;
     }
 
@@ -71,6 +88,11 @@ public class Field {
      * @param direction in welche Richtung von diesem Feld das Nachbarfeld sein soll
      */
     public void addNeighbour(Field field, Direction direction) {
+        
+        if (neighbours.keySet().contains(direction)) {
+            throw new IllegalArgumentException("Richtung " + direction + " ist schon besetzt");
+        }
+
         neighbours.put(direction, field);
         field.getNeighbours().put(direction.getOpposite(), this);
     }
