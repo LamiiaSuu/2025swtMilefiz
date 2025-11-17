@@ -1,13 +1,16 @@
 <script setup lang="ts">
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
-import { watchEffect } from 'vue'
+import { watchEffect, ref } from 'vue'
 
-//Definierte Props für Augen und Körperfarbe
+//Definierte Props für Augen, Körperfarbe und Position
 const props = defineProps<{
   bodyColor?: string | number
   eyeColor?: string | number
+  position?: [number, number, number]
 }>()
+
+const characterRotation = ref(0)
 
 // Block Character by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/ozSIyRIcIj)
 const { state } = useGLTF('/Block Character.glb', { draco: true })
@@ -36,8 +39,21 @@ watchEffect(() => {
     })
   }
 })
+
+// Updated die Rotation des Charakters
+const setRotation = (yRotation: number) => {
+  characterRotation.value = yRotation
+}
+
+// Gibt Rotation frei
+defineExpose({ setRotation })
 </script>
 
 <template>
-  <primitive v-if="state" :object="state?.scene" />
+    <TresGroup 
+      :position="position || [0, 0, 0]"
+      :rotation="[0, characterRotation, 0]"
+    >
+      <primitive v-if="state" :object="state?.scene" />
+  </TresGroup>
 </template>
