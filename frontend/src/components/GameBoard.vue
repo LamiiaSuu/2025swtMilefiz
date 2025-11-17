@@ -3,33 +3,32 @@ import { ref, shallowRef, onMounted, onUnmounted } from 'vue'
 import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
+import Camera from './Camera.vue'
 
 const gameCharRef = shallowRef<TresObject | null>(null)
-const useFirstPerson = ref(false) // Kamera-Mode-Flag
-
-// Referenz zu beiden Kameras (Orbit + First-Person)
-const orbitCam = shallowRef<TresObject | null>(null)
-const firstCam = shallowRef<TresObject | null>(null)
-
+const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 // Keyboard toggle listener
 const toggleCamera = (e: KeyboardEvent) => {
   if (e.key.toLowerCase() === 'o') {
     useFirstPerson.value = !useFirstPerson.value
-    
+  }
+}
+
+// Updated Rotation vom Charakter für First Person Kamera
+const onRotateCharacter = (yRotation: number) => {
+  if (gameCharRef.value) {
+    gameCharRef.value.setRotation(yRotation)
   }
 }
 
 onMounted(() => {
   window.addEventListener('keydown', toggleCamera)
-  
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', toggleCamera)
 })
-
-
 
 </script>
 
@@ -40,7 +39,7 @@ onUnmounted(() => {
     style="width: 100vw; height: 100vh"
     clear-color="#87CEEB"
   >
-    <!-- Kamerapoistion und Kamerasteuerung via OrbitControls -->
+    <!-- Kameraposition und Kamerasteuerung via OrbitControls -->
     <TresPerspectiveCamera
       v-if="!useFirstPerson"
       ref="orbitCam"
@@ -50,11 +49,10 @@ onUnmounted(() => {
     <OrbitControls v-if="!useFirstPerson" />
 
     <!-- First Person Kamera (Folgt dem Charakter) -->
-    <TresPerspectiveCamera
-      v-else
-      ref="firstCam"
-      :position="[0, 2, 0]"
-      :rotation="[0, 0, 0]"
+    <Camera
+      :gameCharRef="gameCharRef"
+      :use-first-person="useFirstPerson"
+      @rotate-character="onRotateCharacter"
     />
 
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
@@ -73,8 +71,6 @@ onUnmounted(() => {
       :position="[0, 0, 0]"
       bodyColor="pink"
       eyeColor="white"
-      :camera="firstCam"
-      :useFirstPerson="useFirstPerson"
     />
   </TresCanvas>
 </template>
