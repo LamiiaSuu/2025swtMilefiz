@@ -26,6 +26,7 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {
@@ -48,6 +49,9 @@ sonar {
 	} 
 }
 
-bootJar {
-	
+task build_frontend(type: Exec) {
+  workingDir "${projectDir}/frontend"
+  commandLine "/bin/bash", "-c", "npm clean-install && npm audit fix && npm run build && rm -rf ../src/main/resources/public && cp -rv dist ../src/main/resources/public"
 }
+
+bootJar.dependsOn build_frontend

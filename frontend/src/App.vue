@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-import GameBoard from './components/GameBoard.vue';
 </script>
 
 <template>
   <!-- Einbindung des Hauptspielfelds-->
-    <GameBoard class="game-board"/>
+    <RouterView></RouterView>
 </template>
 
 <style>

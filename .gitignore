@@ -43,7 +43,6 @@ frontend/build/
 frontend/.npm/
 frontend/.cache/
 frontend/yarn-error.log
-frontend/package-lock.json
 frontend/pnpm-lock.yaml
 frontend/yarn.lock
 
