@@ -7,6 +7,16 @@ import Tile from './Tile.vue'
 import Camera from './Camera.vue'
 
 const gameCharRef = shallowRef<TresObject | null>(null)
+
+// API Spielfeld laden
+const gameBoardTiles = ref([] as any[])
+onMounted(async () => {
+  const res = await fetch('api/game/getBoard')
+  const data = await res.json()
+  gameBoardTiles.value = data.fields
+})
+
+
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 // Keyboard toggle listener
@@ -72,6 +82,14 @@ onUnmounted(() => {
       :position="[0, 0, 0]"
       bodyColor="pink"
       eyeColor="white"
+    />
+
+    <!-- Spielfeldtiles rendern -->
+    <Tile
+      v-for="field in gameBoardTiles"
+      :key="field.id"
+      :position="[field.position.x, 0, field.position.y]"
+      :type="field.type"
     />
   </TresCanvas>
 </template>

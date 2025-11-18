@@ -17,9 +17,9 @@ public class GameController {
     public BoardDTO getBoard() {
         BoardDTO board = new BoardDTO();
         Position pos0 = new Position(0,0);
-        Position pos1 = new Position(0,1);
-        Position pos2 = new Position(1, 1);
-        Position pos3 = new Position(1, 2);
+        Position pos1 = new Position(0,2);
+        Position pos2 = new Position(2, 2);
+        Position pos3 = new Position(2, 4);
 
         board.addField(0, FieldType.START_BLUE, pos0, false, 1, -1, -1, -1);
         board.addField(1, FieldType.NORMAL, pos1, false, -1, 2, 0, -1);
