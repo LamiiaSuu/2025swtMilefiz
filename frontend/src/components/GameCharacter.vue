@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
-import { watchEffect, ref } from 'vue'
+import { watchEffect, ref, computed } from 'vue'
 
 //Definierte Props für Augen, Körperfarbe und Position
 const props = defineProps<{
@@ -12,15 +12,23 @@ const props = defineProps<{
 
 const characterRotation = ref(0)
 
+//Variablen für Anpassung des Sprungs definiert
 const jumpOffset = ref(0)
 const isJumping = ref(false)
-const jumpHeight = 4
-const upDuration = 300
-const fallDuration = 2000
+const jumpHeight = 4 //gibt Höhe an
+const upDuration = 300 //gibt Zeit in ms an um hochzuspringen
+const fallDuration = 2000 //gibt Zeit in ms an um runterzufallen
 
 // Animation-Variablen
 const mixer = ref<any>(null)
 const jumpAction = ref<any>(null)
+
+// Berechne aktuelle Position (inklusive jumpOffset)
+const currentPosition = computed((): [number, number, number] => [
+  props.position?.[0] || 0,
+  (props.position?.[1] || 0) + jumpOffset.value,
+  props.position?.[2] || 0
+])
 
 // Block Character by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/ozSIyRIcIj)
 const { state } = useGLTF('/Block Character.glb', { draco: true })
@@ -52,7 +60,7 @@ watchEffect(async () => {
       const THREE = await import('three')
       mixer.value = new THREE.AnimationMixer(state.value.scene)
 
-      // Suche nach Jump-Animation (oft heißt sie "Jump", "jump" oder ähnlich)
+      // Suche nach Jump-Animation
       const jumpAnimation = state.value.animations.find((anim: any) =>
         anim.name.toLowerCase().includes('jump'),
       )
@@ -96,64 +104,46 @@ const setRotation = (yRotation: number) => {
   characterRotation.value = yRotation
 }
 
+// Sprung-Animation 
+const animateCustomJump = () => {
+  const startTime = Date.now()
+  
+  const animate = () => {
+    const elapsed = Date.now() - startTime
+
+    if (elapsed < upDuration) {
+      // Hoch-Phase
+      const progress = elapsed / upDuration
+      jumpOffset.value = jumpHeight * Math.sin(progress * Math.PI * 0.5)
+    } else if (elapsed < upDuration + fallDuration) {
+      // Fall-Phase (langsamer)
+      const progress = (elapsed - upDuration) / fallDuration
+      jumpOffset.value = jumpHeight * Math.cos(progress * Math.PI * 0.5)
+    } else {
+      // Landung
+      jumpOffset.value = 0
+      isJumping.value = false
+      return
+    }
+
+    requestAnimationFrame(animate)
+  }
+  animate()
+}
+
 const jump = () => {
   if (isJumping.value) return
 
   isJumping.value = true
 
-  // Verwende eingebaute Animation wenn verfügbar
+  // Spiele GLB-Animation ab (falls verfügbar)
   if (jumpAction.value) {
     jumpAction.value.reset()
     jumpAction.value.play()
-
-     // ZUSÄTZLICH: Eigene Höhen-Animation mit deinen Werten
-    const startTime = Date.now()
-    const animateCustomJump = () => {
-      const elapsed = Date.now() - startTime
-
-      if (elapsed < upDuration) {
-        // Hoch-Phase
-        const upProgress = elapsed / upDuration
-        jumpOffset.value = jumpHeight * Math.sin(upProgress * Math.PI * 0.5)
-      } else if (elapsed < upDuration + fallDuration) {
-        // Fall-Phase (langsamer)
-        const fallProgress = (elapsed - upDuration) / fallDuration
-        jumpOffset.value = jumpHeight * Math.cos(fallProgress * Math.PI * 0.5)
-      } else {
-        // Landung
-        jumpOffset.value = 0
-        isJumping.value = false
-        return
-      }
-
-      requestAnimationFrame(animateCustomJump)
-    }
-    animateCustomJump()
-
-  } else {
-    const startTime = Date.now()
-    const animateJump = () => {
-      const elapsed = Date.now() - startTime
-
-      if (elapsed < upDuration) {
-        // Hoch-Phase
-        const upProgress = elapsed / upDuration
-        jumpOffset.value = jumpHeight * Math.sin(upProgress * Math.PI * 0.5)
-      } else if (elapsed < upDuration + fallDuration) {
-        // Fall-Phase (langsamer)
-        const fallProgress = (elapsed - upDuration) / fallDuration
-        jumpOffset.value = jumpHeight * Math.cos(fallProgress * Math.PI * 0.5)
-      } else {
-        // Landung
-        jumpOffset.value = 0
-        isJumping.value = false
-        return
-      }
-
-      requestAnimationFrame(animateJump)
-    }
-    animateJump()
   }
+
+  // Führe immer Custom-Animation für Höhe aus
+  animateCustomJump()
 }
 
 // Gibt Rotation frei
@@ -162,11 +152,7 @@ defineExpose({ setRotation, jump })
 
 <template>
   <TresGroup
-    :position="[
-      props.position?.[0] || 0,
-      (props.position?.[1] || 0) + jumpOffset,
-      props.position?.[2] || 0,
-    ]"
+    :position="currentPosition"
     :rotation="[0, characterRotation, 0]"
   >
     <primitive v-if="state" :object="state?.scene" />
