@@ -12,6 +12,9 @@ const props = defineProps<{
 
 const characterRotation = ref(0)
 
+const jumpOffset = ref(0)
+const isJumping = ref(false)
+
 // Block Character by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/ozSIyRIcIj)
 const { state } = useGLTF('/Block Character.glb', { draco: true })
 
@@ -45,13 +48,40 @@ const setRotation = (yRotation: number) => {
   characterRotation.value = yRotation
 }
 
+const jump = () => {
+  if (isJumping.value) return
+
+  isJumping.value = true
+  const jumpHeight = 2
+  const jumpDuration = 600
+
+  const startTime = Date.now()
+  const animateJump = () => {
+    const elapsed = Date.now() - startTime
+    const progress = elapsed/jumpDuration
+
+    if (progress < 1) {
+      jumpOffset.value = jumpHeight * Math.sin(progress * Math.PI)
+      requestAnimationFrame(animateJump)
+    }else{
+      jumpOffset.value = 0
+      isJumping.value = false
+    }
+  }
+  animateJump()
+}
+
 // Gibt Rotation frei
-defineExpose({ setRotation })
+defineExpose({ setRotation, jump})
 </script>
 
 <template>
     <TresGroup 
-      :position="position || [0, 0, 0]"
+      :position="[
+        (props.position?.[0] || 0), 
+        (props.position?.[1] || 0) + jumpOffset, 
+        (props.position?.[2] || 0)
+      ]"
       :rotation="[0, characterRotation, 0]"
     >
       <primitive v-if="state" :object="state?.scene" />
