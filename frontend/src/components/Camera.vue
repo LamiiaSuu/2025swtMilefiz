@@ -32,19 +32,19 @@ const cameraPosition = computed((): [number, number, number] => {
   const offset = props.offset || { x: 0, y: 1, z: 0 }
   
   // Position wird vom Charakter abgefragt
-  const charPos = char.position || [0, 0, 0]
-  
+  const charPos = char?.characterPosition?.position || [0, 0, 0]
+
   // Rückgabe von Kamera Position (Charakter Position + Offset)
   return [
-    charPos[0] + offset.x,
-    charPos[1] + offset.y,
-    charPos[2] + offset.z
+    charPos.x + offset.x,
+    charPos.y + offset.y,
+    charPos.z + offset.z
   ]
 })
 
 // Berechnete Rotation der Kamera neu, wenn sie sich ändert
 const cameraRotation = computed((): [number, number, number] => {
-  return [verticalRotation.value, horizontalRotation.value, 0]
+  return [verticalRotation.value, horizontalRotation.value + Math.PI, 0]
 })
 
 // Kamera Maussteuerung
@@ -76,6 +76,35 @@ watch(() => props.useFirstPerson, (isFirstPerson) => {
 
 onMounted(() => {
   document.addEventListener('mousemove', onMouseMove)
+  const updateCamera = () => {
+    // Kamera nur updaten, wenn First Person an und cameraRef existiert
+    if (props.useFirstPerson && cameraRef.value && props.gameCharRef?.characterPosition) {
+      const charPos = props.gameCharRef.characterPosition.position
+      const offset = props.offset || { x: 0, y: 1, z: 0 }
+
+      // Kamera-Position setzen
+      cameraRef.value.position.set(
+        charPos.x + offset.x,
+        charPos.y + offset.y,
+        charPos.z + offset.z
+      )
+
+    }
+
+    // Nächsten Frame planen
+    requestAnimationFrame(updateCamera)
+  }
+
+  // Nur starten, wenn cameraRef existiert
+  const stopLoop = () => {
+    if (cameraRef.value) {
+      updateCamera()
+    } else {
+      requestAnimationFrame(stopLoop)
+    }
+  }
+
+  stopLoop()
 })
 
 onUnmounted(() => {

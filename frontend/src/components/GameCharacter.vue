@@ -11,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const characterRotation = ref(0)
+const characterPosition = ref(null)
 
 //Variablen für Anpassung des Sprungs definiert
 const jumpOffset = ref(0)
@@ -146,12 +147,13 @@ const jump = () => {
   animateCustomJump()
 }
 
-// Gibt Rotation frei
-defineExpose({ setRotation, jump })
+// Gibt Rotation und Position frei
+defineExpose({ setRotation, jump, characterPosition })
 </script>
 
 <template>
   <TresGroup
+    ref="characterPosition"
     :position="currentPosition"
     :rotation="[0, characterRotation, 0]"
   >
