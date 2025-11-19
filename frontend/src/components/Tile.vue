@@ -14,11 +14,16 @@ const {state} = useGLTF('/Grass Platform.glb', {draco: true})
 
 // Position und Skalierung aktualisieren, sobald Modell oder Props sich ändern
 const scale = 2
+
+console.log('Tile component created with position:', props.position)
+
 watchEffect(() => {
     if (!state.value) return
     const obj = state.value.scene
     obj.position.set(props.position[0], -0.3, props.position[2])
     obj.scale.set(scale, scale, scale)
+
+    console.log('Tile final position set to:', obj.position.x, obj.position.y, obj.position.z)
     })
 </script>
 

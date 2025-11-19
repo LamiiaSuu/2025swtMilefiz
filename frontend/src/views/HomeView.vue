@@ -1,21 +1,30 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import TheWelcome from '@/components/TheWelcome.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
-import GameBoard from '@/components/GameBoard.vue';
+import GameBoard from '@/components/GameBoard.vue'
+import { onMounted } from 'vue'
 
-// const milefizStore = useMilefizStore();
-const { gamedata, startMilefizLiveUpdate, sendSocketMessage } = useMilefizStore();
-startMilefizLiveUpdate();
+const { gamedata, startMilefizLiveUpdate, sendSocketMessage } = useMilefizStore()
+
+startMilefizLiveUpdate()
 
 setTimeout(function () {
-  sendSocketMessage({ msg: "Hello World" });
+  sendSocketMessage({ msg: 'Hello World' })
   console.log('Home view!!')
-}, 5000);
+}, 5000)
 </script>
 
 <template>
   <main>
     <TheWelcome />
-    <GameBoard class="game-board" />
+    <GameBoard />
   </main>
 </template>
+<style>
+.game-board {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+</style>
