@@ -19,6 +19,21 @@ onMounted(async () => {
 
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
+ 
+//Methode um alle Keyboard Events zu verwalten
+const handleKeydown = (e: KeyboardEvent) => {
+  toggleCamera(e)
+  handleJump(e)
+}
+
+const handleJump = (e: KeyboardEvent) => {
+  if (e.code === 'Space'){
+    e.preventDefault()
+    if (gameCharRef.value && gameCharRef.value.jump){
+      gameCharRef.value.jump()
+    }
+  }
+}
 
 // Keyboard toggle listener
 const toggleCamera = (e: KeyboardEvent) => {
@@ -35,11 +50,11 @@ const onRotateCharacter = (yRotation: number) => {
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', toggleCamera)
+  window.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', toggleCamera)
+  window.removeEventListener('keydown', handleKeydown)
 })
 
 </script>
