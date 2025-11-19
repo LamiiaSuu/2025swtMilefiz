@@ -24,8 +24,4 @@ export default defineConfig({
       },
     },
   },
-    server: {
-    proxy: {   // die folgenden URI-Pfade werden vom Frontend-Development-Server durchgeleitet
-      '/api': 'http://localhost:8080',
-}, },
 })
