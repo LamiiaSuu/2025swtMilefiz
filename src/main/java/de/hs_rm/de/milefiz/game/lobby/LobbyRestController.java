@@ -24,7 +24,9 @@ public class LobbyRestController {
     }
 
     /**
-     * Liefer Liste an allen Lobbys. TODO, nur ausgewählte Variablen. z.B. sind players/meeples ggf. unnötig
+     * Liefer Liste an allen Lobbys. TODO, nur ausgewählte Variablen. z.B. sind
+     * players/meeples ggf. unnötig
+     *
      * @return
      */
     @GetMapping(path = "/list")
@@ -47,12 +49,14 @@ public class LobbyRestController {
         } else {
             lobby = lobbyManager.getLobby(lobbyId);
         }
-        if (!lobby.isJoinable()) {
-            return new ResponseEntity<>(new LobbyJoinEvent(null, null, null, "Lobby ist bereits voll!"), HttpStatus.CONFLICT);
-        }
         // Zuweisung eines Players
         Player player = new Player(lobby.getAvailableColor());
-        lobby.addPlayer(player);
+        try {
+            lobby.join(player);
+        } catch (LobbyJoinException ex) {
+            return new ResponseEntity<>(new LobbyJoinEvent(null, null, null, ex.getMessage()), HttpStatus.CONFLICT);
+
+        }
 
         // String responseMsg = String.format("{\"lobbyId\":\"%s\", \"playerId\":\"$s\" \"msg\":\"Erfolgreich gejoint\"}", lobbyId, player.getId().toString());
         return new ResponseEntity<>(new LobbyJoinEvent(lobbyId, player.getId(), player.getColor().name(), "Erfolgreich gejoint."), HttpStatus.OK);

@@ -36,8 +36,12 @@ public class LobbyManager {
         Player blue = new Player(Color.BLUE);
         Player red = new Player(Color.RED);
         lobby.setId(UUID.fromString("271c95db-3737-496f-9081-ae920e8ebbf7")); // Test-ID
-        lobby.addPlayer(blue);
-        lobby.addPlayer(red);
+        try {
+            lobby.join(blue);
+            lobby.join(red);
+        } catch (LobbyJoinException ex) {
+            ex.printStackTrace();
+        }
         return lobby;
     }
 
