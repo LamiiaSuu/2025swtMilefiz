@@ -4,12 +4,13 @@ import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
 import Tile from './Tile.vue'
+import type { Field } from '../types/fields'
 import Camera from './Camera.vue'
 
 const gameCharRef = shallowRef<TresObject | null>(null)
 
 // API Spielfeld laden
-const gameBoardTiles = ref([] as any[])
+const gameBoardTiles = ref<Field[]>([])
 onMounted(async () => {
   const res = await fetch('api/game/getBoard')
   const data = await res.json()
