@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.hs_rm.de.milefiz.game.model.Lobby;
+import de.hs_rm.de.milefiz.game.model.Player;
 
 @RestController
 @RequestMapping("/api/lobby")
@@ -22,18 +23,22 @@ public class LobbyRestController {
         this.lobbyManager = lobbyManager;
     }
 
+    /**
+     * Liefer Liste an allen Lobbys. TODO, nur ausgewählte Variablen. z.B. sind players/meeples ggf. unnötig
+     * @return
+     */
     @GetMapping(path = "/list")
     public Set<Lobby> getLobbyList() {
         return lobbyManager.getLobbies();
     }
 
     @GetMapping(path = "/join/random")
-    public ResponseEntity<String> joinRandomLobby() throws LobbyNotFoundException {
+    public ResponseEntity<LobbyJoinEvent> joinRandomLobby() throws LobbyNotFoundException {
         return joinLobby(null);
     }
 
     @GetMapping(path = "/join/{lobbyId}")
-    public ResponseEntity<String> joinLobby(@PathVariable("lobbyId") UUID lobbyId) throws LobbyNotFoundException {
+    public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId) throws LobbyNotFoundException {
         Lobby lobby;
         if (lobbyId == null) {
             // Join Random lobby
@@ -43,9 +48,13 @@ public class LobbyRestController {
             lobby = lobbyManager.getLobby(lobbyId);
         }
         if (!lobby.isJoinable()) {
-            return new ResponseEntity<>("Lobby ist bereits voll!", HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new LobbyJoinEvent(null, null, null, "Lobby ist bereits voll!"), HttpStatus.CONFLICT);
         }
-        String responseMsg = String.format("{\"lobbyId\":\"%s\", \"msg\":\"Erfolgreich gejoint\"}", lobbyId);
-        return new ResponseEntity<>(responseMsg, HttpStatus.OK);
+        // Zuweisung eines Players
+        Player player = new Player(lobby.getAvailableColor());
+        lobby.addPlayer(player);
+
+        // String responseMsg = String.format("{\"lobbyId\":\"%s\", \"playerId\":\"$s\" \"msg\":\"Erfolgreich gejoint\"}", lobbyId, player.getId().toString());
+        return new ResponseEntity<>(new LobbyJoinEvent(lobbyId, player.getId(), player.getColor().name(), "Erfolgreich gejoint."), HttpStatus.OK);
     }
 }

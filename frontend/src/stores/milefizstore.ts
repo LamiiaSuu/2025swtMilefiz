@@ -10,9 +10,9 @@ let stompclient: Client | null = null
 export const useMilefizStore = defineStore('milefizstore', () => {
 
   // Beispiele für Daten
-  const gamedata = reactive<{ lobbyId: string, id: string; mana: number }>({
-    lobbyId: "",//"271c95db-3737-496f-9081-ae920e8ebbf7", // Platzhalter
-    id: "bda226ca-7c8f-4471-acbb-dc1c214ada12", // UUID vom eigenen Spieler
+  const gamedata = reactive<{ lobbyId: string, playerId: string; mana: number }>({
+    lobbyId: "", // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
+    playerId: "", // UUID vom eigenen Spieler
     mana: 100,
   })
 
@@ -92,6 +92,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       let responseMsg = await resp.json()
       console.log(responseMsg.msg)
       gamedata.lobbyId = responseMsg.lobbyId;
+      gamedata.playerId = responseMsg.playerId;
       startMilefizLiveUpdate();
     } catch (error_) {
       console.log(error_)

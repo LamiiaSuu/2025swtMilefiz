@@ -5,10 +5,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Player {
+
     private UUID id;
     private UUID sessionId;
     private Meeple[] meeples;
-    Color color;
+    private Color color;
 
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
@@ -19,15 +20,18 @@ public class Player {
         this.color = color;
     }
 
+    public Player(Color color) {
+        this(color, 5);
+    }
+
     public UUID getId() {
         return id;
     }
 
-    
     public UUID getSessionId() {
         return sessionId;
     }
-    
+
     public void setSessionId(UUID sessionId) {
         this.sessionId = sessionId;
     }
@@ -38,8 +42,8 @@ public class Player {
 
     public Meeple getMeepleWithId(UUID id) {
         Optional<Meeple> opt = Arrays.stream(meeples)
-                                        .filter(m -> id.equals(m.getId()))
-                                        .findFirst();
+                .filter(m -> id.equals(m.getId()))
+                .findFirst();
         if (opt.isPresent()) {
             return opt.get();
         }
@@ -51,17 +55,18 @@ public class Player {
         return color;
     }
 
-
     /**
      * Setzt Farbe des Spielers
+     *
      * @param color
      */
     public void setColor(Color color) {
         this.color = color;
     }
-   
+
     /**
      * Entfernt Meeple mit
+     *
      * @param id UUID des Meeples, das entfernt werden soll
      */
     public void removeMeeple(UUID id) {
@@ -74,6 +79,4 @@ public class Player {
         throw new IllegalArgumentException("meeple mit id" + id + " nicht vorhanden");
     }
 
-
-    
 }
