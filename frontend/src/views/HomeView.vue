@@ -4,9 +4,10 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import GameBoard from '@/components/GameBoard.vue'
 import { onMounted } from 'vue'
 
-const { gamedata, startMilefizLiveUpdate, sendSocketMessage } = useMilefizStore()
+const { gamedata, startMilefizLiveUpdate, sendSocketMessage, joinLobby } = useMilefizStore()
 
-startMilefizLiveUpdate()
+// startMilefizLiveUpdate()
+joinLobby()
 
 setTimeout(function () {
   sendSocketMessage({ msg: 'Hello World' })
