@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
 import type { IBoardDTD } from './IBoardDTD'
-import type { Field } from '@/types/fields'
-import { ref, shallowRef, onMounted, onUnmounted } from 'vue'
-import Tile from '@/components/Tile.vue'
+import { ref } from 'vue'
 
 const gameBoardTiles = ref<IBoardDTD>()
 /**
@@ -37,10 +35,6 @@ export const useBoardStore = defineStore('board', {
 
         console.log('GameBoard successfully loaded')
 
-        // const res = await fetch('api/game/getBoard')
-        // const data = await res.json()
-
-        // gameBoardTiles.value = data.fields
       } catch (error_) {
         console.log(error_)
         this.ok = false

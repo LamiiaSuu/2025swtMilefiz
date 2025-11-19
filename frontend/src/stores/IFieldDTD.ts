@@ -15,7 +15,7 @@ export interface IFieldDTD{
     /** Art von Feld: Start von Farbe, Normal, Ziel */
     type: string
     /** Koordinaten des Felds */
-    position: Array<number>
+    position: { x: number, y: number }
     /** Ob Feld durch Spieler oder Blockade blockiert ist */
     isBarrier: boolean
 }
