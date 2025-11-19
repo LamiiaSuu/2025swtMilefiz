@@ -3,23 +3,22 @@ import { ref, shallowRef, onMounted, onUnmounted } from 'vue'
 import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
+import { useBoardStore } from '@/stores/boardStore'
 import Tile from './Tile.vue'
-import type { Field } from '../types/fields'
 import Camera from './Camera.vue'
 
 const gameCharRef = shallowRef<TresObject | null>(null)
+const boardStore = useBoardStore()
 
-// API Spielfeld laden
-const gameBoardTiles = ref<Field[]>([])
+// Board-Daten laden wenn die App startet
 onMounted(async () => {
-  const res = await fetch('api/game/getBoard')
-  const data = await res.json()
-  gameBoardTiles.value = data.fields
+  console.log('App mounted - loading board data...')
+  await boardStore.getBoard()
 })
 
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
- 
+
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
   toggleCamera(e)
@@ -102,7 +101,7 @@ onUnmounted(() => {
 
     <!-- Spielfeldtiles rendern -->
     <Tile
-      v-for="field in gameBoardTiles"
+      v-for="field in boardStore.board?.fields"
       :key="field.id"
       :position="[field.position.x, 0, field.position.y]"
       :type="field.type"
