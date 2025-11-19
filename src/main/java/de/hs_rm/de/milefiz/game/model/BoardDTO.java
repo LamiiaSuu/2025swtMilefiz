@@ -2,8 +2,11 @@ package de.hs_rm.de.milefiz.game.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-
+/**
+ * DTO des Spielbretts zur Übertragung an das Frontend
+ */
 public class BoardDTO {
     private List<FieldDTO> fields = new ArrayList<>();
 
@@ -11,21 +14,21 @@ public class BoardDTO {
         return fields;
     }
 
-    public void addField(long id, FieldType type, Position position, boolean isBarrier, long north, long east, long south, long west) {
+    public void addField(UUID id, FieldType type, Position position, boolean isBarrier, UUID north, UUID east, UUID south, UUID west) {
         this.fields.add(new FieldDTO(id, type, position, isBarrier, north, east, south, west));
     }
     
-    public class FieldDTO {
-        private long id;
-        private long north;
-        private long east; 
-        private long south;
-        private long west; 
+    protected class FieldDTO {
+        private UUID id;
+        private UUID north;
+        private UUID east; 
+        private UUID south;
+        private UUID west; 
         private FieldType type;
         private boolean isBarrier;
         private Position position;
 
-        private FieldDTO(long id, FieldType type, Position position, boolean isBarrier, long north, long east, long south, long west) {
+        private FieldDTO(UUID id, FieldType type, Position position, boolean isBarrier, UUID north, UUID east, UUID south, UUID west) {
             this.id = id;
             this.type = type;
             this.position = position;
@@ -36,43 +39,43 @@ public class BoardDTO {
             this.west = west;
         }
 
-        public long getId() {
+        public UUID getId() {
             return id;
         }
 
-        public void setId(long id) {
+        public void setId(UUID id) {
             this.id = id;
         }
 
-        public long getNorth() {
+        public UUID getNorth() {
             return north;
         }
 
-        public void setNorth(long north) {
+        public void setNorth(UUID north) {
             this.north = north;
         }
 
-        public long getEast() {
+        public UUID getEast() {
             return east;
         }
 
-        public void setEast(long east) {
+        public void setEast(UUID east) {
             this.east = east;
         }
 
-        public long getSouth() {
+        public UUID getSouth() {
             return south;
         }
 
-        public void setSouth(long south) {
+        public void setSouth(UUID south) {
             this.south = south;
         }
 
-        public long getWest() {
+        public UUID getWest() {
             return west;
         }
 
-        public void setWest(long west) {
+        public void setWest(UUID west) {
             this.west = west;
         }
 
