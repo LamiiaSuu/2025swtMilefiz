@@ -9,6 +9,12 @@ let stompclient: Client | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
 
+  //Cooldown für das Würfelsystem
+  const cooldown = reactive({
+    remainingMs: 0,
+    active: false,
+  })
+
   // Beispiele für Daten
   const gamedata = reactive<{ lobbyId: string, playerId: string; mana: number }>({
     lobbyId: "", // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
@@ -51,6 +57,23 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         // Callback: Nachricht auf DEST empfangen
         // empfangene Nutzdaten in message.body abrufbar,
         // ggf. mit JSON.parse(message.body) zu JS konvertieren
+
+        // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
+        const event = JSON.parse(message.body)
+        if (event.type === 'COOLDOWN_STARTED') {
+          cooldown.active = true
+          cooldown.remainingMs = event.remainingMs
+        }
+
+        if (event.type === 'COOLDOWN_UPDATE') {
+          cooldown.remainingMs = event.remainingMs
+        }
+
+        if (event.type === 'COOLDOWN_READY') {
+          cooldown.active = false
+          cooldown.remainingMs = 0
+        }
+
       })
     }
     stompclient.onDisconnect = () => {
