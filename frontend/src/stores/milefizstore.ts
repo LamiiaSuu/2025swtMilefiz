@@ -127,5 +127,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     startMilefizLiveUpdate,
     sendSocketMessage,
     joinLobby,
+    cooldown
   }
 })
