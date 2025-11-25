@@ -226,7 +226,7 @@ const onRotateCharacter = (yRotation: number) => {
 const checkHoverTile = () => {
 
   frameCounter++
-  if (frameCounter % 2 !== 0) {
+  if (frameCounter % 0 !== 0) {
     requestAnimationFrame(checkHoverTile)
     return
   }

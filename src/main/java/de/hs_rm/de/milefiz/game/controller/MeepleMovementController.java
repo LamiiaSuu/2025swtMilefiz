@@ -67,7 +67,6 @@ public class MeepleMovementController {
     @MessageMapping("/move")
     public void handleMove(@Header("simpSessionId") String sessionId, MovementCommand moveCmd) {
 
-        System.out.println("Kommt was an?");
         Player player = gameService.getPlayerBySession(sessionId);
 
         // nur zum testen
@@ -134,8 +133,6 @@ public class MeepleMovementController {
                 nextField.getId());
 
         messagingTemplate.convertAndSend("/topic/move", frontendMoveEvent);
-
-        System.out.println("Move made by playeur: " + player.getId());
 
     }
 }
