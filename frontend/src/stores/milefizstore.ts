@@ -1,9 +1,12 @@
 import { reactive, readonly, computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
+import type { Direction, MovementCommand } from "@/types/movement";
+import { useBoardStore } from "./boardStore"
 
 const wsurl = `ws://${window.location.host}/milefiz`
 const DEST = '/topic/milefiz/lobby/'
+const MOVE_DEST = '/topic/move'  //milefiz/move
 
 let stompclient: Client | null = null
 
@@ -75,6 +78,30 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
 
       })
+
+      /**
+      * Abonniert das STOMP-Topic für Bewegungs-Updates (`/topic/move`).
+      * 
+      * Wenn der Server eine Bewegung eines Meeples sendet, 
+      * wird die Nachricht hier empfangen, verarbeitet und an den `BoardStore` 
+      * weitergereicht, um die Spielfeld-Position lokal zu aktualisieren.
+      * 
+      * Ablauf:
+      * 1. Empfang des JSON-Nachrichtentexts über `message.body`.
+      * 2. Umwandlung in ein JS-Objekt (`event`).
+      * 3. Prüfung auf Fehlermeldungen (z. B. `"CANNOT_CHANGE_DIRECTION"`).  
+      * 4. Aktualisierung der Spielfigur-Position im `BoardStore`.
+      */
+      stompclient.subscribe(MOVE_DEST, (message) => {
+        console.log("movement update:", message.body)
+        const event = JSON.parse(message.body)
+        const boardStore = useBoardStore()
+        if (event.reason === "CANNOT_CHANGE_DIRECTION") {
+          console.warn("Move rejected:", event)
+          return
+        }
+        boardStore.updateMeeplePosition(event.meepleId, event.targetField)
+      })
     }
     stompclient.onDisconnect = () => {
       /* Verbindung abgebaut*/
@@ -122,11 +149,50 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /**
+   * Sendet eine Bewegungsaktion (Move) an den Spielserver.
+   * 
+   * Wird aufgerufen, wenn der Spieler im Frontend eine Bewegung 
+   * durchführt.  
+   * 
+   * Erstellt ein `MovementCommand`-Objekt mit Meeple-ID und Bewegungsrichtung
+   * und veröffentlicht es über den STOMP-Endpunkt `/app/move`.
+   * 
+   * Ablauf:
+   * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.  
+   * 2. Move-Daten serialisieren (`JSON.stringify`).  
+   * 3. Nachricht an den Server senden.  
+   * 
+   * @param meepleId - Eindeutige ID der Spielfigur, die bewegt werden soll  
+   * @param direction - Bewegungsrichtung (z. B. "NORTH", "SOUTH", "EAST", "WEST")
+   */
+  function sendMove(meepleId: string, direction: Direction) {
+    if (!stompclient || !stompclient.connected) {
+      console.error("Cannot send move: STOMP client not connected.")
+      return
+    }
+
+    const moveCmd: MovementCommand = { meepleId, direction };
+
+    const body = JSON.stringify(moveCmd)
+
+    try {
+      stompclient.publish({
+        destination: "/app/move",
+        body,
+      })
+      console.log("Move sent:", body)
+    } catch (err) {
+      console.error("Error sending move:", err)
+    }
+  }
+
   return {
     gamedata,
     startMilefizLiveUpdate,
     sendSocketMessage,
     joinLobby,
-    cooldown
+    cooldown,
+    sendMove
   }
 })
