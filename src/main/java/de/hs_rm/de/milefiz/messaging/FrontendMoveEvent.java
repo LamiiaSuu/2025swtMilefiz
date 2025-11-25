@@ -3,14 +3,13 @@ package de.hs_rm.de.milefiz.messaging;
 import java.util.UUID;
 
 /**
- * @author Robin Claassen / Maximilian Ressel
- * @param sessionId   Game session Id
- * @param id          meepleId/barrierId
- * @param targetField Ziel wo der Spieler hin will
+ * @author              Robin Claassen / Maximilian Ressel
+ * @param sessionId     Game session Id
+ * @param meepleId      meepleId/barrierId
+ * @param targetField   targeted field
  */
-// public record FrontendMoveEvent(UUID sessionId, long id, FieldDTO
-// targetField) {
-public record FrontendMoveEvent(UUID sessionId, UUID id, UUID targetField) implements FrontendEvent { // TODO warten auf
-                                                                                                      // Datenstruktur
-                                                                                                      // Spielfeld
+
+public record FrontendMoveEvent(String sessionId, UUID meepleId, UUID targetField) implements FrontendEvent {
+                                                                                                      
+                                                                                                      
 }
