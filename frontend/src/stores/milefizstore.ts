@@ -14,7 +14,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     lobbyId: "", // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
     playerId: "", // UUID vom eigenen Spieler
     mana: 100,
-    currentDiceRoll: undefined,
+    currentDiceRoll: undefined, //Würfel ergebnis
   })
 
   function startMilefizLiveUpdate() {
@@ -45,11 +45,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       stompclient.subscribe((DEST + gamedata.lobbyId), (message) => {
         console.log('Message received: ' + message + "\nBody:\n" + message.body)
 
-              try {
+      try {
         const event = JSON.parse(message.body)
         
         if (event.type === 'ROLL_DICE') {
-          console.log(`🎲 Player ${event.playerId} rolled: ${event.number}`)
+          console.log(`Player ${event.playerId} rolled: ${event.number}`)
           gamedata.currentDiceRoll = event.number
           handleRollDiceResult(event)
         }
@@ -139,11 +139,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
 function handleRollDiceResult(event: any) {
-  console.log('🎲 Dice roll result:', event)
+  console.log('Dice roll result:', event)
   
   gamedata.currentDiceRoll = event.number
   
-  console.log(`🎲 Player rolled: ${event.number}`)
+  console.log(`Player rolled: ${event.number}`)
 }
 
   return {
