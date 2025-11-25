@@ -10,10 +10,11 @@ let stompclient: Client | null = null
 export const useMilefizStore = defineStore('milefizstore', () => {
 
   // Beispiele für Daten
-  const gamedata = reactive<{ lobbyId: string, playerId: string; mana: number }>({
+  const gamedata = reactive<{ lobbyId: string, playerId: string; mana: number; currentDiceRoll?: number }>({
     lobbyId: "", // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
     playerId: "", // UUID vom eigenen Spieler
     mana: 100,
+    currentDiceRoll: undefined,
   })
 
   function startMilefizLiveUpdate() {
@@ -43,6 +44,18 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe((DEST + gamedata.lobbyId), (message) => {
         console.log('Message received: ' + message + "\nBody:\n" + message.body)
+
+              try {
+        const event = JSON.parse(message.body)
+        
+        if (event.type === 'ROLL_DICE') {
+          console.log(`🎲 Player ${event.playerId} rolled: ${event.number}`)
+          gamedata.currentDiceRoll = event.number
+          handleRollDiceResult(event)
+        }
+      } catch (err) {
+        console.error('Error parsing message:', err)
+      }
         // const eventobjekt: IZutatDTD = JSON.parse(message.body)
         // console.log(JSON.stringify(eventobjekt))
         // if (eventobjekt.type === 'DOENER') {
@@ -99,10 +112,45 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function sendRollDice() {
+    if (!stompclient || !stompclient.connected) {
+      console.error("Cannot roll dice: STOMP client not connected.")
+      return
+    }
+
+    if (!gamedata.lobbyId || !gamedata.playerId) {
+      console.error("Cannot roll dice: Missing lobbyId or playerId")
+      return
+    }
+
+    const rollDiceCommand = {
+      playerId: gamedata.playerId
+    }
+
+    try {
+      stompclient.publish({
+        destination: `/app/milefiz/lobby/${gamedata.lobbyId}/rollDice`,
+        body: JSON.stringify(rollDiceCommand)
+      })
+      console.log("Roll dice command sent for player:", gamedata.playerId)
+    } catch (err) {
+      console.error("Error sending roll dice command:", err)
+    }
+  }
+
+function handleRollDiceResult(event: any) {
+  console.log('🎲 Dice roll result:', event)
+  
+  gamedata.currentDiceRoll = event.number
+  
+  console.log(`🎲 Player rolled: ${event.number}`)
+}
+
   return {
     gamedata,
     startMilefizLiveUpdate,
     sendSocketMessage,
+    sendRollDice,
     joinLobby,
   }
 })
