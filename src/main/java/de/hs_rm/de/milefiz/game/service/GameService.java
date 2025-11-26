@@ -51,8 +51,6 @@ public class GameService {
      * und über WebSocket an alle Frontend-Clients der entsprechenden Lobby gesendet.</p>
      * 
      * 
-     * @param lobby Die Lobby in der gewürfelt wird (bestimmt die WebSocket-Zielgruppe)
-     * @param playerId Eindeutige ID des Spielers der würfelt
      *  
      * @see DiceService#roll()
      * @see FrontendRollDiceEvent
@@ -60,11 +58,9 @@ public class GameService {
      * @see de.hs_rm.de.milefiz.messaging.FrontendMessagingServiceImpl#sendEvent(LobbyMessage)
      * 
      */
-    public void rollDice(Lobby lobby, UUID playerId) {
+    public int rollDice() {
 
         int number = diceService.roll();
-        FrontendRollDiceEvent event = new FrontendRollDiceEvent(playerId, number);
-        LobbyMessage message = new LobbyMessage(lobby, event);
-        publisher.publishEvent(message);
+        return number;
     }
 }

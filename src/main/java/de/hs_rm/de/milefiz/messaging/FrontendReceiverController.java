@@ -14,6 +14,7 @@ import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -35,19 +36,10 @@ public class FrontendReceiverController {
     }
 
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
-    public void handleRollDice(@DestinationVariable UUID lobbyId, RollDiceCommand command) {
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendRollDiceEvent handleRollDice(@DestinationVariable UUID lobbyId, RollDiceCommand command) {
         logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
-        
-        try {
-            Lobby lobby = lobbyManager.getLobby(lobbyId);
-            // Das triggert das Event-System
-            gameService.rollDice(lobby, command.playerId());
-            
-        } catch (LobbyNotFoundException e) {
-            logger.warn("Lobby not found: {}", lobbyId, e);
-            
-        } catch (RuntimeException e) {
-            logger.error("Error rolling dice: {}", e.getMessage());
-        }
+        int number = gameService.rollDice();
+        return new FrontendRollDiceEvent(lobbyId, number);
     }
 }
