@@ -26,12 +26,12 @@ public class LobbyManager {
         return lobbies.stream().filter(e -> e.getId().equals(id)).findFirst().orElseThrow(LobbyNotFoundException::new);
     }
 
-    public Player getPlayerBySessionIdFromLobbies(String sessionId) throws PlayerNotFoundException {
+    public Player getPlayerBySessionIdFromLobbies(String playerToken) throws PlayerNotFoundException {
         return lobbies.stream()
                 .flatMap(lobby -> lobby.getPlayers().stream())
-                .filter(p -> p.getSessionId() != null && p.getSessionId().equals(sessionId))
+                .filter(p -> p.getSessionId() != null && p.getSessionId().equals(playerToken))
                 .findFirst()
-                .orElseThrow(PlayerNotFoundException::new);
+                .orElseThrow(() -> new PlayerNotFoundException(String.format("Player mit Token '%s' konnte nicht gefunden werden", playerToken)));
     }
 
     /**
@@ -41,15 +41,15 @@ public class LobbyManager {
      */
     public Lobby getDummyLobby() {
         Lobby lobby = new Lobby();
-        Player blue = new Player(Color.BLUE);
-        Player red = new Player(Color.RED);
+        // Player blue = new Player(Color.BLUE);
+        // Player red = new Player(Color.RED);
         lobby.setId(UUID.fromString("271c95db-3737-496f-9081-ae920e8ebbf7")); // Test-ID
-        try {
-            lobby.join(blue);
-            lobby.join(red);
-        } catch (LobbyJoinException ex) {
-            ex.printStackTrace();
-        }
+        // try {
+        //     lobby.join(blue);
+        //     lobby.join(red);
+        // } catch (LobbyJoinException ex) {
+        //     ex.printStackTrace();
+        // }
         return lobby;
     }
 

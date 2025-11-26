@@ -12,6 +12,7 @@ import java.security.Principal;
 import java.util.Map;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
+import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Direction;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
@@ -40,22 +41,40 @@ public class FrontendReceiverController {
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleMove(@DestinationVariable("lobbyId") UUID lobbyId, MovementCommand moveCmd,
-            Principal principal) {
-
-        System.out.println("kommt was an? " + principal.getName());
-
-        Lobby lobby = lobbyManager.getDummyLobby();
+            Principal principal, SimpMessageHeaderAccessor sha) {
+        Lobby lobby = null;
+        try {
+            lobby = lobbyManager.getLobby(lobbyId);
+        } catch (LobbyNotFoundException e) {
+            e.printStackTrace();
+        }
+        System.out.println("LOBBY MEMBERS");
+        lobby.getPlayers().forEach(e -> System.out.println(e.getSessionId()));
+        String principalName = null;
+        if (principal != null) {
+            principalName = principal.getName();
+            System.out.println("kommt was an? principal=" + principalName);
+        } else {
+            // Fallback: read copied HTTP session attributes or native headers
+            Map<String, Object> sessionAttrs = sha.getSessionAttributes();
+            if (sessionAttrs != null && sessionAttrs.get("playerSessionId") != null) {
+                principalName = (String) sessionAttrs.get("playerSessionId");
+            } else if (sha.getFirstNativeHeader("player-token") != null) {
+                principalName = sha.getFirstNativeHeader("player-token");
+            }
+            System.out.println("kommt was an? principal (fallback)=" + principalName);
+        }
 
         Player player = null;
         try {
-            player = lobby.getPlayerBySessionId(principal.getName());
+            player = lobby.getPlayerBySessionId(principalName);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         // nur zum testen
         if (player == null) {
-            System.out.println("No player found for session " + player.getSessionId() + ", creating dummy player...");
+            System.out.println("No player found for session " + principalName + ", creating dummy player...");
             player = lobby.getPlayers().stream().findAny().orElse(null);
             player.getMeeples()[0].setId(moveCmd.meepleId());
             player.getMeeples()[0].setCurrentField(lobby.getField());
