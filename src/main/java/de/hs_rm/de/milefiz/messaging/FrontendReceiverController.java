@@ -71,6 +71,8 @@ public class FrontendReceiverController {
 
         // nur zum testen
         lobby.setField(gameService.getTestBoard());
+        player.getMeeples()[0].setId(moveCmd.meepleId());
+        player.getMeeples()[0].setCurrentField(lobby.getField());
 
         Meeple meeple = player.getMeepleWithId(moveCmd.meepleId());
         Field currentField = meeple.getCurrentField();

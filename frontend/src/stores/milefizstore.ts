@@ -96,37 +96,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         }
         if (event.type === "MOVE") {
-          boardStore.updateMeeplePosition(event.meepleId, event.targetField)
-        }
-
-      })
-
-      /**
-      * Abonniert das STOMP-Topic für Bewegungs-Updates (`/topic/move`).
-      *
-      * Wenn der Server eine Bewegung eines Meeples sendet,
-      * wird die Nachricht hier empfangen, verarbeitet und an den `BoardStore`
-      * weitergereicht, um die Spielfeld-Position lokal zu aktualisieren.
-      *
-      * Ablauf:
-      * 1. Empfang des JSON-Nachrichtentexts über `message.body`.
-      * 2. Umwandlung in ein JS-Objekt (`event`).
-      * 3. Prüfung auf Fehlermeldungen (z. B. `"CANNOT_CHANGE_DIRECTION"`).
-      * 4. Aktualisierung der Spielfigur-Position im `BoardStore`.
-      */
-      stompclient.subscribe(DEST + gamedata.lobbyId + "/move", (message) => {
-        console.log("movement update:", message.body)
-        const event = JSON.parse(message.body)
-        const boardStore = useBoardStore()
-        if (event.type === "MOVE_ERROR") {
-          console.warn("Move rejected:", event)
-          return
-        }
-        if (event.type === "MOVE") {
-          console.log("move angekommen")
-          console.log(event.id, event.targetField)
           boardStore.updateMeeplePosition(event.id, event.targetField)
         }
+
       })
     }
     stompclient.onDisconnect = () => {
