@@ -6,7 +6,6 @@ import { useBoardStore } from "./boardStore"
 
 const wsurl = `ws://${window.location.host}/milefiz`
 const DEST = '/topic/milefiz/lobby/'
-const MOVE_DEST = '/topic/move'  //milefiz/move
 
 let stompclient: Client | null = null
 
@@ -63,6 +62,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
+        const boardStore = useBoardStore()
         if (event.type === 'COOLDOWN_STARTED') {
           cooldown.active = true
           cooldown.remainingMs = event.remainingMs
@@ -75,6 +75,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === 'COOLDOWN_READY') {
           cooldown.active = false
           cooldown.remainingMs = 0
+        }
+        if (event.type === "MOVE_ERROR") {
+          console.warn("Move rejected:", event.msg)
+          return
+        }
+        if (event.type === "MOVE") {
+          boardStore.updateMeeplePosition(event.meepleId, event.targetField)
         }
 
       })
@@ -92,15 +99,17 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       * 3. Prüfung auf Fehlermeldungen (z. B. `"CANNOT_CHANGE_DIRECTION"`).  
       * 4. Aktualisierung der Spielfigur-Position im `BoardStore`.
       */
-      stompclient.subscribe(MOVE_DEST, (message) => {
+      stompclient.subscribe(DEST + gamedata.lobbyId + "/move", (message) => {
         console.log("movement update:", message.body)
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
-        if (event.reason === "CANNOT_CHANGE_DIRECTION") {
+        if (event.type === "MOVE_ERROR") {
           console.warn("Move rejected:", event)
           return
         }
-        boardStore.updateMeeplePosition(event.meepleId, event.targetField)
+        if (event.type === "MOVE") {
+          boardStore.updateMeeplePosition(event.meepleId, event.targetField)
+        }
       })
     }
     stompclient.onDisconnect = () => {
@@ -176,9 +185,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     const body = JSON.stringify(moveCmd)
 
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobbyId
+
     try {
       stompclient.publish({
-        destination: "/app/move",
+        destination: DEST_APP + "/move",
         body,
       })
       console.log("Move sent:", body)

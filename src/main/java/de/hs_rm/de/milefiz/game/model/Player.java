@@ -7,9 +7,10 @@ import java.util.UUID;
 public class Player {
 
     private UUID id;
-    private UUID sessionId;
+    private String sessionId;
     private Meeple[] meeples;
     private Color color;
+    private Meeple activeMeeple;
 
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
@@ -28,11 +29,19 @@ public class Player {
         return id;
     }
 
-    public UUID getSessionId() {
+    public Meeple getActiveMeeple() {
+        return activeMeeple;
+    }
+
+    public void setActiveMeeple(Meeple activeMeeple) {
+        this.activeMeeple = activeMeeple;
+    }
+
+    public String getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(UUID sessionId) {
+    public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 
