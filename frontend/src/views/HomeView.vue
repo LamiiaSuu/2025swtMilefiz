@@ -2,12 +2,20 @@
 import TheWelcome from '@/components/TheWelcome.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import GameBoard from '@/components/GameBoard.vue'
-import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { onMounted, ref } from 'vue'
 
 const { gamedata, startMilefizLiveUpdate, sendSocketMessage, joinLobby } = useMilefizStore()
+const route = useRoute()
 
-// startMilefizLiveUpdate()
-joinLobby()
+startMilefizLiveUpdate()
+const lobbyid: string = route.redirectedFrom?.params.lobbyid as string
+if (lobbyid) {
+  joinLobby(lobbyid)
+} else {
+  joinLobby()
+  
+}
 
 setTimeout(function () {
   sendSocketMessage({ msg: 'Hello World' })
