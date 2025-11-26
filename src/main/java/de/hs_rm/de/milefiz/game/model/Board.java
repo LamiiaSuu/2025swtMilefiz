@@ -2,6 +2,7 @@ package de.hs_rm.de.milefiz.game.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Board {
     /**
@@ -10,14 +11,28 @@ public class Board {
      * @param startField Eingangsfeld ins Board
      * @param barriers barrieren des Boards
      */
+    private final UUID id;
     private String name;
     private Field startField;
     private List<Meeple> barriers;
     
     public Board(String name, Field startField) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.startField = startField;
         this.barriers = new ArrayList<>();
+    }
+
+    public Board(UUID id, String name, Field startField) {
+        this.id = id;
+        this.name = name;
+        this.startField = startField;
+        this.barriers = new ArrayList<>();
+    }
+
+    
+    public UUID getId() {
+        return id;
     }
 
     public Field getStartField() {
@@ -49,4 +64,5 @@ public class Board {
             throw new IllegalArgumentException("Barriere nicht im Board");
         }
     }
+
 }

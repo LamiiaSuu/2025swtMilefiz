@@ -11,13 +11,30 @@ import java.util.UUID;
  */
 public class Field {
     
-    private UUID id;
+    private final UUID id;
     private Map<Direction, Field> neighbours = new HashMap<>();
     private FieldType type;
     private Position position;
 
+    /**
+     * Field mit random UUID erstellen
+     * @param type
+     * @param position
+     */
     public Field(FieldType type, Position position) {
         id = UUID.randomUUID();
+        this.type = type;
+        this.position = position;
+    }
+
+    /**
+     * Field mit gegebener ID erstellen
+     * @param id 
+     * @param type 
+     * @param position
+     */
+    public Field(UUID id, FieldType type, Position position) {
+        this.id = id;
         this.type = type;
         this.position = position;
     }
