@@ -2,7 +2,8 @@ package de.hs_rm.de.milefiz.messaging;
 
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -16,21 +17,26 @@ import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
-import de.hs_rm.de.milefiz.game.services.GameService;
+import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
+import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
+import de.hs_rm.de.milefiz.game.model.Lobby;
+import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
+import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 
 @Controller
 public class FrontendReceiverController {
 
-    @Autowired
+    private final Logger logger = LoggerFactory.getLogger(FrontendReceiverController.class);
+    private LobbyManager lobbyManager;
     private GameService gameService;
 
-    private LobbyManager lobbyManager;
-
-    public FrontendReceiverController(LobbyManager lobbyManager) {
+    public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService) {
         this.lobbyManager = lobbyManager;
+        this.gameService = gameService;
     }
 
     @MessageMapping("/milefiz/lobby/{lobbyId}")
@@ -62,7 +68,7 @@ public class FrontendReceiverController {
         }
 
         // nur zum testen
-        lobby.setField(gameService.getTestStartField());
+        lobby.setField(gameService.getTestBoard());
 
         if (player == null) {
             System.out.println("No player found for session " + sessionId + ", creating dummy player...");
@@ -125,4 +131,11 @@ public class FrontendReceiverController {
         return move;
     }
 
+    @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendRollDiceEvent handleRollDice(@DestinationVariable UUID lobbyId, RollDiceCommand command) {
+        logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
+        int number = gameService.rollDice();
+        return new FrontendRollDiceEvent(lobbyId, number);
+    }
 }
