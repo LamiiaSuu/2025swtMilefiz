@@ -55,7 +55,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.type === 'ROLL_DICE') {
             console.log(`Player ${event.playerId} rolled: ${event.number}`)
             gamedata.currentDiceRoll = event.number
-            handleRollDiceResult(event)
           }
         } catch (err) {
           console.error('Error parsing message:', err)
@@ -132,14 +131,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     } catch (err) {
       console.error('Error sending roll dice command:', err)
     }
-  }
-
-  function handleRollDiceResult(event: any) {
-    console.log('Dice roll result:', event)
-
-    gamedata.currentDiceRoll = event.number
-
-    console.log(`Player rolled: ${event.number}`)
   }
 
   return {
