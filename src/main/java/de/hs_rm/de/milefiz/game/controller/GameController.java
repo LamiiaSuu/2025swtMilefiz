@@ -13,15 +13,17 @@ import de.hs_rm.de.milefiz.game.model.Direction;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.FieldType;
 import de.hs_rm.de.milefiz.game.model.Position;
-import de.hs_rm.de.milefiz.game.services.GameService;
+import de.hs_rm.de.milefiz.game.service.GameService;
 
 @RestController
 @RequestMapping("/api/game")
 public class GameController {
 
-    // zum testen
-    @Autowired
     private GameService gameService;
+
+    public GameController(GameService gameService){
+        this.gameService = gameService;
+    }
 
     @GetMapping(path = "/getBoard")
     public BoardDTO getBoard() {
@@ -61,12 +63,7 @@ public class GameController {
         zeroTwo.addNeighbour(zeroFour, Direction.NORTH);
         zeroFour.addNeighbour(twoFour, Direction.WEST);
         
-        gameService.saveTestField(zeroZero);
-        gameService.saveTestField(zeroTwo);
-        gameService.saveTestField(twoTwo);
-        gameService.saveTestField(twoZero);
-        gameService.saveTestField(twoFour);
-        gameService.saveTestField(zeroFour);
+        gameService.setTestBoard(zeroZero);
 
         return BoardMapper.mapToDTO(zeroZero);
     }

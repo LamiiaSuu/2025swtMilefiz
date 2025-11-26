@@ -116,7 +116,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         }
         if (event.type === "MOVE") {
-          boardStore.updateMeeplePosition(event.meepleId, event.targetField)
+          console.log("move angekommen")
+          console.log(event.id, event.targetField)
+          boardStore.updateMeeplePosition(event.id, event.targetField)
         }
       })
     }
