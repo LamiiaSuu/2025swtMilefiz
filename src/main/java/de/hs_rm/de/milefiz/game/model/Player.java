@@ -14,7 +14,7 @@ public class Player {
         meeples = new Meeple[noOfMeeples];
         id = UUID.randomUUID();
         for (int i = 0; i < noOfMeeples; i++) {
-            meeples[i] = new Meeple();
+            meeples[i] = new Meeple(false);
         }
         this.color = color;
     }

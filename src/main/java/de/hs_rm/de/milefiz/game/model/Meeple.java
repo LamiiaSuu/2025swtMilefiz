@@ -3,14 +3,17 @@ package de.hs_rm.de.milefiz.game.model;
 import java.util.UUID;
 
 /**
- * Spielfigur
+ * Spielfigur oder eine Barriere
  */
 public class Meeple {
-    private UUID id;
+    private final UUID id;
     private Field currentField;
+    private Field lastField;
+    private final boolean isBarrier;
     
-    public Meeple() {
+    public Meeple(boolean isBarrier) {
         id = UUID.randomUUID();
+        this.isBarrier = isBarrier;
     }
 
     public UUID getId() {
@@ -21,8 +24,36 @@ public class Meeple {
         return currentField;
     }
 
-    public void setCurrentField(Field currentField) {
-        this.currentField = currentField;
+    /**
+     * lastField vom Meeple wird hier gesetzt
+     * @param field Field auf das das Meeple gesetzt werden soll
+     */
+    public void setCurrentField(Field field) {
+        lastField = currentField;
+        this.currentField = field;
+    }
+
+    public Field getLastField() {
+        return lastField;
+    }
+
+    public boolean isBarrier() {
+        return isBarrier;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof Meeple)) {
+            return false;
+        }
+
+        Meeple meeple = (Meeple) obj;
+
+        return this.id.equals(meeple.id);
     }
 
     
