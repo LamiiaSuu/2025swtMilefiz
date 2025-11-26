@@ -53,4 +53,8 @@ public class GameService {
         return testFields.get(0);
     }
 
+    public List<Player> getAllPlayers() {
+        return new ArrayList<>(playersBySession.values());
+}
+
 }
