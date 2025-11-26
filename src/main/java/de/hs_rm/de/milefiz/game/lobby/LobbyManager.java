@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import de.hs_rm.de.milefiz.game.model.Color;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
 
@@ -26,12 +25,44 @@ public class LobbyManager {
         return lobbies.stream().filter(e -> e.getId().equals(id)).findFirst().orElseThrow(LobbyNotFoundException::new);
     }
 
-    public Player getPlayerBySessionIdFromLobbies(String playerToken) throws PlayerNotFoundException {
+    /**
+     * Gibt den Spieler zurück dessen playerToken übereinstimmt
+     *
+     * @param playerToken
+     * @return
+     * @throws PlayerNotFoundException
+     */
+    public Player getPlayerByTokenFromLobbies(String playerToken) throws PlayerNotFoundException {
         return lobbies.stream()
                 .flatMap(lobby -> lobby.getPlayers().stream())
                 .filter(p -> p.getPlayerToken() != null && p.getPlayerToken().equals(playerToken))
                 .findFirst()
                 .orElseThrow(() -> new PlayerNotFoundException(String.format("Player mit Token '%s' konnte nicht gefunden werden", playerToken)));
+    }
+
+    /**
+     * Durchsucht alle Lobbys nach dem angegebenn Spieler
+     *
+     * @param player
+     * @return Lobby wo der Spieler drin ist
+     */
+    public Lobby getLobbyFromPlayer(Player player) {
+        return lobbies.stream().filter(lob -> lob.getPlayers().contains(player)).findFirst().orElse(null);
+    }
+
+    /**
+     * Erstellt eine neue Lobby und fügt sie zum Lobby Management hinzu
+     *
+     * @return die erstellte Lobby
+     */
+    public Lobby createLobby() {
+        Lobby lobby = new Lobby();
+        lobbies.add(lobby);
+        return lobby;
+    }
+
+    public boolean deleteLobby(Lobby lobby) {
+        return lobbies.remove(lobby);
     }
 
     /**
@@ -41,15 +72,7 @@ public class LobbyManager {
      */
     public Lobby getDummyLobby() {
         Lobby lobby = new Lobby();
-        // Player blue = new Player(Color.BLUE);
-        // Player red = new Player(Color.RED);
         lobby.setId(UUID.fromString("271c95db-3737-496f-9081-ae920e8ebbf7")); // Test-ID
-        // try {
-        //     lobby.join(blue);
-        //     lobby.join(red);
-        // } catch (LobbyJoinException ex) {
-        //     ex.printStackTrace();
-        // }
         return lobby;
     }
 

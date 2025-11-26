@@ -5,14 +5,18 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
+import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Direction;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
@@ -55,8 +59,6 @@ public class FrontendReceiverController {
         } catch (LobbyNotFoundException e) {
             e.printStackTrace();
         }
-        System.out.println("LOBBY MEMBERS");
-        lobby.getPlayers().forEach(e -> System.out.println(e.getPlayerToken()));
         String principalName = null;
         if (principal != null) {
             principalName = principal.getName();
@@ -136,5 +138,20 @@ public class FrontendReceiverController {
         logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
         int number = gameService.rollDice();
         return new FrontendRollDiceEvent(lobbyId, number);
+    }
+
+    /**
+     * Handelt bei disconnects die Spieler -> Leave aus Lobby
+     * @param event
+     * @throws PlayerNotFoundException
+     */
+    @EventListener
+    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws PlayerNotFoundException {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        String playerToken = (String) headerAccessor.getSessionAttributes().get("player-token");
+        Player player = lobbyManager.getPlayerByTokenFromLobbies(playerToken);
+        Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
+        lobby.leave(player);
+        logger.info("WebSocket disconnected - Player Token: {}", playerToken);
     }
 }

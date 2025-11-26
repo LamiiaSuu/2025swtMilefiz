@@ -30,12 +30,13 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String token = accessor.getFirstNativeHeader("player-token");
             try {
-                Player player = lobbyManager.getPlayerBySessionIdFromLobbies(token);
+                Player player = lobbyManager.getPlayerByTokenFromLobbies(token);
                 if (player == null) {
                     throw new IllegalArgumentException("Invalid player token");
                 }
 
                 accessor.setUser(() -> String.valueOf(player.getPlayerToken()));
+                accessor.getSessionAttributes().put("player-token", player.getPlayerToken());
                 accessor.setLeaveMutable(true);
             } catch (PlayerNotFoundException e) {
                 e.printStackTrace();

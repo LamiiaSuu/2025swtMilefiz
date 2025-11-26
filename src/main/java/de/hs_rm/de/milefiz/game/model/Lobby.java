@@ -53,6 +53,10 @@ public class Lobby {
         throw new LobbyJoinException("Die Lobby ist zurzeit nicht beitretbar!");
     }
 
+    public boolean leave(Player player) {
+        return players.remove(player);
+    }
+
     private boolean addPlayer(Player player) {
         return players.add(player);
     }

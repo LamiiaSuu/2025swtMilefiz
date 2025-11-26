@@ -37,19 +37,18 @@ public class LobbyRestController {
 
     @GetMapping(path = "/join/random")
     public ResponseEntity<LobbyJoinEvent> joinRandomLobby(HttpSession httpSession) throws LobbyNotFoundException {
-        return joinLobby(null, httpSession);
+        // Join Random lobby
+        Lobby lobby = lobbyManager.getLobbies().stream().filter(lob -> lob.isJoinable()).findAny().orElse(null);
+        if(lobby == null) { // keine joinable Lobby gefunden
+            lobby = lobbyManager.createLobby();
+        }
+        return joinLobby(lobby.getId(), httpSession);
     }
 
     @GetMapping(path = "/join/{lobbyId}")
     public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId, HttpSession httpSession) throws LobbyNotFoundException {
-        Lobby lobby;
-        if (lobbyId == null) {
-            // Join Random lobby
-            lobby = lobbyManager.getLobbies().stream().findAny().orElseThrow(LobbyNotFoundException::new);
-            lobbyId = lobby.getId();
-        } else {
-            lobby = lobbyManager.getLobby(lobbyId);
-        }
+        Lobby lobby = lobbyManager.getLobby(lobbyId);
+
         // Zuweisung eines Players
         Player player = new Player(lobby.getAvailableColor());
 
