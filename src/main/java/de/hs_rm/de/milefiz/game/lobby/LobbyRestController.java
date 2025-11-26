@@ -35,6 +35,9 @@ public class LobbyRestController {
         return lobbyManager.getLobbies();
     }
 
+    /**
+     * Joint eine zufällige Lobby. Sollte keine joinable Lobby existieren (z.B. volle Lobby), wird eine neue Lobby erstellt und gejoint.
+     */
     @GetMapping(path = "/join/random")
     public ResponseEntity<LobbyJoinEvent> joinRandomLobby(HttpSession httpSession) throws LobbyNotFoundException {
         // Join Random lobby
@@ -45,6 +48,9 @@ public class LobbyRestController {
         return joinLobby(lobby.getId(), httpSession);
     }
 
+    /**
+     * Joint die Lobby, welche angegeben wurde
+     */
     @GetMapping(path = "/join/{lobbyId}")
     public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId, HttpSession httpSession) throws LobbyNotFoundException {
         Lobby lobby = lobbyManager.getLobby(lobbyId);
@@ -52,7 +58,7 @@ public class LobbyRestController {
         // Zuweisung eines Players
         Player player = new Player(lobby.getAvailableColor());
 
-        // Session ID
+        // Player Token
         String playerToken = UUID.randomUUID().toString();
         player.setPlayerToken(playerToken);
 
