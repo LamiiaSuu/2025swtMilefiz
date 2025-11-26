@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import type { TresObject } from '@tresjs/core'
+import type { PerspectiveCamera, Vector3 } from 'three'
 
 // Definiert Props für den zugehörigen Character, 
 // ob First Person an ist und das Offset der Kamera
@@ -14,7 +15,7 @@ const emit = defineEmits<{
   rotateCharacter: [yRotation: number]
 }>()
 
-const cameraRef = ref<TresObject | null>(null)
+const cameraRef = ref<PerspectiveCamera>()
 const verticalRotation = ref(0) // Hoch + Runter Rotation
 const horizontalRotation = ref(0) // Links + Rechts Rotation
 
@@ -30,7 +31,7 @@ const cameraPosition = computed((): [number, number, number] => {
 
   const char = props.gameCharRef as any
   const offset = props.offset || { x: 0, y: 1, z: 0 }
-  
+
   // Position wird vom Charakter abgefragt
   const charPos = char?.characterPosition?.position || [0, 0, 0]
 
@@ -107,6 +108,23 @@ onMounted(() => {
   stopLoop()
 })
 
+/**
+ * Beobachtet die Rotation des Spielcharakters und synchronisiert sie mit der Kamerarotation.
+ * 
+ * Wird die Charakterrotation (z. B. durch Bewegung im Spiel) geändert, 
+ * übernimmt die Kamera diese horizontale Ausrichtung, 
+ * damit die Blickrichtung im First-Person-Modus mit dem Charakter übereinstimmt.
+ * 
+ * @param newRotation - Neuer Rotationswert des Charakters
+ */
+watch(
+  () => props.gameCharRef?.characterRotation?.value,
+  (newRotation) => {
+    if (!props.useFirstPerson || newRotation == null) return
+    horizontalRotation.value = newRotation
+  }
+)
+
 onUnmounted(() => {
   document.removeEventListener('mousemove', onMouseMove)
   if (document.pointerLockElement) {
@@ -115,17 +133,21 @@ onUnmounted(() => {
 })
 
 // Gibt Kamera frei
-defineExpose({ cameraRef })
+defineExpose({
+  get camera() {
+    return cameraRef.value
+  }
+})
 
 </script>
 
 <template>
-    <TresPerspectiveCamera
-        v-if="useFirstPerson"
-        ref="cameraRef"
-        :position="cameraPosition"
-        :rotation="cameraRotation"
-        :fov="90"
-        rotation-order="YXZ"
-    />
+  <TresPerspectiveCamera 
+    v-if="useFirstPerson" 
+    ref="cameraRef" 
+    :position="cameraPosition" 
+    :rotation="cameraRotation" 
+    :fov="90" 
+    rotation-order="YXZ" 
+  />
 </template>
