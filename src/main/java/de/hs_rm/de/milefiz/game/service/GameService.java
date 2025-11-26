@@ -1,66 +1,35 @@
 package de.hs_rm.de.milefiz.game.service;
 
-import java.util.UUID;
-
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-
-import de.hs_rm.de.milefiz.game.model.Lobby;
-import de.hs_rm.de.milefiz.messaging.LobbyMessage;
-import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
-
 /**
  * Service für die Verwaltung von Spiellogik und Spielaktionen.
  * 
- * <p>Der GameService koordiniert Spielaktionen wie das Würfeln und kommuniziert
- * diese über das Event-System an das Frontend. Er fungiert als zentrale
- * Schnittstelle zwischen Frontend-Anfragen und Backend-Spiellogik.</p>
+ * <p>
+ * Das GameService Interface definiert die grundlegenden Spielfunktionen
+ * und stellt die Geschäftslogik für Spiel-bezogene Operationen bereit.
+ * </p>
  * 
- * <h3>Hauptfunktionen:</h3>
+ * <h3>Unterstützte Spielaktionen:</h3>
  * <ul>
- *   <li>Würfeln für Spieler</li>
- *   <li>Event-basierte Kommunikation mit Frontend</li>
- *   <li>Koordination zwischen verschiedenen Game-Services</li>
+ * <li>{@link #rollDice()} - Würfeln</li>
  * </ul>
  * 
  * @author Leon Schäfer
  */
-@Service
-public class GameService {
-
-    private final DiceServiceImpl diceService;
-    private final ApplicationEventPublisher publisher;
-
-    public GameService(DiceServiceImpl diceService, ApplicationEventPublisher publisher) {
-        this.diceService = diceService;
-        this.publisher = publisher;
-    }
+public interface GameService {
 
     /**
-     * Führt einen Würfelwurf für einen Spieler aus und sendet das Ergebnis an das Frontend.
+     * Führt einen Würfelwurf aus und gibt das Ergebnis zurück.
      * 
-     * <p>Diese Methode orchestriert den kompletten Würfelvorgang:</p>
-     * <ol>
-     *   <li>Würfelt eine Zufallszahl über den DiceService</li>
-     *   <li>Erstellt ein FrontendRollDiceEvent mit Spieler-ID und Würfelergebnis</li>
-     *   <li>Verpackt das Event in eine LobbyMessage für lobby-spezifische Übertragung</li>
-     *   <li>Publiziert das Event über Spring's Event-System</li>
-     * </ol>
+     * <p>
+     * Diese Methode delegiert an den DiceService und gibt das
+     * Würfelergebnis unverändert zurück.
+     * </p>
      * 
-     * <p>Das publizierte Event wird automatisch vom MessagingService abgefangen 
-     * und über WebSocket an alle Frontend-Clients der entsprechenden Lobby gesendet.</p>
+     * @return gibt die gewürfelte Zahl zurück (1-6)
      * 
-     * 
-     *  
      * @see DiceService#roll()
-     * @see FrontendRollDiceEvent
-     * @see LobbyMessage
-     * @see de.hs_rm.de.milefiz.messaging.FrontendMessagingServiceImpl#sendEvent(LobbyMessage)
      * 
      */
-    public int rollDice() {
+    int rollDice();
 
-        int number = diceService.roll();
-        return number;
-    }
 }

@@ -34,12 +34,12 @@ class GameServiceTest {
 
     @BeforeEach
     void setUp() {
-        gameService = new GameService(diceService, publisher);
+        gameService = new GameServiceImpl(diceService, publisher);
 
     }
 
     @Test
-    @DisplayName("Sollte Exception vom DiceService weiterleiten ohne eigene Exception-Behandlung")
+    @DisplayName("Sollte Exception vom DiceService weitersleiten ohne eigene Exception-Behandlung")
     void rollDice_shouldPropagateExceptionFromDiceService() {
         // Arrange: DiceService wirft Exception
         RuntimeException expectedException = new RuntimeException("Würfel ist kaputt");
