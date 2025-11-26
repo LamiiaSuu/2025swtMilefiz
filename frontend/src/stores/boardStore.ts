@@ -14,6 +14,10 @@ export const useBoardStore = defineStore('board', {
     ok: false,
     /** Das komplette Spielbrett mit allen Feldern */
     board: null as IBoardDTD | null,
+    /** meeple positionen */
+    meeplePositions: {} as Record<string, string>,
+    testMeepleId: "123e4567-e89b-12d3-a456-426614174000" as string,
+    lastFields: {} as Record<string, string | null>,
   }),
   actions: {
     /**
@@ -35,11 +39,37 @@ export const useBoardStore = defineStore('board', {
 
         console.log('GameBoard successfully loaded')
 
+        // noch zum testen
+        if (this.board) {
+          const startField = this.board.fields.find(
+            (f) => f.position.x === 0 && f.position.y === 0
+          )
+
+          if (startField) {
+            this.meeplePositions[this.testMeepleId] = startField.id
+            this.lastFields[this.testMeepleId] = null
+            console.log(
+              `TestMeeple ${this.testMeepleId} startet auf Feld ${startField.id}`
+            )
+          } else {
+            console.warn("Kein Startfeld bei (0,0) gefunden!")
+          }
+        }
+
       } catch (error_) {
         console.log(error_)
         this.ok = false
         this.board = null
       }
+    },
+
+    // meeple bewegen und letztes Feld merken
+    updateMeeplePosition(meepleId: string, fieldId: string) {
+      const previousField = this.meeplePositions[meepleId] ?? null
+      if (previousField) {
+        this.lastFields[meepleId] = previousField
+      }
+      this.meeplePositions[meepleId] = fieldId
     },
   },
 })
