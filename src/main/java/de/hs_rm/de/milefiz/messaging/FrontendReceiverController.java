@@ -5,10 +5,13 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+
+import java.security.Principal;
+import java.util.Map;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.model.Direction;
@@ -39,35 +42,35 @@ public class FrontendReceiverController {
 
     @MessageMapping("/milefiz/lobby/{lobbyId}")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public String handleMessage(@DestinationVariable UUID lobbyId, String message) {
+    public String handleMessage(@DestinationVariable("lobbyId") UUID lobbyId, String message) {
         System.out.println("Received " + lobbyId.toString() + ": " + message);
         return "Server received: " + message; // Body von Weiterleitung an alle Clients
     }
 
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleMove(@DestinationVariable UUID lobbyId, @Header("simpSessionId") String sessionId,
-            MovementCommand moveCmd) {
+    public FrontendEvent handleMove(@DestinationVariable("lobbyId") UUID lobbyId, MovementCommand moveCmd,
+            Principal principal) {
 
-        System.out.println("kommt was an?");
-        
+        System.out.println("kommt was an? " + principal.getName());
+
         Lobby lobby = lobbyManager.getDummyLobby();
-        
+
         Player player = null;
         try {
-            player = lobby.getPlayerBySessionId(sessionId);
+            player = lobby.getPlayerBySessionId(principal.getName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         // nur zum testen
         if (player == null) {
-            System.out.println("No player found for session " + sessionId + ", creating dummy player...");
+            System.out.println("No player found for session " + player.getSessionId() + ", creating dummy player...");
             player = lobby.getPlayers().stream().findAny().orElse(null);
             player.getMeeples()[0].setId(moveCmd.meepleId());
             player.getMeeples()[0].setCurrentField(lobby.getField());
         }
-        
+
         Meeple meeple = player.getMeepleWithId(moveCmd.meepleId());
         Field currentField = meeple.getCurrentField();
         Field lastField = meeple.getLastField();

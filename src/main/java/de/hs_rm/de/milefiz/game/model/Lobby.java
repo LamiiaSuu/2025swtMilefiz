@@ -73,11 +73,9 @@ public class Lobby {
         this.maxPlayers = maxPlayers;
     }
 
-
     public Player getPlayerBySessionId(String sessionId) throws Exception{
         return players.stream().filter(p -> p.getSessionId() != null && p.getSessionId().equals(sessionId)).findFirst().orElseThrow(PlayerNotFoundException::new);
     }
-
     public Board getBoard() {
         return board;
     }
