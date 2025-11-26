@@ -26,6 +26,14 @@ public class LobbyManager {
         return lobbies.stream().filter(e -> e.getId().equals(id)).findFirst().orElseThrow(LobbyNotFoundException::new);
     }
 
+    public Player getPlayerBySessionIdFromLobbies(String sessionId) throws PlayerNotFoundException {
+        return lobbies.stream()
+                .flatMap(lobby -> lobby.getPlayers().stream())
+                .filter(p -> p.getSessionId() != null && p.getSessionId().equals(sessionId))
+                .findFirst()
+                .orElseThrow(PlayerNotFoundException::new);
+    }
+
     /**
      * Diese Lobby kann zum Testen verwendet werden.
      *
