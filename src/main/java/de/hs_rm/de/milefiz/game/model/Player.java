@@ -11,6 +11,8 @@ public class Player {
     private Meeple[] meeples;
     private Color color;
     private Meeple activeMeeple;
+    private long cooldown;
+
 
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
@@ -62,6 +64,14 @@ public class Player {
 
     public Color getColor() {
         return color;
+    }
+
+    public long getCooldown() {
+        return cooldown;
+    }
+
+    public void setCooldown(long cooldown) {
+        this.cooldown = cooldown;
     }
 
     /**
