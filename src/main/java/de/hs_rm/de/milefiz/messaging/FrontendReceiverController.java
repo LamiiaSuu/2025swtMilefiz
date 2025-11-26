@@ -2,6 +2,7 @@ package de.hs_rm.de.milefiz.messaging;
 
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -9,17 +10,22 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
+import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Direction;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.services.GameService;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 
 @Controller
 public class FrontendReceiverController {
+
+    @Autowired
+    private GameService gameService;
 
     private LobbyManager lobbyManager;
 
@@ -35,13 +41,18 @@ public class FrontendReceiverController {
     }
 
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
-    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}/move")
     public FrontendEvent handleMove(@DestinationVariable UUID lobbyId, @Header("simpSessionId") String sessionId,
             MovementCommand moveCmd) {
 
-        System.out.println("kommt was an?");
+        UUID testLobby = UUID.fromString("271c95db-3737-496f-9081-ae920e8ebbf7");
         
-        Lobby lobby = lobbyManager.getDummyLobby();
+        Lobby lobby = null;
+        try {
+            lobby = lobbyManager.getLobby(testLobby);
+        } catch (LobbyNotFoundException e) {
+            e.printStackTrace();
+        }
         
         Player player = null;
         try {
@@ -51,12 +62,18 @@ public class FrontendReceiverController {
         }
 
         // nur zum testen
+        lobby.setField(gameService.getTestStartField());
+
         if (player == null) {
             System.out.println("No player found for session " + sessionId + ", creating dummy player...");
             player = lobby.getPlayers().stream().findAny().orElse(null);
+            player.setSessionId(sessionId);
+            System.out.println("createt dummy player" + player.getId() + "with sessionId" + player.getSessionId());
             player.getMeeples()[0].setId(moveCmd.meepleId());
             player.getMeeples()[0].setCurrentField(lobby.getField());
         }
+        //
+
         
         Meeple meeple = player.getMeepleWithId(moveCmd.meepleId());
         Field currentField = meeple.getCurrentField();
