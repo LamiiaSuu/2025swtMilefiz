@@ -5,10 +5,9 @@ import GameBoard from '@/components/GameBoard.vue'
 import { useRoute } from 'vue-router'
 import { onMounted, ref } from 'vue'
 
-const { gamedata, startMilefizLiveUpdate, sendSocketMessage, joinLobby } = useMilefizStore()
+const { gamedata, sendSocketMessage, joinLobby } = useMilefizStore()
 const route = useRoute()
 
-startMilefizLiveUpdate()
 const lobbyid: string = route.redirectedFrom?.params.lobbyid as string
 if (lobbyid) {
   joinLobby(lobbyid)
