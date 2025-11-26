@@ -29,7 +29,7 @@ public class LobbyManager {
     public Player getPlayerBySessionIdFromLobbies(String playerToken) throws PlayerNotFoundException {
         return lobbies.stream()
                 .flatMap(lobby -> lobby.getPlayers().stream())
-                .filter(p -> p.getSessionId() != null && p.getSessionId().equals(playerToken))
+                .filter(p -> p.getPlayerToken() != null && p.getPlayerToken().equals(playerToken))
                 .findFirst()
                 .orElseThrow(() -> new PlayerNotFoundException(String.format("Player mit Token '%s' konnte nicht gefunden werden", playerToken)));
     }

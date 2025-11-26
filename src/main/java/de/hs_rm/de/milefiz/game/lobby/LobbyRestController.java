@@ -55,7 +55,7 @@ public class LobbyRestController {
 
         // Session ID
         String playerToken = UUID.randomUUID().toString();
-        player.setSessionId(playerToken);
+        player.setPlayerToken(playerToken);
 
         try {
             lobby.join(player);

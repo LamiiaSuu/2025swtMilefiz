@@ -1,5 +1,6 @@
 package de.hs_rm.de.milefiz.messaging;
 
+import java.security.Principal;
 import java.util.UUID;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -7,9 +8,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
-
-import java.security.Principal;
-import java.util.Map;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
@@ -49,25 +47,15 @@ public class FrontendReceiverController {
             e.printStackTrace();
         }
         System.out.println("LOBBY MEMBERS");
-        lobby.getPlayers().forEach(e -> System.out.println(e.getSessionId()));
+        lobby.getPlayers().forEach(e -> System.out.println(e.getPlayerToken()));
         String principalName = null;
         if (principal != null) {
             principalName = principal.getName();
-            System.out.println("kommt was an? principal=" + principalName);
-        } else {
-            // Fallback: read copied HTTP session attributes or native headers
-            Map<String, Object> sessionAttrs = sha.getSessionAttributes();
-            if (sessionAttrs != null && sessionAttrs.get("playerSessionId") != null) {
-                principalName = (String) sessionAttrs.get("playerSessionId");
-            } else if (sha.getFirstNativeHeader("player-token") != null) {
-                principalName = sha.getFirstNativeHeader("player-token");
-            }
-            System.out.println("kommt was an? principal (fallback)=" + principalName);
         }
 
         Player player = null;
         try {
-            player = lobby.getPlayerBySessionId(principalName);
+            player = lobby.getPlayerByToken(principalName);
         } catch (Exception e) {
             e.printStackTrace();
         }
