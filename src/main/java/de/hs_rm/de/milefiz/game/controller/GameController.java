@@ -61,7 +61,6 @@ public class GameController {
         zeroTwo.addNeighbour(zeroFour, Direction.NORTH);
         zeroFour.addNeighbour(twoFour, Direction.WEST);
         
-
         gameService.saveTestField(zeroZero);
         gameService.saveTestField(zeroTwo);
         gameService.saveTestField(twoTwo);

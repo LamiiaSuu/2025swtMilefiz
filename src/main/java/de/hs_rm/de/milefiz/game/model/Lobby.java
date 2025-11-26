@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyJoinException;
+import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 
 public class Lobby {
 
@@ -78,6 +79,11 @@ public class Lobby {
 
     public void setMaxPlayers(int maxPlayers) {
         this.maxPlayers = maxPlayers;
+    }
+
+
+    public Player getPlayerBySessionId(String sessionId) throws Exception{
+        return players.stream().filter(p -> p.getSessionId() != null && p.getSessionId().equals(sessionId)).findFirst().orElseThrow(PlayerNotFoundException::new);
     }
 
 }

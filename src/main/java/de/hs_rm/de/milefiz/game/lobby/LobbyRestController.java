@@ -24,7 +24,7 @@ public class LobbyRestController {
     }
 
     /**
-     * Liefer Liste an allen Lobbys. TODO, nur ausgewählte Variablen. z.B. sind
+     * Liefer Liste an allen Lobbys. nur ausgewählte Variablen. z.B. sind
      * players/meeples ggf. unnötig
      *
      * @return
@@ -58,7 +58,6 @@ public class LobbyRestController {
 
         }
 
-        // String responseMsg = String.format("{\"lobbyId\":\"%s\", \"playerId\":\"$s\" \"msg\":\"Erfolgreich gejoint\"}", lobbyId, player.getId().toString());
         return new ResponseEntity<>(new LobbyJoinEvent(lobbyId, player.getId(), player.getColor().name(), "Erfolgreich gejoint."), HttpStatus.OK);
     }
 }
