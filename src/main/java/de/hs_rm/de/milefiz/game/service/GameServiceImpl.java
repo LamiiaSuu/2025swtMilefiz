@@ -4,6 +4,8 @@ package de.hs_rm.de.milefiz.game.service;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import de.hs_rm.de.milefiz.game.model.Field;
+
 
 /**
  * Standard-Implementierung des GameService Interface.
@@ -20,6 +22,7 @@ public class GameServiceImpl implements GameService {
 
     private final DiceServiceImpl diceService;
     private final ApplicationEventPublisher publisher;
+    private Field testBoard;
 
     public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher) {
         this.diceService = diceService;
@@ -33,5 +36,15 @@ public class GameServiceImpl implements GameService {
     public int rollDice() {
 
         return diceService.roll();
+    }
+    
+    @Override
+    public Field getTestBoard() {
+        return testBoard;
+    }
+
+    @Override
+    public void setTestBoard(Field testBoard) {
+        this.testBoard = testBoard;
     }
 }

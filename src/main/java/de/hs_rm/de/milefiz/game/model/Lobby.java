@@ -53,6 +53,10 @@ public class Lobby {
         throw new LobbyJoinException("Die Lobby ist zurzeit nicht beitretbar!");
     }
 
+    public boolean leave(Player player) {
+        return players.remove(player);
+    }
+
     private boolean addPlayer(Player player) {
         return players.add(player);
     }
@@ -81,9 +85,7 @@ public class Lobby {
         this.maxPlayers = maxPlayers;
     }
 
-
-    public Player getPlayerBySessionId(String sessionId) throws Exception{
-        return players.stream().filter(p -> p.getSessionId() != null && p.getSessionId().equals(sessionId)).findFirst().orElseThrow(PlayerNotFoundException::new);
+    public Player getPlayerByToken(String sessionId) throws Exception {
+        return players.stream().filter(p -> p.getPlayerToken() != null && p.getPlayerToken().equals(sessionId)).findFirst().orElseThrow(PlayerNotFoundException::new);
     }
-
 }

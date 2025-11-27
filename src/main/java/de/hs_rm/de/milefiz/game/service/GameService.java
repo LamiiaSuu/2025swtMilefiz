@@ -1,5 +1,7 @@
 package de.hs_rm.de.milefiz.game.service;
 
+import de.hs_rm.de.milefiz.game.model.Field;
+
 /**
  * Service für die Verwaltung von Spiellogik und Spielaktionen.
  * 
@@ -32,4 +34,7 @@ public interface GameService {
      */
     int rollDice();
 
+    void setTestBoard(Field testBoard);
+
+    Field getTestBoard();
 }
