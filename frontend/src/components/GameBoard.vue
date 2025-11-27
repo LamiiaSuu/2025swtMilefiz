@@ -128,6 +128,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     case ("ArrowUp"):
     // case "KeyW":
       localDir.set(0, 0, 1) 
+      break
     case "ArrowDown":
     // case "KeyS":
       localDir.set(0, 0, -1) 
