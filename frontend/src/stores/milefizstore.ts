@@ -155,7 +155,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * durchführt.
    *
    * Erstellt ein `MovementCommand`-Objekt mit Meeple-ID und Bewegungsrichtung
-   * und veröffentlicht es über den STOMP-Endpunkt `/app/move`.
+   * und veröffentlicht es über den STOMP-Endpunkt `/app/milefiz/lobby/{lobbyId}`.
    *
    * Ablauf:
    * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.

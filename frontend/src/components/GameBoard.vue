@@ -4,7 +4,7 @@ import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
 import { useBoardStore } from '@/stores/boardStore'
-import Tile  from './Tile.vue'
+import Tile from './Tile.vue'
 import Camera from './Camera.vue'
 import { useMilefizStore } from "@/stores/milefizstore"
 import type { Direction } from "@/types/movement"
@@ -81,6 +81,7 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 const handleKeydown = (e: KeyboardEvent) => {
   toggleCamera(e)
   handleJump(e)
+  handleMoveKeys(e)
 }
 
 const handleJump = (e: KeyboardEvent) => {
@@ -98,6 +99,70 @@ const toggleCamera = (e: KeyboardEvent) => {
     useFirstPerson.value = !useFirstPerson.value
   }
 }
+
+/**
+ * Die Richtung wird relativ zur aktuellen Kamerasicht berechnet.
+ * 
+ * Ablauf:
+ * 1. Prüft, ob sich der Spieler im First-Person-Modus befindet.
+ * 2. Ermittelt, welche Bewegungstaste gedrückt wurde (`W`, `A`, `S`, `D` oder Pfeiltasten).
+ * 3. Wandelt diese lokale Richtung (z. B. „vorwärts“) über die Kamerarotation (`Quaternion`)
+ *    in eine Richtung im Weltkoordinatensystem um.
+ * 4. Analysiert, ob sich die resultierende Richtung überwiegend entlang der X- oder Z-Achse bewegt:
+ *    - X-Achse → EAST oder WEST
+ *    - Z-Achse → NORTH oder SOUTH
+ * 5. Sendet die berechnete Himmelsrichtung als Spielzug an den Server (`milefizStore`).
+ *
+ * @param {KeyboardEvent} e - Das Tastatur-Event, das die Eingabe auslöst.
+ */
+const handleMoveKeys = (e: KeyboardEvent) => {
+  if (!useFirstPerson.value) return
+
+  const cam = fpsCamera.value?.camera
+  const meepleId = gameCharRef.value?.meepleId
+  if (!cam || !meepleId) return
+
+  let localDir = new Vector3()
+
+  switch (e.code) {
+    case ("ArrowUp"):
+    // case "KeyW":
+      localDir.set(0, 0, 1) 
+    case "ArrowDown":
+    // case "KeyS":
+      localDir.set(0, 0, -1) 
+      break
+    case "ArrowLeft":
+    // case "KeyA":
+      localDir.set(1, 0, 0) 
+      break
+    case "ArrowRight":
+    // case "KeyD":  
+      localDir.set(-1, 0, 0) 
+      break
+    default:
+      return
+  }
+  
+  e.preventDefault()
+
+  const worldDir = localDir.clone().applyQuaternion(cam.quaternion).setY(0).normalize()
+
+  const absX = Math.abs(worldDir.x)
+  const absZ = Math.abs(worldDir.z)
+
+  let direction: Direction | null = null
+  if (absX > absZ) {
+    direction = worldDir.x > 0 ? "EAST" : "WEST"
+  } else {
+    direction = worldDir.z > 0 ? "SOUTH" : "NORTH"
+  }
+
+  if (!direction) return
+
+  milefizStore.sendMove(meepleId, direction)
+}
+
 
 /**
  * Wird ausgelöst, wenn ein Spielfeld-Tile angeklickt wurde.
@@ -164,18 +229,18 @@ const onTileClicked = (targetFieldId: string) => {
 const handleGlobalClick = (e: MouseEvent) => {
 
   if (!useFirstPerson.value) return
-  if (e.button !== 0) return 
+  if (e.button !== 0) return
 
   const cam = fpsCamera.value?.camera
   if (!cam) {
     console.warn("Keine Kamera gefunden")
     return
   }
- 
+
   cam.getWorldPosition(rayOrigin)
 
   rayDirection.set(0, 0, -1)
-  rayDirection.applyQuaternion(cam.quaternion) 
+  rayDirection.applyQuaternion(cam.quaternion)
   raycaster.set(rayOrigin, rayDirection)
 
   const objects = clickableTiles.value.map(t => t.object)
@@ -348,10 +413,7 @@ onUnmounted(() => {
     <OrbitControls v-if="!useFirstPerson" />
 
     <!-- First Person Kamera (Folgt dem Charakter) -->
-    <Camera 
-      ref="fpsCamera" 
-      :gameCharRef="gameCharRef" 
-      :use-first-person="useFirstPerson"
+    <Camera ref="fpsCamera" :gameCharRef="gameCharRef" :use-first-person="useFirstPerson"
       @rotate-character="onRotateCharacter" />
 
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
