@@ -4,7 +4,7 @@ import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
 import { useBoardStore } from '@/stores/boardStore'
-import Tile from './Tile.vue'
+import Tile  from './Tile.vue'
 import Camera from './Camera.vue'
 import { useMilefizStore } from "@/stores/milefizstore"
 import type { Direction } from "@/types/movement"

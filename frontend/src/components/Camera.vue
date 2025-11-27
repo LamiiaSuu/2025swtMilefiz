@@ -22,6 +22,8 @@ const horizontalRotation = ref(0) // Links + Rechts Rotation
 const mouseSensitivity = 0.002
 const maxVerticalAngle = Math.PI / 3 // Limitiert Hoch/Runter
 
+
+
 // Berechnete Kamera Position neu, wenn sie sich ändert
 // Kamera Position = Charakter Position + Offset
 const cameraPosition = computed((): [number, number, number] => {
@@ -51,7 +53,21 @@ const cameraRotation = computed((): [number, number, number] => {
 // Kamera Maussteuerung
 const onMouseMove = (e: MouseEvent) => {
   if (!props.useFirstPerson) return // Keine Maussteurung
+  
+  // Pointer Lock versuchen
+  if (props.useFirstPerson) {
+    const requestLock = () => {
+      if (!document.pointerLockElement && props.useFirstPerson) {
+        document.body.requestPointerLock()
+      }
+    }
 
+    // Fallback: auf ersten Klick warten
+    document.addEventListener('click', requestLock, { once: true })
+  }
+
+  
+  
   // Horizontale Rotation - Dreht Charakter!
   horizontalRotation.value -= e.movementX * mouseSensitivity
   emit('rotateCharacter', horizontalRotation.value)
@@ -77,7 +93,25 @@ watch(() => props.useFirstPerson, (isFirstPerson) => {
 
 onMounted(() => {
   document.addEventListener('mousemove', onMouseMove)
+
+  // Direkt Pointer Lock versuchen
+  if (props.useFirstPerson) {
+    const requestLock = () => {
+      if (!document.pointerLockElement) {
+        document.body.requestPointerLock()
+      }
+    }
+
+    // Einige Browser erlauben PointerLock nur nach Benutzerinteraktion
+    // Falls möglich, direkt versuchen:
+    requestLock()
+
+    // Fallback: auf ersten Klick warten
+    document.addEventListener('click', requestLock, { once: true })
+  }
+
   const updateCamera = () => {
+    
     // Kamera nur updaten, wenn First Person an und cameraRef existiert
     if (props.useFirstPerson && cameraRef.value && props.gameCharRef?.characterPosition) {
       const charPos = props.gameCharRef.characterPosition.position

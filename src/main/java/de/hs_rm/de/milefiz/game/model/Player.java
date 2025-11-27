@@ -7,7 +7,7 @@ import java.util.UUID;
 public class Player {
 
     private UUID id;
-    private String sessionId;
+    private String playerToken;
     private Meeple[] meeples;
     private Color color;
     private Meeple activeMeeple;
@@ -37,12 +37,12 @@ public class Player {
         this.activeMeeple = activeMeeple;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public String getPlayerToken() {
+        return playerToken;
     }
 
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
+    public void setPlayerToken(String sessionId) {
+        this.playerToken = sessionId;
     }
 
     public Meeple[] getMeeples() {
