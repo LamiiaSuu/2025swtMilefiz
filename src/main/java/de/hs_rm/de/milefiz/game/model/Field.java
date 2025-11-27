@@ -11,26 +11,34 @@ import java.util.UUID;
  */
 public class Field {
     
-    private UUID id;
+    private final UUID id;
     private Map<Direction, Field> neighbours = new HashMap<>();
-    private boolean isBarrier = false;
     private FieldType type;
-    private Meeple occupant = null;
     private Position position;
 
+    /**
+     * Field mit random UUID erstellen
+     * @param type
+     * @param position
+     */
     public Field(FieldType type, Position position) {
         id = UUID.randomUUID();
         this.type = type;
         this.position = position;
     }
 
-    public Field(FieldType type, Position position, boolean isBarrier) {
-        id = UUID.randomUUID();
+    /**
+     * Field mit gegebener ID erstellen
+     * @param id 
+     * @param type 
+     * @param position
+     */
+    public Field(UUID id, FieldType type, Position position) {
+        this.id = id;
         this.type = type;
-        this.isBarrier = isBarrier;
         this.position = position;
     }
-
+    
     public Field getNorth() {
         return neighbours.keySet().contains(Direction.NORTH) ? neighbours.get(Direction.NORTH) : null;
     }
@@ -55,16 +63,6 @@ public class Field {
         return neighbours;
     }
 
-    public boolean isBarrier() {
-        return isBarrier;
-    }
-
-    public void setBarrier(boolean isBarrier) throws Exception {
-        if (isBarrier && occupant != null) {
-            throw new Exception("Feld ist schon besetzt");
-        }
-        this.isBarrier = isBarrier;
-    }
 
     public FieldType getType() {
         return type;
@@ -72,14 +70,6 @@ public class Field {
 
     public void setType(FieldType type) {
         this.type = type;
-    }
-
-    public Meeple getOccupant() {
-        return occupant;
-    }
-
-    public void setOccupant(Meeple occupant) {
-        this.occupant = occupant;
     }
 
     /**
@@ -108,22 +98,30 @@ public class Field {
         return """
            %s {
              id: %s
-             isBarrier: %s
              FieldType: %s
-             Occupant: %s
              availableDirections: %s
            }""".formatted(
              this.getClass().getSimpleName(),
              id,
-             isBarrier,
              type,
-             occupant == null ? "null" : occupant.getId(),
              availableDirections
            );
     }
 
-    //zum testen
-    public void setId(UUID id){
-        this.id = id;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof Field)) {
+            return false;
+        }
+
+        Field field = (Field) obj;
+
+        return this.id.equals(field.id);
     }
+
+    
 }

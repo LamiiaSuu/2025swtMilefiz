@@ -17,9 +17,12 @@ public class BoardMapperTest {
         nextField = nextField.getNeighbours().get(Direction.EAST);
         nextField.addNeighbour(new Field(FieldType.END, new Position(1,2)), Direction.NORTH);
 
-        BoardDTO board = BoardMapper.mapToDTO(startField);
+        Meeple barrier = new Meeple(true);
+        barrier.setCurrentField(nextField);
+        Board board = new Board("testfeld", startField);
+        BoardDTO boardDTO = BoardMapper.mapToDTO(board);
         ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(board);
+        String json = objectMapper.writeValueAsString(boardDTO);
 
         System.out.println(json);
     }

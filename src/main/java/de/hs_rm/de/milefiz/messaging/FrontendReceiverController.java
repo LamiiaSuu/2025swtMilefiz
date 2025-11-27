@@ -17,6 +17,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
+import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Direction;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
@@ -28,6 +29,8 @@ import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
+import de.hs_rm.de.milefiz.game.service.GameService;
+import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 
 @Controller
@@ -72,16 +75,18 @@ public class FrontendReceiverController {
         }
 
         // nur zum testen
-        lobby.setField(gameService.getTestBoard());
+        lobby.setBoard(gameService.getTestBoard());
         player.getMeeples()[0].setId(moveCmd.meepleId());
         if (player.getMeeples()[0].getCurrentField() == null) {
-            player.getMeeples()[0].setCurrentField(lobby.getField());
+            player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartField());
         }
 
+        Board board = lobby.getBoard();
         Meeple meeple = player.getMeepleWithId(moveCmd.meepleId());
         Field currentField = meeple.getCurrentField();
         Field lastField = meeple.getLastField();
         Direction direction = moveCmd.direction();
+
 
         // Ziel-Feld anhand der Bewegungsrichtung bestimmen
         Field nextField = switch (direction) {
@@ -100,16 +105,27 @@ public class FrontendReceiverController {
             return new FrontendMoveRejectedEvent("Field doesnt exist");
         }
 
-        if (nextField.isBarrier()) {
-            // TODO player loses all unspent steps
-            System.out.println("reached blockade, cant go any further!");
-            return new FrontendMoveRejectedEvent("ran into barrier");
+        for (Meeple tempBarrier : board.getBarriers()) {            
+            if (tempBarrier.getCurrentField().equals(nextField)) {
+                // TODO player loses all unspent steps
+                System.out.println("reached blockade, cant go any further!");
+                return new FrontendMoveRejectedEvent("ran into barrier");
+            }
         }
 
-        if (nextField.getOccupant() != null) {
-            // TODO duel starts
-            System.out.println("oh oh, looks like its time to duel!");
-            return new FrontendMoveRejectedEvent("time to duel first");
+        for (Player tempPlayer : lobby.getPlayers()) {
+            if (player.equals(tempPlayer)) {
+                continue;
+            }
+
+            for (Meeple tempMeeple : tempPlayer.getMeeples()) {
+                //Keine Barriere und Meeple vom anderen Spieler steht drauf
+                if (!tempMeeple.isBarrier() && tempMeeple.getCurrentField().equals(nextField)) {                    
+                    // TODO duel starts !!! Erst wenn letzter Move des Wuerfel-Zuges
+                    System.out.println("oh oh, looks like its time to duel!");
+                    return new FrontendMoveRejectedEvent("time to duel first");
+                }
+            }
         }
 
         // Rückwärtsbewegung nicht erlaubt
@@ -119,9 +135,7 @@ public class FrontendReceiverController {
         }
 
         // Spielfeld-Zustand aktualisieren
-        currentField.setOccupant(null);
-        nextField.setOccupant(meeple);
-        meeple.setLastField(currentField);
+        // lastField wird jetzt im Meeple.setCurrentField aktualisiert
         meeple.setCurrentField(nextField);
 
         // Erfolgreiche Bewegung an Clients senden
