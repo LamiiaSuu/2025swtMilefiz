@@ -14,8 +14,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import java.security.Principal;
-
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
@@ -77,10 +75,10 @@ public class FrontendReceiverController {
         }
 
         // nur zum testen
-        lobby.setField(gameService.getTestBoard());
+        lobby.setBoard(gameService.getTestBoard());
         player.getMeeples()[0].setId(moveCmd.meepleId());
         if (player.getMeeples()[0].getCurrentField() == null) {
-            player.getMeeples()[0].setCurrentField(lobby.getField());
+            player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartField());
         }
 
         Board board = lobby.getBoard();

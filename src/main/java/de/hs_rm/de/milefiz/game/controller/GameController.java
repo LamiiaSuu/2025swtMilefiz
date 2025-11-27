@@ -48,9 +48,9 @@ public class GameController {
         zeroTwo.addNeighbour(zeroFour, Direction.NORTH);
         zeroFour.addNeighbour(twoFour, Direction.WEST);
         
-        gameService.setTestBoard(zeroZero);
-
+        
         Board board = new Board("test", zeroZero); 
+        gameService.setTestBoard(board);
         return BoardMapper.mapToDTO(board);
     }
 }

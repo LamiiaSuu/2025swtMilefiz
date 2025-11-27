@@ -6,7 +6,7 @@ import java.util.UUID;
  * Spielfigur oder eine Barriere
  */
 public class Meeple {
-    private final UUID id;
+    private UUID id;
     private Field currentField;
     private Field lastField;
     private final boolean isBarrier;
@@ -56,5 +56,7 @@ public class Meeple {
         return this.id.equals(meeple.id);
     }
 
-    
+    public void setId(UUID id) {
+        this.id = id;
+    }
 }
