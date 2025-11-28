@@ -186,6 +186,40 @@ public class FrontendReceiverController {
         return move;
     }
 
+    /**
+ * WebSocket Message Handler für Würfel-Aktionen in einer Lobby.
+ * 
+ * <p>Diese Methode verarbeitet eingehende Würfel-Befehle von Clients und 
+ * broadcastet das Würfelergebnis an alle Teilnehmer der entsprechenden Lobby.
+ * Der Würfelwurf wird über den {@link GameService} durchgeführt und das Ergebnis
+ * als {@link FrontendRollDiceEvent} an alle verbundenen Clients gesendet.</p>
+ * 
+ * <h3>Ablauf:</h3>
+ * <ol>
+ *   <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
+ *   <li>Methode loggt die Würfel-Anfrage mit Spieler-ID und Lobby-ID</li>
+ *   <li>{@link GameService#rollDice()} wird aufgerufen um Zufallszahl zu generieren</li>
+ *   <li>Würfelergebnis wird in {@link FrontendRollDiceEvent} verpackt</li>
+ *   <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}} gesendet</li>
+ *   <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
+ * </ol>
+ * 
+ * <h3>WebSocket-Mapping:</h3>
+ * <ul>
+ *   <li><strong>Eingang:</strong> {@code /milefiz/lobby/{lobbyId}/rollDice}</li>
+ *   <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
+ *   <li><strong>Protokoll:</strong> STOMP über WebSocket</li>
+ * </ul>
+ * 
+ * @param lobbyId die eindeutige UUID der Lobby in der gewürfelt wird
+ * @param command der Würfel-Befehl vom Client, enthält die Spieler-ID
+ * @return {@link FrontendRollDiceEvent} mit Lobby-ID und Würfelergebnis (1-6)
+ * 
+ * @see GameService#rollDice()
+ * @see FrontendRollDiceEvent
+ * @see RollDiceCommand
+ * 
+ */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendRollDiceEvent handleRollDice(@DestinationVariable UUID lobbyId, RollDiceCommand command) {
