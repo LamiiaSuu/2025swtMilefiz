@@ -4,10 +4,12 @@ import { computed } from 'vue'
 
 const milefizStore = useMilefizStore()
 
+//schaut, ob schon gewürfelt wurde
 const roll = computed(() => {
   return milefizStore.gamedata.currentDiceRoll !== undefined
 })
 
+//zieht sich den gewürfelten wert
 const rollValue = computed(() => {
   return milefizStore.gamedata.currentDiceRoll || 0
 })
