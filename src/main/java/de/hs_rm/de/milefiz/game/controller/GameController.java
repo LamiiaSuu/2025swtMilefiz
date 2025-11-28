@@ -1,12 +1,11 @@
 package de.hs_rm.de.milefiz.game.controller;
 
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.BoardMapper;
 import de.hs_rm.de.milefiz.game.model.Direction;
@@ -34,26 +33,12 @@ public class GameController {
         Position pos4 = new Position(2, 4);
         Position pos5 = new Position(0, 4);
 
-        UUID id0 = UUID.randomUUID();
-        UUID id1 = UUID.randomUUID();
-        UUID id2 = UUID.randomUUID();
-        UUID id3 = UUID.randomUUID();
-        UUID id4 = UUID.randomUUID();
-        UUID id5 = UUID.randomUUID();
-
         Field zeroZero = new Field(FieldType.NORMAL, pos0);
         Field zeroTwo = new Field(FieldType.NORMAL, pos1);
         Field twoTwo = new Field(FieldType.NORMAL, pos2);
         Field twoZero = new Field(FieldType.NORMAL, pos3);
         Field twoFour = new Field(FieldType.NORMAL, pos4);
         Field zeroFour = new Field(FieldType.NORMAL, pos5);
-
-        zeroZero.setId(id0);
-        zeroTwo.setId(id1);
-        twoTwo.setId(id2);
-        twoZero.setId(id3);
-        twoFour.setId(id4);
-        zeroFour.setId(id5);
 
         zeroZero.addNeighbour(zeroTwo, Direction.NORTH);
         zeroTwo.addNeighbour(twoTwo, Direction.WEST);
@@ -63,8 +48,9 @@ public class GameController {
         zeroTwo.addNeighbour(zeroFour, Direction.NORTH);
         zeroFour.addNeighbour(twoFour, Direction.WEST);
         
-        gameService.setTestBoard(zeroZero);
-
-        return BoardMapper.mapToDTO(zeroZero);
+        
+        Board board = new Board("test", zeroZero); 
+        gameService.setTestBoard(board);
+        return BoardMapper.mapToDTO(board);
     }
 }

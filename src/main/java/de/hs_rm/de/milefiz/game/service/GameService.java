@@ -1,5 +1,6 @@
 package de.hs_rm.de.milefiz.game.service;
 
+import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Field;
 
 /**
@@ -34,7 +35,7 @@ public interface GameService {
      */
     int rollDice();
 
-    void setTestBoard(Field testBoard);
+    void setTestBoard(Board testBoard);
 
-    Field getTestBoard();
+    Board getTestBoard();
 }
