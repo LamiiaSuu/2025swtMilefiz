@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUrlLobbyStore } from '@/stores/urlLobbyStore'
 import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
@@ -19,7 +20,13 @@ const router = createRouter({
     },
     {
       path: '/lobby/:lobbyid',
-      redirect: { name: 'home' },
+      redirect: (to) => {
+        // lese lobbyid aus url parametern und setze urlLobbyId in UrlLobbyStore, dann weiterleitung an home
+        const id: string | undefined = (to.params.lobbyid as string | undefined)
+        if (id)
+          if (id) useUrlLobbyStore().setUrlLobbyId(id)
+        return { name: 'home', replace: true }
+      },
     },
   ],
 })
