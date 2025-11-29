@@ -4,6 +4,7 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import { useUrlLobbyStore } from '@/stores/urlLobbyStore'
 import GameBoard from '@/components/GameBoard.vue'
 import { onMounted } from 'vue'
+import GameHUD from '@/components/ui/GameHUD.vue'
 
 const { sendSocketMessage, joinLobby } = useMilefizStore()
 
@@ -28,7 +29,9 @@ setTimeout(function () {
 </script>
 
 <template>
-  <main>
+  <main >
+    <!-- Einbindung des globalen HUDs -->
+    <GameHUD />
     <TheWelcome />
     <GameBoard />
   </main>

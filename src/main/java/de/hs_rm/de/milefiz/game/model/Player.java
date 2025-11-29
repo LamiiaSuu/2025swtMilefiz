@@ -7,7 +7,7 @@ import java.util.UUID;
 public class Player {
 
     private UUID id;
-    private String sessionId;
+    private String playerToken;
     private Meeple[] meeples;
     private Color color;
     private Meeple activeMeeple;
@@ -16,7 +16,7 @@ public class Player {
         meeples = new Meeple[noOfMeeples];
         id = UUID.randomUUID();
         for (int i = 0; i < noOfMeeples; i++) {
-            meeples[i] = new Meeple();
+            meeples[i] = new Meeple(false);
         }
         this.color = color;
     }
@@ -37,12 +37,12 @@ public class Player {
         this.activeMeeple = activeMeeple;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public String getPlayerToken() {
+        return playerToken;
     }
 
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
+    public void setPlayerToken(String sessionId) {
+        this.playerToken = sessionId;
     }
 
     public Meeple[] getMeeples() {
@@ -88,4 +88,20 @@ public class Player {
         throw new IllegalArgumentException("meeple mit id" + id + " nicht vorhanden");
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof Player)) {
+            return false;
+        }
+
+        Player player = (Player) obj;
+
+        return this.id.equals(player.id);
+    }
+
+    
 }

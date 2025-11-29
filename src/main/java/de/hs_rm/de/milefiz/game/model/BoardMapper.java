@@ -10,11 +10,12 @@ import java.util.UUID;
 public class BoardMapper {
     
     /**
-     * mappt ein Board von {@link Field} zu {@link BoardDTO}
-     * @param startField Startfeld des Boards
+     * mappt ein Board von {@link Board} zu {@link BoardDTO}
+     * @param board Board 
      * @return Board als DTO
      */
-    public static BoardDTO mapToDTO(Field startField) {
+    public static BoardDTO mapToDTO(Board board) {
+        Field startField = board.getStartField();
         Stack<Field> remaining = new Stack<>(); 
         Map<Direction, Field> currentNeighbours;
         List<Field> visited = new ArrayList<>();
@@ -35,8 +36,16 @@ public class BoardMapper {
             UUID north = availableDirections.contains(Direction.NORTH) ? currentNeighbours.get(Direction.NORTH).getId() : null;
             UUID east = availableDirections.contains(Direction.EAST) ? currentNeighbours.get(Direction.EAST).getId() : null; 
             UUID south= availableDirections.contains(Direction.SOUTH) ? currentNeighbours.get(Direction.SOUTH).getId() : null;
-            UUID west = availableDirections.contains(Direction.WEST) ? currentNeighbours.get(Direction.WEST).getId() : null; 
-            out.addField(node.getId(), node.getType(), node.getPosition(), node.isBarrier(), north, east, south, west);
+            UUID west = availableDirections.contains(Direction.WEST) ? currentNeighbours.get(Direction.WEST).getId() : null;
+            boolean isBarrier = false;
+
+            for (Meeple barrier : board.getBarriers()) {
+                if (barrier.getCurrentField().equals(node)) {
+                    isBarrier = true;
+                }
+            }
+
+            out.addField(node.getId(), node.getType(), node.getPosition(), isBarrier, north, east, south, west);
 
             for (Direction dir : availableDirections) {
                Field neighbour = currentNeighbours.get(dir);

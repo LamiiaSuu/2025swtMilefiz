@@ -12,7 +12,7 @@ public class Lobby {
 
     private UUID id;
     private List<Player> players;
-    private Field field;
+    private Board board;
     private int maxPlayers;
 
     public Lobby() {
@@ -53,6 +53,10 @@ public class Lobby {
         throw new LobbyJoinException("Die Lobby ist zurzeit nicht beitretbar!");
     }
 
+    public boolean leave(Player player) {
+        return players.remove(player);
+    }
+
     private boolean addPlayer(Player player) {
         return players.add(player);
     }
@@ -65,14 +69,6 @@ public class Lobby {
         this.players = players;
     }
 
-    public Field getField() {
-        return field;
-    }
-
-    public void setField(Field field) {
-        this.field = field;
-    }
-
     public int getMaxPlayers() {
         return maxPlayers;
     }
@@ -81,9 +77,15 @@ public class Lobby {
         this.maxPlayers = maxPlayers;
     }
 
+    public Player getPlayerByToken(String sessionId) throws Exception {
+        return players.stream().filter(p -> p.getPlayerToken() != null && p.getPlayerToken().equals(sessionId)).findFirst().orElseThrow(PlayerNotFoundException::new);
+    }
+    public Board getBoard() {
+        return board;
+    }
 
-    public Player getPlayerBySessionId(String sessionId) throws Exception{
-        return players.stream().filter(p -> p.getSessionId() != null && p.getSessionId().equals(sessionId)).findFirst().orElseThrow(PlayerNotFoundException::new);
+    public void setBoard(Board board) {
+        this.board = board;
     }
 
 }

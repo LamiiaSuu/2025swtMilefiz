@@ -25,7 +25,7 @@ public class TestController {
     @GetMapping("/test")
     public String getMethodName() {
         Lobby lobby = lobbyManager.getDummyLobby();
-        Meeple meeple = new Meeple();
+        Meeple meeple = new Meeple(false);
         messageingService.sendEvent(new LobbyMessage(lobby, new FrontendJumpEvent(meeple.getId())));
         return "";
     }
