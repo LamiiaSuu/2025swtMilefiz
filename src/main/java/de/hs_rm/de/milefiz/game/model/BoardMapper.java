@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
 
+import de.hs_rm.de.milefiz.game.model.BoardDTO.FieldDTO;
+
 public class BoardMapper {
     
     /**
@@ -33,10 +35,10 @@ public class BoardMapper {
             visited.add(node);
             currentNeighbours = node.getNeighbours();
             Set<Direction> availableDirections = currentNeighbours.keySet();
-            UUID north = availableDirections.contains(Direction.NORTH) ? currentNeighbours.get(Direction.NORTH).getId() : null;
-            UUID east = availableDirections.contains(Direction.EAST) ? currentNeighbours.get(Direction.EAST).getId() : null; 
-            UUID south= availableDirections.contains(Direction.SOUTH) ? currentNeighbours.get(Direction.SOUTH).getId() : null;
-            UUID west = availableDirections.contains(Direction.WEST) ? currentNeighbours.get(Direction.WEST).getId() : null;
+            UUID north = getNeighbourID(Direction.NORTH, currentNeighbours);
+            UUID east = getNeighbourID(Direction.EAST, currentNeighbours); 
+            UUID south= getNeighbourID(Direction.SOUTH, currentNeighbours);
+            UUID west = getNeighbourID(Direction.WEST, currentNeighbours);
             boolean isBarrier = false;
 
             for (Meeple barrier : board.getBarriers()) {
@@ -57,4 +59,39 @@ public class BoardMapper {
 
         return out;
     }
+
+    private static UUID getNeighbourID(Direction direction, Map<Direction, Field> currentNeighbours) {
+        Set<Direction> availableDirections = currentNeighbours.keySet();
+        return availableDirections.contains(direction) ? currentNeighbours.get(direction).getId() : null;
+    }
+
+    public static Board mapToBoard(BoardDTO boardDTO) {
+
+        List<FieldDTO> fieldDTOs = boardDTO.getFields();
+        List<Field> fields = new ArrayList<>();
+        FieldDTO startDTO = fieldDTOs.removeFirst();
+        Field startField = new Field(startDTO.getId(), startDTO.getType(), startDTO.getPosition());
+
+        fields.add(startField);
+        
+        for (FieldDTO tempDTO : fieldDTOs) {
+            Field field = new Field(tempDTO.getId(), tempDTO.getType(), tempDTO.getPosition());
+
+            for (Field tempField : fields) {
+                UUID dirID = tempDTO.getNorth();
+                if (dirID != null && dirID.equals(tempField.getId())) {
+                    tempField.addNeighbour(field, Direction.NORTH);
+                }
+
+                dirID = tempDTO.getEast();
+                if (dirID != null && dirID.equals(tempField.getId())) {
+                    tempField.addNeighbour(field, Direction.EAST);
+                }
+
+            }
+        }
+    }
+
+    private static void
+
 }
