@@ -110,7 +110,6 @@ public class FrontendReceiverController {
         Player player = null;
         try {
             player = lobby.getPlayerByToken(principalName);
-            player.getRemainingMoves();
         } catch (Exception e) {
             e.printStackTrace();
         }
