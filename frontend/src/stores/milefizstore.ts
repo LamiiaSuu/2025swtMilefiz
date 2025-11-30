@@ -178,7 +178,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
-    const moveCmd: MovementCommand = { meepleId, direction,  remainingMoves};
+    const moveCmd: MovementCommand = { meepleId, direction};
 
     const body = JSON.stringify(moveCmd)
 

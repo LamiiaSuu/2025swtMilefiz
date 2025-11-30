@@ -110,7 +110,7 @@ public class FrontendReceiverController {
         Player player = null;
         try {
             player = lobby.getPlayerByToken(principalName);
-            player.setRemainingMoves(moveCmd.remainingMoves());
+            player.getRemainingMoves();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -234,6 +234,23 @@ public class FrontendReceiverController {
     public FrontendRollDiceEvent handleRollDice(@DestinationVariable UUID lobbyId, RollDiceCommand command) {
         logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
         int number = gameService.rollDice();
+        try {
+            Lobby lobby = lobbyManager.getLobby(lobbyId);
+            Player player = lobby.getPlayers().stream()
+                .filter(p -> p.getId().equals(command.playerId()))
+                .findFirst()
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found"));
+                
+            player.setRemainingMoves(number);
+            logger.info("Set {} remaining moves for player {}", number, player.getId());
+            
+        } catch (LobbyNotFoundException e) {
+            logger.error("Lobby {} not found for dice roll", lobbyId, e);
+        } catch (PlayerNotFoundException e) {
+            logger.error("Player {} not found in lobby {}", command.playerId(), lobbyId, e);
+        } catch (RuntimeException e) {
+            logger.error("Unexpected error setting remaining moves for player {}", command.playerId(), e);
+        }
         return new FrontendRollDiceEvent(lobbyId, number);
     }
 
