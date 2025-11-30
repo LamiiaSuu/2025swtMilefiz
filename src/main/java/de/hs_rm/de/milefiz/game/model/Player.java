@@ -11,6 +11,7 @@ public class Player {
     private Meeple[] meeples;
     private Color color;
     private Meeple activeMeeple;
+    private int remainingMoves = 0;
 
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
@@ -73,7 +74,15 @@ public class Player {
         this.color = color;
     }
 
-    /**
+    public int getRemainingMoves() {
+		return remainingMoves;
+	}
+
+	public void setRemainingMoves(int remainingMoves) {
+		this.remainingMoves = remainingMoves;
+	}
+
+	/**
      * Entfernt Meeple mit
      *
      * @param id UUID des Meeples, das entfernt werden soll
@@ -86,6 +95,16 @@ public class Player {
             }
         }
         throw new IllegalArgumentException("meeple mit id" + id + " nicht vorhanden");
+    }
+
+    public boolean canMove(){
+        return remainingMoves > 0;
+    }
+
+    public void useMove(){
+        if (this.canMove()){
+            remainingMoves--;
+        }
     }
 
     @Override

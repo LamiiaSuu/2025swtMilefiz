@@ -111,6 +111,7 @@ public class FrontendReceiverController {
         Player player = null;
         try {
             player = lobby.getPlayerByToken(principalName);
+            player.setRemainingMoves(moveCmd.remainingMoves());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -143,6 +144,11 @@ public class FrontendReceiverController {
         if (nextField == null) {
             System.out.println("invalid direction!");
             return new FrontendMoveRejectedEvent("Field doesnt exist");
+        }
+
+        if (!player.canMove()) {
+            logger.info("No more moves left");
+            return new FrontendMoveRejectedEvent("no moves left");
         }
 
         for (Meeple tempBarrier : board.getBarriers()) {
@@ -178,10 +184,14 @@ public class FrontendReceiverController {
         // lastField wird jetzt im Meeple.setCurrentField aktualisiert
         meeple.setCurrentField(nextField);
 
+        //Spieler nutzt einen Zug
+        player.useMove();
+
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(
                 meeple.getId(),
-                nextField.getId());
+                nextField.getId(),
+                player.getRemainingMoves());
 
         return move;
     }

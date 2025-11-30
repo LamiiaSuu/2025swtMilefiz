@@ -161,7 +161,9 @@ const handleMoveKeys = (e: KeyboardEvent) => {
 
   if (!direction) return
 
-  milefizStore.sendMove(meepleId, direction)
+  let remainingMoves = milefizStore.gamedata.currentDiceRoll
+
+  milefizStore.sendMove(meepleId, direction, remainingMoves)
 }
 
 
@@ -209,7 +211,9 @@ const onTileClicked = (targetFieldId: string) => {
     console.log("not a neighbor — no move.")
     return
   }
-  milefizStore.sendMove(meepleId, direction)
+
+  let remainingMoves = milefizStore.gamedata.currentDiceRoll
+  milefizStore.sendMove(meepleId, direction, remainingMoves)
 }
 
 /**
@@ -287,7 +291,7 @@ const onRotateCharacter = (yRotation: number) => {
  * - Aktualisiert die Fadenkreuzfarbe dynamisch:
  *   - Weiß: kein Treffer  
  *   - Grün: gültiger Nachbar  
- *   - Rot: ungültig oder letztes Feld
+ *   - Rot: ungültig, keine Züge mehr übrig oder letztes Feld
  */
 const checkHoverTile = () => {
 
@@ -362,9 +366,10 @@ const checkHoverTile = () => {
     (dx === 0 && dy === 2)
 
   const lastFieldId = boardStore.lastFields[boardStore.testMeepleId]
+  const remainingMoves = milefizStore.gamedata.currentDiceRoll
   const isLastField = targetField.id === lastFieldId
 
-  if (isNeighbor && !isLastField) {
+  if (isNeighbor && !isLastField && remainingMoves != 0 && remainingMoves != undefined) {
     crosshairColor.value = 'green'
   } else {
     crosshairColor.value = 'red'
