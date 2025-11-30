@@ -102,6 +102,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "MOVE") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
+          gamedata.currentDiceRoll = event.remainingMoves
         }
 
       })
@@ -169,14 +170,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    *
    * @param meepleId - Eindeutige ID der Spielfigur, die bewegt werden soll
    * @param direction - Bewegungsrichtung (z. B. "NORTH", "SOUTH", "EAST", "WEST")
+   * @param remainingMoves - Schritte die der Spieler noch tätigen kann
    */
-  function sendMove(meepleId: string, direction: Direction) {
+  function sendMove(meepleId: string, direction: Direction, remainingMoves?: number) {
     if (!stompclient || !stompclient.connected) {
       console.error("Cannot send move: STOMP client not connected.")
       return
     }
 
-    const moveCmd: MovementCommand = { meepleId, direction };
+    const moveCmd: MovementCommand = { meepleId, direction};
 
     const body = JSON.stringify(moveCmd)
 
