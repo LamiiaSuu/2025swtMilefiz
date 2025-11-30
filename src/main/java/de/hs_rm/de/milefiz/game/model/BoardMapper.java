@@ -65,6 +65,12 @@ public class BoardMapper {
         return availableDirections.contains(direction) ? currentNeighbours.get(direction).getId() : null;
     }
 
+
+    /**
+     * mappt ein {@link BoardDTO} zu {@link Board}
+     * @param boardDTO
+     * @return die Struktur des boardDTO als Board
+     */
     public static Board mapToBoard(BoardDTO boardDTO) {
  
         List<FieldDTO> fieldDTOs = boardDTO.getFields();
