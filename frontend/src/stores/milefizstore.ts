@@ -11,7 +11,12 @@ let stompclient: Client | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
 
-  //Cooldown für das Würfelsystem
+  /**
+   * Cooldown für das Würfelsystem
+   * cooldown
+   * @prop {long} remainingMs - Beschreibt verbleibende Millisekunden des Würfelcooldowns.
+   * @prop {boolean} active - Wenn 'true', dann läuft gerade aktiv ein Cooldown herunter. Wenn 'false' steht der Cooldown auf 0 und es läuft gerade kein Timer.
+   */
   const cooldown = reactive({
     remainingMs: 0,
     active: false,
