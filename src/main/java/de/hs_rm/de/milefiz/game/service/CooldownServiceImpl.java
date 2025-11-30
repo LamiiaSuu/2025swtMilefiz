@@ -16,8 +16,14 @@ public class CooldownServiceImpl implements CooldownService {
     //Map für Spieler-Cooldowns
     private final Map<UUID, Integer> cooldowns = new ConcurrentHashMap<>();
 
+    /**
+     * Fügt einen Cooldown für einen Spieler hinzu oder aktualisiert einen Cooldown für einen Spieler.
+     */
+    public void addCooldown(UUID playerId, int seconds) {
+        cooldowns.put(playerId, seconds);
+    }
 
-        public void tick() {
+    public void tick() {
 
-        }
+    }
 }
