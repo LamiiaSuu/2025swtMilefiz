@@ -11,7 +11,12 @@ let stompclient: Client | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
 
-  //Cooldown für das Würfelsystem
+  /**
+   * Cooldown für das Würfelsystem
+   * cooldown
+   * @prop {long} remainingMs - Beschreibt verbleibende Millisekunden des Würfelcooldowns.
+   * @prop {boolean} active - Wenn 'true', dann läuft gerade aktiv ein Cooldown herunter. Wenn 'false' steht der Cooldown auf 0 und es läuft gerade kein Timer.
+   */
   const cooldown = reactive({
     remainingMs: 0,
     active: false,
@@ -155,7 +160,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * durchführt.
    *
    * Erstellt ein `MovementCommand`-Objekt mit Meeple-ID und Bewegungsrichtung
-   * und veröffentlicht es über den STOMP-Endpunkt `/app/move`.
+   * und veröffentlicht es über den STOMP-Endpunkt `/app/milefiz/lobby/{lobbyId}`.
    *
    * Ablauf:
    * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.
