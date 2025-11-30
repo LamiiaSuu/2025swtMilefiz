@@ -29,8 +29,6 @@ import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
-import de.hs_rm.de.milefiz.game.service.GameService;
-import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 
 @Controller
@@ -70,10 +68,11 @@ public class FrontendReceiverController {
      * 4. Das Ziel-Feld wird basierend auf der angegebenen {@link Direction} vom aktuellen Feld bestimmt.
      * 5. Es erfolgen verschiedene Validierungen:
      * - Existiert das Zielfeld überhaupt?
+     * - Hat der Spieler überhaupt Züge frei
      * - Blockiert ein anderes Meeple oder eine Barriere das Feld?
      * - Steht dort ein Meeple eines anderen Spielers (→ Duell)?
      * - Ist der Zug eine verbotene Rückwärtsbewegung?
-     * 6. Wenn keine Regel verletzt wird, wird das Meeple auf das neue Feld gesetzt und 
+     * 6. Wenn keine Regel verletzt wird, wird das Meeple auf das neue Feld gesetzt, ein Zug verbraucht und 
      * ein {@link FrontendMoveEvent} an alle Clients der Lobby gesendet.
      * 7. Bei einem ungültigen Zug wird stattdessen ein
      * {@link FrontendMoveRejectedEvent} mit einer Fehlermeldung gesendet.

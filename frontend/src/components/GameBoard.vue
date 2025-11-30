@@ -111,7 +111,7 @@ const toggleCamera = (e: KeyboardEvent) => {
  * 4. Analysiert, ob sich die resultierende Richtung überwiegend entlang der X- oder Z-Achse bewegt:
  *    - X-Achse → EAST oder WEST
  *    - Z-Achse → NORTH oder SOUTH
- * 5. Sendet die berechnete Himmelsrichtung als Spielzug an den Server (`milefizStore`).
+ * 5. Sendet die berechnete Himmelsrichtung und übrigbleibenden Züge als Spielzug an den Server (`milefizStore`).
  *
  * @param {KeyboardEvent} e - Das Tastatur-Event, das die Eingabe auslöst.
  */
@@ -171,7 +171,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
  * Wird ausgelöst, wenn ein Spielfeld-Tile angeklickt wurde.
  * 
  * Ermittelt anhand der Tile-ID, ob das Ziel-Feld ein Nachbarfeld des Charakters ist.
- * Falls ja, wird der Spielzug (Richtung) über den Milefiz-Store an den Server gesendet.
+ * Falls ja, wird der Spielzug (Richtung und übrigbleibende Züge) über den Milefiz-Store an den Server gesendet.
  * 
  * @param targetFieldId - ID des angeklickten Ziel-Feldes
  */
