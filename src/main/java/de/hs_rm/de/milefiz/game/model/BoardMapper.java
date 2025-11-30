@@ -66,32 +66,54 @@ public class BoardMapper {
     }
 
     public static Board mapToBoard(BoardDTO boardDTO) {
-
+ 
         List<FieldDTO> fieldDTOs = boardDTO.getFields();
         List<Field> fields = new ArrayList<>();
         FieldDTO startDTO = fieldDTOs.removeFirst();
         Field startField = new Field(startDTO.getId(), startDTO.getType(), startDTO.getPosition());
-
+        Board board = new Board("dummy-board", startField);
         fields.add(startField);
-        
+        if (startDTO.isBarrier()) {
+            Meeple barrier = new Meeple(true);
+            barrier.setCurrentField(startField);
+            board.addBarrier(barrier);
+        }
+        //geht bestimmt irgendwie besser ¯\_(ツ)_/¯
         for (FieldDTO tempDTO : fieldDTOs) {
             Field field = new Field(tempDTO.getId(), tempDTO.getType(), tempDTO.getPosition());
 
             for (Field tempField : fields) {
                 UUID dirID = tempDTO.getNorth();
                 if (dirID != null && dirID.equals(tempField.getId())) {
-                    tempField.addNeighbour(field, Direction.NORTH);
+                    tempField.addNeighbour(field, Direction.SOUTH);
                 }
 
                 dirID = tempDTO.getEast();
                 if (dirID != null && dirID.equals(tempField.getId())) {
-                    tempField.addNeighbour(field, Direction.EAST);
+                    tempField.addNeighbour(field, Direction.WEST);
                 }
 
-            }
-        }
-    }
+                dirID = tempDTO.getSouth();
+                if (dirID != null && dirID.equals(tempField.getId())) {
+                    tempField.addNeighbour(field, Direction.NORTH);
+                }
 
-    private static void
+                dirID = tempDTO.getWest();
+                if (dirID != null && dirID.equals(tempField.getId())) {
+                    tempField.addNeighbour(field, Direction.EAST);
+                }
+            }
+
+            if (tempDTO.isBarrier()) {
+                Meeple barrier = new Meeple(true);
+                barrier.setCurrentField(field);
+                board.addBarrier(barrier);
+            }
+
+            fields.add(field);
+        }
+
+        return board;
+    }
 
 }
