@@ -9,6 +9,11 @@ import java.util.UUID;
 
 import de.hs_rm.de.milefiz.game.model.BoardDTO.FieldDTO;
 
+/**
+ * Mapper Klasse, die zwischen {@link Board} und {@link BoardDTO} mappt.
+ * 
+ * @author Thilo Wittmer
+ */
 public class BoardMapper {
     
     /**
@@ -17,7 +22,7 @@ public class BoardMapper {
      * @return Board als DTO
      */
     public static BoardDTO mapToDTO(Board board) {
-        Field startField = board.getStartField();
+        Field startField = board.getStartBlue();
         Stack<Field> remaining = new Stack<>(); 
         Map<Direction, Field> currentNeighbours;
         List<Field> visited = new ArrayList<>();
@@ -77,13 +82,18 @@ public class BoardMapper {
         List<Field> fields = new ArrayList<>();
         FieldDTO startDTO = fieldDTOs.removeFirst();
         Field startField = new Field(startDTO.getId(), startDTO.getType(), startDTO.getPosition());
-        Board board = new Board("dummy-board", startField);
+        Board board = new Board("dummy-board", null, null, null, null);
+
         fields.add(startField);
+
         if (startDTO.isBarrier()) {
             Meeple barrier = new Meeple(true);
             barrier.setCurrentField(startField);
             board.addBarrier(barrier);
         }
+
+        checkForStartType(startField, board);
+
         //geht bestimmt irgendwie besser ¯\_(ツ)_/¯
         for (FieldDTO tempDTO : fieldDTOs) {
             Field field = new Field(tempDTO.getId(), tempDTO.getType(), tempDTO.getPosition());
@@ -110,6 +120,8 @@ public class BoardMapper {
                 }
             }
 
+            checkForStartType(field, board);
+
             if (tempDTO.isBarrier()) {
                 Meeple barrier = new Meeple(true);
                 barrier.setCurrentField(field);
@@ -122,4 +134,18 @@ public class BoardMapper {
         return board;
     }
 
+    /**
+     * Ueberprueft, ob das Feld ein Startfeld ist und wenn ja, wird es dem Board hinzugefuegt
+     * @param field das Feld, wo ueberprueft wird, ob es ein Startfeld ist
+     * @param board das Board, dem das potenzielle Startfeld hinzugefügt werden soll
+     */
+    public static void checkForStartType(Field field, Board board) {
+        switch (field.getType()) {
+            case START_GREEN -> board.setStartGreen(field);
+            case START_YELLOW -> board.setStartYellow(field);
+            case START_BLUE -> board.setStartBlue(field);
+            case START_RED -> board.setStartRed(field);
+            default -> {}
+        }
+    }
 }

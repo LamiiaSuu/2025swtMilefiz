@@ -3,7 +3,7 @@
     {
         "id": "cff7caa8-032f-42e8-aeaa-c53ce5cbfc97",
         "north": "f8cc4645-effc-49d9-9968-faeea99b4662",
-        "south": "f0236db2-7411-4e72-ac90-c9c35efa61e8",
+        "south": null,
         "west": "3a72227f-a298-436c-97d4-2a8151f337eb",
         "east": "14047fb1-b692-4866-bfe9-12939d5be387",
         "type": "NORMAL",
@@ -85,7 +85,7 @@
         "north": "c5f54fd3-425b-46ae-be9f-db62581f8b11",
         "south": "506f8417-eb13-43f8-92a5-4ca72ca80d41",
         "west": "3df83e35-151c-4ad9-995f-057c3495c93b",
-        "east": "218f8f79-a14a-4930-b913-eb0c5dd56810",
+        "east": null,
         "type": "NORMAL",
         "position": {"x": 12, "y": 4},
         "barrier": false
@@ -141,16 +141,6 @@
         "barrier": false
     },
     {
-        "id": "f0236db2-7411-4e72-ac90-c9c35efa61e8",
-        "north": "cff7caa8-032f-42e8-aeaa-c53ce5cbfc97",
-        "south": null,
-        "west": null,
-        "east": null,
-        "type": "START_GREEN",
-        "position": {"x": 4, "y": 2},
-        "barrier": false
-    },
-    {
         "id": "506f8417-eb13-43f8-92a5-4ca72ca80d41",
         "north": "2b485a92-ccc4-45a9-89ce-eae11e1f7ef7",
         "south": null,
@@ -158,16 +148,6 @@
         "east": null,
         "type": "START_BLUE",
         "position": {"x": 12, "y": 2},
-        "barrier": false
-    },
-    {
-        "id": "218f8f79-a14a-4930-b913-eb0c5dd56810",
-        "north": null,
-        "south": null,
-        "west": "2b485a92-ccc4-45a9-89ce-eae11e1f7ef7",
-        "east": null,
-        "type": "START_BLUE",
-        "position": {"x": 14, "y": 4},
         "barrier": false
     }
 ]
