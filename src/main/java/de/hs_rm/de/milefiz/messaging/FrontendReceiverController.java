@@ -32,6 +32,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -222,10 +223,16 @@ public class FrontendReceiverController {
  */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendRollDiceEvent handleRollDice(@DestinationVariable UUID lobbyId, RollDiceCommand command) {
+    public FrontendEvent handleRollDice(@DestinationVariable UUID lobbyId, RollDiceCommand command) {
         logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
-        int number = gameService.rollDice();
-        return new FrontendRollDiceEvent(lobbyId, number);
+        if(gameService.getRollDiceCooldown(command.playerId()) <= 0){
+            int number = gameService.rollDice();
+            gameService.addRollDiceCooldown(command.playerId());
+            return new FrontendRollDiceEvent(lobbyId, number);
+        }
+        else{
+            return new FrontendRollDiceRejectedEvent(command.playerId(), gameService.getRollDiceCooldown(command.playerId()));
+        }
     }
 
     /**

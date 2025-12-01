@@ -51,8 +51,8 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void addRollDiceCooldown(UUID playerId, int seconds) {
-        cooldownService.addCooldown(playerId, seconds);
+    public void addRollDiceCooldown(UUID playerId) {
+        cooldownService.addCooldown(playerId);
     }
     
     @Override

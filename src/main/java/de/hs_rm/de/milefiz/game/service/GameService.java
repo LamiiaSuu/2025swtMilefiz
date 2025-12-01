@@ -39,7 +39,7 @@ public interface GameService {
 
     int getRollDiceCooldown(UUID playerId);
 
-    void addRollDiceCooldown(UUID playerId, int seconds);
+    void addRollDiceCooldown(UUID playerId);
 
     void setTestBoard(Board testBoard);
 

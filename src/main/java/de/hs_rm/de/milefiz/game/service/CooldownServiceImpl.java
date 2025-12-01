@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +16,13 @@ public class CooldownServiceImpl implements CooldownService {
     //Map für Spieler-Cooldowns
     private final Map<UUID, Integer> cooldowns = new ConcurrentHashMap<>();
 
+    @Value("${dice.cooldown.seconds}")
+    private int seconds;
+
     /**
      * Fügt einen Cooldown für einen Spieler hinzu oder aktualisiert einen Cooldown für einen Spieler.
      */
-    public void addCooldown(UUID playerId, int seconds) {
+    public void addCooldown(UUID playerId) {
         cooldowns.put(playerId, seconds);
     }
 
