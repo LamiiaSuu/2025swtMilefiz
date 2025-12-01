@@ -14,6 +14,7 @@ import de.hs_rm.de.milefiz.game.model.Field;
  * <h3>Verwendete Services:</h3>
  * <ul>
  * <li>{@link DiceServiceImpl} - Für Würfelaktionen</li>
+ * <li>{@link CooldownServiceImpl} - Für serverseitiges Cooldown-Management</li>
  * </ul>
  * 
  * @author Leon Schäfer
@@ -22,11 +23,13 @@ import de.hs_rm.de.milefiz.game.model.Field;
 public class GameServiceImpl implements GameService {
 
     private final DiceServiceImpl diceService;
+    private final CooldownServiceImpl cooldownService;
     private final ApplicationEventPublisher publisher;
     private Board testBoard;
 
-    public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher) {
+    public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher, CooldownServiceImpl cooldownService) {
         this.diceService = diceService;
+        this.cooldownService = cooldownService;
         this.publisher = publisher;
     }
 
