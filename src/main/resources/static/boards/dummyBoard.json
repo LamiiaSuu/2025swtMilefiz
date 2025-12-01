@@ -7,7 +7,7 @@
         "west": "3a72227f-a298-436c-97d4-2a8151f337eb",
         "east": "14047fb1-b692-4866-bfe9-12939d5be387",
         "type": "NORMAL",
-        "position": {"x": 2, "y": 2},
+        "position": {"x": 4, "y": 4},
         "barrier": false
     },
     {
@@ -17,7 +17,7 @@
         "west": null,
         "east": null,
         "type": "NORMAL",
-        "position": {"x": 2, "y": 3},
+        "position": {"x": 4, "y": 6},
         "barrier": false
     },
     {
@@ -27,7 +27,7 @@
         "west": null,
         "east": "705b8058-801b-449c-8ac9-d63f91742854",
         "type": "NORMAL",
-        "position": {"x": 2, "y": 4},
+        "position": {"x": 4, "y": 8},
         "barrier": true
     },
     {
@@ -37,7 +37,7 @@
         "west": "39a9d9d8-67dd-409a-95ca-7cf620671096",
         "east": "cc850384-e899-463f-b895-3419a6090b1c",
         "type": "NORMAL",
-        "position": {"x": 3, "y": 4},
+        "position": {"x": 6, "y": 8},
         "barrier": false
     },
     {
@@ -47,7 +47,7 @@
         "west": "705b8058-801b-449c-8ac9-d63f91742854",
         "east": "35b5278e-dfc4-4196-8c39-f8f06811b8b5",
         "type": "NORMAL",
-        "position": {"x": 4, "y": 4},
+        "position": {"x": 8, "y": 8},
         "barrier": false
     },
      {
@@ -57,7 +57,7 @@
         "west": "cc850384-e899-463f-b895-3419a6090b1c",
         "east": "9fc41ff5-fd40-44ab-b99d-151010e5cda5",
         "type": "NORMAL",
-        "position": {"x": 5, "y": 4},
+        "position": {"x": 10, "y": 8},
         "barrier": false
     },
     {
@@ -67,7 +67,7 @@
         "west": "35b5278e-dfc4-4196-8c39-f8f06811b8b5",
         "east": null,
         "type": "NORMAL",
-        "position": {"x": 6, "y": 4},
+        "position": {"x": 12, "y": 8},
         "barrier": true
     },
     {
@@ -77,7 +77,7 @@
         "west": null,
         "east": null,
         "type": "NORMAL",
-        "position": {"x": 6, "y": 3},
+        "position": {"x": 12, "y": 6},
         "barrier": false
     },
     {
@@ -87,7 +87,7 @@
         "west": "3df83e35-151c-4ad9-995f-057c3495c93b",
         "east": "218f8f79-a14a-4930-b913-eb0c5dd56810",
         "type": "NORMAL",
-        "position": {"x": 6, "y": 2},
+        "position": {"x": 12, "y": 4},
         "barrier": false
     },
     {
@@ -97,7 +97,7 @@
         "west": "5226146e-53a7-4c59-8946-ec805fe90608",
         "east": "2b485a92-ccc4-45a9-89ce-eae11e1f7ef7",
         "type": "NORMAL",
-        "position": {"x": 5, "y": 2},
+        "position": {"x": 10, "y": 4},
         "barrier": false
     },
     {
@@ -107,7 +107,7 @@
         "west": "14047fb1-b692-4866-bfe9-12939d5be387",
         "east": "3df83e35-151c-4ad9-995f-057c3495c93b",
         "type": "NORMAL",
-        "position": {"x": 4, "y": 2},
+        "position": {"x": 8, "y": 4},
         "barrier": false
     },
     {
@@ -117,7 +117,7 @@
         "west": "cff7caa8-032f-42e8-aeaa-c53ce5cbfc97",
         "east": "5226146e-53a7-4c59-8946-ec805fe90608",
         "type": "NORMAL",
-        "position": {"x": 3, "y": 2},
+        "position": {"x": 6, "y": 4},
         "barrier": false
     },
     {
@@ -127,7 +127,7 @@
         "west": null,
         "east": null,
         "type": "END",
-        "position": {"x": 4, "y": 5},
+        "position": {"x": 8, "y": 10},
         "barrier": false
     },
      {
@@ -137,7 +137,7 @@
         "west": null,
         "east": "cff7caa8-032f-42e8-aeaa-c53ce5cbfc97",
         "type": "START_GREEN",
-        "position": {"x": 1, "y": 2},
+        "position": {"x": 2, "y": 4},
         "barrier": false
     },
     {
@@ -147,7 +147,7 @@
         "west": null,
         "east": null,
         "type": "START_GREEN",
-        "position": {"x": 2, "y": 1},
+        "position": {"x": 4, "y": 2},
         "barrier": false
     },
     {
@@ -157,7 +157,7 @@
         "west": null,
         "east": null,
         "type": "START_BLUE",
-        "position": {"x": 6, "y": 1},
+        "position": {"x": 12, "y": 2},
         "barrier": false
     },
     {
@@ -167,7 +167,7 @@
         "west": "2b485a92-ccc4-45a9-89ce-eae11e1f7ef7",
         "east": null,
         "type": "START_BLUE",
-        "position": {"x": 7, "y": 2},
+        "position": {"x": 14, "y": 4},
         "barrier": false
     }
 ]
