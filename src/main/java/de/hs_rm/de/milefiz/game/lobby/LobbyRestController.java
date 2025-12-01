@@ -13,15 +13,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.service.GameService;
 
 @RestController
 @RequestMapping("/api/lobby")
 public class LobbyRestController {
 
     private final LobbyManager lobbyManager;
+    private GameService gameService;
 
-    public LobbyRestController(LobbyManager lobbyManager) {
+    public LobbyRestController(LobbyManager lobbyManager, GameService gameService) {
         this.lobbyManager = lobbyManager;
+        this.gameService = gameService;
     }
 
     /**
@@ -54,6 +57,10 @@ public class LobbyRestController {
     @GetMapping(path = "/join/{lobbyId}")
     public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId, HttpSession httpSession) throws LobbyNotFoundException {
         Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+        if (lobby.getBoard() != null){
+            lobby.setBoard(gameService.getTestBoard());
+        }
 
         // Zuweisung eines Players
         Player player = new Player(lobby.getAvailableColor());
