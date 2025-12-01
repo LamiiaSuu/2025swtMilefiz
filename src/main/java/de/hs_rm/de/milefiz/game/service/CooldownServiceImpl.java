@@ -23,6 +23,14 @@ public class CooldownServiceImpl implements CooldownService {
         cooldowns.put(playerId, seconds);
     }
 
+    /**
+     * Gibt die verbleibenden Sekunden für einen Spieler zurück.
+     * 
+     */
+    public int getCooldown(UUID playerId) {
+        return cooldowns.getOrDefault(playerId, 0);
+    }
+
     public void tick() {
 
     }
