@@ -1,6 +1,8 @@
 package de.hs_rm.de.milefiz.game.service;
 
 
+import java.util.UUID;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +42,11 @@ public class GameServiceImpl implements GameService {
     public int rollDice() {
 
         return diceService.roll();
+    }
+
+    public int getRollDiceCooldown(UUID playerId) {
+
+        return cooldownService.getCooldown(playerId);
     }
     
     @Override
