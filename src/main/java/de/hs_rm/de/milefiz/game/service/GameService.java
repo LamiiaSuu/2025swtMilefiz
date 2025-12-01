@@ -1,5 +1,7 @@
 package de.hs_rm.de.milefiz.game.service;
 
+import java.util.UUID;
+
 import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Field;
 
@@ -34,6 +36,10 @@ public interface GameService {
      * 
      */
     int rollDice();
+
+    int getRollDiceCooldown(UUID playerId);
+
+    void addRollDiceCooldown(UUID playerId, int seconds);
 
     void setTestBoard(Board testBoard);
 
