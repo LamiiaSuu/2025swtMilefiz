@@ -11,7 +11,7 @@ import de.hs_rm.de.milefiz.game.model.Field;
 /**
  * Standard-Implementierung des GameService Interface.
  * 
- * <h3>Verwendete Services:</h3>
+ * <h2>Verwendete Services:</h2>
  * <ul>
  * <li>{@link DiceServiceImpl} - Für Würfelaktionen</li>
  * </ul>
