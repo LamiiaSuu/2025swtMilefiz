@@ -14,11 +14,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   /**
    * Cooldown für das Würfelsystem
    * cooldown
-   * @prop {long} remainingMs - Beschreibt verbleibende Millisekunden des Würfelcooldowns.
+   * @prop {number} remainingSeconds - Beschreibt verbleibende Sekunden des Würfelcooldowns.
    * @prop {boolean} active - Wenn 'true', dann läuft gerade aktiv ein Cooldown herunter. Wenn 'false' steht der Cooldown auf 0 und es läuft gerade kein Timer.
    */
   const cooldown = reactive({
-    remainingMs: 0,
+    remainingSeconds: 0,
     active: false,
   })
   // Beispiele für Daten
@@ -75,7 +75,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.type === 'ROLL_DICE') {
             console.log(`Player ${event.playerId} rolled: ${event.number}`)
             gamedata.currentDiceRoll = event.number
+            cooldown.active = true
+            cooldown.remainingSeconds = event.cooldown
           }
+
         } catch (err) {
           console.error('Error parsing message:', err)
         }
@@ -83,18 +86,18 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
-        if (event.type === 'COOLDOWN_STARTED') {
-          cooldown.active = true
-          cooldown.remainingMs = event.remainingMs
+
+        // Wenn der Spieler im Moment noch nicht Würfeln darf, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
+        if (event.type === 'ROLL_DICE_ERROR') {
+          console.log(`Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`)
+          cooldown.remainingSeconds = event.seconds
         }
 
-        if (event.type === 'COOLDOWN_UPDATE') {
-          cooldown.remainingMs = event.remainingMs
-        }
-
+        // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
         if (event.type === 'COOLDOWN_READY') {
+          console.log(`Player ${event.playerId} can roll again!`)
           cooldown.active = false
-          cooldown.remainingMs = 0
+          cooldown.remainingSeconds = 0
         }
         if (event.type === "MOVE_ERROR") {
           console.warn("Move rejected:", event.msg)

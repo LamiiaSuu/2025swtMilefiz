@@ -7,8 +7,8 @@ import java.util.UUID;
  * @param playerId playerId
  * @param number gewürfelte Zahl
  */
-public record FrontendRollDiceEvent(String type, UUID playerId, int number) implements FrontendEvent {
-    public FrontendRollDiceEvent(UUID playerId, int number) {
-        this(EventType.ROLL_DICE.name(), playerId, number);
+public record FrontendRollDiceEvent(String type, UUID playerId, int number, int cooldown) implements FrontendEvent {
+    public FrontendRollDiceEvent(UUID playerId, int number, int cooldown) {
+        this(EventType.ROLL_DICE.name(), playerId, number, cooldown);
     }
 }
