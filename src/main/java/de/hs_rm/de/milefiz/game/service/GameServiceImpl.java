@@ -1,6 +1,8 @@
 package de.hs_rm.de.milefiz.game.service;
 
 
+import java.util.UUID;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import de.hs_rm.de.milefiz.game.model.BoardMapper;
  * <h2>Verwendete Services:</h2>
  * <ul>
  * <li>{@link DiceServiceImpl} - Für Würfelaktionen</li>
+ * <li>{@link CooldownServiceImpl} - Für serverseitiges Cooldown-Management</li>
  * </ul>
  * 
  * @author Leon Schäfer
@@ -29,16 +32,18 @@ import de.hs_rm.de.milefiz.game.model.BoardMapper;
 public class GameServiceImpl implements GameService {
 
     private final DiceServiceImpl diceService;
+    private final CooldownServiceImpl cooldownService;
     private final ApplicationEventPublisher publisher;
     private Board testBoard;
-    
-    public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher) throws StreamReadException, DatabindException, IOException {
+
+    public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher, CooldownServiceImpl cooldownService) throws StreamReadException, DatabindException, IOException {
         ObjectMapper objectMapper;
         objectMapper = new ObjectMapper();
         BoardDTO testBoardDTO = objectMapper.readValue(new File("src/main/resources/static/boards/dummyBoard.json"), BoardDTO.class);
         testBoard = BoardMapper.mapToBoard(testBoardDTO);
         
         this.diceService = diceService;
+        this.cooldownService = cooldownService;
         this.publisher = publisher;
     }
 
@@ -49,6 +54,23 @@ public class GameServiceImpl implements GameService {
     public int rollDice() {
 
         return diceService.roll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getRollDiceCooldown(UUID playerId) {
+
+        return cooldownService.getCooldown(playerId);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addRollDiceCooldown(UUID playerId) {
+        cooldownService.addCooldown(playerId);
     }
     
     @Override
