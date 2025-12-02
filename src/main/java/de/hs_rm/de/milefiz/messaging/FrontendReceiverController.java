@@ -202,7 +202,7 @@ public class FrontendReceiverController {
  * Der Würfelwurf wird über den {@link GameService} durchgeführt und das Ergebnis
  * als {@link FrontendRollDiceEvent} an alle verbundenen Clients gesendet.</p>
  * 
- * <h3>Ablauf:</h3>
+ * <h4>Ablauf:</h4>
  * <ol>
  *   <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
  *   <li>Methode loggt die Würfel-Anfrage mit Spieler-ID und Lobby-ID</li>
@@ -213,7 +213,7 @@ public class FrontendReceiverController {
  *   <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
  * </ol>
  * 
- * <h3>WebSocket-Mapping:</h3>
+ * <h4>WebSocket-Mapping:</h4>
  * <ul>
  *   <li><strong>Eingang:</strong> {@code /milefiz/lobby/{lobbyId}/rollDice}</li>
  *   <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
