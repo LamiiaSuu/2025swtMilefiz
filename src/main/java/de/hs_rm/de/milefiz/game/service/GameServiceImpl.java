@@ -44,12 +44,18 @@ public class GameServiceImpl implements GameService {
         return diceService.roll();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getRollDiceCooldown(UUID playerId) {
 
         return cooldownService.getCooldown(playerId);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addRollDiceCooldown(UUID playerId) {
         cooldownService.addCooldown(playerId);

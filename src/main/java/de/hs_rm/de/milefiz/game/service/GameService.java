@@ -37,8 +37,27 @@ public interface GameService {
      */
     int rollDice();
 
+    /**
+     * Gibt die aktuell verbleibende Cooldown-Zeit eines Spielers für den Würfelwurf zurück.
+     * <p>
+     * Diese Methode delegiert direkt an den {@link CooldownService}, der serverseitig
+     * das Cooldown-Tracking übernimmt.
+     * </p>
+     *
+     * @param playerId die UUID des Spielers
+     * @return verbleibende Cooldown-Sekunden; {@code 0}, wenn kein Cooldown aktiv ist
+     */
     int getRollDiceCooldown(UUID playerId);
 
+    /**
+     * Startet oder setzt den Cooldown eines Spielers für den Würfelwurf zurück.
+     * <p>
+     * Die konkrete Cooldown-Länge wird vom {@link CooldownService} verwaltet
+     * und typischerweise über Spring Properties konfiguriert.
+     * </p>
+     *
+     * @param playerId die UUID des Spielers
+     */
     void addRollDiceCooldown(UUID playerId);
 
     void setTestBoard(Board testBoard);
