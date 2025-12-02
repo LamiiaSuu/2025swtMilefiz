@@ -23,7 +23,7 @@ const router = createRouter({
     {
       path: '/lobby/:lobbyid',
       redirect: (to) => {
-        // lese lobbyid aus url parametern und setze urlLobbyId in UrlLobbyStore, dann weiterleitung an home
+        // lese lobbyid aus url parametern und rufe joinLobby auf, dann weiterleitung an home
         const id: string | undefined = (to.params.lobbyid as string | undefined)
         if (id)
           if (id) joinLobby(id)
