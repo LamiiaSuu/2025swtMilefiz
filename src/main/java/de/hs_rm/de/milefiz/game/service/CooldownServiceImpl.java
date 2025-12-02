@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 
 /**
- * @author Robert Bothfeld
+ * 
  * Service-Implementierung zur Verwaltung von zeitbasierten Cooldowns pro Spieler.
  * <p>
  * Der Service speichert aktive Cooldowns in einer thread-sicheren Map und reduziert diese
@@ -21,6 +21,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
  * Sobald ein Cooldown eines Spielers abläuft, wird ein {@link FrontendCooldownFinishedEvent}
  * über den {@link ApplicationEventPublisher} veröffentlicht.
  * </p>
+ * @author Robert Bothfeld
  */
 
 @Service
