@@ -36,6 +36,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     currentDiceRoll: undefined, //Würfel ergebnis
   })
 
+  const isJoined = computed(() => {
+    return Boolean(gamedata.lobbyId)
+  })
+
   function startMilefizLiveUpdate() {
     console.log('Starting Liveupdater for Milefiz')
     // Nur eine Instanz
@@ -226,6 +230,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
   return {
     gamedata,
+    isJoined,
     startMilefizLiveUpdate,
     sendSocketMessage,
     sendRollDice,

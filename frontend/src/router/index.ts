@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useUrlLobbyStore } from '@/stores/urlLobbyStore'
+import { useMilefizStore } from '@/stores/milefizstore'
 import HomeView from '../views/HomeView.vue'
+
+const { joinLobby } = useMilefizStore()
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,7 +26,7 @@ const router = createRouter({
         // lese lobbyid aus url parametern und setze urlLobbyId in UrlLobbyStore, dann weiterleitung an home
         const id: string | undefined = (to.params.lobbyid as string | undefined)
         if (id)
-          if (id) useUrlLobbyStore().setUrlLobbyId(id)
+          if (id) joinLobby(id)
         return { name: 'home', replace: true }
       },
     },
