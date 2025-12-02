@@ -239,6 +239,7 @@ public class FrontendReceiverController {
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleRollDice(@DestinationVariable("lobbyId") UUID lobbyId, RollDiceCommand command) {
         logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
+        if(gameService.getRollDiceCooldown(command.playerId()) <= 0){
         int number = gameService.rollDice();
         try {
             Lobby lobby = lobbyManager.getLobby(lobbyId);
@@ -257,7 +258,7 @@ public class FrontendReceiverController {
         } catch (RuntimeException e) {
             logger.error("Unexpected error setting remaining moves for player {}", command.playerId(), e);
         }
-        if(gameService.getRollDiceCooldown(command.playerId()) <= 0){
+        
             gameService.addRollDiceCooldown(command.playerId());
             logger.info("Player {} rolled a {} in lobby {}.", command.playerId(), number, lobbyId);
             return new FrontendRollDiceEvent(lobbyId, number, gameService.getRollDiceCooldown(command.playerId()));
