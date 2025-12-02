@@ -11,7 +11,12 @@ let stompclient: Client | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
 
-  //Cooldown für das Würfelsystem
+  /**
+   * Cooldown für das Würfelsystem
+   * cooldown
+   * @prop {long} remainingMs - Beschreibt verbleibende Millisekunden des Würfelcooldowns.
+   * @prop {boolean} active - Wenn 'true', dann läuft gerade aktiv ein Cooldown herunter. Wenn 'false' steht der Cooldown auf 0 und es läuft gerade kein Timer.
+   */
   const cooldown = reactive({
     remainingMs: 0,
     active: false,
@@ -97,6 +102,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "MOVE") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
+          gamedata.currentDiceRoll = event.remainingMoves
         }
 
       })
@@ -164,14 +170,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    *
    * @param meepleId - Eindeutige ID der Spielfigur, die bewegt werden soll
    * @param direction - Bewegungsrichtung (z. B. "NORTH", "SOUTH", "EAST", "WEST")
+   * @param remainingMoves - Schritte die der Spieler noch tätigen kann
    */
-  function sendMove(meepleId: string, direction: Direction) {
+  function sendMove(meepleId: string, direction: Direction, remainingMoves?: number) {
     if (!stompclient || !stompclient.connected) {
       console.error("Cannot send move: STOMP client not connected.")
       return
     }
 
-    const moveCmd: MovementCommand = { meepleId, direction };
+    const moveCmd: MovementCommand = { meepleId, direction};
 
     const body = JSON.stringify(moveCmd)
 

@@ -122,44 +122,50 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   const meepleId = gameCharRef.value?.meepleId
   if (!cam || !meepleId) return
 
-  let localDir = new Vector3()
+  // Blickrichtung der Kamera holen
+  const lookDir = new Vector3()
+  cam.getWorldDirection(lookDir)
+  lookDir.setY(0).normalize() // nur horizontale Richtung
+  lookDir.z *= -1
+
+  // Vektor für Bewegung
+  const moveDir = new Vector3()
 
   switch (e.code) {
-    case ("ArrowUp"):
-    // case "KeyW":
-      localDir.set(0, 0, 1) 
+    case "ArrowUp":
+    case "KeyW":
+      moveDir.copy(lookDir)
       break
     case "ArrowDown":
-    // case "KeyS":
-      localDir.set(0, 0, -1) 
+    case "KeyS":
+      moveDir.copy(lookDir).negate()
       break
     case "ArrowLeft":
-    // case "KeyA":
-      localDir.set(1, 0, 0) 
+    case "KeyA":
+      // Links = Kreuzprodukt von Up-Vektor × Blickrichtung
+      moveDir.crossVectors(lookDir, new Vector3(0, 1, 0)).normalize()
       break
     case "ArrowRight":
-    // case "KeyD":  
-      localDir.set(-1, 0, 0) 
+    case "KeyD":
+      // Rechts = Kreuzprodukt von Blickrichtung × Up-Vektor
+      moveDir.crossVectors(new Vector3(0, 1, 0), lookDir).normalize()
       break
     default:
       return
   }
-  
+
   e.preventDefault()
 
-  const worldDir = localDir.clone().applyQuaternion(cam.quaternion).setY(0).normalize()
+  // Richtung auf Hauptachsen runterbrechen (X/Z)
+  const absX = Math.abs(moveDir.x)
+  const absZ = Math.abs(moveDir.z)
 
-  const absX = Math.abs(worldDir.x)
-  const absZ = Math.abs(worldDir.z)
-
-  let direction: Direction | null = null
+  let direction: Direction
   if (absX > absZ) {
-    direction = worldDir.x > 0 ? "EAST" : "WEST"
+    direction = moveDir.x > 0 ? "EAST" : "WEST"
   } else {
-    direction = worldDir.z > 0 ? "SOUTH" : "NORTH"
+    direction = moveDir.z > 0 ? "SOUTH" : "NORTH"
   }
-
-  if (!direction) return
 
   milefizStore.sendMove(meepleId, direction)
 }
@@ -209,6 +215,7 @@ const onTileClicked = (targetFieldId: string) => {
     console.log("not a neighbor — no move.")
     return
   }
+
   milefizStore.sendMove(meepleId, direction)
 }
 
@@ -287,7 +294,7 @@ const onRotateCharacter = (yRotation: number) => {
  * - Aktualisiert die Fadenkreuzfarbe dynamisch:
  *   - Weiß: kein Treffer  
  *   - Grün: gültiger Nachbar  
- *   - Rot: ungültig oder letztes Feld
+ *   - Rot: ungültig, keine Züge mehr übrig oder letztes Feld
  */
 const checkHoverTile = () => {
 
@@ -362,9 +369,10 @@ const checkHoverTile = () => {
     (dx === 0 && dy === 2)
 
   const lastFieldId = boardStore.lastFields[boardStore.testMeepleId]
+  const remainingMoves = milefizStore.gamedata.currentDiceRoll
   const isLastField = targetField.id === lastFieldId
 
-  if (isNeighbor && !isLastField) {
+  if (isNeighbor && !isLastField && remainingMoves != 0 && remainingMoves != undefined) {
     crosshairColor.value = 'green'
   } else {
     crosshairColor.value = 'red'
