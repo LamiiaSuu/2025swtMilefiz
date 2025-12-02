@@ -2,8 +2,6 @@
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
 import dice from "@/assets/hud/dice.png";
-import { InternalSymbolName } from "typescript";
-import { truncateSync } from "fs";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -59,6 +57,10 @@ watch(remainingSeconds, (value) => {
 
 onMounted(() => {
     interval = window.setInterval(() => {
+        if (timestampEnd === null){
+            localCountdown.value = 0;
+            return;
+        }
         const diff = timestampEnd - Date.now();
         localCountdown.value = Math.max(0, Math.ceil(diff / 1000));
     }, 150)
