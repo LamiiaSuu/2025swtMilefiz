@@ -14,11 +14,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   /**
    * Cooldown für das Würfelsystem
    * cooldown
-   * @prop {long} remainingMs - Beschreibt verbleibende Millisekunden des Würfelcooldowns.
+   * @prop {number} remainingSeconds - Beschreibt verbleibende Sekunden des Würfelcooldowns.
    * @prop {boolean} active - Wenn 'true', dann läuft gerade aktiv ein Cooldown herunter. Wenn 'false' steht der Cooldown auf 0 und es läuft gerade kein Timer.
    */
   const cooldown = reactive({
-    remainingMs: 0,
+    remainingSeconds: 0,
     active: false,
   })
   // Beispiele für Daten
@@ -76,6 +76,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             console.log(`Player ${event.playerId} rolled: ${event.number}`)
             gamedata.currentDiceRoll = event.number
           }
+
         } catch (err) {
           console.error('Error parsing message:', err)
         }
@@ -85,16 +86,21 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         const boardStore = useBoardStore()
         if (event.type === 'COOLDOWN_STARTED') {
           cooldown.active = true
-          cooldown.remainingMs = event.remainingMs
+          cooldown.remainingSeconds = event.remainingSeconds
+        }
+
+        if (event.type === 'ROLL_DICE_ERROR') {
+          console.log(`Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`)
+          cooldown.remainingSeconds = event.seconds
         }
 
         if (event.type === 'COOLDOWN_UPDATE') {
-          cooldown.remainingMs = event.remainingMs
+          cooldown.remainingSeconds = event.remainingSeconds
         }
 
         if (event.type === 'COOLDOWN_READY') {
           cooldown.active = false
-          cooldown.remainingMs = 0
+          cooldown.remainingSeconds = 0
         }
         if (event.type === "MOVE_ERROR") {
           console.warn("Move rejected:", event.msg)

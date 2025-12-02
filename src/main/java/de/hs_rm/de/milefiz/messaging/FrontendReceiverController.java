@@ -228,9 +228,11 @@ public class FrontendReceiverController {
         if(gameService.getRollDiceCooldown(command.playerId()) <= 0){
             int number = gameService.rollDice();
             gameService.addRollDiceCooldown(command.playerId());
+            logger.info("Player {} rolled a {} in lobby {}.", command.playerId(), number, lobbyId);
             return new FrontendRollDiceEvent(lobbyId, number);
         }
         else{
+            logger.info("Player {} tried to roll dice in Lobby {}. But they still have a cooldown of {} to roll their dice!", command.playerId(), lobbyId, gameService.getRollDiceCooldown(command.playerId()));
             return new FrontendRollDiceRejectedEvent(command.playerId(), gameService.getRollDiceCooldown(command.playerId()));
         }
     }
