@@ -258,6 +258,32 @@ public class FrontendReceiverController {
         logger.info("WebSocket disconnected - Player Token: {}", playerToken);
     }
 
+    /**
+     * Event-Listener, der ausgelöst wird, sobald der Cooldown eines Spielers
+     * abgelaufen ist.
+     *
+     * <p>Dieser Listener reagiert auf {@link FrontendCooldownFinishedEvent}-Events,
+     * die vom {@link de.hs_rm.de.milefiz.game.service.CooldownService} publiziert 
+     * werden, sobald der Cooldown eines Spielers den Wert 0 erreicht.</p>
+     *
+     * <h3>Ablauf:</h3>
+     * <ol>
+     *   <li>Der Listener ermittelt anhand der playerId, in welcher {@link Lobby}
+     *       sich der Spieler aktuell befindet.</li>
+     *   <li>Es wird ein neues {@link FrontendCooldownFinishedEvent} erzeugt,
+     *       das zusätzlich die Lobby-ID enthält.</li>
+     *   <li>Dieses Event wird via STOMP über den WebSocket-Broker an alle Clients
+     *       der betroffenen Lobby gesendet.</li>
+     * </ol>
+     *
+     * <h3>WebSocket-Ausgang:</h3>
+     * <ul>
+     *   <li><strong>Topic:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
+     *   <li>Enthält: {@code playerId} und {@code lobbyId}</li>
+     * </ul>
+     *
+     * @param event das ursprüngliche CooldownFinishedEvent mit der Spieler-ID
+     */
     @EventListener
     public void handleCooldownFinished(FrontendCooldownFinishedEvent event) {
         logger.info("Cooldown finished for Player {} in Lobby {}", 
