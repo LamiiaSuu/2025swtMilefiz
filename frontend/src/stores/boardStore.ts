@@ -42,7 +42,7 @@ export const useBoardStore = defineStore('board', {
         // noch zum testen
         if (this.board) {
           const startField = this.board.fields.find(
-            (f) => f.position.x === 0 && f.position.y === 0
+            (f) => f.type === 'START_GREEN'
           )
 
           if (startField) {

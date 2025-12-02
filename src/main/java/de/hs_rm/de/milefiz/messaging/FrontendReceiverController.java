@@ -115,10 +115,10 @@ public class FrontendReceiverController {
         }
 
         // nur zum testen
-        lobby.setBoard(gameService.getTestBoard());
+        // lobby.setBoard(gameService.getTestBoard());
         player.getMeeples()[0].setId(moveCmd.meepleId());
         if (player.getMeeples()[0].getCurrentField() == null) {
-            player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartField());
+            player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartGreen());
         }
 
         Board board = lobby.getBoard();

@@ -13,34 +13,31 @@ public class Board {
      */
     private final UUID id;
     private String name;
-    private Field startField;
+    private Field startGreen;
+    private Field startYellow;
+    private Field startBlue;
+    private Field startRed;
+
+
     private List<Meeple> barriers;
     
-    public Board(String name, Field startField) {
-        this.id = UUID.randomUUID();
-        this.name = name;
-        this.startField = startField;
-        this.barriers = new ArrayList<>();
+    public Board(String name, Field startGreen, Field startYellow, Field startBlue, Field startRed) {
+        this(UUID.randomUUID(), name, startGreen, startYellow, startBlue, startRed);
     }
 
-    public Board(UUID id, String name, Field startField) {
+    public Board(UUID id, String name, Field startGreen, Field startYellow, Field startBlue, Field startRed) {
         this.id = id;
         this.name = name;
-        this.startField = startField;
+        this.startGreen = startGreen;
+        this.startYellow = startYellow;
+        this.startBlue = startBlue;
+        this.startRed = startRed;
         this.barriers = new ArrayList<>();
     }
 
     
     public UUID getId() {
         return id;
-    }
-
-    public Field getStartField() {
-        return startField;
-    }
-
-    public void setStartField(Field startField) {
-        this.startField = startField;
     }
 
     public String getName() {
@@ -65,4 +62,35 @@ public class Board {
         }
     }
 
+    public Field getStartGreen() {
+        return startGreen;
+    }
+
+    public void setStartGreen(Field startGreen) {
+        this.startGreen = startGreen;
+    }
+
+    public Field getStartYellow() {
+        return startYellow;
+    }
+
+    public void setStartYellow(Field startYellow) {
+        this.startYellow = startYellow;
+    }
+
+    public Field getStartBlue() {
+        return startBlue;
+    }
+
+    public void setStartBlue(Field startBlue) {
+        this.startBlue = startBlue;
+    }
+
+    public Field getStartRed() {
+        return startRed;
+    }
+
+    public void setStartRed(Field startRed) {
+        this.startRed = startRed;
+    }
 }
