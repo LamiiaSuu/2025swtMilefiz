@@ -13,7 +13,7 @@ import de.hs_rm.de.milefiz.game.model.Field;
  * und stellt die Geschäftslogik für Spiel-bezogene Operationen bereit.
  * </p>
  * 
- * <h3>Unterstützte Spielaktionen:</h3>
+ * <h2>Unterstützte Spielaktionen:</h2>
  * <ul>
  * <li>{@link #rollDice()} - Würfeln</li>
  * </ul>

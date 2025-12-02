@@ -3,11 +3,15 @@
 
 <script setup lang="ts">
 import DiceButton from './DiceButton.vue'
+import DiceCounter from './DiceCounter.vue';
 </script>
 
 
 <template>
   <div class="hud-container">
+    <div class="dice-counter-container">
+      <DiceCounter />
+    </div>
     <div style="position: absolute;bottom: 40px;right: 0px;">
       <div class="button-bar">
         <DiceButton />
@@ -22,6 +26,13 @@ import DiceButton from './DiceButton.vue'
   inset: 0;
   pointer-events: none;
   z-index: 99999
+}
+
+.dice-counter-container {
+  position: absolute;
+  top: 20px;           /* Abstand von oben */
+  left: 50%;           /* Mittig horizontal */
+  transform: translateX(-50%);  /* Zentriert das Element */
 }
 
 .button-bar {

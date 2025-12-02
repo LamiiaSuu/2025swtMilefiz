@@ -31,8 +31,6 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
-import de.hs_rm.de.milefiz.game.service.GameService;
-import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
 
@@ -75,10 +73,11 @@ public class FrontendReceiverController {
      * 4. Das Ziel-Feld wird basierend auf der angegebenen {@link Direction} vom aktuellen Feld bestimmt.
      * 5. Es erfolgen verschiedene Validierungen:
      * - Existiert das Zielfeld überhaupt?
+     * - Hat der Spieler überhaupt Züge frei
      * - Blockiert ein anderes Meeple oder eine Barriere das Feld?
      * - Steht dort ein Meeple eines anderen Spielers (→ Duell)?
      * - Ist der Zug eine verbotene Rückwärtsbewegung?
-     * 6. Wenn keine Regel verletzt wird, wird das Meeple auf das neue Feld gesetzt und 
+     * 6. Wenn keine Regel verletzt wird, wird das Meeple auf das neue Feld gesetzt, ein Zug verbraucht und 
      * ein {@link FrontendMoveEvent} an alle Clients der Lobby gesendet.
      * 7. Bei einem ungültigen Zug wird stattdessen ein
      * {@link FrontendMoveRejectedEvent} mit einer Fehlermeldung gesendet.
@@ -150,6 +149,11 @@ public class FrontendReceiverController {
             return new FrontendMoveRejectedEvent("Field doesnt exist");
         }
 
+        if (!player.canMove()) {
+            logger.info("No more moves left");
+            return new FrontendMoveRejectedEvent("no moves left");
+        }
+
         for (Meeple tempBarrier : board.getBarriers()) {
             if (tempBarrier.getCurrentField().equals(nextField)) {
                 // TODO player loses all unspent steps
@@ -183,10 +187,14 @@ public class FrontendReceiverController {
         // lastField wird jetzt im Meeple.setCurrentField aktualisiert
         meeple.setCurrentField(nextField);
 
+        //Spieler nutzt einen Zug
+        player.useMove();
+
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(
                 meeple.getId(),
-                nextField.getId());
+                nextField.getId(),
+                player.getRemainingMoves());
 
         return move;
     }
@@ -199,17 +207,18 @@ public class FrontendReceiverController {
  * Der Würfelwurf wird über den {@link GameService} durchgeführt und das Ergebnis
  * als {@link FrontendRollDiceEvent} an alle verbundenen Clients gesendet.</p>
  * 
- * <h3>Ablauf:</h3>
+ * <h4>Ablauf:</h4>
  * <ol>
  *   <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
  *   <li>Methode loggt die Würfel-Anfrage mit Spieler-ID und Lobby-ID</li>
  *   <li>{@link GameService#rollDice()} wird aufgerufen um Zufallszahl zu generieren</li>
+ *   <li> Speichert die gewürfelte zahl im Spieler ab
  *   <li>Würfelergebnis wird in {@link FrontendRollDiceEvent} verpackt</li>
  *   <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}} gesendet</li>
  *   <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
  * </ol>
  * 
- * <h3>WebSocket-Mapping:</h3>
+ * <h4>WebSocket-Mapping:</h4>
  * <ul>
  *   <li><strong>Eingang:</strong> {@code /milefiz/lobby/{lobbyId}/rollDice}</li>
  *   <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
@@ -228,10 +237,27 @@ public class FrontendReceiverController {
  */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleRollDice(@DestinationVariable UUID lobbyId, RollDiceCommand command) {
+    public FrontendEvent handleRollDice(@DestinationVariable("lobbyId") UUID lobbyId, RollDiceCommand command) {
         logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
+        int number = gameService.rollDice();
+        try {
+            Lobby lobby = lobbyManager.getLobby(lobbyId);
+            Player player = lobby.getPlayers().stream()
+                .filter(p -> p.getId().equals(command.playerId()))
+                .findFirst()
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found"));
+                
+            player.setRemainingMoves(number);
+            logger.info("Set {} remaining moves for player {}", number, player.getId());
+            
+        } catch (LobbyNotFoundException e) {
+            logger.error("Lobby {} not found for dice roll", lobbyId, e);
+        } catch (PlayerNotFoundException e) {
+            logger.error("Player {} not found in lobby {}", command.playerId(), lobbyId, e);
+        } catch (RuntimeException e) {
+            logger.error("Unexpected error setting remaining moves for player {}", command.playerId(), e);
+        }
         if(gameService.getRollDiceCooldown(command.playerId()) <= 0){
-            int number = gameService.rollDice();
             gameService.addRollDiceCooldown(command.playerId());
             logger.info("Player {} rolled a {} in lobby {}.", command.playerId(), number, lobbyId);
             return new FrontendRollDiceEvent(lobbyId, number, gameService.getRollDiceCooldown(command.playerId()));
