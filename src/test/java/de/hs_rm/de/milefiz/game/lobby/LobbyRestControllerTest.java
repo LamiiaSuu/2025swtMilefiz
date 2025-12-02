@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import de.hs_rm.de.milefiz.game.model.Color;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.service.GameService;
 import jakarta.servlet.http.HttpSession;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +31,9 @@ class LobbyRestControllerTest {
 
     @Mock
     private LobbyManager lobbyManager;
+
+    @Mock
+    private GameService gameService;
 
     @Mock
     private HttpSession httpSession;
@@ -44,6 +49,10 @@ class LobbyRestControllerTest {
         testLobbyId = UUID.randomUUID();
         testLobby = new Lobby();
         testLobby.setId(testLobbyId);
+        
+        // Mock gameService.getTestBoard() um NullPointerException zu vermeiden
+        // Lenient macht das Mock optional (wird nicht in allen Tests aufgerufen)
+        lenient().when(gameService.getTestBoard()).thenReturn(null);
     }
 
     @Test
