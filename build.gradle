@@ -4,6 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 	id "jacoco" // fuer Test-Coverage
 	id "org.sonarqube" version "7.0.1.6134"
+	id "org.ysb33r.doxygen" version "2.1.1"
 }
 
 group = 'de.hs-rm.de'
@@ -27,6 +28,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	// Security for authentication/authorization and messaging support
+	implementation 'org.springframework.security:spring-security-messaging'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
 }
 
 tasks.named('test') {
@@ -47,6 +51,44 @@ sonar {
 		property "sonar.host.url", "http://localhost:9000/sonar"
 		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
 	} 
+}
+
+doxygen {
+  executables {
+    doxygen {
+      // TODO: Pfad zu doxygen-Programmdatei anpassen
+      executableBySearchPath('doxygen')
+    }
+    dot {
+      executableBySearchPath('dot')
+    }
+  }
+  sourceSets {
+    // Generieren mit ./gradlew doxygenDox
+    main {
+      sources new File(projectDir,"src/main/java")
+      include '**/*.java'
+      outputDir = new File(buildDir,'docs/doxygen')
+
+      // https://doxygen.nl/manual/config.html
+      options optimize_output_java: true,
+        javadoc_autobrief: true,
+        generate_treeview: true,
+        class_graph: true,
+        collaboration_graph: true,
+        uml_look: true,
+        have_dot: true, // nur 'true' setzen falls 'dot'-Programm verfügbar (Linux)
+        recursive: true,
+        extract_all: true,
+        quiet: true,
+        warnings: false,
+        warn_if_doc_error: false,
+        warn_no_paramdoc: false,
+        warn_logfile: false,
+        warn_if_undocumented: false,
+        generate_latex: false
+    }
+  }
 }
 
 task build_frontend(type: Exec) {

@@ -3,10 +3,12 @@ import TheWelcome from '@/components/TheWelcome.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import GameBoard from '@/components/GameBoard.vue'
 import { onMounted } from 'vue'
+import GameHUD from '@/components/ui/GameHUD.vue'
 
-const { gamedata, startMilefizLiveUpdate, sendSocketMessage } = useMilefizStore()
+const { gamedata, startMilefizLiveUpdate, sendSocketMessage, joinLobby } = useMilefizStore()
 
-startMilefizLiveUpdate()
+// startMilefizLiveUpdate()
+joinLobby()
 
 setTimeout(function () {
   sendSocketMessage({ msg: 'Hello World' })
@@ -15,7 +17,9 @@ setTimeout(function () {
 </script>
 
 <template>
-  <main>
+  <main >
+    <!-- Einbindung des globalen HUDs -->
+    <GameHUD />
     <TheWelcome />
     <GameBoard />
   </main>

@@ -1,29 +1,32 @@
 package de.hs_rm.de.milefiz.ui;
 
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import de.hs_rm.de.milefiz.messaging.FrontendJumpEvent;
-import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
+import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
+import de.hs_rm.de.milefiz.game.model.Lobby;
+import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingServiceImpl;
+import de.hs_rm.de.milefiz.messaging.LobbyMessage;
+import de.hs_rm.de.milefiz.messaging.events.FrontendJumpEvent;
 
 @Controller
 public class TestController {
 
     private FrontendMessagingServiceImpl messageingService;
 
-    public TestController(FrontendMessagingServiceImpl messageingService) {
+    private LobbyManager lobbyManager;
+
+    public TestController(FrontendMessagingServiceImpl messageingService, LobbyManager lobbyManager) {
         this.messageingService = messageingService;
+        this.lobbyManager = lobbyManager;
     }
 
-    @GetMapping("/testMessage")
+    @GetMapping("/test")
     public String getMethodName() {
-        messageingService.sendEvent(new FrontendJumpEvent(UUID.randomUUID(), UUID.randomUUID()));
+        Lobby lobby = lobbyManager.getDummyLobby();
+        Meeple meeple = new Meeple(false);
+        messageingService.sendEvent(new LobbyMessage(lobby, new FrontendJumpEvent(meeple.getId())));
         return "";
     }
 
