@@ -6,8 +6,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 
 
 @Service
@@ -15,9 +18,14 @@ public class CooldownServiceImpl implements CooldownService {
 
     //Map für Spieler-Cooldowns
     private final Map<UUID, Integer> cooldowns = new ConcurrentHashMap<>();
+    private final ApplicationEventPublisher publisher;
 
     @Value("${dice.cooldown.seconds}")
     private int defaultSeconds;
+
+    public CooldownServiceImpl(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
+    }
 
     /**
      * Fügt einen Cooldown für einen Spieler hinzu oder aktualisiert einen Cooldown für einen Spieler.
@@ -45,6 +53,9 @@ public class CooldownServiceImpl implements CooldownService {
 
             if (newTime <= 0) {
                 cooldowns.remove(uuid); // Cooldown fertig -> spieler raus aus der Map
+
+
+                publisher.publishEvent(new FrontendCooldownFinishedEvent(uuid, null));
             } else {
                 cooldowns.put(uuid, newTime);
             }

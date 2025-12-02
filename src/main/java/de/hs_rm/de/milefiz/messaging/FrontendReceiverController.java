@@ -10,6 +10,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -26,6 +27,7 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
+import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
@@ -40,10 +42,12 @@ public class FrontendReceiverController {
     private final Logger logger = LoggerFactory.getLogger(FrontendReceiverController.class);
     private LobbyManager lobbyManager;
     private GameService gameService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService) {
+    public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService, SimpMessagingTemplate messagingTemplate) {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @MessageMapping("/milefiz/lobby/{lobbyId}")
@@ -229,7 +233,7 @@ public class FrontendReceiverController {
             int number = gameService.rollDice();
             gameService.addRollDiceCooldown(command.playerId());
             logger.info("Player {} rolled a {} in lobby {}.", command.playerId(), number, lobbyId);
-            return new FrontendRollDiceEvent(lobbyId, number);
+            return new FrontendRollDiceEvent(lobbyId, number, gameService.getRollDiceCooldown(command.playerId()));
         }
         else{
             logger.info("Player {} tried to roll dice in Lobby {}. But they still have a cooldown of {} to roll their dice!", command.playerId(), lobbyId, gameService.getRollDiceCooldown(command.playerId()));
@@ -251,5 +255,23 @@ public class FrontendReceiverController {
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
         logger.info("WebSocket disconnected - Player Token: {}", playerToken);
+    }
+
+    @EventListener
+    public void handleCooldownFinished(FrontendCooldownFinishedEvent event) {
+        logger.info("Cooldown finished for Player {} in Lobby {}", 
+            event.playerId(), lobbyManager.getLobbyFromPlayerUUID(event.playerId()).getId());
+
+        Lobby lobby = lobbyManager.getLobbyFromPlayerUUID(event.playerId());
+        
+        var payload = new FrontendCooldownFinishedEvent(
+            event.playerId(),
+            lobby.getId()
+        );
+
+        messagingTemplate.convertAndSend(
+            "/topic/milefiz/lobby/" + lobby.getId(),
+            payload
+        );
     }
 }

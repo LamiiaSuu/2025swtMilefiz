@@ -75,6 +75,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.type === 'ROLL_DICE') {
             console.log(`Player ${event.playerId} rolled: ${event.number}`)
             gamedata.currentDiceRoll = event.number
+            cooldown.active = true
+            cooldown.remainingSeconds = event.cooldown
           }
 
         } catch (err) {
@@ -84,21 +86,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
-        if (event.type === 'COOLDOWN_STARTED') {
-          cooldown.active = true
-          cooldown.remainingSeconds = event.remainingSeconds
-        }
 
         if (event.type === 'ROLL_DICE_ERROR') {
           console.log(`Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`)
           cooldown.remainingSeconds = event.seconds
         }
 
-        if (event.type === 'COOLDOWN_UPDATE') {
-          cooldown.remainingSeconds = event.remainingSeconds
-        }
-
         if (event.type === 'COOLDOWN_READY') {
+          console.log(`Player ${event.playerId} can roll again!`)
           cooldown.active = false
           cooldown.remainingSeconds = 0
         }

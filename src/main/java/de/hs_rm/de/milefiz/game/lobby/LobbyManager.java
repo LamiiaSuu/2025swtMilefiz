@@ -51,6 +51,20 @@ public class LobbyManager {
     }
 
     /**
+     * Durchsucht alle Lobbys nach dem angegebenn Spieler
+     *
+     * @param player
+     * @return Lobby wo der Spieler drin ist
+     */
+    public Lobby getLobbyFromPlayerUUID(UUID player) {
+        return lobbies.stream()
+            .filter(lobby -> lobby.getPlayers().stream()
+                    .anyMatch(p -> p.getId().equals(player)))
+            .findFirst()
+            .orElse(null);
+    }
+
+    /**
      * Erstellt eine neue Lobby und fügt sie zum Lobby Management hinzu
      *
      * @return die erstellte Lobby
