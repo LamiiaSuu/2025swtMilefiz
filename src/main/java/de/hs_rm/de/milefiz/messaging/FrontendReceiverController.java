@@ -223,6 +223,7 @@ public class FrontendReceiverController {
  * @see GameService#rollDice()
  * @see FrontendRollDiceEvent
  * @see RollDiceCommand
+ * @see FrontendRollDiceRejectedEvent
  * 
  */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
