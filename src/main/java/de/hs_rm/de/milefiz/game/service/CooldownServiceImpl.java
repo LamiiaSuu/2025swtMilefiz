@@ -17,13 +17,13 @@ public class CooldownServiceImpl implements CooldownService {
     private final Map<UUID, Integer> cooldowns = new ConcurrentHashMap<>();
 
     @Value("${dice.cooldown.seconds}")
-    private int seconds;
+    private int defaultSeconds;
 
     /**
      * Fügt einen Cooldown für einen Spieler hinzu oder aktualisiert einen Cooldown für einen Spieler.
      */
     public void addCooldown(UUID playerId) {
-        cooldowns.put(playerId, seconds);
+        cooldowns.put(playerId, defaultSeconds);
     }
 
     /**
