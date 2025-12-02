@@ -207,7 +207,7 @@ public class FrontendReceiverController {
  * Der Würfelwurf wird über den {@link GameService} durchgeführt und das Ergebnis
  * als {@link FrontendRollDiceEvent} an alle verbundenen Clients gesendet.</p>
  * 
- * <h4>Ablauf:</h4>
+ * Ablauf:
  * <ol>
  *   <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
  *   <li>Methode loggt die Würfel-Anfrage mit Spieler-ID und Lobby-ID</li>
@@ -293,7 +293,7 @@ public class FrontendReceiverController {
      * die vom {@link de.hs_rm.de.milefiz.game.service.CooldownService} publiziert 
      * werden, sobald der Cooldown eines Spielers den Wert 0 erreicht.</p>
      *
-     * <h3>Ablauf:</h3>
+     * Ablauf:
      * <ol>
      *   <li>Der Listener ermittelt anhand der playerId, in welcher {@link Lobby}
      *       sich der Spieler aktuell befindet.</li>
@@ -303,7 +303,7 @@ public class FrontendReceiverController {
      *       der betroffenen Lobby gesendet.</li>
      * </ol>
      *
-     * <h3>WebSocket-Ausgang:</h3>
+     * WebSocket-Ausgang:
      * <ul>
      *   <li><strong>Topic:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
      *   <li>Enthält: {@code playerId} und {@code lobbyId}</li>
