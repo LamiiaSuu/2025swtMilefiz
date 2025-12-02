@@ -39,13 +39,14 @@ public class LobbyRestController {
     }
 
     /**
-     * Joint eine zufällige Lobby. Sollte keine joinable Lobby existieren (z.B. volle Lobby), wird eine neue Lobby erstellt und gejoint.
+     * Joint eine zufällige Lobby. Sollte keine joinable Lobby existieren (z.B.
+     * volle Lobby), wird eine neue Lobby erstellt und gejoint.
      */
     @GetMapping(path = "/join/random")
     public ResponseEntity<LobbyJoinEvent> joinRandomLobby(HttpSession httpSession) throws LobbyNotFoundException {
         // Join Random lobby
         Lobby lobby = lobbyManager.getLobbies().stream().filter(lob -> lob.isJoinable()).findAny().orElse(null);
-        if(lobby == null) { // keine joinable Lobby gefunden
+        if (lobby == null) { // keine joinable Lobby gefunden
             lobby = lobbyManager.createLobby();
         }
         return joinLobby(lobby.getId(), httpSession);
@@ -55,10 +56,11 @@ public class LobbyRestController {
      * Joint die Lobby, welche angegeben wurde
      */
     @GetMapping(path = "/join/{lobbyId}")
-    public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId, HttpSession httpSession) throws LobbyNotFoundException {
+    public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId, HttpSession httpSession)
+            throws LobbyNotFoundException {
         Lobby lobby = lobbyManager.getLobby(lobbyId);
 
-        if (lobby.getBoard() != null){
+        if (lobby.getBoard() == null) {
             lobby.setBoard(gameService.getTestBoard());
         }
 
@@ -72,9 +74,11 @@ public class LobbyRestController {
         try {
             lobby.join(player);
         } catch (LobbyJoinException ex) {
-            return new ResponseEntity<>(new LobbyJoinEvent(null, null, null, ex.getMessage(), null), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new LobbyJoinEvent(null, null, null, ex.getMessage(), null),
+                    HttpStatus.CONFLICT);
 
         }
-        return new ResponseEntity<>(new LobbyJoinEvent(lobbyId, player.getId(), player.getColor().name(), "Erfolgreich gejoint. ", playerToken), HttpStatus.OK);
+        return new ResponseEntity<>(new LobbyJoinEvent(lobbyId, player.getId(), player.getColor().name(),
+                "Erfolgreich gejoint. ", playerToken), HttpStatus.OK);
     }
 }
