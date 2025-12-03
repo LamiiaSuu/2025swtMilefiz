@@ -72,7 +72,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         try {
           const event = JSON.parse(message.body)
 
-          if (event.type === 'ROLL_DICE') {
+          if (event.type === 'ROLL_DICE' && event.playerId === gamedata.playerId) {
             console.log(`Player ${event.playerId} rolled: ${event.number}`)
             gamedata.currentDiceRoll = event.number
             cooldown.active = true
@@ -88,13 +88,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         const boardStore = useBoardStore()
 
         // Wenn der Spieler im Moment noch nicht Würfeln darf, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
-        if (event.type === 'ROLL_DICE_ERROR') {
+        if (event.type === 'ROLL_DICE_ERROR' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`)
           cooldown.remainingSeconds = event.seconds
         }
 
         // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
-        if (event.type === 'COOLDOWN_READY') {
+        if (event.type === 'COOLDOWN_READY' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} can roll again!`)
           cooldown.active = false
           cooldown.remainingSeconds = 0
