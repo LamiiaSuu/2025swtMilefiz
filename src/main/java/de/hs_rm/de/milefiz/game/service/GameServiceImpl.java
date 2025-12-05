@@ -2,6 +2,8 @@ package de.hs_rm.de.milefiz.game.service;
 
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ public class GameServiceImpl implements GameService {
     private final CooldownServiceImpl cooldownService;
     private final MovementService movementService;
     private final ApplicationEventPublisher publisher;
+    private final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
     private Board testBoard;
 
     public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher,
@@ -94,6 +97,14 @@ public class GameServiceImpl implements GameService {
     @Override
     public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Principal principal,
             SimpMessageHeaderAccessor sha) {
+
+        logger.info("Processing movement command in lobby {} from player '{}': meeple {} moving {} (sessionId={})",
+                lobbyId,
+                principal != null ? principal.getName() : "anonymous",
+                moveCmd.meepleId(),
+                moveCmd.direction(),
+                sha.getSessionId());
+
         return movementService.moveMeeple(lobbyId, moveCmd, principal, sha);
     }
 }

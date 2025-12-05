@@ -1,5 +1,12 @@
 package de.hs_rm.de.milefiz.messaging.events;
 
 public enum EventType {
-    MOVE, JUMP, ROLL_DICE, MOVE_ERROR, ROLL_DICE_ERROR, COOLDOWN_READY
+    MOVE, 
+    JUMP, 
+    ROLL_DICE, 
+    MOVE_ERROR, 
+    ROLL_DICE_ERROR, 
+    COOLDOWN_READY, 
+    DUEL, 
+    MOVE_BARRIER
 }
