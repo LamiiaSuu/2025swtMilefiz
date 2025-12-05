@@ -2,7 +2,6 @@ package de.hs_rm.de.milefiz.game.lobby;
 
 import java.util.Set;
 import java.util.UUID;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,20 +42,20 @@ public class LobbyRestController {
      * volle Lobby), wird eine neue Lobby erstellt und gejoint.
      */
     @GetMapping(path = "/join/random")
-    public ResponseEntity<LobbyJoinEvent> joinRandomLobby(HttpSession httpSession) throws LobbyNotFoundException {
+    public ResponseEntity<LobbyJoinEvent> joinRandomLobby() throws LobbyNotFoundException {
         // Join Random lobby
         Lobby lobby = lobbyManager.getLobbies().stream().filter(lob -> lob.isJoinable()).findAny().orElse(null);
         if (lobby == null) { // keine joinable Lobby gefunden
             lobby = lobbyManager.createLobby();
         }
-        return joinLobby(lobby.getId(), httpSession);
+        return joinLobby(lobby.getId());
     }
 
     /**
      * Joint die Lobby, welche angegeben wurde
      */
     @GetMapping(path = "/join/{lobbyId}")
-    public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId, HttpSession httpSession)
+    public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId)
             throws LobbyNotFoundException {
         Lobby lobby = lobbyManager.getLobby(lobbyId);
 

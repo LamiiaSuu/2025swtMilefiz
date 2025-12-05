@@ -48,13 +48,6 @@ public class FrontendReceiverController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @MessageMapping("/milefiz/lobby/{lobbyId}")
-    @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public String handleMessage(@DestinationVariable("lobbyId") UUID lobbyId, String message) {
-        System.out.println("Received " + lobbyId.toString() + ": " + message);
-        return "Server received: " + message; // Body von Weiterleitung an alle Clients
-    }
-
     /**
      * Verarbeitet eingehende Bewegungsbefehle eines Spielers innerhalb einer
      * bestimmten Lobby

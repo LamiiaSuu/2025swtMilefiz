@@ -4,7 +4,8 @@ import { Client, type Message } from '@stomp/stompjs'
 import type { Direction, MovementCommand } from "@/types/movement";
 import { useBoardStore } from "./boardStore"
 
-const wsurl = `ws://${window.location.host}/milefiz`
+// const wsurl = `ws://${window.location.host}/milefiz`
+const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/milefiz`
 const DEST = '/topic/milefiz/lobby/'
 
 let stompclient: Client | null = null
@@ -118,25 +119,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     stompclient.activate()
   }
 
-  function sendSocketMessage(payload: any) {
-    if (!stompclient || !stompclient.connected) {
-      console.error('Cannot send message: STOMP client not connected.')
-      return
-    }
-    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobbyId
-    const body = JSON.stringify(payload)
-
-    try {
-      stompclient.publish({
-        destination: '/app/milefiz/lobby',
-        body,
-      })
-      console.log('Message sent to /app/milefiz/lobby/: ' + body)
-    } catch (err) {
-      console.error('Error sending message:', err)
-    }
-  }
-
   async function joinLobby(lobbyId: string = 'random') {
     console.log('Start receiving Gameboard Data...')
     try {
@@ -227,7 +209,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   return {
     gamedata,
     startMilefizLiveUpdate,
-    sendSocketMessage,
     sendRollDice,
     joinLobby,
     cooldown,
