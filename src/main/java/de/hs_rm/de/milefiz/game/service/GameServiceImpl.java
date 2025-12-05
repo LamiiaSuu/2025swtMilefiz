@@ -38,8 +38,6 @@ public class GameServiceImpl implements GameService {
 
     public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher, CooldownServiceImpl cooldownService) throws IOException {
         final String BOARD_PATH = "static/boards/dummyBoard.json";
-
-        
         ObjectMapper objectMapper = new ObjectMapper();
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(BOARD_PATH);
@@ -49,9 +47,9 @@ public class GameServiceImpl implements GameService {
         }
 
         try{
-        BoardDTO testBoardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
-        testBoard = BoardMapper.mapToBoard(testBoardDTO);
-        logger.info("Test board loaded successfully from: {}", BOARD_PATH);
+            BoardDTO testBoardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
+            testBoard = BoardMapper.mapToBoard(testBoardDTO);
+            logger.info("Test board loaded successfully from: {}", BOARD_PATH);
         }finally{
             inputStream.close();
         }
