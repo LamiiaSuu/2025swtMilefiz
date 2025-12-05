@@ -101,7 +101,7 @@
             "west": "e0a6f971-bcb4-4f9f-9820-f11e19a31593",
             "type": "NORMAL",
             "position": {
-                "x": 4,
+                "x": 2,
                 "y": 6
             },
             "barrier": false
@@ -221,7 +221,7 @@
                 "x": 4,
                 "y": 4
             },
-            "barrier": false
+            "barrier": true
         },
         {
             "id": "ce1591d3-4f42-4e09-82fc-e8ef907b1b6a",
@@ -234,7 +234,7 @@
                 "x": 8,
                 "y": 4
             },
-            "barrier": true
+            "barrier": false
         },
         {
             "id": "ed2f45ff-b8a7-4ee5-9dc4-be031f55d94f",
