@@ -126,7 +126,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   const lookDir = new Vector3()
   cam.getWorldDirection(lookDir)
   lookDir.setY(0).normalize() // nur horizontale Richtung
-  lookDir.z *= -1
+  //lookDir.z *= -1
 
   // Vektor für Bewegung
   const moveDir = new Vector3()
