@@ -1,26 +1,13 @@
 <script setup lang="ts">
 import TheWelcome from '@/components/TheWelcome.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
-import { useUrlLobbyStore } from '@/stores/urlLobbyStore'
 import GameBoard from '@/components/GameBoard.vue'
 import { onMounted } from 'vue'
-import GameHUD from '@/components/ui/GameHUD.vue'
 
-const { sendSocketMessage, joinLobby } = useMilefizStore()
+const { gamedata, startMilefizLiveUpdate, sendSocketMessage, joinLobby } = useMilefizStore()
 
-onMounted(() => {
-
-  // holt während des routings gespeicherte lobbyid aus dem urlLobbyStore
-  const urlLobbyId = useUrlLobbyStore().getUrlLobbyId()
-
-  // falls vorhanden, tritt mit lobbyid bei und lösche diese aus urlLobbyStore
-  if (urlLobbyId) {
-    joinLobby(urlLobbyId)
-    useUrlLobbyStore().clear()
-  } else {
-    joinLobby()
-  }
-})
+// startMilefizLiveUpdate()
+joinLobby()
 
 setTimeout(function () {
   sendSocketMessage({ msg: 'Hello World' })
@@ -29,9 +16,7 @@ setTimeout(function () {
 </script>
 
 <template>
-  <main >
-    <!-- Einbindung des globalen HUDs -->
-    <GameHUD />
+  <main>
     <TheWelcome />
     <GameBoard />
   </main>

@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useUrlLobbyStore } from '@/stores/urlLobbyStore'
 import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
@@ -17,16 +16,6 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
-    },
-    {
-      path: '/lobby/:lobbyid',
-      redirect: (to) => {
-        // lese lobbyid aus url parametern und setze urlLobbyId in UrlLobbyStore, dann weiterleitung an home
-        const id: string | undefined = (to.params.lobbyid as string | undefined)
-        if (id)
-          if (id) useUrlLobbyStore().setUrlLobbyId(id)
-        return { name: 'home', replace: true }
-      },
     },
   ],
 })
