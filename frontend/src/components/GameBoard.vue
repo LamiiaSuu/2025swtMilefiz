@@ -126,7 +126,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   const lookDir = new Vector3()
   cam.getWorldDirection(lookDir)
   lookDir.setY(0).normalize() // nur horizontale Richtung
-  //lookDir.z *= -1
+  lookDir.multiplyScalar(-1)
 
   // Vektor für Bewegung
   const moveDir = new Vector3()
@@ -143,12 +143,12 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     case "ArrowLeft":
     case "KeyA":
       // Links = Kreuzprodukt von Up-Vektor × Blickrichtung
-      moveDir.crossVectors(lookDir, new Vector3(0, 1, 0)).normalize()
+      moveDir.crossVectors(new Vector3(0, 1, 0), lookDir).normalize()
       break
     case "ArrowRight":
     case "KeyD":
       // Rechts = Kreuzprodukt von Blickrichtung × Up-Vektor
-      moveDir.crossVectors(new Vector3(0, 1, 0), lookDir).normalize()
+      moveDir.crossVectors(lookDir, new Vector3(0, 1, 0)).normalize()
       break
     default:
       return
