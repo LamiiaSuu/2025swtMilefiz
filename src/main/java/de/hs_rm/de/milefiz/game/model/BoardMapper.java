@@ -26,7 +26,7 @@ public class BoardMapper {
         Stack<Field> remaining = new Stack<>(); 
         Map<Direction, Field> currentNeighbours;
         List<Field> visited = new ArrayList<>();
-        BoardDTO out = new BoardDTO();
+        BoardDTO out = new BoardDTO(board.getId(), board.getName());
 
         remaining.add(startField);
         
@@ -82,7 +82,7 @@ public class BoardMapper {
         List<Field> fields = new ArrayList<>();
         FieldDTO startDTO = fieldDTOs.removeFirst();
         Field startField = new Field(startDTO.getId(), startDTO.getType(), startDTO.getPosition());
-        Board board = new Board("dummy-board", null, null, null, null);
+        Board board = new Board(boardDTO.getId(), boardDTO.getName(), null, null, null, null);
 
         fields.add(startField);
 

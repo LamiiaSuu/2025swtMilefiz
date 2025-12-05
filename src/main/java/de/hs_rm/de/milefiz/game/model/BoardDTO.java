@@ -8,10 +8,36 @@ import java.util.UUID;
  * DTO des Spielbretts zur Übertragung an das Frontend
  */
 public class BoardDTO {
+    private UUID id;
+    private String name;
+
+    public BoardDTO() {}
+
+    public BoardDTO(UUID id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     private List<FieldDTO> fields = new ArrayList<>();
 
     public List<FieldDTO> getFields() {
         return fields;
+    }
+    
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void addField(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
@@ -107,4 +133,7 @@ public class BoardDTO {
         
         
     }
+
+
+
 }
