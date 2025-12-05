@@ -1,9 +1,9 @@
 package de.hs_rm.de.milefiz.game.service;
 
-
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
@@ -11,9 +11,12 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.security.Principal;
 
 import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Field;
+import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
+import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.game.model.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.BoardMapper;
 
@@ -33,17 +36,22 @@ public class GameServiceImpl implements GameService {
 
     private final DiceServiceImpl diceService;
     private final CooldownServiceImpl cooldownService;
+    private final MovementService movementService;
     private final ApplicationEventPublisher publisher;
     private Board testBoard;
 
-    public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher, CooldownServiceImpl cooldownService) throws StreamReadException, DatabindException, IOException {
+    public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher,
+            CooldownServiceImpl cooldownService, MovementService movementService)
+            throws StreamReadException, DatabindException, IOException {
         ObjectMapper objectMapper;
         objectMapper = new ObjectMapper();
-        BoardDTO testBoardDTO = objectMapper.readValue(new File("src/main/resources/static/boards/dummyBoard.json"), BoardDTO.class);
+        BoardDTO testBoardDTO = objectMapper.readValue(new File("src/main/resources/static/boards/dummyBoard.json"),
+                BoardDTO.class);
         testBoard = BoardMapper.mapToBoard(testBoardDTO);
-        
+
         this.diceService = diceService;
         this.cooldownService = cooldownService;
+        this.movementService = movementService;
         this.publisher = publisher;
     }
 
@@ -64,7 +72,7 @@ public class GameServiceImpl implements GameService {
 
         return cooldownService.getCooldown(playerId);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -72,7 +80,7 @@ public class GameServiceImpl implements GameService {
     public void addRollDiceCooldown(UUID playerId) {
         cooldownService.addCooldown(playerId);
     }
-    
+
     @Override
     public Board getTestBoard() {
         return testBoard;
@@ -81,5 +89,11 @@ public class GameServiceImpl implements GameService {
     @Override
     public void setTestBoard(Board testBoard) {
         this.testBoard = testBoard;
+    }
+
+    @Override
+    public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Principal principal,
+            SimpMessageHeaderAccessor sha) {
+        return movementService.moveMeeple(lobbyId, moveCmd, principal, sha);
     }
 }
