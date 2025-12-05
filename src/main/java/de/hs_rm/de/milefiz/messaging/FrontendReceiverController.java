@@ -9,7 +9,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
@@ -84,7 +83,6 @@ public class FrontendReceiverController {
      *                  {@link Direction}
      * @param principal der authentifizierte Benutzer, der die Nachricht gesendet
      *                  hat
-     * @param sha       der aktuelle STOMP-Header-Accessor (z. B. für Metadaten)
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
      *         ({@link FrontendMoveEvent}) oder einen Fehler
      *         ({@link FrontendMoveRejectedEvent}) an die Clients sendet
@@ -93,7 +91,7 @@ public class FrontendReceiverController {
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleMove(@DestinationVariable("lobbyId") UUID lobbyId, MovementCommand moveCmd,
-            Principal principal, SimpMessageHeaderAccessor sha) {
+            Principal principal) {
         Lobby lobby = null;
         try {
             lobby = lobbyManager.getLobby(lobbyId);
@@ -111,6 +109,7 @@ public class FrontendReceiverController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("PLAYER " + player.getPlayerToken() + " | " + player.getColor());
 
         // nur zum testen
         // lobby.setBoard(gameService.getTestBoard());

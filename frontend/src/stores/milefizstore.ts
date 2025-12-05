@@ -38,14 +38,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   })
 
   function startMilefizLiveUpdate() {
-    console.log('Starting Liveupdater for Milefiz')
+    console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
     // Nur eine Instanz
     if (stompclient != null && stompclient.connected) {
       return
     }
 
     stompclient = new Client({
-      brokerURL: wsurl,
+      // brokerURL: wsurl,
+      webSocketFactory: () => new WebSocket(wsurl),
       connectHeaders: {
         "player-token": gamedata.playerToken
       }
@@ -163,7 +164,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
-    const moveCmd: MovementCommand = { meepleId, direction};
+    const moveCmd: MovementCommand = { meepleId, direction };
 
     const body = JSON.stringify(moveCmd)
 
@@ -172,6 +173,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     try {
       stompclient.publish({
         destination: DEST_APP + "/move",
+        headers: { "player-token": gamedata.playerToken },
         body,
       })
       console.log("Move sent:", body)
@@ -198,6 +200,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     try {
       stompclient.publish({
         destination: `/app/milefiz/lobby/${gamedata.lobbyId}/rollDice`,
+        headers: { "player-token": gamedata.playerToken },
         body: JSON.stringify(rollDiceCommand),
       })
       console.log('Roll dice command sent for player:', gamedata.playerId)

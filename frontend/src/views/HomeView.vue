@@ -5,9 +5,8 @@ import GameBoard from '@/components/GameBoard.vue'
 import { onMounted } from 'vue'
 import GameHUD from '@/components/ui/GameHUD.vue'
 
-const { gamedata, startMilefizLiveUpdate, joinLobby } = useMilefizStore()
+const { joinLobby } = useMilefizStore()
 
-// startMilefizLiveUpdate()
 joinLobby()
 </script>
 
