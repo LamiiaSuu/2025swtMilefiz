@@ -109,6 +109,8 @@ public class Player {
     * @return {@code true} wenn der Spieler noch Züge übrig hat, 
     *         {@code false} wenn keine Züge mehr vorhanden sind
     * 
+    * @author Leon Schäfer
+    * 
     */
     public boolean canMove(){
         return remainingMoves > 0;
@@ -127,6 +129,8 @@ public class Player {
      * 
      * <p><strong>Sicherheit:</strong> Die Methode verhindert, dass 
      * {@code remainingMoves} unter 0 fallen kann.</p>
+     * 
+     * @author Leon Schäfer
      * 
      */
     public void useMove(){

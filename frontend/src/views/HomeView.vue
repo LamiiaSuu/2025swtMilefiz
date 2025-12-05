@@ -5,15 +5,10 @@ import GameBoard from '@/components/GameBoard.vue'
 import { onMounted } from 'vue'
 import GameHUD from '@/components/ui/GameHUD.vue'
 
-const { gamedata, startMilefizLiveUpdate, sendSocketMessage, joinLobby } = useMilefizStore()
+const { gamedata, startMilefizLiveUpdate, joinLobby } = useMilefizStore()
 
 // startMilefizLiveUpdate()
 joinLobby()
-
-setTimeout(function () {
-  sendSocketMessage({ msg: 'Hello World' })
-  console.log('Home view!!')
-}, 5000)
 </script>
 
 <template>

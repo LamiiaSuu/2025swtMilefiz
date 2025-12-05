@@ -4,7 +4,8 @@ import { Client, type Message } from '@stomp/stompjs'
 import type { Direction, MovementCommand } from "@/types/movement";
 import { useBoardStore } from "./boardStore"
 
-const wsurl = `ws://${window.location.host}/milefiz`
+// const wsurl = `ws://${window.location.host}/milefiz`
+const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/milefiz`
 const DEST = '/topic/milefiz/lobby/'
 
 let stompclient: Client | null = null
@@ -72,7 +73,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         try {
           const event = JSON.parse(message.body)
 
-          if (event.type === 'ROLL_DICE') {
+          if (event.type === 'ROLL_DICE' && event.playerId === gamedata.playerId) {
             console.log(`Player ${event.playerId} rolled: ${event.number}`)
             gamedata.currentDiceRoll = event.number
             cooldown.active = true
@@ -88,13 +89,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         const boardStore = useBoardStore()
 
         // Wenn der Spieler im Moment noch nicht Würfeln darf, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
-        if (event.type === 'ROLL_DICE_ERROR') {
+        if (event.type === 'ROLL_DICE_ERROR' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`)
           cooldown.remainingSeconds = event.seconds
         }
 
         // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
-        if (event.type === 'COOLDOWN_READY') {
+        if (event.type === 'COOLDOWN_READY' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} can roll again!`)
           cooldown.active = false
           cooldown.remainingSeconds = 0
@@ -116,25 +117,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
     // Verbindung zum Broker aufbauen
     stompclient.activate()
-  }
-
-  function sendSocketMessage(payload: any) {
-    if (!stompclient || !stompclient.connected) {
-      console.error('Cannot send message: STOMP client not connected.')
-      return
-    }
-    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobbyId
-    const body = JSON.stringify(payload)
-
-    try {
-      stompclient.publish({
-        destination: '/app/milefiz/lobby',
-        body,
-      })
-      console.log('Message sent to /app/milefiz/lobby/: ' + body)
-    } catch (err) {
-      console.error('Error sending message:', err)
-    }
   }
 
   async function joinLobby(lobbyId: string = 'random') {
@@ -226,7 +208,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   return {
     gamedata,
     startMilefizLiveUpdate,
-    sendSocketMessage,
     sendRollDice,
     joinLobby,
     cooldown,

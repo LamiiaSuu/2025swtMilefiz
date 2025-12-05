@@ -8,11 +8,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.Principal;
 
 import de.hs_rm.de.milefiz.game.model.Board;
@@ -36,21 +35,44 @@ import de.hs_rm.de.milefiz.game.model.BoardMapper;
 @Service
 public class GameServiceImpl implements GameService {
 
+    private final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
     private final DiceServiceImpl diceService;
     private final CooldownServiceImpl cooldownService;
     private final MovementService movementService;
     private final ApplicationEventPublisher publisher;
-    private final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
     private Board testBoard;
 
+    /**
+     * Konstruktor für Dependency Injection und Board-Initialisierung.
+     * 
+     * @param diceService Service für Würfeloperationen
+     * @param publisher Event Publisher für Events  
+     * @param cooldownService Service für Cooldown-Management
+     * @throws IOException wenn Board-Datei nicht gefunden oder gelesen werden kann
+     * 
+     * @author Leon Schäfer
+     * 
+     */
     public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher,
             CooldownServiceImpl cooldownService, MovementService movementService)
-            throws StreamReadException, DatabindException, IOException {
-        ObjectMapper objectMapper;
-        objectMapper = new ObjectMapper();
-        BoardDTO testBoardDTO = objectMapper.readValue(new File("src/main/resources/static/boards/dummyBoard.json"),
+            throws IOException {
+        final String BOARD_PATH = "static/boards/dummyBoard.json";
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(BOARD_PATH);
+        if(inputStream == null){
+            logger.error("BoardFile not found: {}", BOARD_PATH);
+            throw new IOException("BoardFile not found: " + BOARD_PATH);
+        }
+
+        try{
+            BoardDTO testBoardDTO = objectMapper.readValue(inputStream,
                 BoardDTO.class);
-        testBoard = BoardMapper.mapToBoard(testBoardDTO);
+            testBoard = BoardMapper.mapToBoard(testBoardDTO);
+            logger.info("Test board loaded successfully from: {}", BOARD_PATH);
+        }finally{
+            inputStream.close();
+        }
 
         this.diceService = diceService;
         this.cooldownService = cooldownService;

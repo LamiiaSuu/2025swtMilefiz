@@ -42,14 +42,6 @@ public class FrontendReceiverController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @MessageMapping("/milefiz/lobby/{lobbyId}")
-    @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public String handleMessage(@DestinationVariable("lobbyId") UUID lobbyId, String message) {
-        System.out.println("Received " + lobbyId.toString() + ": " + message);
-        return "Server received: " + message; // Body von Weiterleitung an alle Clients
-    }
-
-
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleMove(@DestinationVariable("lobbyId") UUID lobbyId, MovementCommand moveCmd,
@@ -78,7 +70,7 @@ public class FrontendReceiverController {
  *   <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
  *   <li>Methode loggt die Würfel-Anfrage mit Spieler-ID und Lobby-ID</li>
  *   <li>{@link GameService#rollDice()} wird aufgerufen um Zufallszahl zu generieren</li>
- *   <li> Speichert die gewürfelte zahl im Spieler ab
+ *   <li> Speichert die gewürfelte zahl im Spieler ab</li>
  *   <li>Würfelergebnis wird in {@link FrontendRollDiceEvent} verpackt</li>
  *   <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}} gesendet</li>
  *   <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
@@ -99,6 +91,8 @@ public class FrontendReceiverController {
  * @see FrontendRollDiceEvent
  * @see RollDiceCommand
  * @see FrontendRollDiceRejectedEvent
+ * 
+ * @author Leon Schäfer
  * 
  */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
@@ -127,7 +121,7 @@ public class FrontendReceiverController {
         
             gameService.addRollDiceCooldown(command.playerId());
             logger.info("Player {} rolled a {} in lobby {}.", command.playerId(), number, lobbyId);
-            return new FrontendRollDiceEvent(lobbyId, number, gameService.getRollDiceCooldown(command.playerId()));
+            return new FrontendRollDiceEvent(command.playerId(), number, gameService.getRollDiceCooldown(command.playerId()));
         }
         else{
             logger.info("Player {} tried to roll dice in Lobby {}. But they still have a cooldown of {} to roll their dice!", command.playerId(), lobbyId, gameService.getRollDiceCooldown(command.playerId()));
