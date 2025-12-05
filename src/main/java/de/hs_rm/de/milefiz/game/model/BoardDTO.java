@@ -14,25 +14,27 @@ public class BoardDTO {
         return fields;
     }
 
-    public void addField(UUID id, FieldType type, Position position, boolean isBarrier, UUID north, UUID east, UUID south, UUID west) {
-        this.fields.add(new FieldDTO(id, type, position, isBarrier, north, east, south, west));
+    public void addField(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
+        this.fields.add(new FieldDTO(id, type, position, barrier, north, east, south, west));
     }
     
-    protected class FieldDTO {
+    public static class FieldDTO {
         private UUID id;
         private UUID north;
         private UUID east; 
         private UUID south;
         private UUID west; 
         private FieldType type;
-        private boolean isBarrier;
+        private boolean barrier;
         private Position position;
 
-        private FieldDTO(UUID id, FieldType type, Position position, boolean isBarrier, UUID north, UUID east, UUID south, UUID west) {
+        public FieldDTO() {}
+
+        public FieldDTO(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
             this.id = id;
             this.type = type;
             this.position = position;
-            this.isBarrier = isBarrier;
+            this.barrier = barrier;
             this.north = north;
             this.east = east;
             this.south = south;
@@ -88,11 +90,11 @@ public class BoardDTO {
         }
 
         public boolean isBarrier() {
-            return isBarrier;
+            return barrier;
         }
 
         public void setBarrier(boolean isBarrier) {
-            this.isBarrier = isBarrier;
+            this.barrier = isBarrier;
         }
 
         public Position getPosition() {

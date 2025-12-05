@@ -3,13 +3,14 @@ package de.hs_rm.de.milefiz.messaging.events;
 import java.util.UUID;
 
 /**
- * @author Robin Claassen / Maximilian Ressel
+ * @author Robin Claassen / Maximilian Ressel / Leon Schäfer / Elisabeth Gehdt
  * @param id meepleId/barrierId
  * @param targetField Ziel wo der Spieler hin will
+ * @param remainingMoves Anzahl der übrigbleibenden Züge
  */
-public record FrontendMoveEvent(String type, UUID id, UUID targetField) implements FrontendEvent {
+public record FrontendMoveEvent(String type, UUID id, UUID targetField, int remainingMoves) implements FrontendEvent {
 
-    public FrontendMoveEvent(UUID id, UUID targetField) {
-        this(EventType.MOVE.name(), id, targetField);
+    public FrontendMoveEvent(UUID id, UUID targetField, int remainingMoves) {
+        this(EventType.MOVE.name(), id, targetField, remainingMoves);
     }
 }

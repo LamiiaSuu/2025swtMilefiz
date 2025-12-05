@@ -3,12 +3,12 @@
     {
         "id": "cff7caa8-032f-42e8-aeaa-c53ce5cbfc97",
         "north": "f8cc4645-effc-49d9-9968-faeea99b4662",
-        "south": "f0236db2-7411-4e72-ac90-c9c35efa61e8",
+        "south": null,
         "west": "3a72227f-a298-436c-97d4-2a8151f337eb",
         "east": "14047fb1-b692-4866-bfe9-12939d5be387",
         "type": "NORMAL",
-        "position": {"x": 2, "y": 2},
-        "isBarrier": false
+        "position": {"x": 4, "y": 4},
+        "barrier": false
     },
     {
         "id": "f8cc4645-effc-49d9-9968-faeea99b4662",
@@ -17,8 +17,8 @@
         "west": null,
         "east": null,
         "type": "NORMAL",
-        "position": {"x": 2, "y": 3},
-        "isBarrier": false
+        "position": {"x": 4, "y": 6},
+        "barrier": false
     },
     {
         "id": "39a9d9d8-67dd-409a-95ca-7cf620671096",
@@ -27,8 +27,8 @@
         "west": null,
         "east": "705b8058-801b-449c-8ac9-d63f91742854",
         "type": "NORMAL",
-        "position": {"x": 2, "y": 4},
-        "isBarrier": true
+        "position": {"x": 4, "y": 8},
+        "barrier": true
     },
     {
         "id": "705b8058-801b-449c-8ac9-d63f91742854",
@@ -37,8 +37,8 @@
         "west": "39a9d9d8-67dd-409a-95ca-7cf620671096",
         "east": "cc850384-e899-463f-b895-3419a6090b1c",
         "type": "NORMAL",
-        "position": {"x": 3, "y": 4},
-        "isBarrier": false
+        "position": {"x": 6, "y": 8},
+        "barrier": false
     },
     {
         "id": "cc850384-e899-463f-b895-3419a6090b1c",
@@ -47,8 +47,8 @@
         "west": "705b8058-801b-449c-8ac9-d63f91742854",
         "east": "35b5278e-dfc4-4196-8c39-f8f06811b8b5",
         "type": "NORMAL",
-        "position": {"x": 4, "y": 4},
-        "isBarrier": false
+        "position": {"x": 8, "y": 8},
+        "barrier": false
     },
      {
         "id": "35b5278e-dfc4-4196-8c39-f8f06811b8b5",
@@ -57,8 +57,8 @@
         "west": "cc850384-e899-463f-b895-3419a6090b1c",
         "east": "9fc41ff5-fd40-44ab-b99d-151010e5cda5",
         "type": "NORMAL",
-        "position": {"x": 5, "y": 4},
-        "isBarrier": false
+        "position": {"x": 10, "y": 8},
+        "barrier": false
     },
     {
         "id": "9fc41ff5-fd40-44ab-b99d-151010e5cda5",
@@ -67,8 +67,8 @@
         "west": "35b5278e-dfc4-4196-8c39-f8f06811b8b5",
         "east": null,
         "type": "NORMAL",
-        "position": {"x": 6, "y": 4},
-        "isBarrier": true
+        "position": {"x": 12, "y": 8},
+        "barrier": true
     },
     {
         "id": "c5f54fd3-425b-46ae-be9f-db62581f8b11",
@@ -77,18 +77,18 @@
         "west": null,
         "east": null,
         "type": "NORMAL",
-        "position": {"x": 6, "y": 3},
-        "isBarrier": false
+        "position": {"x": 12, "y": 6},
+        "barrier": false
     },
     {
         "id": "2b485a92-ccc4-45a9-89ce-eae11e1f7ef7",
         "north": "c5f54fd3-425b-46ae-be9f-db62581f8b11",
         "south": "506f8417-eb13-43f8-92a5-4ca72ca80d41",
         "west": "3df83e35-151c-4ad9-995f-057c3495c93b",
-        "east": "218f8f79-a14a-4930-b913-eb0c5dd56810",
+        "east": null,
         "type": "NORMAL",
-        "position": {"x": 6, "y": 2},
-        "isBarrier": false
+        "position": {"x": 12, "y": 4},
+        "barrier": false
     },
     {
         "id": "3df83e35-151c-4ad9-995f-057c3495c93b",
@@ -97,8 +97,8 @@
         "west": "5226146e-53a7-4c59-8946-ec805fe90608",
         "east": "2b485a92-ccc4-45a9-89ce-eae11e1f7ef7",
         "type": "NORMAL",
-        "position": {"x": 5, "y": 2},
-        "isBarrier": false
+        "position": {"x": 10, "y": 4},
+        "barrier": false
     },
     {
         "id": "5226146e-53a7-4c59-8946-ec805fe90608",
@@ -107,8 +107,8 @@
         "west": "14047fb1-b692-4866-bfe9-12939d5be387",
         "east": "3df83e35-151c-4ad9-995f-057c3495c93b",
         "type": "NORMAL",
-        "position": {"x": 4, "y": 2},
-        "isBarrier": false
+        "position": {"x": 8, "y": 4},
+        "barrier": false
     },
     {
         "id": "14047fb1-b692-4866-bfe9-12939d5be387",
@@ -117,8 +117,8 @@
         "west": "cff7caa8-032f-42e8-aeaa-c53ce5cbfc97",
         "east": "5226146e-53a7-4c59-8946-ec805fe90608",
         "type": "NORMAL",
-        "position": {"x": 3, "y": 2},
-        "isBarrier": false
+        "position": {"x": 6, "y": 4},
+        "barrier": false
     },
     {
         "id": "84917ccf-a3ce-4ba5-910e-d9fa3507fd91",
@@ -127,8 +127,8 @@
         "west": null,
         "east": null,
         "type": "END",
-        "position": {"x": 4, "y": 5},
-        "isBarrier": false
+        "position": {"x": 8, "y": 10},
+        "barrier": false
     },
      {
         "id": "3a72227f-a298-436c-97d4-2a8151f337eb",
@@ -137,18 +137,8 @@
         "west": null,
         "east": "cff7caa8-032f-42e8-aeaa-c53ce5cbfc97",
         "type": "START_GREEN",
-        "position": {"x": 1, "y": 2},
-        "isBarrier": false
-    },
-    {
-        "id": "f0236db2-7411-4e72-ac90-c9c35efa61e8",
-        "north": "cff7caa8-032f-42e8-aeaa-c53ce5cbfc97",
-        "south": null,
-        "west": null,
-        "east": null,
-        "type": "START_GREEN",
-        "position": {"x": 2, "y": 1},
-        "isBarrier": false
+        "position": {"x": 2, "y": 4},
+        "barrier": false
     },
     {
         "id": "506f8417-eb13-43f8-92a5-4ca72ca80d41",
@@ -157,18 +147,8 @@
         "west": null,
         "east": null,
         "type": "START_BLUE",
-        "position": {"x": 6, "y": 1},
-        "isBarrier": false
-    },
-    {
-        "id": "218f8f79-a14a-4930-b913-eb0c5dd56810",
-        "north": null,
-        "south": null,
-        "west": "2b485a92-ccc4-45a9-89ce-eae11e1f7ef7",
-        "east": null,
-        "type": "START_BLUE",
-        "position": {"x": 7, "y": 2},
-        "isBarrier": false
+        "position": {"x": 12, "y": 2},
+        "barrier": false
     }
 ]
 }
