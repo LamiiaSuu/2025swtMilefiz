@@ -36,6 +36,17 @@ public class GameServiceImpl implements GameService {
     private final ApplicationEventPublisher publisher;
     private Board testBoard;
 
+    /**
+     * Konstruktor für Dependency Injection und Board-Initialisierung.
+     * 
+     * @param diceService Service für Würfeloperationen
+     * @param publisher Event Publisher für Events  
+     * @param cooldownService Service für Cooldown-Management
+     * @throws IOException wenn Board-Datei nicht gefunden oder gelesen werden kann
+     * 
+     * @author Leon Schäfer
+     * 
+     */
     public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher, CooldownServiceImpl cooldownService) throws IOException {
         final String BOARD_PATH = "static/boards/dummyBoard.json";
         ObjectMapper objectMapper = new ObjectMapper();
