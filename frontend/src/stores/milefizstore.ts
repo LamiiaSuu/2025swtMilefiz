@@ -45,8 +45,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
 
     stompclient = new Client({
-      // brokerURL: wsurl,
-      webSocketFactory: () => new WebSocket(wsurl + `?player-token=${gamedata.playerToken}`),
+      brokerURL: wsurl,
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)

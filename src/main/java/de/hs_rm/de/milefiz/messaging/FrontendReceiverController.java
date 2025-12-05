@@ -107,7 +107,7 @@ public class FrontendReceiverController {
         try {
             player = lobby.getPlayerByToken(principalName);
         } catch (Exception e) {
-            e.printStackTrace();
+            player = lobby.getPlayers().stream().findFirst().orElse(null);
         }
         System.out.println("PLAYER " + player.getPlayerToken() + " | " + player.getColor());
 
