@@ -28,6 +28,7 @@ public class FrontendMessagingServiceImpl implements FrontendMessagingService {
      * <li>{@link de.hs_rm.de.milefiz.messaging.events.FrontendJumpEvent}</li>
      * <li>{@link de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent}</li>
      * <li>{@link de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent}</li>
+     * <li>{@link de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent}</li>
      * </ul>
      */
     @Override

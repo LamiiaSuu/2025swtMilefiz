@@ -13,8 +13,14 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
 
 
 // Mockito erstellt echten GameService mit Fake-Abhängigkeiten:
@@ -28,13 +34,17 @@ class GameServiceTest {
     private DiceServiceImpl diceService; // Mock wird automatisch erstellt
 
     @Mock
+    private CooldownServiceImpl cooldownService; // Mock wird automatisch erstellt
+
+    @Mock
     private ApplicationEventPublisher publisher; // Mock wird automatisch erstellt
 
     private GameService gameService;
 
     @BeforeEach
-    void setUp() {
-        gameService = new GameServiceImpl(diceService, publisher);
+
+    void setUp() throws StreamReadException, DatabindException, IOException {
+        gameService = new GameServiceImpl(diceService, publisher, cooldownService);
 
     }
 
