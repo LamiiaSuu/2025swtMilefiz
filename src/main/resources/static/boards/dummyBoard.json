@@ -72,7 +72,7 @@
             "north": "ed2f45ff-b8a7-4ee5-9dc4-be031f55d94f",
             "east": null,
             "south": null,
-            "west": null,
+            "west": "44148eac-f419-44ca-906f-c785df3fcb81",
             "type": "NORMAL",
             "position": {
                 "x": 6,
