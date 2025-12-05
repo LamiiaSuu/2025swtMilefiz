@@ -5,7 +5,15 @@ import java.util.Random;
 
 import org.springframework.stereotype.Service;
 /**
- * Würfel
+ * Standard-Implementierung des {@link DiceService} für Würfelwürfe.
+ * 
+ * <p>Diese Implementierung verwendet {@link SecureRandom} zur Generierung 
+ * kryptographisch sicherer, unvorhersagbarer Zufallszahlen. Dies verhindert 
+ * potenzielle Manipulation oder Vorhersage von Würfelergebnissen durch 
+ * Analyse der verwendeten Zufallsalgorithmen.</p>
+ * 
+ * @author Leon Schäfer
+ * 
  */
 @Service
 public class DiceServiceImpl implements DiceService{
@@ -16,8 +24,9 @@ public class DiceServiceImpl implements DiceService{
                                                       // Vorhersehbar
 
     /**
+     * Führt einen Würfelwurf aus und generiert eine Zufallszahl zwischen 1 und 6.
      * 
-     * @return eine Zahl zwischen 1 und 6
+     * @return eine kryptographisch sichere Zufallszahl zwischen 1 und 6 (inklusive)
      */
     @Override
     public int roll() {

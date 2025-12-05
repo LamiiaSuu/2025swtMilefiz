@@ -212,7 +212,7 @@ public class FrontendReceiverController {
  *   <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
  *   <li>Methode loggt die Würfel-Anfrage mit Spieler-ID und Lobby-ID</li>
  *   <li>{@link GameService#rollDice()} wird aufgerufen um Zufallszahl zu generieren</li>
- *   <li> Speichert die gewürfelte zahl im Spieler ab
+ *   <li> Speichert die gewürfelte zahl im Spieler ab</li>
  *   <li>Würfelergebnis wird in {@link FrontendRollDiceEvent} verpackt</li>
  *   <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}} gesendet</li>
  *   <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
@@ -233,6 +233,8 @@ public class FrontendReceiverController {
  * @see FrontendRollDiceEvent
  * @see RollDiceCommand
  * @see FrontendRollDiceRejectedEvent
+ * 
+ * @author Leon Schäfer
  * 
  */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
