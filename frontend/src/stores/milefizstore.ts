@@ -46,10 +46,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     stompclient = new Client({
       // brokerURL: wsurl,
-      webSocketFactory: () => new WebSocket(wsurl),
-      connectHeaders: {
-        "player-token": gamedata.playerToken
-      }
+      webSocketFactory: () => new WebSocket(wsurl + `?player-token=${gamedata.playerToken}`),
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)
@@ -173,7 +170,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     try {
       stompclient.publish({
         destination: DEST_APP + "/move",
-        headers: { "player-token": gamedata.playerToken },
         body,
       })
       console.log("Move sent:", body)
@@ -200,7 +196,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     try {
       stompclient.publish({
         destination: `/app/milefiz/lobby/${gamedata.lobbyId}/rollDice`,
-        headers: { "player-token": gamedata.playerToken },
         body: JSON.stringify(rollDiceCommand),
       })
       console.log('Roll dice command sent for player:', gamedata.playerId)
