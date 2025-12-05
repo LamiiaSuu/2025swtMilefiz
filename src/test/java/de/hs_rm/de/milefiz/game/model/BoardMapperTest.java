@@ -1,13 +1,12 @@
 package de.hs_rm.de.milefiz.game.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,8 +20,19 @@ public class BoardMapperTest {
     @BeforeEach
     void init() throws IOException{
         ObjectMapper objectMapper = new ObjectMapper();
-    
-        boardDTO = objectMapper.readValue(new File("src/main/resources/static/boards/dummyBoard.json"), BoardDTO.class);
+        
+        InputStream inputStream = getClass().getClassLoader()
+            .getResourceAsStream("static/boards/dummyBoard.json");
+            
+        if (inputStream == null) {
+            throw new IOException("Test board file not found");
+        }
+        
+        try {
+            boardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
+        } finally {
+            inputStream.close();
+        }   
     }
 
     @Test
