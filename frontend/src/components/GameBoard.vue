@@ -429,7 +429,7 @@ onUnmounted(() => {
      vertikal ist -->
     <TresMesh :rotation="[-Math.PI / 2, 0, 0]">
       <TresPlaneGeometry :args="[500, 500]" />
-      <TresMeshBasicMaterial :color="0x7cfc00" />
+      <TresMeshStandardMaterial :color="0x7cfc00" />
     </TresMesh>
 
     <!-- Grundbeleuchtung der Szene (80% Intensität) -->
