@@ -120,6 +120,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           gamedata.currentDiceRoll = event.remainingMoves
         }
         if (event.type === "MOVE_BARRIER") {
+          console.log("MOVE_BARRIER event received:", event);
           boardStore.updateBarrierPosition(event.barrierId, event.targetField);
         }
         if (event.type === "REJECTED_BY_BARRIER") {

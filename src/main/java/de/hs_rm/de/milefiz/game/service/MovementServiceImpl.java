@@ -162,7 +162,7 @@ public class MovementServiceImpl implements MovementService {
 
         Player player = null;
         try {
-            player = lobby.getPlayerByToken(principalName);
+            player = lobby.getPlayers().stream().findFirst().orElse(null);
         } catch (Exception e) {
             e.printStackTrace();
         }
