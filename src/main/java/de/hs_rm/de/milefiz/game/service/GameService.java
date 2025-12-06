@@ -7,6 +7,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
 import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Field;
+import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 
@@ -43,14 +44,17 @@ public interface GameService {
     int rollDice();
 
     /**
-     * Gibt die aktuell verbleibende Cooldown-Zeit eines Spielers für den Würfelwurf zurück.
+     * Gibt die aktuell verbleibende Cooldown-Zeit eines Spielers für den Würfelwurf
+     * zurück.
      * <p>
-     * Diese Methode delegiert direkt an den {@link CooldownService}, der serverseitig
+     * Diese Methode delegiert direkt an den {@link CooldownService}, der
+     * serverseitig
      * das Cooldown-Tracking übernimmt.
      * </p>
      *
      * @param playerId die UUID des Spielers
-     * @return verbleibende Cooldown-Sekunden; {@code 0}, wenn kein Cooldown aktiv ist
+     * @return verbleibende Cooldown-Sekunden; {@code 0}, wenn kein Cooldown aktiv
+     *         ist
      */
     int getRollDiceCooldown(UUID playerId);
 
@@ -70,5 +74,8 @@ public interface GameService {
     Board getTestBoard();
 
     FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Principal principal,
+            SimpMessageHeaderAccessor sha);
+
+    FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveCmd, Principal principal,
             SimpMessageHeaderAccessor sha);
 }

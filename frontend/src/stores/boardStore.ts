@@ -71,5 +71,9 @@ export const useBoardStore = defineStore('board', {
       }
       this.meeplePositions[meepleId] = fieldId
     },
+
+    updateBarrierPosition(barrierId: string, fieldId: string){
+      //TODO Barrieren verschieben implementieren
+    }
   },
 })

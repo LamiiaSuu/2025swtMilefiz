@@ -1,8 +1,9 @@
 import { reactive, readonly, computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
-import type { Direction, MovementCommand } from "@/types/movement";
+import type { Direction, MoveBarrierCommand, MovementCommand } from "@/types/movement";
 import { useBoardStore } from "./boardStore"
+import { generateUUID } from 'three/src/math/MathUtils.js';
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/milefiz`
@@ -108,6 +109,39 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           gamedata.currentDiceRoll = event.remainingMoves
         }
+        if (event.type === "MOVE_WITH_LOSS") {
+          boardStore.updateMeeplePosition(event.id, event.targetField)
+          gamedata.currentDiceRoll = event.remainingMoves
+          //TODO moveloss animieren
+          console.warn("lost remaining moves")
+        }
+        if (event.type === "TRIGGER_BARRIER_MOVE") {
+          //TODO verschieben der barriere implementieren
+          //aktuell einfach random platzhalter uuid
+          moveBarrier(event.barrierId, crypto.randomUUID())
+          boardStore.updateMeeplePosition(event.meepleId, event.targetField)
+          gamedata.currentDiceRoll = event.remainingMoves
+        }
+        if (event.type === "MOVE_BARRIER") {
+          boardStore.updateBarrierPosition(event.barrierId, event.targetField);
+        }
+        if (event.type === "REJECTED_BY_BARRIER") {
+          //TODO rennen in Barriere visualisieren
+          console.warn("u ran into barrieeer oh no")
+          gamedata.currentDiceRoll = event.remainingMoves
+        }
+        if (event.type === "DUEL") {
+          gamedata.currentDiceRoll = event.remainingMoves
+          boardStore.updateMeeplePosition(event.meepleId, event.targetField)
+          //TODO duel zwischen zwei meeples einleiten
+        }
+        if (event.type === "MEEPLE_REACHED_END"){
+          gamedata.currentDiceRoll = 0
+          //TODO meeple bei spieler und von board entfernen
+        }
+         if (event.type === "BARRIER_MOVE_ERROR"){
+          console.warn("Barriermove rejected:", event.msg)
+        }
 
       })
     }
@@ -162,7 +196,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
-    const moveCmd: MovementCommand = { meepleId, direction};
+    const moveCmd: MovementCommand = { meepleId, direction };
 
     const body = JSON.stringify(moveCmd)
 
@@ -171,6 +205,27 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     try {
       stompclient.publish({
         destination: DEST_APP + "/move",
+        body,
+      })
+      console.log("Move sent:", body)
+    } catch (err) {
+      console.error("Error sending move:", err)
+    }
+  }
+
+  //TODO tatsächliches moven der Barrier implementieren
+  function moveBarrier(barrierId: string, targetFieldId: string) {
+    if (!stompclient || !stompclient.connected) {
+      console.error("Cannot send move: STOMP client not connected.")
+      return
+    }
+    const moveBarrCmd: MoveBarrierCommand = { barrierId, targetFieldId};
+    const body = JSON.stringify(moveBarrCmd)
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobbyId
+
+    try {
+      stompclient.publish({
+        destination: DEST_APP + "/movebarrier",
         body,
       })
       console.log("Move sent:", body)
