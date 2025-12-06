@@ -39,7 +39,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   })
 
   function startMilefizLiveUpdate() {
-    console.log('Starting Liveupdater for Milefiz')
+    console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
     // Nur eine Instanz
     if (stompclient != null && stompclient.connected) {
       return
@@ -47,9 +47,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     stompclient = new Client({
       brokerURL: wsurl,
-      connectHeaders: {
-        "player-token": gamedata.playerToken
-      }
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)

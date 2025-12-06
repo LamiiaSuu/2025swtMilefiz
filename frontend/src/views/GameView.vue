@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import TheWelcome from '@/components/TheWelcome.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import GameBoard from '@/components/GameBoard.vue'
 import { onMounted } from 'vue'
 import GameHUD from '@/components/ui/GameHUD.vue'
 
-const { gamedata, startMilefizLiveUpdate, joinLobby } = useMilefizStore()
+const { joinLobby } = useMilefizStore()
 
-// startMilefizLiveUpdate()
 joinLobby()
 </script>
 
@@ -15,7 +13,6 @@ joinLobby()
   <main >
     <!-- Einbindung des globalen HUDs -->
     <GameHUD />
-    <TheWelcome />
     <GameBoard />
   </main>
 </template>

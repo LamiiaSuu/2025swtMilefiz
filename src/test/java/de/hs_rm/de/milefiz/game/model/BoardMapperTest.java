@@ -22,7 +22,7 @@ public class BoardMapperTest {
         ObjectMapper objectMapper = new ObjectMapper();
         
         InputStream inputStream = getClass().getClassLoader()
-            .getResourceAsStream("static/boards/dummyBoard.json");
+            .getResourceAsStream("boards/dummyBoard.json");
             
         if (inputStream == null) {
             throw new IOException("Test board file not found");

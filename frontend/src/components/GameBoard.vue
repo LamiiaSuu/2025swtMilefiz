@@ -437,7 +437,17 @@ onUnmounted(() => {
 
     <!-- Game Character includiert (position - Position auf Plane), (bodyColor - Farbe der Figur), (eyeColor - Farbe der Augen) -->
     <GameCharacter ref="gameCharRef" :position="gameCharPosition" bodyColor="pink" eyeColor="white"
-      :meepleId="boardStore.testMeepleId" />
+      :meepleId="boardStore.testMeepleId"/>
+
+    <GameCharacter 
+      v-for="barrier in boardStore.barriersWithPositions"
+      :key="barrier.fieldId"
+      :position="barrier.position"
+      bodyColor="gray"
+      eyeColor="red"
+      :meepleId="barrier.fieldId"
+      :barrier="true"
+    />
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
