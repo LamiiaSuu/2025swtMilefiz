@@ -9,6 +9,7 @@ const props = defineProps<{
   eyeColor?: string | number
   position?: [number, number, number]
   meepleId: string
+  barrier?: boolean
 }>()
 
 const characterRotation = ref(0)
@@ -32,21 +33,27 @@ const smallFallDuration = 170
 const mixer = ref<any>(null)
 const jumpAction = ref<any>(null)
 
+// NEU: Y-Offset für unterschiedliche Modelle
+const yOffset = computed(() => props.barrier ? 0.85 : 0)
+
 // Berechne aktuelle Position (inklusive jumpOffset)
 const currentPosition = computed<[number, number, number]>(() => [
   animatedPosition.value[0],
-  animatedPosition.value[1] + jumpOffset.value,
+  animatedPosition.value[1] + jumpOffset.value + yOffset.value,
   animatedPosition.value[2]
 ])
 
+//Rock by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/dmRuyy1VXEv)
 // Block Character by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/ozSIyRIcIj)
-const { state } = useGLTF('/Block Character.glb', { draco: true })
 
-// Modellgröße per Scaling-Faktor, sobald geladen
-const scale = 1
+const modelPath = computed(() => props.barrier ? '/Rock.glb' : '/Block Character.glb')
+const { state } = useGLTF(modelPath, { draco: true })
+
+// Unterschiedliche Scale für Barriere und Character
+const scale = computed(() => props.barrier ? 1.5 : 1)
 watchEffect(async () => {
   if (state.value?.scene) {
-    state.value.scene.scale.set(scale, scale, scale)
+    state.value.scene.scale.set(scale.value, scale.value, scale.value)
 
     //Geht über CharacterMesh und unterscheidet nach Körper und Eyes
     state.value.scene.traverse((child: any) => {
