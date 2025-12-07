@@ -16,7 +16,7 @@ export const useBoardStore = defineStore('board', {
     board: null as IBoardDTD | null,
     /** meeple positionen */
     meeplePositions: {} as Record<string, string>,
-    testMeepleId: "123e4567-e89b-12d3-a456-426614174000" as string,
+    testMeepleId: '123e4567-e89b-12d3-a456-426614174000' as string,
     lastFields: {} as Record<string, string | null>,
   }),
   actions: {
@@ -41,21 +41,16 @@ export const useBoardStore = defineStore('board', {
 
         // noch zum testen
         if (this.board) {
-          const startField = this.board.fields.find(
-            (f) => f.type === 'START_GREEN'
-          )
+          const startField = this.board.fields.find((f) => f.type === 'START_GREEN')
 
           if (startField) {
             this.meeplePositions[this.testMeepleId] = startField.id
             this.lastFields[this.testMeepleId] = null
-            console.log(
-              `TestMeeple ${this.testMeepleId} startet auf Feld ${startField.id}`
-            )
+            console.log(`TestMeeple ${this.testMeepleId} startet auf Feld ${startField.id}`)
           } else {
-            console.warn("Kein Startfeld bei (0,0) gefunden!")
+            console.warn('Kein Startfeld bei (0,0) gefunden!')
           }
         }
-
       } catch (error_) {
         console.log(error_)
         this.ok = false
@@ -70,6 +65,38 @@ export const useBoardStore = defineStore('board', {
         this.lastFields[meepleId] = previousField
       }
       this.meeplePositions[meepleId] = fieldId
+    },
+  },
+  // Getter um alle Barriere-Meeple ans Frontend zu übergeben
+  getters: {
+    /**
+     * Gibt alle Felder zurück, die eine Barriere haben
+     */
+    barrierFields: (state) => {
+      return state.board?.fields.filter((f) => f.barrier) || []
+    },
+
+    /**
+     * Prüft ob ein bestimmtes Feld eine Barriere hat
+     * @param fieldId - ID des zu prüfenden Feldes
+     * @returns true wenn Barriere vorhanden, sonst false
+     */
+    hasBarrier: (state) => (fieldId: string) => {
+      return state.board?.fields.find((f) => f.id === fieldId)?.barrier || false
+    },
+
+    /**
+     * Gibt alle Barrieren mit ihren 3D-Positionen für das Rendering zurück
+     */
+    barriersWithPositions: (state) => {
+      if (!state.board) return []
+
+      return state.board.fields
+        .filter((f) => f.barrier)
+        .map((field) => ({
+          fieldId: field.id,
+          position: [field.position.x, 0, field.position.y] as [number, number, number],
+        }))
     },
   },
 })
