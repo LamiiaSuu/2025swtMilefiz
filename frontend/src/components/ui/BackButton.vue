@@ -1,0 +1,35 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+const props = defineProps<{ to?: string }>()
+const router = useRouter()
+
+const goBack = () => {
+  if (props.to) {
+    router.push(props.to)
+  }
+}
+</script>
+
+<template>
+    <button class="back-button" @click="goBack">
+        Zurück
+    </button>
+</template>
+
+<style>
+.back-button {
+    background-color: var(--color-button, #234420);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    font-family: var(--font-small-button);
+}
+
+.back-button:hover {
+    opacity: 0.8;
+}
+</style>
