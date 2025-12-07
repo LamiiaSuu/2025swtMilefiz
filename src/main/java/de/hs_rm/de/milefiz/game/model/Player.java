@@ -26,6 +26,10 @@ public class Player {
         this(color, 5);
     }
 
+    public Player() {
+        this(null);
+    }
+
     public UUID getId() {
         return id;
     }
@@ -103,20 +107,19 @@ public class Player {
 
     /**
      * Prüft ob der Spieler noch Bewegungen ausführen kann.
-     * 
+     *
      * <p>
      * Ein Spieler kann sich bewegen, wenn er noch mindestens einen
-     * verbleibenden Zug ({@code remainingMoves > 0}) zur Verfügung hat.
-     * Die Anzahl der verfügbaren Züge wird normalerweise durch einen
-     * Würfelwurf bestimmt und nach jedem ausgeführten Zug mit
-     * {@link #useMove()} reduziert.
-     * </p>
-     * 
-     * @return {@code true} wenn der Spieler noch Züge übrig hat,
-     *         {@code false} wenn keine Züge mehr vorhanden sind
-     * 
+     * verbleibenden Zug ({@code remainingMoves > 0}) zur Verfügung hat. Die
+     * Anzahl der verfügbaren Züge wird normalerweise durch einen Würfelwurf
+     * bestimmt und nach jedem ausgeführten Zug mit {@link #useMove()}
+     * reduziert.</p>
+     *
+     * @return {@code true} wenn der Spieler noch Züge übrig hat, {@code false}
+     * wenn keine Züge mehr vorhanden sind
+     *
      * @author Leon Schäfer
-     * 
+     *
      */
     public boolean canMove() {
         return remainingMoves > 0;
@@ -124,26 +127,23 @@ public class Player {
 
     /**
      * Verbraucht einen Zug des Spielers.
-     * 
+     *
      * <p>
-     * Reduziert die Anzahl der verbleibenden Züge ({@code remainingMoves})
-     * um 1, falls der Spieler noch Züge übrig hat. Wenn bereits keine Züge
-     * mehr vorhanden sind, bleibt der Wert unverändert bei 0.
-     * </p>
-     * 
+     * Reduziert die Anzahl der verbleibenden Züge ({@code remainingMoves}) um
+     * 1, falls der Spieler noch Züge übrig hat. Wenn bereits keine Züge mehr
+     * vorhanden sind, bleibt der Wert unverändert bei 0.</p>
+     *
      * <p>
-     * <strong>Verwendung:</strong> Diese Methode sollte nach jeder erfolgreichen
-     * Bewegung eines Meeples aufgerufen werden, um die verfügbaren Züge korrekt
-     * zu verwalten.
-     * </p>
-     * 
+     * <strong>Verwendung:</strong> Diese Methode sollte nach jeder
+     * erfolgreichen Bewegung eines Meeples aufgerufen werden, um die
+     * verfügbaren Züge korrekt zu verwalten.</p>
+     *
      * <p>
      * <strong>Sicherheit:</strong> Die Methode verhindert, dass
-     * {@code remainingMoves} unter 0 fallen kann.
-     * </p>
-     * 
+     * {@code remainingMoves} unter 0 fallen kann.</p>
+     *
      * @author Leon Schäfer
-     * 
+     *
      */
     public void useMove() {
         if (this.canMove()) {

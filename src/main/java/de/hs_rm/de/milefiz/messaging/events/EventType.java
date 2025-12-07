@@ -6,7 +6,7 @@ public enum EventType {
     ROLL_DICE, 
     MOVE_ERROR, 
     ROLL_DICE_ERROR, 
-    COOLDOWN_READY, 
+    COOLDOWN_READY, LOBBY_UPDATE, 
     DUEL, 
     TRIGGER_BARRIER_MOVE,
     MOVE_BARRIER,

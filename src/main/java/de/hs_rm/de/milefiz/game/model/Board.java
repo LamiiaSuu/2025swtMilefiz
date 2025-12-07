@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class Board {
+
     /**
      * Repraesentiert das ganze Board
      * 
@@ -37,6 +38,10 @@ public class Board {
         this.startBlue = startBlue;
         this.startRed = startRed;
         this.barriers = new ArrayList<>();
+    }
+
+    public Board() {
+        id = UUID.randomUUID();
     }
 
     public UUID getId() {
