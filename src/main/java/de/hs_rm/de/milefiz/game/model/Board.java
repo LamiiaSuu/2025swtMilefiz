@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class Board {
+
     /**
      * Repraesentiert das ganze Board
+     *
      * @param name Name des Boards
      * @param startField Eingangsfeld ins Board
      * @param barriers barrieren des Boards
@@ -18,9 +20,8 @@ public class Board {
     private Field startBlue;
     private Field startRed;
 
-
     private List<Meeple> barriers;
-    
+
     public Board(String name, Field startGreen, Field startYellow, Field startBlue, Field startRed) {
         this(UUID.randomUUID(), name, startGreen, startYellow, startBlue, startRed);
     }
@@ -35,7 +36,10 @@ public class Board {
         this.barriers = new ArrayList<>();
     }
 
-    
+    public Board() {
+        id = UUID.randomUUID();
+    }
+
     public UUID getId() {
         return id;
     }
@@ -55,9 +59,9 @@ public class Board {
     public void addBarrier(Meeple barrier) {
         this.barriers.add(barrier);
     }
-    
+
     public void removeBarrier(Meeple barrier) {
-        if(!this.barriers.removeIf(b -> b.getId().equals(barrier.getId()))) {
+        if (!this.barriers.removeIf(b -> b.getId().equals(barrier.getId()))) {
             throw new IllegalArgumentException("Barriere nicht im Board");
         }
     }
