@@ -62,8 +62,12 @@ const router = useRouter()
 .button-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2vh;
   align-items: center;
-  margin-top: -3.5rem;  /* Verkleinert Abstand zum Header */
+  margin-top: -6vh;  /* Verkleinert Abstand zum Header */
+}
+.menu-button:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
 }
 </style>
