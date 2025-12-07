@@ -34,7 +34,7 @@ const mixer = ref<any>(null)
 const jumpAction = ref<any>(null)
 
 // NEU: Y-Offset für unterschiedliche Modelle
-const yOffset = computed(() => props.barrier ? 0.85 : 0)
+const yOffset = computed(() => props.barrier ? 0.85 : 0.135)
 
 // Berechne aktuelle Position (inklusive jumpOffset)
 const currentPosition = computed<[number, number, number]>(() => [
