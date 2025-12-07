@@ -4,11 +4,13 @@ import GameStartView from '@/views/GameStartView.vue'
 
 const routes = [
   {
+    // Spiel Start Seite
     path: '/',
     name: 'game-start',
     component: GameStartView,
   },
   {
+    // In-Game
     path: '/game',
     name: 'game',
     component: GameView,

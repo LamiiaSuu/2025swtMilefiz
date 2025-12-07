@@ -43,9 +43,11 @@
   --font-label: "Bubblegum Sans", sans-serif;
   --font-form: "Bubblegum Sans", sans-serif;
 
-  /* Caprasimo for body text and buttons */
-  --font-text: "Caprasimo", serif;
-  --font-button: "Caprasimo", serif;
+  /* Alegrya Sans for Game UI */
+  --font-game-ui: "Alegreya Sans", sans-serif;
+
+  /* Acme for small buttons */
+  --font-small-button: "Acme", sans-serif;
 
   /* Text and Button Color */
   --color-text: #000000; 
@@ -82,7 +84,6 @@ body {
     color 0.5s,
     background-color 0.5s;
   line-height: 1.6;
-  font-family: var(--font-text); /* Caprasimo font */
   font-size: 15px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -92,14 +93,78 @@ body {
 /* Bubblegum font */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  color: white;
+}
+
+h1 {
+  font-size: 6rem;
+  text-shadow: /* Umrandung */
+    -2px -2px 0 black,
+    2px -2px 0 black,
+    -2px  2px 0 black,
+    2px  2px 0 black,
+    3px  3px 8px rgba(0,0,0,0.8); /* Schatten */  
+}
+
+h2 {
+  font-size: 5rem;
+  text-shadow: /* Umrandung */
+    -2px -2px 0 black,
+    2px -2px 0 black,
+    -2px  2px 0 black,
+    2px  2px 0 black,
+    3px  3px 8px rgba(0,0,0,0.8); /* Schatten */  
+}
+
+h3 {
+  font-size: 4rem;  
+  text-shadow: /* Umrandung */
+    -2px -2px 0 black,
+    2px -2px 0 black,
+    -2px  2px 0 black,
+    2px  2px 0 black,
+    3px  3px 8px rgba(0,0,0,0.8); /* Schatten */  
+}
+
+h4 {
+  font-size: 3rem;
+  text-shadow: /* Umrandung */
+    -1px -1px 0 black,
+    1px -1px 0 black,
+    -1px  1px 0 black,
+    1px  1px 0 black,
+    3px  3px 8px rgba(0,0,0,0.8); /* Schatten */  
+}
+
+h5 {
+  font-size: 2rem;
+  text-shadow: /* Umrandung */
+    -1px -1px 0 black,
+    1px -1px 0 black,
+    -1px  1px 0 black,
+    1px  1px 0 black,
+    3px  3px 8px rgba(0,0,0,0.8); /* Schatten */  
+}
+
+h6 {
+  font-size: 1rem;
+  text-shadow: /* Umrandung */
+    -1px -1px 0 black,
+    1px -1px 0 black,
+    -1px  1px 0 black,
+    1px  1px 0 black,
+    3px  3px 8px rgba(0,0,0,0.8); /* Schatten */  
 }
 
 /* Bubblegum font */
 label, input, select, textarea {
   font-family: var(--font-form); 
+  color: white;
+  text-shadow: /* Umrandung */
+    -1px -1px 0 black,
+     1px -1px 0 black,
+    -1px  1px 0 black,
+     1px  1px 0 black,
+     3px  3px 8px rgba(0,0,0,0.8); /* Schatten */
 }
 
-/* Caprasimo font */
-button {
-  font-family: var(--font-button); 
-}
