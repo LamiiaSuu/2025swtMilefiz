@@ -503,41 +503,42 @@ public class MovementServiceImpl implements MovementService {
         Board board = lobby.getBoard();
         Meeple barrier = board.getBarrierById(moveBarrCmd.barrierId());
 
-        // so sollte es eigentlich sein, aber funktioniert noch nicht, da nichts
-        // gültiges vom frontend kommt
-        // TODO das hier übernehmen
-        // Field targetField = board.getFieldById(moveBarrCmd.targetFieldId());
+       
 
         // ⚠️ Temporärer Testcode:
         // zu testzwecken greifen wir auf ein zufälliges feld zurück um die checks
         // testen zu können.
-        // TODO: durch tatsächliches target ersetzen
+        // TODO: Block aus !TESTING Übernehmen und TESTING streichen
         /**********************************************************************************************************************/
-        Field testTargetField = board.getFieldById(moveBarrCmd.targetFieldId());
+
+        Field targetField = board.getFieldById(getRandomField(board));
+
+        if (!TESTING) {
+            targetField = board.getFieldById(moveBarrCmd.targetFieldId());
+        }
         if (TESTING) {
-            testTargetField = board.getFieldById(getRandomField(board));
-            while (testTargetField.getType().isEnd() || testTargetField.getType().isStart()
-                    || isOccupied(lobby, board, testTargetField)) {
-                testTargetField = board.getFieldById(getRandomField(board));
+            while (targetField.getType().isEnd() || targetField.getType().isStart()
+                    || isOccupied(lobby, board, targetField)) {
+                targetField = board.getFieldById(getRandomField(board));
             }
         }
         /**********************************************************************************************************************/
 
         // Fehler, wenn es sich um ein Startfeld oder das Ende handelt
-        if (testTargetField.getType().isEnd() || testTargetField.getType().isStart()) {
+        if (targetField.getType().isEnd() || targetField.getType().isStart()) {
             logger.info("Cant place a barrier on Start or End");
             return new FrontendMoveBarrierRejectedEvent("Cant place a barrier on Start or End");
         }
 
         // Fehler wenn das Feld besetzt ist
-        if (isOccupied(lobby, board, testTargetField)) {
+        if (isOccupied(lobby, board, targetField)) {
             logger.info("Cant place a barrier on an occupied Field");
             return new FrontendMoveBarrierRejectedEvent("Cant place a barrier on an occupied Field");
         }
 
-        barrier.setCurrentField(testTargetField);
+        barrier.setCurrentField(targetField);
 
-        return new FrontendMoveBarrierEvent(barrier.getId(), testTargetField.getId());
+        return new FrontendMoveBarrierEvent(barrier.getId(), targetField.getId());
     }
 
     /**
