@@ -6,12 +6,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,12 +223,14 @@ public class MovementServiceImpl implements MovementService {
             case WEST -> currentField.getWest();
         };
 
+        // FELD EXISTIERT NICHT
         // Fehler, wenn in der angegeben Richtung kein Feld ist
         if (nextField == null) {
             logger.info("No Field in this Direction");
             return new FrontendMoveRejectedEvent("No Field in this Direction");
         }
 
+        // RICHTUNGSWECHSEL
         // Fehler bei Versuch das Feld zu betreten auf dem man zuletzt war
         // (Richtungswechsel ist verboten)
         if (lastField != null && nextField.equals(lastField)) {
@@ -238,6 +238,7 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent("Cant change direction!");
         }
 
+        // START
         // Nachdem das Startfeld verlassen wurde, kann man nicht zurückkehren (damit
         // kann man auch nicht die der anderen betreten)
         if (nextField.getType().isStart()) {
@@ -245,6 +246,7 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent("Cant go back to a starting field!");
         }
 
+        // ZIEL
         // Man kann das Ziel nur betreten, wenn man exakt darauf endet
         if (nextField.getType().isEnd()) {
             // Wenn man darauf endet, wird der meeple entfernt.
@@ -261,11 +263,12 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent("Cant enter End with remaining Moves");
         }
 
-        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren und
-        // das aktuelle Feld hat,
+        // SACKGASSE DURCH BARRIEREN
+        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren 
+        // und/oder nicht betretbare Felder hat,
         // wird der Zug automatisch beendet ohne dass man sich noch in Richtung der
         // Barriere bewegen muss, außer man macht gerade seinen vorletzten Schritt,
-        // was bedeutet, dass man direkt auf der Barriere landen kann.
+        // was bedeutet, dass man direkt auf der Barriere oder dem Ziel landen kann.
         if ((hasOnlyBarrierNeighbours(nextField, currentField, board))
                 && (player.getRemainingMoves() != SECOND_TO_LAST_MOVE)) {
             endTurnWithMove(player, meeple, nextField);
@@ -276,6 +279,7 @@ public class MovementServiceImpl implements MovementService {
                     player.getRemainingMoves());
         }
 
+        // BARRIERE
         // Wenn man in eine Barriere läuft, verliert man seine restlichen Schritte,
         // außer man landet genau darauf
         for (Meeple tempBarrier : board.getBarriers()) {
@@ -312,6 +316,7 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent("Attempt to occupy a field with multiple meeple failed");
         }
 
+        // SACKGASSE DURCH EIGENE MEEPLE
         // Ueberpruefen, ob sich der Spieler,
         // abgesehen vom aktuellen Feld,
         // in eine Sackgasse aus eigenen Meeplen bewegt
@@ -328,6 +333,7 @@ public class MovementServiceImpl implements MovementService {
             }
         }
 
+        // DUELL
         // Sonderfaelle wenn es sich um den letzten Zug handelt
         if (player.getRemainingMoves() == LAST_MOVE) {
 
@@ -374,28 +380,30 @@ public class MovementServiceImpl implements MovementService {
 
     /**
      * Prüft, ob das angegebene Zielfeld ausschließlich Nachbarfelder besitzt,
-     * die entweder das aktuelle Feld oder Felder mit Barrieren sind.
+     * die entweder Felder mit Barrieren sind oder nicht betretbare Felder sind.
      *
      * Diese Methode dient dazu festzustellen, ob ein Spieler sich auf ein Feld
      * bewegt, von dem aus keine weiteren regulären Bewegungen mehr möglich sind,
      * weil alle angrenzenden Felder (außer dem, von dem der Spieler kam) durch
-     * Barrieren blockiert werden. In diesem Fall verfallen die restlichen Schritte
+     * Barrieren blockiert werden oder nicht betretbar sind.
+     * In diesem Fall verfallen die restlichen Schritte
      * des Spielers und der Zug endet automatisch.
      *
      * @param nextField    das Feld, auf das sich der Meeple bewegen möchte
      * @param currentField das Feld, auf dem sich der Meeple aktuell befindet
      * @param board        das aktuelle Spielfeld, das alle Barrieren kennt
      * @return true, wenn alle Nachbarfelder des Zielfelds entweder
-     *         das aktuelle Feld
-     *         oder
-     *         Felder mit Barrieren sind, andernfalls false
+     *         Felder mit Barrieren sind oder nicht betretbar sind,
+     *         andernfalls false
      *
      *         Author: Maximilian Ressel
      */
     private boolean hasOnlyBarrierNeighbours(Field nextField, Field currentField, Board board) {
         return nextField.getNeighbours().values().stream().allMatch(
-                neighbour -> neighbour.equals(currentField) ||
-                        board.getBarriers().stream()
+                neighbour -> neighbour.equals(currentField)
+                        || neighbour.getType().isStart()
+                        || neighbour.getType().isEnd()
+                        || board.getBarriers().stream()
                                 .map(Meeple::getCurrentField)
                                 .filter(Objects::nonNull)
                                 .anyMatch(neighbour::equals));
@@ -403,21 +411,23 @@ public class MovementServiceImpl implements MovementService {
 
     /**
      * Prüft, ob das angegebene Zielfeld ausschließlich Nachbarfelder besitzt,
-     * die entweder das aktuelle Feld oder Felder mit eigenen Meeples sind.
+     * die entweder Felder mit eigenen Meeples oder nicht betretbare Felder sind.
      *
      * @param nextField       das Feld, auf das sich der Meeple bewegen möchte
      * @param currentField    das Feld, auf dem sich der Meeple aktuell befindet
      * @param ownMeepleFields Liste aller Felder, auf denen sich eigene Meeples des
      *                        Spielers befinden
-     * @return true, wenn alle Nachbarfelder des Zielfelds entweder das aktuelle
-     *         Feld
-     *         oder Felder mit eigenen Meeples sind, andernfalls false
-     *
+     * @return true, wenn alle Nachbarfelder des Zielfelds entweder
+     *         Felder mit eigenen Meeples sind oder nicht betretbare Felder sind,
+     *         andernfalls false
+     * 
      *         Author: Maximilian Ressel
      */
     private boolean hasOnlyOwnMeepleNeighbours(Field nextField, Field currentField, List<Field> ownMeepleFields) {
         return nextField.getNeighbours().values().stream()
-                .allMatch(neighbour -> neighbour.equals(currentField) || ownMeepleFields.contains(neighbour));
+                .allMatch(neighbour -> neighbour.equals(currentField)
+                        || neighbour.getType().isStart()
+                        || ownMeepleFields.contains(neighbour));
     }
 
     /**

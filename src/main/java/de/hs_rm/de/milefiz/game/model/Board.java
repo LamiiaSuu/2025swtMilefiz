@@ -42,6 +42,7 @@ public class Board {
 
     public Board() {
         id = UUID.randomUUID();
+        this.barriers = new ArrayList<>();
     }
 
     public UUID getId() {
