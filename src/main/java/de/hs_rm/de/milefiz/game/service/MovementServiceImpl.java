@@ -81,6 +81,7 @@ public class MovementServiceImpl implements MovementService {
     private LobbyManager lobbyManager;
     private static final int LAST_MOVE = 1;
     private static final int SECOND_TO_LAST_MOVE = 2;
+    private static final boolean TESTING = false;
 
     /**
      * Erstellt eine neue Instanz des MovementServiceImpl.
@@ -264,7 +265,7 @@ public class MovementServiceImpl implements MovementService {
         }
 
         // SACKGASSE DURCH BARRIEREN
-        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren 
+        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren
         // und/oder nicht betretbare Felder hat,
         // wird der Zug automatisch beendet ohne dass man sich noch in Richtung der
         // Barriere bewegen muss, außer man macht gerade seinen vorletzten Schritt,
@@ -512,10 +513,13 @@ public class MovementServiceImpl implements MovementService {
         // testen zu können.
         // TODO: durch tatsächliches target ersetzen
         /**********************************************************************************************************************/
-        Field testTargetField = board.getFieldById(getRandomField(board));
-        while (testTargetField.getType().isEnd() || testTargetField.getType().isStart()
-                || isOccupied(lobby, board, testTargetField)) {
+        Field testTargetField = board.getFieldById(moveBarrCmd.targetFieldId());
+        if (TESTING) {
             testTargetField = board.getFieldById(getRandomField(board));
+            while (testTargetField.getType().isEnd() || testTargetField.getType().isStart()
+                    || isOccupied(lobby, board, testTargetField)) {
+                testTargetField = board.getFieldById(getRandomField(board));
+            }
         }
         /**********************************************************************************************************************/
 
