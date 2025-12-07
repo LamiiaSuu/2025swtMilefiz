@@ -25,7 +25,7 @@ const defaultUpDuration = 300
 const defaultFallDuration = 2000
 
 // Kleine Hüpfer (bei Bewegung)
-const smallJumpHeight = 1.2
+const smallJumpHeight = 0.7
 const smallUpDuration = 120   
 const smallFallDuration = 170
 
