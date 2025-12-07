@@ -37,7 +37,8 @@ public interface LobbyMapper {
     Lobby toEntity(LobbyDTO lobbyDTO);
 
     /**
-     * Konvertiert ein Set<Lobby> zu Set<LobbyDTO>
+     * Konvertiert ein {@code Set<Lobby>} zu einem {@code Set<LobbyDTO>}.
+ *
      *
      * @param lobbies Set von Lobby-Entitys
      * @return das Set von LobbyDTOs
@@ -45,7 +46,7 @@ public interface LobbyMapper {
     Set<LobbyDTO> toDTOSet(Set<Lobby> lobbies);
 
     /**
-     * Konvertiert ein Set<LobbyDTO> zu Set<Lobby>
+     * Konvertiert ein {@code Set<LobbyDTO>} zu einem {@code Set<Lobby>}.
      *
      * @param lobbyDTOs Set von LobbyDTOs
      * @return das Set von Lobby-Entitys
