@@ -354,7 +354,7 @@ onUnmounted(() => {
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
-      :position="[field.position.x, 0, field.position.y]" :type="field.type" @tile-click="onTileClicked"
+      :position="[field.position.x, 0, field.position.y]" :type="field.type" 
       @tile-ready="onTileReady" :cast-shadow="true" :receive-shadow="true"/>
   </TresCanvas>
 
