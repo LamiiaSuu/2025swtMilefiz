@@ -50,7 +50,7 @@ const modelPath = computed(() => props.barrier ? '/Rock.glb' : '/Block Character
 const { state } = useGLTF(modelPath, { draco: true })
 
 // Unterschiedliche Scale für Barriere und Character
-const scale = computed(() => props.barrier ? 1.5 : 1)
+const scale = computed(() => props.barrier ? 1.5 : 0.55)
 watchEffect(async () => {
   if (state.value?.scene) {
     state.value.scene.scale.set(scale.value, scale.value, scale.value)
