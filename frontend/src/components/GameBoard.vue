@@ -170,112 +170,6 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   milefizStore.sendMove(meepleId, direction)
 }
 
-
-/**
- * Wird ausgelöst, wenn ein Spielfeld-Tile angeklickt wurde.
- * 
- * Ermittelt anhand der Tile-ID, ob das Ziel-Feld ein Nachbarfeld des Charakters ist.
- * Falls ja, wird der Spielzug (Richtung) über den Milefiz-Store an den Server gesendet.
- * 
- * @param targetFieldId - ID des angeklickten Ziel-Feldes
- */
-const onTileClicked = (targetFieldId: string) => {
-  console.log(targetFieldId)
-  const meepleId = gameCharRef.value?.meepleId
-  if (!meepleId) {
-    console.warn("Meeple ID missing — cannot move")
-    return
-  }
-
-  const board = boardStore.board
-  if (!board) return
-
-  const targetField = board.fields.find(f => f.id === targetFieldId)
-  if (!targetField) return
-
-  const [cx, , cz] = gameCharRef.value?.getPosition() ?? [0, 0, 0]
-  const currentField = board.fields.find(f => f.position.x === cx && f.position.y === cz)
-
-  if (!currentField) {
-    console.warn("Cannot find current field for character")
-    return
-  }
-
-  const dx = targetField.position.x - currentField.position.x
-  const dy = targetField.position.y - currentField.position.y
-
-  let direction: Direction | null = null
-
-  if (dx === -2 && dy === 0) direction = "EAST"
-  else if (dx === 2 && dy === 0) direction = "WEST"
-  else if (dx === 0 && dy === -2) direction = "SOUTH"
-  else if (dx === 0 && dy === 2) direction = "NORTH"
-
-  if (!direction) {
-    console.log("not a neighbor — no move.")
-    return
-  }
-
-  milefizStore.sendMove(meepleId, direction)
-}
-
-/**
- * Globale Mausklick-Handler-Funktion für den First-Person-Modus.
- * 
- * Wird bei jedem Mausklick im Fenster aufgerufen und prüft, 
- * ob der Spieler mit der Kamera auf ein klickbares Spielfeld (Tile) zielt.
- * 
- * Funktionsweise:
- * 1. Nur im First-Person-Modus und bei linkem Mausklick aktiv.  
- * 2. Ermittelt die Weltposition und Blickrichtung der Kamera.  
- * 3. Führt einen Raycast entlang der Blickrichtung aus.  
- * 4. Erkennt das zuerst getroffene Tile-Objekt.  
- * 5. Ruft `onTileClicked(tile.id)` auf, um die Spiellogik auszulösen (z. B. Bewegung).
- * 
- * @param e - Das auslösende MouseEvent (wird global vom Fenster empfangen)
- */
-const handleGlobalClick = (e: MouseEvent) => {
-
-  if (!useFirstPerson.value) return
-  if (e.button !== 0) return
-
-  const cam = fpsCamera.value?.camera
-  if (!cam) {
-    console.warn("Keine Kamera gefunden")
-    return
-  }
-
-  cam.getWorldPosition(rayOrigin)
-
-  rayDirection.set(0, 0, -1)
-  rayDirection.applyQuaternion(cam.quaternion)
-  raycaster.set(rayOrigin, rayDirection)
-
-  const objects = clickableTiles.value.map(t => t.object)
-  const hits = raycaster.intersectObjects(objects, true)
-  const firstHit = hits[0]
-
-  if (!firstHit) {
-    console.log('Kein Tile getroffen')
-    return
-  }
-
-  let hitRoot = firstHit.object as any
-
-  while (hitRoot.parent && !objects.includes(hitRoot)) {
-    hitRoot = hitRoot.parent
-  }
-
-  const tile = clickableTiles.value.find(t => t.object === hitRoot)
-  if (!tile) {
-    console.warn('Treffer, aber kein zugehöriges Tile gefunden')
-    return
-  }
-
-  onTileClicked(tile.id)
-}
-
-
 // Updated Rotation vom Charakter für First Person Kamera
 const onRotateCharacter = (yRotation: number) => {
   if (gameCharRef.value) {
@@ -400,7 +294,6 @@ onMounted(() => {
       return
     }
     window.addEventListener("keydown", handleKeydown)
-    window.addEventListener("click", handleGlobalClick)
     requestAnimationFrame(checkHoverTile)
   }
 
@@ -409,7 +302,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
-  window.removeEventListener('click', handleGlobalClick)
 })
 
 </script>
@@ -437,21 +329,14 @@ onUnmounted(() => {
 
     <!-- Game Character includiert (position - Position auf Plane), (bodyColor - Farbe der Figur), (eyeColor - Farbe der Augen) -->
     <GameCharacter ref="gameCharRef" :position="gameCharPosition" bodyColor="pink" eyeColor="white"
-      :meepleId="boardStore.testMeepleId"/>
+      :meepleId="boardStore.testMeepleId" />
 
-    <GameCharacter 
-      v-for="barrier in boardStore.barriersWithPositions"
-      :key="barrier.fieldId"
-      :position="barrier.position"
-      bodyColor="gray"
-      eyeColor="red"
-      :meepleId="barrier.fieldId"
-      :barrier="true"
-    />
+    <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
+      :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
-      :position="[field.position.x, 0, field.position.y]" :type="field.type" @tile-click="onTileClicked"
+      :position="[field.position.x, 0, field.position.y]" :type="field.type"
       @tile-ready="onTileReady" />
   </TresCanvas>
 
