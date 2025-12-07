@@ -97,7 +97,8 @@ public class MovementServiceImpl implements MovementService {
     }
 
     /**
-     * Führt die Bewegung eines bestimmten Meeples eines Spielers innerhalb einer bestimmten Lobby aus
+     * Führt die Bewegung eines bestimmten Meeples eines Spielers innerhalb einer
+     * bestimmten Lobby aus
      * und wendet dabei alle Bewegungsregeln des Spiels Milefiz an.
      *
      * Diese Methode verarbeitet den vom Frontend empfangenen Bewegungsbefehl
@@ -106,36 +107,56 @@ public class MovementServiceImpl implements MovementService {
      * unterschiedliche Ereignisse (Events) an das Frontend zurückgegeben.
      *
      * Ablauf der Methode:
-     * - Ermittlung der betroffenen Lobby, des Spielers und des zu bewegenden Meeples
+     * - Ermittlung der betroffenen Lobby, des Spielers und des zu bewegenden
+     * Meeples
      * - Berechnung des Zielfelds anhand der angegebenen Bewegungsrichtung
-     * - Validierung gegen Regelverletzungen (z. B. Rückwärtslaufen oder Betreten eines Startfelds)
+     * - Validierung gegen Regelverletzungen (z. B. Rückwärtslaufen oder Betreten
+     * eines Startfelds)
      * - Prüfung auf das Erreichen des Zielfelds (Endfeld):
-     *   - Wenn der Meeple exakt auf dem Endfeld landet, wird er entfernt.
-     *   - Wenn der Spieler dadurch keine Meeples mehr besitzt, hat er das Spiel gewonnen.
+     * - Wenn der Meeple exakt auf dem Endfeld landet, wird er entfernt.
+     * - Wenn der Spieler dadurch keine Meeples mehr besitzt, hat er das Spiel
+     * gewonnen.
      * - Behandlung spezieller Spielsituationen:
-     *   - Bewegung in eine Barriere (alle restlichen Schritte verfallen)
-     *   - Direktes Landen auf einer Barriere (die Barriere darf anschließend verschoben werden)
-     *   - Bewegung in Sackgassen, die nur Barrieren oder eigene Meeples als Nachbarn haben
-     *   - Duelle mit Meeples anderer Spieler, wenn man auf deren Feld landet
-     * - Aktualisierung des Spielfeldzustands und Verwaltung der verbleibenden Bewegungen
+     * - Bewegung in eine Barriere (alle restlichen Schritte verfallen)
+     * - Direktes Landen auf einer Barriere (die Barriere darf anschließend
+     * verschoben werden)
+     * - Bewegung in Sackgassen, die nur Barrieren oder eigene Meeples als Nachbarn
+     * haben
+     * - Duelle mit Meeples anderer Spieler, wenn man auf deren Feld landet
+     * - Aktualisierung des Spielfeldzustands und Verwaltung der verbleibenden
+     * Bewegungen
      *
-     * Abhängig vom Ergebnis wird eines der folgenden Events an das Frontend gesendet:
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent} bei erfolgreicher Bewegung
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent} bei ungültigem Zug
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMoveWithLossEvent} wenn verbleibende Schritte verfallen
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent} wenn der Meeple direkt auf einer Barriere landet
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendRejectedByBarrierEvent} wenn der Meeple gegen eine Barriere läuft und der Zug endet
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMeepleReachedEndEvent} wenn ein Meeple das Zielfeld erreicht
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendPlayerHasWonEvent} wenn ein Spieler alle Meeples entfernt hat und gewinnt
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent} wenn ein Duell zwischen zwei Meeples ausgelöst wird
+     * Abhängig vom Ergebnis wird eines der folgenden Events an das Frontend
+     * gesendet:
+     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent} bei
+     * erfolgreicher Bewegung
+     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent} bei
+     * ungültigem Zug
+     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMoveWithLossEvent} wenn
+     * verbleibende Schritte verfallen
+     * -
+     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent}
+     * wenn der Meeple direkt auf einer Barriere landet
+     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendRejectedByBarrierEvent}
+     * wenn der Meeple gegen eine Barriere läuft und der Zug endet
+     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMeepleReachedEndEvent}
+     * wenn ein Meeple das Zielfeld erreicht
+     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendPlayerHasWonEvent} wenn
+     * ein Spieler alle Meeples entfernt hat und gewinnt
+     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent} wenn ein
+     * Duell zwischen zwei Meeples ausgelöst wird
      *
      * @param lobbyId   die eindeutige ID der Lobby, in der die Bewegung stattfindet
-     * @param moveCmd   der vom Frontend übermittelte Bewegungsbefehl mit Meeple-ID und Bewegungsrichtung
-     * @param principal der Spieler (bzw. dessen Benutzerkontext), der den Zug ausführt
-     * @param sha       WebSocket-Header mit Sitzungsinformationen (z. B. Session-ID)
-     * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das das Ergebnis der Bewegung beschreibt
+     * @param moveCmd   der vom Frontend übermittelte Bewegungsbefehl mit Meeple-ID
+     *                  und Bewegungsrichtung
+     * @param principal der Spieler (bzw. dessen Benutzerkontext), der den Zug
+     *                  ausführt
+     * @param sha       WebSocket-Header mit Sitzungsinformationen (z. B.
+     *                  Session-ID)
+     * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
+     *         das Ergebnis der Bewegung beschreibt
      *
-     * Author: Maximilian Ressel
+     *         Author: Maximilian Ressel
      */
     @Override
     public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Principal principal,
@@ -482,6 +503,10 @@ public class MovementServiceImpl implements MovementService {
         // TODO: durch tatsächliches target ersetzen
         /**********************************************************************************************************************/
         Field testTargetField = board.getFieldById(getRandomField(board));
+        while (testTargetField.getType().isEnd() || testTargetField.getType().isStart()
+                || isOccupied(lobby, board, testTargetField)) {
+            testTargetField = board.getFieldById(getRandomField(board));
+        }
         /**********************************************************************************************************************/
 
         // Fehler, wenn es sich um ein Startfeld oder das Ende handelt
@@ -519,7 +544,8 @@ public class MovementServiceImpl implements MovementService {
                 .filter(Objects::nonNull)
                 .anyMatch(f -> f.equals(field));
 
-        if (occupiedByMeeple) return true;
+        if (occupiedByMeeple)
+            return true;
 
         boolean occupiedByBarrier = board.getBarriers().stream()
                 .map(Meeple::getCurrentField)
