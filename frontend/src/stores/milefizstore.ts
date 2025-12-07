@@ -243,7 +243,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
     const moveBarrCmd: MoveBarrierCommand = { barrierId, targetFieldId};
     const body = JSON.stringify(moveBarrCmd)
-    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobbyId
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
 
     try {
       stompclient.publish({
