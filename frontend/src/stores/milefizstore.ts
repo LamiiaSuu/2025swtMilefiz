@@ -6,7 +6,7 @@ import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdat
 import { useBoardStore } from "./boardStore"
 
 // const wsurl = `ws://${window.location.host}/milefiz`
-const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/milefiz`
+const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
 const DEST = '/topic/milefiz/lobby/'
 
 let stompclient: Client | null = null

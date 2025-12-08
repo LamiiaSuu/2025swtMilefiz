@@ -28,7 +28,7 @@ public class StompWebMessageBrokerConfiguration implements WebSocketMessageBroke
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Register endpoint and copy HTTP session attributes into the WebSocket session
-        registry.addEndpoint("/milefiz").setAllowedOrigins("*")
+        registry.addEndpoint("/ws").setAllowedOrigins("*")
         .addInterceptors(new HttpSessionHandshakeInterceptor());
         // .addInterceptors(new HttpHandshakeInterceptor());
     }
