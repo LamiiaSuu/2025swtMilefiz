@@ -429,7 +429,7 @@ onUnmounted(() => {
      vertikal ist -->
     <TresMesh :rotation="[-Math.PI / 2, 0, 0]">
       <TresPlaneGeometry :args="[500, 500]" />
-      <TresMeshStandardMaterial :color="0x7cfc00" />
+      <TresMeshStandardMaterial :color="0x4FA200" />
 
     </TresMesh>
 
