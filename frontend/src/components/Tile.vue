@@ -24,7 +24,7 @@ const startColorMap: Record<string, string> = {
 }
 
 // Modell: Grass Platform by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/7xmlX1JEkM)
-const { state } = useGLTF('/Grass Platform.glb', { draco: true })
+const { state } = useGLTF('/Grass_Platform.glb', { draco: true })
 
 const { state: houseState } = useGLTF('/House.glb', { draco: true })
 const { state: goalState } = useGLTF('/Goal_Flag.glb', { draco: true })
