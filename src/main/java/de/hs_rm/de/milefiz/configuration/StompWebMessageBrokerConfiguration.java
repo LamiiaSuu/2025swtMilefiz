@@ -5,6 +5,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 import de.hs_rm.de.milefiz.messaging.PlayerTokenInterceptor;
 
@@ -27,7 +28,8 @@ public class StompWebMessageBrokerConfiguration implements WebSocketMessageBroke
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Register endpoint and copy HTTP session attributes into the WebSocket session
-        registry.addEndpoint("/milefiz").setAllowedOrigins("*");
+        registry.addEndpoint("/ws").setAllowedOrigins("*")
+        .addInterceptors(new HttpSessionHandshakeInterceptor());
         // .addInterceptors(new HttpHandshakeInterceptor());
     }
 

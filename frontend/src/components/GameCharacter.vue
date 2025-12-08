@@ -25,7 +25,7 @@ const defaultUpDuration = 300
 const defaultFallDuration = 2000
 
 // Kleine Hüpfer (bei Bewegung)
-const smallJumpHeight = 1.2
+const smallJumpHeight = 0.7
 const smallUpDuration = 120   
 const smallFallDuration = 170
 
@@ -34,7 +34,7 @@ const mixer = ref<any>(null)
 const jumpAction = ref<any>(null)
 
 // NEU: Y-Offset für unterschiedliche Modelle
-const yOffset = computed(() => props.barrier ? 0.85 : 0)
+const yOffset = computed(() => props.barrier ? 0.85 : 0.135)
 
 // Berechne aktuelle Position (inklusive jumpOffset)
 const currentPosition = computed<[number, number, number]>(() => [
@@ -50,7 +50,7 @@ const modelPath = computed(() => props.barrier ? '/Rock.glb' : '/Block Character
 const { state } = useGLTF(modelPath, { draco: true })
 
 // Unterschiedliche Scale für Barriere und Character
-const scale = computed(() => props.barrier ? 1.5 : 1)
+const scale = computed(() => props.barrier ? 1.5 : 0.55)
 watchEffect(async () => {
   if (state.value?.scene) {
     state.value.scene.scale.set(scale.value, scale.value, scale.value)

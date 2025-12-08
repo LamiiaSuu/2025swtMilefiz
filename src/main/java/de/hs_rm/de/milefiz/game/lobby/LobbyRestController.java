@@ -12,7 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.dto.LobbyDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
 import de.hs_rm.de.milefiz.game.service.GameService;
+import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
+import de.hs_rm.de.milefiz.messaging.FrontendMessagingServiceImpl;
+import de.hs_rm.de.milefiz.messaging.LobbyMessage;
+import de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent;
 
 @RestController
 @RequestMapping("/api/lobby")
@@ -20,10 +26,14 @@ public class LobbyRestController {
 
     private final LobbyManager lobbyManager;
     private GameService gameService;
+    private LobbyMapper lobbyMapper;
+    private FrontendMessagingService messagingService;
 
-    public LobbyRestController(LobbyManager lobbyManager, GameService gameService) {
+    public LobbyRestController(LobbyManager lobbyManager, GameService gameService, LobbyMapper lobbyMapper, FrontendMessagingServiceImpl messagingService) {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
+        this.lobbyMapper = lobbyMapper;
+        this.messagingService = messagingService;
     }
 
     /**
@@ -33,8 +43,8 @@ public class LobbyRestController {
      * @return
      */
     @GetMapping(path = "/list")
-    public Set<Lobby> getLobbyList() {
-        return lobbyManager.getLobbies();
+    public Set<LobbyDTO> getLobbyList() {
+        return lobbyMapper.toDTOSet(lobbyManager.getLobbies());
     }
 
     /**
@@ -73,11 +83,16 @@ public class LobbyRestController {
         try {
             lobby.join(player);
         } catch (LobbyJoinException ex) {
-            return new ResponseEntity<>(new LobbyJoinEvent(null, null, null, ex.getMessage(), null),
-                    HttpStatus.CONFLICT);
+            // FrontendEvent lobbyUpdate = new FrontendLobbyUpdateEvent(null, null, null, ex.getMessage());
+            LobbyJoinEvent joinEvent = new LobbyJoinEvent(null, null, null, ex.getMessage());
+            return new ResponseEntity<>(joinEvent, HttpStatus.CONFLICT);
 
         }
-        return new ResponseEntity<>(new LobbyJoinEvent(lobbyId, player.getId(), player.getColor().name(),
-                "Erfolgreich gejoint. ", playerToken), HttpStatus.OK);
+        // Sende per STOMP allen bereits in der Lobby vorhandenen Spielern ein Update
+        messagingService.sendEvent(new LobbyMessage(lobby, new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler ist gejoint")));
+
+        // Return als Response
+        LobbyJoinEvent joinEvent = new LobbyJoinEvent(player.getId(), playerToken, lobbyMapper.toDTO(lobby), "Erfolgreich gejoint");
+        return new ResponseEntity<>(joinEvent, HttpStatus.OK);
     }
 }
