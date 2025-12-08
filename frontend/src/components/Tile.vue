@@ -80,7 +80,7 @@ watchEffect(() => {
     //    wird ein Custom-Event an den übergeordneten Parent (GameBoard.vue) gesendet.
     //    Tile teilt mit, dass es fertig geladen ist und angeclickt werden kann.
     //    -> Der Parent speichert dann das Objekt in `clickableTiles`
-    emit('tile-ready', { id: props.id, object: base })
+
   }
 
   const overlay = overlayScene.value

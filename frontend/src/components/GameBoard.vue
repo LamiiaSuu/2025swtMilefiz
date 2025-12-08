@@ -416,7 +416,7 @@ onUnmounted(() => {
 
 <template>
   <!-- 3D-Canvas Element das den ganzen Bildschirm ausfüllt-->
-  <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB" :shadows="true">
+  <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB">
     <!-- Kameraposition und Kamerasteuerung via OrbitControls -->
     <TresPerspectiveCamera v-if="!useFirstPerson" ref="orbitCam" :position="[0, 8, 15]" :fov="60" />
     <OrbitControls v-if="!useFirstPerson" />
@@ -427,7 +427,7 @@ onUnmounted(() => {
 
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
      vertikal ist -->
-    <TresMesh :rotation="[-Math.PI / 2, 0, 0]" :receive-shadow="true">
+    <TresMesh :rotation="[-Math.PI / 2, 0, 0]">
       <TresPlaneGeometry :args="[500, 500]" />
       <TresMeshStandardMaterial :color="0x7cfc00" />
 
@@ -440,13 +440,12 @@ onUnmounted(() => {
   <TresDirectionalLight 
     :position="[10, 15, 10]"  
     :intensity="0.9" 
-    :cast-shadow="true"
   />
   
 
     <!-- Game Character includiert (position - Position auf Plane), (bodyColor - Farbe der Figur), (eyeColor - Farbe der Augen) -->
     <GameCharacter ref="gameCharRef" :position="gameCharPosition" bodyColor="pink" eyeColor="white"
-      :meepleId="boardStore.testMeepleId" :cast-shadow="true" :receive-shadow="true"/>
+      :meepleId="boardStore.testMeepleId"/>
 
     <GameCharacter 
       v-for="barrier in boardStore.barriersWithPositions"
@@ -456,14 +455,12 @@ onUnmounted(() => {
       eyeColor="red"
       :meepleId="barrier.fieldId"
       :barrier="true"
-      :cast-shadow="true"
-      :receive-shadow="true"
     />
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
       :position="[field.position.x, 0, field.position.y]" :type="field.type" @tile-click="onTileClicked"
-      @tile-ready="onTileReady" :cast-shadow="true" :receive-shadow="true"/>
+      @tile-ready="onTileReady"/>
   </TresCanvas>
 
   <!-- Fadenkreuz -->
