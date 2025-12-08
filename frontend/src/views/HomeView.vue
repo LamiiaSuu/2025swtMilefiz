@@ -19,7 +19,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const newGameStart = () => {
-  router.push('/gameStart') 
+  router.push({ name: 'game-start' })
 }
 </script>
 
@@ -49,7 +49,7 @@ const newGameStart = () => {
   background-repeat: no-repeat;
   background-position: center;
   filter: blur(4px);
-  z-index: -1; 
+  z-index: -1;
 }
 
 .header-with-plate,
@@ -59,8 +59,8 @@ const newGameStart = () => {
 }
 
 .header-with-plate {
-  position: relative; 
-  z-index: 10;        
+  position: relative;
+  z-index: 10;
 }
 
 .button-container {
@@ -68,8 +68,10 @@ const newGameStart = () => {
   flex-direction: column;
   gap: 2vh;
   align-items: center;
-  margin-top: -6vh;  /* Verkleinert Abstand zum Header */
+  margin-top: -6vh;
+  /* Verkleinert Abstand zum Header */
 }
+
 .menu-button:hover {
   transform: scale(1.05);
   transition: transform 0.2s ease;
