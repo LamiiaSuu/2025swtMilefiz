@@ -13,23 +13,26 @@ const goBack = () => {
 
 
 <template>
-    <button class="back-button" @click="goBack">
-        Zurück
-    </button>
+  <button class="back-button" @click="goBack">
+    Zurück
+  </button>
 </template>
 
 <style>
 .back-button {
-    background-color: #234420;
-    color: white;
-    border: none;
-    padding: 25px 45px;
-    border-radius: 4px;
-    cursor: pointer;
-    
+  background-color: #234420;
+  border: 4px solid #c8a25d;
+  border-radius: 8px;
+  color: white;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: "AcmeFont", sans-serif;
+  font-size: 2rem;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
 }
 
 .back-button:hover {
-    opacity: 0.8;
+  opacity: 0.8;
 }
 </style>
