@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
-const props = defineProps<{ to?: string }>()
+const props = defineProps<{ to: string | { name: string } }>()
 const router = useRouter()
 
 const goBack = () => {
@@ -10,6 +10,7 @@ const goBack = () => {
   }
 }
 </script>
+
 
 <template>
     <button class="back-button" @click="goBack">
@@ -22,7 +23,7 @@ const goBack = () => {
     background-color: #234420;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 25px 45px;
     border-radius: 4px;
     cursor: pointer;
     
