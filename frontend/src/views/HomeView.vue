@@ -5,7 +5,7 @@
     </div>
 
     <div class="button-container">
-      <button class="menu-button">Neues Spiel</button>
+      <button class="menu-button" @click="newGameStart">Neues Spiel</button>
       <button class="menu-button">Spiel beitreten</button>
       <button class="menu-button">Map erstellen</button>
       <button class="menu-button">Einstellungen</button>
@@ -17,6 +17,10 @@
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+const newGameStart = () => {
+  router.push('/gameStart') 
+}
 </script>
 
 <style scoped>
