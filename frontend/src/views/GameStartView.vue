@@ -4,54 +4,47 @@ import BackButton from '@/components/ui/BackButton.vue';
 
 <template>
     <div class="content">
-        <div class="header">
-            <div class="backButton">
-                <BackButton :to="{ name: 'Homepage' }" />
-            </div>
+        <div class="header-with-plate">
+            <p>MI'lefiz</p>
+        </div>
 
-            <div class="header-with-plate2">
-                <p>MI'lefiz</p>
-            </div>
+        <div class="page-title">
+            <h1>Neues Spiel</h1>
+        </div>
 
-            <h5>Neues Spiel</h5>
+        <div class="backButton">
+            <BackButton :to="{ name: 'Homepage' }" />
         </div>
 
         <div class="new-game-form">
             <form>
                 <div class="form-row">
-                    <label>
-                        Lobby-ID
-                        <input type="text" name="lobby-id" disabled>
-                        <button></button>
-                    </label>
+                    <label>Lobby-ID</label>
+                    <input type="text" name="lobby-id" disabled>
+                    <button></button>
                 </div>
 
                 <div class="form-row">
-                    <label>
-                        Lobby-Name
-                        <input type="text" name="lobby-name">
-                    </label>
+                    <label>Lobby-Name</label>
+                    <input type="text" name="lobby-name">
                 </div>
 
                 <div class="form-row">
-                    <label>Username
-                        <input type="text" name="username">
-                    </label>
+                    <label>Username</label>
+                    <input type="text" name="username">
                 </div>
 
                 <div class="form-row">
-                    <label>Spieler
-                        <input type="text" name="username">
-                    </label>
+                    <label>Spieler</label>
+                    <input type="text" name="username">
                 </div>
 
                 <div class="form-row">
-                    <label>Map
-                        <div class="map-buttons">
-                            <button type="button" class="map-select">Standardmap</button>
-                            <button type="button" class="map-select">Importieren</button>
-                        </div>
-                    </label>
+                    <label>Map</label>
+                    <div class="map-buttons">
+                        <button type="button" class="map-select">Standardmap</button>
+                        <button type="button" class="map-select">Importieren</button>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -59,8 +52,7 @@ import BackButton from '@/components/ui/BackButton.vue';
                 </div>
 
                 <div class="form-row">
-                    <button class="game-start" @click="$router.push({ name: 'game' })">Spiel Starten</button>
-
+                    <button class="menu-button game-start-button" type="button" @click="$router.push({ name: 'game' })">Spiel Starten</button>
                 </div>
 
             </form>
@@ -69,14 +61,13 @@ import BackButton from '@/components/ui/BackButton.vue';
 
 </template>
 
-<style>
+<style scoped>
 .content {
     position: relative;
     height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
-
     align-items: center;
     justify-content: center;
     overflow: hidden;
@@ -98,33 +89,28 @@ import BackButton from '@/components/ui/BackButton.vue';
     z-index: -1;
 }
 
-.header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    position: relative;
-    margin-top: 2rem;
-}
-
 .backButton {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 20vh;
+    left: 50vh;
 }
-
-.header-with-plate2 > p {
-  transform: translateY(-50%);
-}
-
 
 .new-game-form {
     padding: 0 25px;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 15px;
+    margin-top: -6vh;
 }
 
+.new-game-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 600px;
+}
 
 .form-row {
     display: flex;
@@ -133,8 +119,10 @@ import BackButton from '@/components/ui/BackButton.vue';
 }
 
 .form-row label {
-    min-width: 120px;
+    min-width: 150px;
+    width: 150px;
     text-align: right;
+    flex-shrink: 0;
 }
 
 .form-row input {
@@ -149,5 +137,10 @@ import BackButton from '@/components/ui/BackButton.vue';
     border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
+}
+
+.menu-button:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
 }
 </style>
