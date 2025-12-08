@@ -6,7 +6,7 @@ import BackButton from '@/components/ui/BackButton.vue';
     <div class="content">
         <div class="header">
             <div class="backButton">
-                <BackButton />
+                <BackButton :to="{ name: 'Homepage' }" />
             </div>
 
             <div class="header-with-plate2">
