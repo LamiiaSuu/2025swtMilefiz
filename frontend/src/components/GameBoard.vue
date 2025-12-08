@@ -433,14 +433,22 @@ onUnmounted(() => {
 
     </TresMesh>
 
-    <!-- Grundbeleuchtung der Szene (80% Intensität) -->
-    <TresAmbientLight :intensity="0.3" />
+    <!-- Grundbeleuchtung der Szene (75% Intensität) -->
+    <TresAmbientLight :intensity=".75" />
 
-    <!-- Directional Licht von "vorne rechts"-->
-  <TresDirectionalLight 
-    :position="[10, 15, 10]"  
-    :intensity="0.9" 
-  />
+    <!-- Directional Licht von "vorne rechts" 200%-->
+    <TresDirectionalLight 
+      :position="[10, 15, 10]"  
+      :intensity="2" 
+    />
+
+    <!-- Himmel + Bodenlicht für GLTF 75%-->
+    <TresHemisphereLight 
+      :intensity=".75"
+      skyColor="#ffffff"
+      groundColor="#888888"
+
+    />
   
 
     <!-- Game Character includiert (position - Position auf Plane), (bodyColor - Farbe der Figur), (eyeColor - Farbe der Augen) -->
