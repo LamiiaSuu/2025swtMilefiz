@@ -29,9 +29,9 @@ const { state } = useGLTF('/Grass Platform.glb', { draco: true })
 const { state: houseState } = useGLTF('/House.glb', { draco: true })
 const { state: goalState } = useGLTF('/Goal_Flag.glb', { draco: true })
 
-// tileScene und optionales Overlay (Flagge / Haus)
-const tileScene = computed<Object3D | null>(() => state.value?.scene ?? null)
-const overlayScene = computed<Object3D | null>(() => {
+// tileObject und optionales Overlay (Flagge / Haus)
+const tileObject = computed<Object3D | null>(() => state.value?.scene ?? null)
+const overlayObject = computed<Object3D | null>(() => {
   if (props.type === 'END') return goalState.value?.scene ?? null
   if (props.type?.startsWith?.('START_')) return houseState.value?.scene ?? null
   return null
@@ -68,7 +68,7 @@ const overlayZOffset = computed(() => {
 //Setzt für tile die Position und Skalierung im Raum
 //Setzt für Overlay die Position basierend auf dem dazu gehörigen tile und Skalierung
 watchEffect(() => {
-  const tile = tileScene.value
+  const tile = tileObject.value
   if (tile) {
     if (typeof tile.position?.set === 'function') {
       tile.position.set(props.position[0], tileYOffset, props.position[2])
@@ -83,7 +83,7 @@ watchEffect(() => {
     emit('tile-ready', { id: props.id, object: tile })
   }
 
-  const overlay = overlayScene.value
+  const overlay = overlayObject.value
   if (overlay) {
 
     if (props.type?.startsWith?.('START_')) {
@@ -130,7 +130,7 @@ function setOverlayMainColor(obj: Object3D, colorHex: string) {
 
 <template>
   <!-- Rendert Basis-Tile (immer) -->
-  <primitive v-if="tileScene" :object="tileScene" @pointerdown="handleClick" />
+  <primitive v-if="tileObject" :object="tileObject" @pointerdown="handleClick" />
   <!-- Rendert Optionales Overlay (Flagge oder Haus) -->
-  <primitive v-if="overlayScene" :object="overlayScene" @pointerdown="handleClick" />
+  <primitive v-if="overlayObject" :object="overlayObject" @pointerdown="handleClick" />
 </template>
