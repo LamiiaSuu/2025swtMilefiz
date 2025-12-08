@@ -8,16 +8,16 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'game',
-      component: GameView,
-    },
-    {
-      path: '/home',
       name: 'Homepage',
       component: HomeView,
     },
     {
-      path: '/spielStart',
+      path: '/home',
+      name: 'game',
+      component: GameView,
+    },
+    {
+      path: '/gameStart',
       name: 'game-start',
       component: GameStartView,
     }
