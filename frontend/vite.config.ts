@@ -18,7 +18,7 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
-      '/milefiz': {
+      '/ws': {
         target: 'http://localhost:8080/',
         ws: true,
       },
