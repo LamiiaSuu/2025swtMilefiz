@@ -19,14 +19,13 @@ const goBack = () => {
 
 <style>
 .back-button {
-    background-color: var(--color-button, #234420);
+    background-color: #234420;
     color: white;
     border: none;
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
     
-    font-family: var(--font-small-button);
 }
 
 .back-button:hover {

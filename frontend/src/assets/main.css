@@ -65,3 +65,33 @@
     3px 3px 6px rgba(0, 0, 0, 0.8),
     0 0 10px rgba(0, 0, 0, 0.5);
 }
+
+.header-with-plate2 {
+  font-family: "MainFont", sans-serif;
+  background-image: url("/backgrounds/HeaderPlate.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  font-size: 8vh;
+  font-weight: bolder;
+  color: white;
+  -webkit-text-stroke: 1px black;
+  text-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5);
+
+  width: 40vw;   
+  height: 45vh;    
+  margin-top: 3vh;
+  padding: 0;
+
+
+  pointer-events: none;
+  
+}

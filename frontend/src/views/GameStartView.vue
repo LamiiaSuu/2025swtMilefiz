@@ -5,12 +5,15 @@ import BackButton from '@/components/ui/BackButton.vue';
 <template>
     <div class="content">
         <div class="header">
-            <BackButton />
-
-            <div class="titles">
-                <h1>MI'lefiz</h1>
-                <h5>Neues Spiel</h5>
+            <div class="backButton">
+                <BackButton />
             </div>
+
+            <div class="header-with-plate2">
+                <p>MI'lefiz</p>
+            </div>
+
+            <h5>Neues Spiel</h5>
         </div>
 
         <div class="new-game-form">
@@ -68,30 +71,52 @@ import BackButton from '@/components/ui/BackButton.vue';
 
 <style>
 .content {
-    background: white;
+    position: relative;
+    height: 100vh;
+    width: 100vw;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding-bottom: 8rem;
+}
+
+.content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/backgrounds/BackgroundTest.webp");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: blur(4px);
+    z-index: -1;
 }
 
 .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
     position: relative;
-    text-align: center;
-    padding: 10px 25px;
-    color: var(--color-text);
+    margin-top: 2rem;
 }
 
-.header>*:first-child {
+.backButton {
     position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    left: 0;
 }
 
-.titles {
-    margin: 0 auto;
-    text-align: center;
+.header-with-plate2 > p {
+  transform: translateY(-50%);
 }
+
 
 .new-game-form {
     padding: 0 25px;
@@ -118,12 +143,11 @@ import BackButton from '@/components/ui/BackButton.vue';
 }
 
 .map-select {
-  padding: 6px 10px;
-  border: 1px solid #234420;
-  background: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
+    padding: 6px 10px;
+    border: 1px solid #234420;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
 }
-
 </style>
