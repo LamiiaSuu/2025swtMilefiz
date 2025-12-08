@@ -30,10 +30,10 @@ import de.hs_rm.de.milefiz.game.model.Position;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMeepleReachedEndEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveWithLossEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendPlayerHasWonEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRejectedByBarrierEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent;
 
@@ -93,7 +93,6 @@ public class MovementServiceMeepleTest {
     }
 
     // Erfolgreicher Move
-    // TODO alle grenzfaelle hinzufuegen
     @Test
     void moveMeepleSuccessfulMoveReturnsFrontendMoveEvent() {
 
@@ -202,34 +201,24 @@ public class MovementServiceMeepleTest {
         assertEquals("Cant enter End with remaining Moves", evt.msg());
     }
 
-    // Erfolgreiches betreten des Ziels
+    // Sieg, wenn erster Meeple das Ziel erreicht
     @Test
-    void moveMeepleLastMoveOntoEndFieldTriggersMeepleReachedEndEvent() {
+    void moveMeepleLastMoveOntoEndFieldTriggersPlayerHasWonEvent() throws LobbyNotFoundException {
+        
+        Field endField = new Field(UUID.randomUUID(), FieldType.END, new Position(0, 1));
+        currentField.addNeighbour(endField, Direction.WEST);
 
         player.setRemainingMoves(LAST_MOVE);
 
-        meeple.setCurrentField(nextField);
-
-        // Endfeld nördlich vom aktuellen Feld
-        Field endField = new Field(UUID.randomUUID(), FieldType.END, new Position(0, 2));
-        nextField.addNeighbour(endField, Direction.NORTH);
-
-        MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
+        MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.WEST);
 
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
 
-        // Meeple erreicht das Ziel
-        assertInstanceOf(FrontendMeepleReachedEndEvent.class, result);
+        assertInstanceOf(FrontendPlayerHasWonEvent.class, result);
 
-        FrontendMeepleReachedEndEvent evt = (FrontendMeepleReachedEndEvent) result;
+        FrontendPlayerHasWonEvent evt = (FrontendPlayerHasWonEvent) result;
+        assertEquals(player.getId(), evt.playerId());
 
-        assertEquals(meeple.getId(), evt.id());
-
-        // SMeeple wurde bei Spieler entfernt
-        assertThrows(IllegalArgumentException.class,
-                () -> player.getMeepleWithId(meeple.getId()));
-
-        // Spieler hat keine Züge mehr
         assertEquals(0, player.getRemainingMoves());
     }
 

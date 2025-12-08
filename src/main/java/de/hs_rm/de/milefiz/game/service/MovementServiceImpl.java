@@ -28,7 +28,6 @@ import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMeepleReachedEndEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveBarrierEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveBarrierRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
@@ -253,12 +252,8 @@ public class MovementServiceImpl implements MovementService {
             // Wenn man darauf endet, wird der meeple entfernt.
             if (player.getRemainingMoves() == LAST_MOVE) {
                 player.useMove();
-                player.removeMeeple(meeple.getId());
-                // wenn spieler keine Meeple mehr hat, hat er gewonnen
-                if (!player.hasMeeples()) {
-                    return new FrontendPlayerHasWonEvent(player.getId());
-                }
-                return new FrontendMeepleReachedEndEvent(meeple.getId());
+                logger.info("player {} has won", player.getId());
+                return new FrontendPlayerHasWonEvent(player.getId());
             }
             logger.info("Cant enter End with remaining moves");
             return new FrontendMoveRejectedEvent("Cant enter End with remaining Moves");
@@ -502,8 +497,6 @@ public class MovementServiceImpl implements MovementService {
 
         Board board = lobby.getBoard();
         Meeple barrier = board.getBarrierById(moveBarrCmd.barrierId());
-
-       
 
         // ⚠️ Temporärer Testcode:
         // zu testzwecken greifen wir auf ein zufälliges feld zurück um die checks
