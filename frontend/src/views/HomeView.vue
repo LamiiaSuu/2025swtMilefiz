@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="header-with-plate">
-      <h1>MI'lefiz</h1>
+      <p>MI'lefiz</p>
     </div>
 
     <div class="button-container">

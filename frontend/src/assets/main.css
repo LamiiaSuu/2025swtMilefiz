@@ -16,11 +16,12 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
 
-  font-size: 4vh;
+  font-size: 8vh;
   font-weight: bolder;
   color: white;
   -webkit-text-stroke: 1px black;
@@ -30,7 +31,7 @@
   
   width: 100vw;
   height: 100vh;
-  padding-top: 16vh;
+  padding-bottom: 8vh;
   margin-top: 3vh;
 
   pointer-events: none;
