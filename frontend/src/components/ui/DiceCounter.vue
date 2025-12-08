@@ -62,7 +62,6 @@ const rollValue = computed(() => {
   color: #ffffff;
   text-shadow: 0 0 10px rgba(223, 223, 223, 0.71);
   
-  font-family: var(--font-game-ui);
 }
 
 .dice-icon-inactive {
@@ -81,8 +80,6 @@ const rollValue = computed(() => {
   letter-spacing: 0.05em;
   white-space: nowrap;
   line-height: 1;
-  
-  font-family: var(--font-game-ui);
 }
 
 .action-icon {

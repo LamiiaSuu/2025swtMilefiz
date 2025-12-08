@@ -202,7 +202,6 @@ function triggerPressAnimation() {
     color: #ffffff;
     border-radius: 3px;
     
-    font-family: var(--font-game-ui);
 }
 
 .cooldown-overlay {
@@ -216,6 +215,5 @@ function triggerPressAnimation() {
     font-size: 32px;
     font-weight: bold;
     pointer-events: none;
-    font-family: var(--font-game-ui);
 }
 </style>
