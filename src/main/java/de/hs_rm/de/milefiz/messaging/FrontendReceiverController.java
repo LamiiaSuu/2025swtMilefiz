@@ -181,6 +181,9 @@ public class FrontendReceiverController {
 
         //Spieler nutzt einen Zug
         player.useMove();
+        if(!player.canMove()){
+            meeple.resetLastField();
+        }
 
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(

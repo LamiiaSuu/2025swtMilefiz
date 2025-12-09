@@ -33,6 +33,13 @@ public class Meeple {
         this.currentField = field;
     }
 
+    /**
+     * lastField vom Meeple wird hier auf null gesetzt
+     */
+    public void resetLastField() {
+        lastField = null;
+    }
+
     public Field getLastField() {
         return lastField;
     }
