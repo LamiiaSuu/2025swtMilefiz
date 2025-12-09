@@ -182,12 +182,6 @@ const jump = () => {
 }
 
 
-/**
- * reagiert auf Jump-Button Trigger
- */
-/* watch(() => milefizStore.triggerJump, () => {
-  jump()
-}) */
 
 // Position für Animation
 const animatedPosition = ref<[number, number, number]>([...(props.position ?? [0, 0, 0])])
