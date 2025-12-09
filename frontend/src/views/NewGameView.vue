@@ -23,9 +23,8 @@ const players = ref([
 const copyToClipboard = async () => {
     try {
         await navigator.clipboard.writeText(lobbyId.value)
-        alert('Lobby-ID kopiert!')
     } catch (err) {
-        console.error('Fehler beim Kopieren:', err)
+        console.error('Fehler beim Kopieren der Lobby-ID:', err)
     }
 }
 
