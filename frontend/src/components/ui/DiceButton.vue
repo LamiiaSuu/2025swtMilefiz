@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
-import dice from "@/assets/hud/dice.png";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
