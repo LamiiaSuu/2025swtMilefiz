@@ -13,8 +13,8 @@ const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
 const selectedFile = ref<File | null>(null)
 
-// Spieler Farben: rot, gruen, blau, gelb
-const playerColors = ['#ff4444', '#44ff44', '#4444ff', '#ffff44']
+// Spieler Farben: gruen, gelb, rot, blau
+const playerColors = ['#44ff44', '#ffff44',  '#ff4444',  '#4444ff' ]
 const players = ref([
     { name: 'Spieler 1', color: playerColors[0] },
 ])
