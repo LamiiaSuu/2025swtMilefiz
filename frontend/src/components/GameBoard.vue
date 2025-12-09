@@ -428,7 +428,7 @@ onUnmounted(() => {
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
      vertikal ist -->
     <TresMesh :rotation="[-Math.PI / 2, 0, 0]">
-      <TresPlaneGeometry :args="[500, 500]" />
+      <TresPlaneGeometry :args="[600, 600]" />
       <TresMeshStandardMaterial :color="0x4FA200" />
 
     </TresMesh>
