@@ -179,7 +179,9 @@ public class FrontendReceiverController {
         // lastField wird jetzt im Meeple.setCurrentField aktualisiert
         meeple.setCurrentField(nextField);
 
-        //Spieler nutzt einen Zug
+        // Spieler nutzt einen Zug, danach wird gecheckt, ob noch Moves übrig sind. 
+        // Wenn nicht wird lastField des Meeples auf null gesetzt. 
+        // Dadurch kann im neuen Move direkt wieder die Richtung geändert werden.
         player.useMove();
         if(!player.canMove()){
             meeple.resetLastField();
