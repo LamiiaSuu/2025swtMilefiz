@@ -14,25 +14,29 @@ const goBack = () => {
 
 <template>
   <button class="back-button" @click="goBack">
-    Zurück
+    &lt; zurück
   </button>
 </template>
 
 <style>
+
 .back-button {
-  background-color: #234420;
-  border: 4px solid #c8a25d;
-  border-radius: 8px;
+  background: none;
+  border: none;
   color: white;
-  padding: 10px 20px;
+  font-size: 1.8rem;
+  font-weight: bold;
   cursor: pointer;
   font-family: "AcmeFont", sans-serif;
-  font-size: 2rem;
-  -webkit-text-stroke: 0 !important;
-  text-shadow: none !important;
+  transition: all 0.2s;
+  -webkit-text-stroke: 4px black;
+  text-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(0, 0, 0, 0.5);
+  paint-order: stroke fill;
 }
 
 .back-button:hover {
-  opacity: 0.8;
+  transform: scale(1.05);
 }
 </style>
