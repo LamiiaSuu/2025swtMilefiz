@@ -249,6 +249,10 @@ public class FrontendReceiverController {
                 
             player.setRemainingMoves(number);
             logger.info("Set {} remaining moves for player {}", number, player.getId());
+            Meeple meeple = player.getActiveMeeple();
+            if(player.getRemainingMoves() == 0){
+                meeple.resetLastField();
+            }
             
         } catch (LobbyNotFoundException e) {
             logger.error("Lobby {} not found for dice roll", lobbyId, e);
