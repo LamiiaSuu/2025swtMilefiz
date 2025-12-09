@@ -44,6 +44,8 @@ const rollValue = computed(() => {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  
+  font-family: "AcmeFont", sans-serif;
 }
 
 .counter-display, .no-roll {
@@ -61,6 +63,8 @@ const rollValue = computed(() => {
   font-weight: bold;
   color: #ffffff;
   text-shadow: 0 0 10px rgba(223, 223, 223, 0.71);
+  
+  font-family: "AcmeFont", sans-serif;
   
 }
 
@@ -80,6 +84,7 @@ const rollValue = computed(() => {
   letter-spacing: 0.05em;
   white-space: nowrap;
   line-height: 1;
+  font-family: "AcmeFont", sans-serif;
 }
 
 .action-icon {
