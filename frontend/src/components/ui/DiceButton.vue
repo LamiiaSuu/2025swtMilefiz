@@ -56,7 +56,7 @@ watch(remainingSeconds, (value) => {
 
 onMounted(() => {
     interval = window.setInterval(() => {
-        if (timestampEnd === null){
+        if (timestampEnd === null) {
             localCountdown.value = 0;
             return;
         }
@@ -161,11 +161,6 @@ function triggerPressAnimation() {
     45% {
         transform: scale(0.9);
         filter: brightness(0.75);
-    }
-
-    75% {
-        transform: scale(1.1);
-        filter: brightness(1.15);
     }
 
     100% {

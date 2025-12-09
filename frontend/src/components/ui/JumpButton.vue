@@ -26,14 +26,13 @@ const disabled = computed(() =>
 /* Hüpfen Hotkey Mapping auf Key " " (Spacebar)*/
 const onKeypress = (e: KeyboardEvent) => {
     if (e.key === " ") {
-        console.log("Hüpfen angestoßen")
         jump()
     }
 }
 
 
 /**
- * -
+ * - Überprüft, ob Meeple im Moment hüpft
  * - visuelles Feedback für Aktivierung des Buttons
  */
 function jump() {
@@ -41,16 +40,15 @@ function jump() {
         return
     } */
 
-    /**
-     * Jump Button deaktivieren, solange Meeple noch hüpft
-     */
+    // Jump Button deaktivieren, solange Meeple noch hüpft
     if (milefizStore.isJumping) {
         console.log("Hüpfen nicht erlaubt!")
         return
     }
     
-    milefizStore.requestJump()
-    
+    console.log("Hüpfen Request gesendet.")
+    /* milefizStore.requestJump() */
+
     /* Press Animation für den Button*/
     triggerPressAnimation();
 }
@@ -142,18 +140,5 @@ function triggerPressAnimation() {
     font-weight: bold;
     color: #ffffff;
     border-radius: 3px;
-}
-
-.cooldown-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 26px;
-    font-weight: bold;
-    pointer-events: none;
 }
 </style>

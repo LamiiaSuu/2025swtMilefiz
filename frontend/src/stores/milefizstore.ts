@@ -232,9 +232,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    */
   const isJumping = ref(false)
 
-  function requestJump() {
+  /* function requestJump() {
     isJumping.value = true
-  }
+  } */
   
   return {
     gamedata,
@@ -244,6 +244,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     cooldown,
     sendMove,
     isJumping,
-    requestJump
+    /* requestJump */
   }
 })
