@@ -81,17 +81,9 @@
 
 .page-title {
   font-family: "MainFont", sans-serif;
-  background-image: url("/backgrounds/ButtonPlate.png");
-  background-color: transparent;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
   border: none;
   cursor: pointer;
   
-  min-width: 35vw;
-  min-height: 9vh;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,7 +99,7 @@
     0 0 10px rgba(0, 0, 0, 0.5);
 
   position: relative;
-  top: -13vh;
+  top: -15vh;
   left: 0;
   transform: none;
   margin-top: -10vh;
