@@ -32,6 +32,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -241,7 +242,10 @@ public class FrontendReceiverController {
                 .filter(p -> p.getId().equals(command.playerId()))
                 .findFirst()
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found"));
-                
+            if(player.getRemainingMoves() > 0){
+                logger.info("Cannot roll. There are still {} moves remaining for player {}", number, player.getId());
+                return new FrontendRollDiceRejectedMovesLeftEvent(command.playerId(), player.getRemainingMoves());
+            }
             player.setRemainingMoves(number);
             logger.info("Set {} remaining moves for player {}", number, player.getId());
             
