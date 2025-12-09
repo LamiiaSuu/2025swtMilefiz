@@ -127,7 +127,7 @@ const handleFileChange = (event: Event) => {
                     <!-- Buttons -->
                     <div class="form-row">
                         <div class="button-container">
-                            <button class="start-game-button" type="submit">
+                            <button class="start-game-button" type="submit" @click="$router.push({ name: 'game' })">
                                 Spiel Starten
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />
