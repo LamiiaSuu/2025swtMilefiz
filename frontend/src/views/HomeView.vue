@@ -1,11 +1,8 @@
 <template>
   <div class="home">
-    <div class="header-with-plate">
-      <p>MI'lefiz</p>
-    </div>
-
+    <Header></Header>
     <div class="button-container">
-      <button class="menu-button">Neues Spiel</button>
+      <button class="menu-button" @click="newGameStart">Neues Spiel</button>
       <button class="menu-button">Spiel beitreten</button>
       <button class="menu-button">Map erstellen</button>
       <button class="menu-button">Einstellungen</button>
@@ -15,8 +12,13 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import Header from '@/components/ui/pages/Header.vue'
 
 const router = useRouter()
+
+const newGameStart = () => {
+  router.push({ name: 'game-start' })
+}
 </script>
 
 <style scoped>
@@ -28,9 +30,8 @@ const router = useRouter()
   flex-direction: column;
 
   align-items: center;
-  justify-content: center;
   overflow: hidden;
-  padding-bottom: 8rem;
+  padding-bottom: 4rem;
 }
 
 .home::before {
@@ -45,18 +46,7 @@ const router = useRouter()
   background-repeat: no-repeat;
   background-position: center;
   filter: blur(4px);
-  z-index: -1; 
-}
-
-.header-with-plate,
-.button-container {
-  position: relative;
-  z-index: 1;
-}
-
-.header-with-plate {
-  position: relative; 
-  z-index: 10;        
+  z-index: -1;
 }
 
 .button-container {
@@ -64,8 +54,8 @@ const router = useRouter()
   flex-direction: column;
   gap: 2vh;
   align-items: center;
-  margin-top: -6vh;  /* Verkleinert Abstand zum Header */
 }
+
 .menu-button:hover {
   transform: scale(1.05);
   transition: transform 0.2s ease;

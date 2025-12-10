@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
-import dice from "@/assets/hud/dice.png";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -57,7 +56,7 @@ watch(remainingSeconds, (value) => {
 
 onMounted(() => {
     interval = window.setInterval(() => {
-        if (timestampEnd === null){
+        if (timestampEnd === null) {
             localCountdown.value = 0;
             return;
         }
@@ -164,11 +163,6 @@ function triggerPressAnimation() {
         filter: brightness(0.75);
     }
 
-    75% {
-        transform: scale(1.1);
-        filter: brightness(1.15);
-    }
-
     100% {
         transform: scale(1);
         filter: brightness(1);
@@ -201,6 +195,7 @@ function triggerPressAnimation() {
     font-weight: bold;
     color: #ffffff;
     border-radius: 3px;
+    font-family: "AcmeFont", sans-serif;
 }
 
 .cooldown-overlay {
@@ -211,8 +206,9 @@ function triggerPressAnimation() {
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: 26px;
+    font-size: 32px;
     font-weight: bold;
     pointer-events: none;
+    font-family: "AcmeFont", sans-serif;
 }
 </style>
