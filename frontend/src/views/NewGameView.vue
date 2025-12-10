@@ -6,11 +6,13 @@ import BackButton from '@/components/ui/pages/BackButton.vue'
 import LobbyIDField from '@/components/ui/pages/LobbyIDField.vue'
 import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
+import { useMilefizStore } from '@/stores/milefizstore'
 
+const { joinLobby } = useMilefizStore()
+joinLobby()
 const router = useRouter()
 
 // Daten
-const lobbyId = ref('ABC-123-XYZ')
 const lobbyName = ref('')
 const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
@@ -29,6 +31,8 @@ const players = ref([
     { name: 'Spieler 4', color: playerColors[3] },
 ])
 
+
+
 /**
  * handleFileChange (event: Event)
  * @param event - Event vom Form
@@ -40,6 +44,7 @@ const handleFileChange = (event: Event) => {
         selectedFile.value = target.files[0]
     }
 }
+
 </script>
 
 <template>

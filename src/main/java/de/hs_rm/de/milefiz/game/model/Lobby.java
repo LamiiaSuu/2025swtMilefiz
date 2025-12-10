@@ -68,6 +68,9 @@ public class Lobby {
     }
 
     private void updatePlayerStarts(Player player) {
+        if (board == null) {
+            return;
+        }
         for (Meeple m : player.getMeeples()) {
             m.setCurrentField(board.getStartField(player.getColor()));
         }

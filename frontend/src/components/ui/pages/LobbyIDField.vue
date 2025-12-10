@@ -1,10 +1,14 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { useMilefizStore } from '@/stores/milefizstore';
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+const milefizStore = useMilefizStore();
 
 const router = useRouter()
 
-const lobbyId = ref('ABC-123-XYZ')
+
+const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
 
 /**
  * copyToClipboard()
@@ -17,6 +21,8 @@ const copyToClipboard = async () => {
         console.error('Fehler beim Kopieren der Lobby-ID:', err)
     }
 }
+
+
 </script>
 
 <template>
