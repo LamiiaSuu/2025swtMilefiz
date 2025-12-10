@@ -222,7 +222,7 @@ select {
 .copy-button,
 .file-input,
 .players-list {
-    background-color: rgba(230, 230, 230, 0.95);
+    background-color: var(--background-color-forms);
 }
 
 .form-input,
@@ -292,7 +292,7 @@ select {
     padding: 8px;
     font-size: 1rem;
     color: white;
-    background-color: #234420;
+    background-color: var(--button-color);
 }
 
 .file-input:disabled {
