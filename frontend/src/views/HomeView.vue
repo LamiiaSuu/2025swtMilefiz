@@ -1,8 +1,6 @@
 <template>
   <div class="home">
-    <div class="header-with-plate">
-      <p>MI'lefiz</p>
-    </div>
+    <Header></Header>
 
     <div class="button-container">
       <button class="menu-button" @click="newGameStart">Neues Spiel</button>
@@ -15,6 +13,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import Header from '@/components/ui/pages/Header.vue'
 
 const router = useRouter()
 
@@ -55,7 +54,7 @@ const newGameStart = () => {
 .header-with-plate,
 .button-container {
   position: relative;
-  z-index: 1;
+  z-index: 20;
 }
 
 .header-with-plate {
