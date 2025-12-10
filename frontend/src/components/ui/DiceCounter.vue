@@ -23,7 +23,7 @@ const rollValue = computed(() => {
     </div>
     <div v-else class="no-roll">
       <div class="dice-icon-inactive">
-        <img src="@/assets/hud/dice.png" class="action-icon" />
+        <img src="@/assets/hud/dice.png" class="action-icon" alt="dice"/>
       </div>
       <div class="label">Würfle!</div>
     </div>
@@ -44,6 +44,8 @@ const rollValue = computed(() => {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  
+  font-family: "AcmeFont", sans-serif;
 }
 
 .counter-display, .no-roll {
@@ -57,11 +59,13 @@ const rollValue = computed(() => {
 }
 
 .dice-number {
-  font-size: 2rem;    /* Responsive font-size */
+  font-size: 4rem;    /* Responsive font-size */
   font-weight: bold;
   color: #ffffff;
   text-shadow: 0 0 10px rgba(223, 223, 223, 0.71);
-  line-height: 1;
+  
+  font-family: "AcmeFont", sans-serif;
+  
 }
 
 .dice-icon-inactive {
@@ -73,12 +77,14 @@ const rollValue = computed(() => {
 }
 
 .label {
-  font-size: 0.6rem;  /* Responsive font-size */
+  font-size: 1rem;  /* Responsive font-size */
+  font-weight: bold;
   opacity: 0.8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
   line-height: 1;
+  font-family: "AcmeFont", sans-serif;
 }
 
 .action-icon {
