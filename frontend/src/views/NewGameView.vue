@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import LobbyIDField from '@/components/ui/pages/LobbyIDField.vue'
@@ -11,7 +11,10 @@ import { useMilefizStore } from '@/stores/milefizstore'
 const { joinLobby } = useMilefizStore()
 
 const milefizStore = useMilefizStore()
-joinLobby()
+
+onMounted(() => {
+    milefizStore.joinLobby()
+})
 const router = useRouter()
 
 // Daten

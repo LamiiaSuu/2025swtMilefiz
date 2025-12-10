@@ -7,6 +7,7 @@ export interface Lobby {
 export interface Player {
   id: string
   meeples: Meeple[]
+  playerName: String
   color: string
   activeMeeple: Meeple | null
   remainingMoves: number
