@@ -47,6 +47,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     stompclient = new Client({
       brokerURL: wsurl,
+      connectHeaders: {
+        "player-token": gamedata.playerToken
+      }
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)
@@ -143,7 +146,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         console.error('Error while recieving Data:\n', resp.statusText)
         throw new Error(resp.statusText)
       }
-      let responseMsg = await resp.json()
+      const responseMsg = await resp.json()
       console.log(responseMsg.msg)
       gamedata.lobby = responseMsg.lobby as Lobby;
       gamedata.playerId = responseMsg.playerId;
@@ -228,14 +231,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
-   * 
+   *
    */
   const isJumping = ref(false)
 
   /* function requestJump() {
     isJumping.value = true
   } */
-  
+
   return {
     gamedata,
     startMilefizLiveUpdate,
