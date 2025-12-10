@@ -3,7 +3,7 @@ import { useMilefizStore } from '@/stores/milefizstore';
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-const milefizStore = useMilefizStore();
+const milefizStore = useMilefizStore()
 
 const router = useRouter()
 

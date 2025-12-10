@@ -9,6 +9,8 @@ import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 
 const { joinLobby } = useMilefizStore()
+
+const milefizStore = useMilefizStore()
 joinLobby()
 const router = useRouter()
 
