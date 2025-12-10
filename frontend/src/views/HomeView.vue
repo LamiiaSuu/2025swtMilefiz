@@ -1,7 +1,6 @@
 <template>
   <div class="home">
     <Header></Header>
-
     <div class="button-container">
       <button class="menu-button" @click="newGameStart">Neues Spiel</button>
       <button class="menu-button">Spiel beitreten</button>
@@ -31,9 +30,8 @@ const newGameStart = () => {
   flex-direction: column;
 
   align-items: center;
-  justify-content: center;
   overflow: hidden;
-  padding-bottom: 8rem;
+  padding-bottom: 4rem;
 }
 
 .home::before {
@@ -51,24 +49,11 @@ const newGameStart = () => {
   z-index: -1;
 }
 
-.header-with-plate,
-.button-container {
-  position: relative;
-  z-index: 20;
-}
-
-.header-with-plate {
-  position: relative;
-  z-index: 10;
-}
-
 .button-container {
   display: flex;
   flex-direction: column;
   gap: 2vh;
   align-items: center;
-  margin-top: -6vh;
-  /* Verkleinert Abstand zum Header */
 }
 
 .menu-button:hover {

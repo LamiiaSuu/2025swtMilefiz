@@ -1,7 +1,7 @@
 <template>
     <div class="header">
         <h1>MI'lefiz</h1>
-        <h2><slot /></h2>
+        <h2><slot>&nbsp;</slot></h2>
     </div>
 </template>
 
