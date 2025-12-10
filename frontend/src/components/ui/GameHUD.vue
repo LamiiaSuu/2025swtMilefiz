@@ -6,6 +6,7 @@ import DiceButton from './DiceButton.vue'
 import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
 import EnergyBar from './EnergyBar.vue';
+import SaveEnergyButton from './SaveEnergyButton.vue';
 </script>
 
 
@@ -19,13 +20,18 @@ import EnergyBar from './EnergyBar.vue';
     <!-- Button Bar -->
     <div style="position: absolute;bottom: 2vw; right: 0px;">
       <div class="button-bar">
-        <DiceButton />
+        <SaveEnergyButton />
         <JumpButton />
+        <DiceButton />
       </div>
     </div>
 
     <div style="position: absolute;bottom: 5vw; left: 3vw;">
       <div class="energy-bar-container">
+
+        <div>
+          <img src="@/assets/hud/lightning.png" class="action-icon" style="width: 2vw;"/>
+        </div>
         <EnergyBar />
       </div>
     </div>

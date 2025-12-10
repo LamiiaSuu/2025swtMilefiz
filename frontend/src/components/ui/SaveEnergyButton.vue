@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, ref, watch } from "vue";
-import { useMilefizStore } from "@/stores/milefizstore";
+import { ref, onMounted } from 'vue';
+import { useMilefizStore } from '@/stores/milefizstore';
 
-// Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
-
-const isEnergyEnough = true;
 
 /**
  * - Registriert EventListener für Keyboard Input 
@@ -14,44 +11,16 @@ onMounted(() => {
     window.addEventListener("keydown", onKeypress)
 });
 
-/**
- * steuert, ob der Jump Button deaktiviert wird/bleibt
- * → true, solange nicht genügend Energie gesammelt wurde
- */
-const disabled = computed(() =>
-    !isEnergyEnough
-)
-
-
-/* Hüpfen Hotkey Mapping auf Key " " (Spacebar)*/
 const onKeypress = (e: KeyboardEvent) => {
-    if (e.key === " ") {
-        jump()
+    if (e.key.toLocaleLowerCase() === "e") {
+        saveEnergy()
     }
 }
 
-
-/**
- * - Überprüft, ob Meeple im Moment hüpft
- * - visuelles Feedback für Aktivierung des Buttons
- */
-function jump() {
-    /* if (disabled.value) {
-        return
-    } */
-
-    // Jump Button deaktivieren, solange Meeple noch hüpft
-    if (milefizStore.isJumping) {
-        console.log("Hüpfen nicht erlaubt!")
-        return
-    }
-    
-    console.log("Hüpfen Request gesendet.")
-    milefizStore.gamedata.energy = 0
-    /* Press Animation für den Button*/
-    triggerPressAnimation();
+function saveEnergy(){
+    console.log("Würfelzahl als Energie speichern")
+    triggerPressAnimation()
 }
-
 
 /**
  * kurze Animation für den Button
@@ -62,27 +31,17 @@ function triggerPressAnimation() {
     isPressed.value = true
     setTimeout(() => (isPressed.value = false), 150)
 }
-
 </script>
+
 <template>
-    <div class="action-button" :class="{ pressed: isPressed, disabled: milefizStore.isJumping}">
-        <!-- Jumping Meeple Icon -->
-        <img src="@/assets/hud/JumpingMeeple.png" class="action-icon" />
-        <!-- Spacebar Icon -->
-        <img src="@/assets/hud/spacebar_icon_light.png" class="hotkey-space" />
+    <div class="action-button" :class="{pressed: isPressed}">
+        <img src="@/assets/hud/lightning.png" class="action-icon" />
+        <span class="hotkey">E</span>
     </div>
+
 </template>
 
 <style>
-.hotkey-space {
-    position: absolute;
-    bottom: -6px;
-    left: 2px;
-    width: 24px;
-    height: auto;
-    pointer-events: none;
-}
-
 .action-button {
     position: relative;
     padding: 5px;
@@ -140,4 +99,5 @@ function triggerPressAnimation() {
     color: #ffffff;
     border-radius: 3px;
 }
+
 </style>

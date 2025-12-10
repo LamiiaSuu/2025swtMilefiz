@@ -27,13 +27,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const gamedata = reactive<{
     playerId: string
     playerToken: string,
-    mana: number
+    energy: number
     currentDiceRoll?: number
     lobby: Lobby | null
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: "",
-    mana: 100,
+    energy: 0,
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
   })
@@ -77,6 +77,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           gamedata.currentDiceRoll = event.number
           cooldown.active = true
           cooldown.remainingSeconds = event.cooldown
+
+          if (gamedata.energy + event.number > 6) {
+            gamedata.energy = 6
+          } else {
+            gamedata.energy = gamedata.energy + event.number //Für testzwecke der Energy animation: energie wird auf würfelzahl gesetzt
+
+          }
         }
 
         // Wenn der Spieler im Moment noch nicht Würfeln darf, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
@@ -232,10 +239,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    */
   const isJumping = ref(false)
 
-  /* function requestJump() {
-    isJumping.value = true
-  } */
-  
+
   return {
     gamedata,
     startMilefizLiveUpdate,
@@ -243,7 +247,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     joinLobby,
     cooldown,
     sendMove,
-    isJumping,
-    /* requestJump */
+    isJumping
   }
 })
