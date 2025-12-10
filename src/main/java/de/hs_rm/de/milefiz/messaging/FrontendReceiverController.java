@@ -16,6 +16,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
+import de.hs_rm.de.milefiz.game.lobby.PlayerHasNoPermissionException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Direction;
@@ -28,6 +29,7 @@ import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
@@ -91,7 +93,7 @@ public class FrontendReceiverController {
      * @param lobbyId   die eindeutige ID der Lobby, in der der Zug ausgeführt wird
      * @param moveCmd   der empfangene Bewegungsbefehl mit Meeple-ID und
      *                  {@link Direction}
-     * @param principal der authentifizierte Benutzer, der die Nachricht gesendet
+     * @param player der authentifizierte Benutzer, der die Nachricht gesendet
      *                  hat
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
      *         ({@link FrontendMoveEvent}) oder einen Fehler
@@ -232,7 +234,8 @@ public class FrontendReceiverController {
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleRollDice(@DestinationVariable("lobbyId") UUID lobbyId, RollDiceCommand command, Player player) {
+    public FrontendEvent handleRollDice(@DestinationVariable("lobbyId") UUID lobbyId, RollDiceCommand command,
+            Player player) {
         logger.info("Player {} wants to roll dice in lobby {}", player.getId(), lobbyId);
         if (gameService.getRollDiceCooldown(player.getId()) <= 0) {
             int number = gameService.rollDice();
@@ -254,6 +257,30 @@ public class FrontendReceiverController {
             return new FrontendRollDiceRejectedEvent(player.getId(),
                     gameService.getRollDiceCooldown(player.getId()));
         }
+    }
+
+    /**
+     * Wird aufgerufen wenn das Spiel losgehen soll (kann nur vom Leader ausgeführt
+     * werden)
+     * 
+     * @param lobbyId
+     * @param player
+     * @return
+     */
+    @MessageMapping("/milefiz/lobby/{lobbyId}/startGame")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendEvent handleStartGame(@DestinationVariable("lobbyId") UUID lobbyId, Player player) {
+        Lobby lobby = null;
+        try {
+            lobby = lobbyManager.getLobby(lobbyId);
+        } catch (LobbyNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (!player.equals(lobby.getLeader())) {
+            throw new PlayerHasNoPermissionException("Der Spieler ist kein Leader");
+        }
+        logger.info("Spiel {} wurde gestartet", lobbyId);
+        return new FrontendGameStartEvent("Das Spiel wurde gestartet!");
     }
 
     /**
