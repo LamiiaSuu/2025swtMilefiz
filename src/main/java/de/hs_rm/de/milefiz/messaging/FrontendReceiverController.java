@@ -9,7 +9,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
@@ -33,6 +32,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -46,13 +46,6 @@ public class FrontendReceiverController {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
         this.messagingTemplate = messagingTemplate;
-    }
-
-    @MessageMapping("/milefiz/lobby/{lobbyId}")
-    @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public String handleMessage(@DestinationVariable("lobbyId") UUID lobbyId, String message) {
-        System.out.println("Received " + lobbyId.toString() + ": " + message);
-        return "Server received: " + message; // Body von Weiterleitung an alle Clients
     }
 
     /**
@@ -91,7 +84,6 @@ public class FrontendReceiverController {
      *                  {@link Direction}
      * @param principal der authentifizierte Benutzer, der die Nachricht gesendet
      *                  hat
-     * @param sha       der aktuelle STOMP-Header-Accessor (z. B. für Metadaten)
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
      *         ({@link FrontendMoveEvent}) oder einen Fehler
      *         ({@link FrontendMoveRejectedEvent}) an die Clients sendet
@@ -100,7 +92,7 @@ public class FrontendReceiverController {
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleMove(@DestinationVariable("lobbyId") UUID lobbyId, MovementCommand moveCmd,
-            Principal principal, SimpMessageHeaderAccessor sha) {
+            Principal principal) {
         Lobby lobby = null;
         try {
             lobby = lobbyManager.getLobby(lobbyId);
@@ -116,8 +108,9 @@ public class FrontendReceiverController {
         try {
             player = lobby.getPlayerByToken(principalName);
         } catch (Exception e) {
-            e.printStackTrace();
+            player = lobby.getPlayers().stream().findFirst().orElse(null);
         }
+        System.out.println("PLAYER " + player.getPlayerToken() + " | " + player.getColor());
 
         // nur zum testen
         // lobby.setBoard(gameService.getTestBoard());
@@ -212,7 +205,7 @@ public class FrontendReceiverController {
  *   <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
  *   <li>Methode loggt die Würfel-Anfrage mit Spieler-ID und Lobby-ID</li>
  *   <li>{@link GameService#rollDice()} wird aufgerufen um Zufallszahl zu generieren</li>
- *   <li> Speichert die gewürfelte zahl im Spieler ab
+ *   <li> Speichert die gewürfelte zahl im Spieler ab</li>
  *   <li>Würfelergebnis wird in {@link FrontendRollDiceEvent} verpackt</li>
  *   <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}} gesendet</li>
  *   <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
@@ -234,6 +227,8 @@ public class FrontendReceiverController {
  * @see RollDiceCommand
  * @see FrontendRollDiceRejectedEvent
  * 
+ * @author Leon Schäfer
+ * 
  */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -247,7 +242,10 @@ public class FrontendReceiverController {
                 .filter(p -> p.getId().equals(command.playerId()))
                 .findFirst()
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found"));
-                
+            if(player.getRemainingMoves() > 0){
+                logger.info("Cannot roll. There are still {} moves remaining for player {}", number, player.getId());
+                return new FrontendRollDiceRejectedMovesLeftEvent(command.playerId(), player.getRemainingMoves());
+            }
             player.setRemainingMoves(number);
             logger.info("Set {} remaining moves for player {}", number, player.getId());
             
@@ -261,7 +259,7 @@ public class FrontendReceiverController {
         
             gameService.addRollDiceCooldown(command.playerId());
             logger.info("Player {} rolled a {} in lobby {}.", command.playerId(), number, lobbyId);
-            return new FrontendRollDiceEvent(lobbyId, number, gameService.getRollDiceCooldown(command.playerId()));
+            return new FrontendRollDiceEvent(command.playerId(), number, gameService.getRollDiceCooldown(command.playerId()));
         }
         else{
             logger.info("Player {} tried to roll dice in Lobby {}. But they still have a cooldown of {} to roll their dice!", command.playerId(), lobbyId, gameService.getRollDiceCooldown(command.playerId()));

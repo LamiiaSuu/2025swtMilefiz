@@ -2,9 +2,11 @@ import { reactive, readonly, computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
 import type { Direction, MovementCommand } from "@/types/movement";
+import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdate";
 import { useBoardStore } from "./boardStore"
 
-const wsurl = `ws://${window.location.host}/milefiz`
+// const wsurl = `ws://${window.location.host}/milefiz`
+const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
 const DEST = '/topic/milefiz/lobby/'
 
 let stompclient: Client | null = null
@@ -23,21 +25,21 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   })
   // Beispiele für Daten
   const gamedata = reactive<{
-    lobbyId: string
     playerId: string
     playerToken: string,
     mana: number
     currentDiceRoll?: number
+    lobby: Lobby | null
   }>({
-    lobbyId: '', // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
     playerId: '', // UUID vom eigenen Spieler
     playerToken: "",
     mana: 100,
     currentDiceRoll: undefined, //Würfel ergebnis
+    lobby: null // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
   })
 
   function startMilefizLiveUpdate() {
-    console.log('Starting Liveupdater for Milefiz')
+    console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
     // Nur eine Instanz
     if (stompclient != null && stompclient.connected) {
       return
@@ -45,9 +47,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     stompclient = new Client({
       brokerURL: wsurl,
-      connectHeaders: {
-        "player-token": gamedata.playerToken
-      }
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)
@@ -66,48 +65,51 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         return
       }
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
-      stompclient.subscribe(DEST + gamedata.lobbyId, (message) => {
+      stompclient.subscribe(DEST + gamedata.lobby?.id, (message) => {
         console.log('Message received: ' + message + '\nBody:\n' + message.body)
-
-        try {
-          const event = JSON.parse(message.body)
-
-          if (event.type === 'ROLL_DICE') {
-            console.log(`Player ${event.playerId} rolled: ${event.number}`)
-            gamedata.currentDiceRoll = event.number
-            cooldown.active = true
-            cooldown.remainingSeconds = event.cooldown
-          }
-
-        } catch (err) {
-          console.error('Error parsing message:', err)
-        }
 
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
 
-        // Wenn der Spieler im Moment noch nicht Würfeln darf, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
-        if (event.type === 'ROLL_DICE_ERROR') {
+        if (event.type === 'ROLL_DICE' && event.playerId === gamedata.playerId) {
+          console.log(`Player ${event.playerId} rolled: ${event.number}`)
+          gamedata.currentDiceRoll = event.number
+          cooldown.active = true
+          cooldown.remainingSeconds = event.cooldown
+        }
+
+        // Wenn der Spieler im Moment noch nicht Würfeln darf, weil er noch aktiven Cooldown hat, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
+        else if (event.type === 'ROLL_DICE_ERROR' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`)
           cooldown.remainingSeconds = event.seconds
         }
 
+        // Wenn der Spieler im Moment noch nicht Würfeln darf, weil er noch Moves übrig hat, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
+        else if (event.type === 'ROLL_DICE_ERROR_MOVES_LEFT' && event.playerId === gamedata.playerId) {
+          console.log(`Player ${event.playerId} still has ${event.moves} moves left and therefor can't roll their dice yet!`)
+          gamedata.currentDiceRoll = event.moves
+        }
+
         // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
-        if (event.type === 'COOLDOWN_READY') {
+        else if (event.type === 'COOLDOWN_READY' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} can roll again!`)
           cooldown.active = false
           cooldown.remainingSeconds = 0
         }
-        if (event.type === "MOVE_ERROR") {
+        else if (event.type === "MOVE_ERROR") {
           console.warn("Move rejected:", event.msg)
           return
         }
-        if (event.type === "MOVE") {
+        else if (event.type === "MOVE") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           gamedata.currentDiceRoll = event.remainingMoves
         }
-
+        // LOBBY_UPDATE wird immer ausgerufen, wenn sich Werte der Lobby (außer das Board) geupdatet haben. Dazu zählt auch, wenn neue Spieler gejoint sind
+        else if (event.type === "LOBBY_UPDATE") {
+          const lobbyUpdate = event as LobbyUpdateEvent
+          handleLobbyUpdate(lobbyUpdate)
+        }
       })
     }
     stompclient.onDisconnect = () => {
@@ -118,25 +120,26 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     stompclient.activate()
   }
 
-  function sendSocketMessage(payload: any) {
-    if (!stompclient || !stompclient.connected) {
-      console.error('Cannot send message: STOMP client not connected.')
-      return
-    }
-    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobbyId
-    const body = JSON.stringify(payload)
-
-    try {
-      stompclient.publish({
-        destination: '/app/milefiz/lobby',
-        body,
-      })
-      console.log('Message sent to /app/milefiz/lobby/: ' + body)
-    } catch (err) {
-      console.error('Error sending message:', err)
-    }
-  }
-
+  // async function joinLobby(lobbyId: string = 'random') {
+  //   console.log('Start receiving Gameboard Data...')
+  //   try {
+  //     if (lobbyId == null) lobbyId = 'random'
+  //     const resp = await fetch('/api/lobby/join/' + lobbyId)
+  //     if (!resp.ok) {
+  //       console.error('Error while recieving Data:\n', resp.statusText)
+  //       throw new Error(resp.statusText)
+  //     }
+  //     const lobbyUpdate = await resp.json() as LobbyUpdateEvent
+  //     handleLobbyUpdate(lobbyUpdate)
+  //     startMilefizLiveUpdate()
+  //   } catch (error_) {
+  //     console.log(error_)
+  //   }
+  // }
+  /**
+   * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
+   * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
+   */
   async function joinLobby(lobbyId: string = 'random') {
     console.log('Start receiving Gameboard Data...')
     try {
@@ -148,13 +151,19 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       }
       let responseMsg = await resp.json()
       console.log(responseMsg.msg)
-      gamedata.lobbyId = responseMsg.lobbyId;
+      gamedata.lobby = responseMsg.lobby as Lobby;
       gamedata.playerId = responseMsg.playerId;
       gamedata.playerToken = responseMsg.playerToken;
       startMilefizLiveUpdate();
     } catch (error_) {
       console.log(error_)
     }
+  }
+
+  function handleLobbyUpdate(lobbyUpdate: LobbyUpdateEvent) {
+    if (lobbyUpdate.ownPlayerId) gamedata.playerId = lobbyUpdate.ownPlayerId
+    if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
+    gamedata.lobby = lobbyUpdate.lobby
   }
 
   /**
@@ -181,11 +190,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
-    const moveCmd: MovementCommand = { meepleId, direction};
+    const moveCmd: MovementCommand = { meepleId, direction };
 
     const body = JSON.stringify(moveCmd)
 
-    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobbyId
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
 
     try {
       stompclient.publish({
@@ -204,7 +213,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
-    if (!gamedata.lobbyId || !gamedata.playerId) {
+    if (!gamedata.lobby?.id || !gamedata.playerId) {
       console.error('Cannot roll dice: Missing lobbyId or playerId')
       return
     }
@@ -215,7 +224,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     try {
       stompclient.publish({
-        destination: `/app/milefiz/lobby/${gamedata.lobbyId}/rollDice`,
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/rollDice`,
         body: JSON.stringify(rollDiceCommand),
       })
       console.log('Roll dice command sent for player:', gamedata.playerId)
@@ -224,13 +233,23 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /**
+   * 
+   */
+  const isJumping = ref(false)
+
+  /* function requestJump() {
+    isJumping.value = true
+  } */
+  
   return {
     gamedata,
     startMilefizLiveUpdate,
-    sendSocketMessage,
     sendRollDice,
     joinLobby,
     cooldown,
-    sendMove
+    sendMove,
+    isJumping,
+    /* requestJump */
   }
 })

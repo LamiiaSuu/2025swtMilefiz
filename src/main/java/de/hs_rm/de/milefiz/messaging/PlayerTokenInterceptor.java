@@ -1,5 +1,7 @@
 package de.hs_rm.de.milefiz.messaging;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -29,6 +31,15 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String token = accessor.getFirstNativeHeader("player-token");
+
+            // Falls kein Header, versuche Query-Parameter
+            if (token == null) {
+                Map<String, Object> sessionAttrs = accessor.getSessionAttributes();
+                if (sessionAttrs != null) {
+                    token = (String) sessionAttrs.get("player-token");
+                }
+            }
+
             try {
                 Player player = lobbyManager.getPlayerByTokenFromLobbies(token);
                 if (player == null) {
@@ -41,6 +52,28 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
             } catch (PlayerNotFoundException e) {
                 e.printStackTrace();
             }
+        }
+
+        // Für MESSAGE und SEND Commands: Token aus Session-Attributen oder Header holen
+        if (StompCommand.SEND.equals(accessor.getCommand()) || StompCommand.MESSAGE.equals(accessor.getCommand())) {
+            String token = (String) accessor.getSessionAttributes().get("player-token");
+
+            // Falls nicht in Session, versuche aus Header zu lesen
+            if (token == null) {
+                token = accessor.getFirstNativeHeader("player-token");
+            }
+
+            if (token != null) {
+                try {
+                    Player player = lobbyManager.getPlayerByTokenFromLobbies(token);
+                    if (player != null) {
+                        accessor.setUser(() -> String.valueOf(player.getPlayerToken()));
+                    }
+                } catch (PlayerNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            accessor.setLeaveMutable(true);
         }
 
         return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());

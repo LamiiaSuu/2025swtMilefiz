@@ -115,7 +115,7 @@ onMounted(() => {
     // Kamera nur updaten, wenn First Person an und cameraRef existiert
     if (props.useFirstPerson && cameraRef.value && props.gameCharRef?.characterPosition) {
       const charPos = props.gameCharRef.characterPosition.position
-      const offset = props.offset || { x: 0, y: 1, z: 0 }
+      const offset = props.offset || { x: 0, y: 0.55, z: 0 }
 
       // Kamera-Position setzen
       cameraRef.value.position.set(
