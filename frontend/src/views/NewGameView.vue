@@ -11,15 +11,22 @@ const lobbyId = ref('ABC-123-XYZ')
 const lobbyName = ref('')
 const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
+
+// Importierte Map Datei
 const selectedFile = ref<File | null>(null)
 
 // Spieler Farben: gruen, gelb, rot, blau
-const playerColors = ['#44ff44', '#ffff44',  '#ff4444',  '#4444ff' ]
+const playerColors = ['#44ff44', '#ffff44', '#ff4444', '#4444ff']
+
+// Liste der Spieler
 const players = ref([
     { name: 'Spieler 1', color: playerColors[0] },
 ])
 
-// Lobby-Id zu Clipboard kopieren
+/**
+ * copyToClipboard()
+ * Diese Funktion kopiert die Lobby-ID ins Clipboard.
+ */
 const copyToClipboard = async () => {
     try {
         await navigator.clipboard.writeText(lobbyId.value)
@@ -28,7 +35,11 @@ const copyToClipboard = async () => {
     }
 }
 
-// Datei importieren
+/**
+ * handleFileChange (event: Event)
+ * @param event - Event vom Form
+ * Diese Funktion wechselt die vom User hochgeladene/importierte Datei.
+ */
 const handleFileChange = (event: Event) => {
     const target = event.target as HTMLInputElement
     if (target.files && target.files[0]) {
@@ -63,11 +74,7 @@ const handleFileChange = (event: Event) => {
                             <input type="text" v-model="lobbyId" disabled class="form-input">
                             <button type="button" @click="copyToClipboard" class="copy-button"
                                 title="In Zwischenablage kopieren">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" height="20"
-                                    fill="currentColor">
-                                    <path
-                                        d="M272 0H396.1c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9V336c0 26.5-21.5 48-48 48H272c-26.5 0-48-21.5-48-48V48c0-26.5 21.5-48 48-48zM48 128H208v64H64V448H256V416h64v48c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V176c0-26.5 21.5-48 48-48zm272 96h96v32H320V224zm0 64h96v32H320V288z" />
-                                </svg>
+                                <img src="@/assets/buttons/copy-clipboard-icon.png" alt="Copy" width="20" height="20">
                             </button>
                         </div>
                     </div>
