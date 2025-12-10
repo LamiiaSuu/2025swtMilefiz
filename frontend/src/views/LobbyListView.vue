@@ -1,17 +1,13 @@
 <script setup>
-import Button from '@/components/pages/Button.vue'
-import Header from '@/components/pages/Header.vue'
+import Header from '@/components/ui/pages/Header.vue'
+import ComponentList from '@/components/ui/pages/ComponentList.vue'
 </script>
 
 <template>
   <div class="lobbylist">
     <Header>Spiel Beitreten</Header>
-    <div class="container">
-      <Button>Neues Spiel</Button>
-      <Button>Spiel beitreten</Button>
-      <Button>Map erstellen</Button>
-      <Button>Einstellungen</Button>
-    </div>
+    <ComponentList>
+    </ComponentList>
   </div>
 </template>
 
@@ -22,9 +18,6 @@ import Header from '@/components/pages/Header.vue'
   width: 100vw;
   display: flex;
   flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   padding-bottom: 8rem;
 }
@@ -42,13 +35,5 @@ import Header from '@/components/pages/Header.vue'
   background-position: center;
   filter: blur(4px);
   z-index: -1; 
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: 2vh;
-  align-items: center;
-  margin-top: -6vh;  /* Verkleinert Abstand zum Header */
 }
 </style>

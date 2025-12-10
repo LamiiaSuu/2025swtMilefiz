@@ -26,9 +26,11 @@
             0 0 10px rgba(0, 0, 0, 0.5);
 
         width: 100vw;
-        height: 100vh;
+        min-height: 54%;
         padding-bottom: 6vh;
         margin-top: 3vh;
+        margin-bottom: -6vh;  /* Verkleinert Abstand zum Header */
+
 
         pointer-events: none;
 
