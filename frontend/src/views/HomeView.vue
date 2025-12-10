@@ -3,9 +3,9 @@
     <Header></Header>
     <div class="button-container">
       <button class="menu-button" @click="newGameStart">Neues Spiel</button>
-      <button class="menu-button">Spiel beitreten</button>
-      <button class="menu-button">Map erstellen</button>
-      <button class="menu-button">Einstellungen</button>
+      <button class="menu-button" @click="goToJoinGame">Spiel beitreten</button>
+      <button class="menu-button" @click="goToMapEditor">Map erstellen</button>
+      <button class="menu-button" @click="goToSettings">Einstellungen</button>
     </div>
   </div>
 </template>
@@ -18,6 +18,18 @@ const router = useRouter()
 
 const newGameStart = () => {
   router.push({ name: 'game-start' })
+}
+
+const goToJoinGame = () => {
+  router.push('/join-game')
+}
+
+const goToMapEditor = () => {
+  router.push('map-editor')
+}
+
+const goToSettings = () => {
+  router.push('/settings')
 }
 </script>
 
