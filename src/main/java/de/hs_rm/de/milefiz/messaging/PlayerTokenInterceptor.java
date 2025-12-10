@@ -46,11 +46,14 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
                     throw new IllegalArgumentException("Invalid player token");
                 }
 
-                accessor.setUser(() -> String.valueOf(player.getPlayerToken()));
-                accessor.getSessionAttributes().put("player-token", player.getPlayerToken());
                 accessor.setLeaveMutable(true);
-            } catch (PlayerNotFoundException e) {
+                accessor.setUser(player);
+                accessor.getSessionAttributes().put("player-token", player.getPlayerToken());
+                accessor.getSessionAttributes().put("player", player);
+            } catch (PlayerNotFoundException | IllegalArgumentException e) {
                 e.printStackTrace();
+                // Verbindung ablehnen bei ungültigem Token
+                return null;
             }
         }
 
@@ -63,20 +66,27 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
                 token = accessor.getFirstNativeHeader("player-token");
             }
 
-            if (token != null) {
+            // Versuche Player aus Session zu holen
+            Player player = (Player) accessor.getSessionAttributes().get("player");
+
+            if (player == null && token != null) {
                 try {
-                    Player player = lobbyManager.getPlayerByTokenFromLobbies(token);
-                    if (player != null) {
-                        accessor.setUser(() -> String.valueOf(player.getPlayerToken()));
-                    }
+                    player = lobbyManager.getPlayerByTokenFromLobbies(token);
                 } catch (PlayerNotFoundException e) {
                     e.printStackTrace();
                 }
             }
-            accessor.setLeaveMutable(true);
+
+            if (player != null) {
+                accessor.setLeaveMutable(true);
+                accessor.setUser(player);
+            } else {
+                accessor.setLeaveMutable(true);
+            }
+
+            return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
         }
 
-        return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
-
+        return message;
     }
 }
