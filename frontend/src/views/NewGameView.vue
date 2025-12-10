@@ -1,8 +1,10 @@
 <script setup lang="ts">
 
 import { ref } from 'vue'
-import BackButton from '@/components/ui/BackButton.vue'
 import { useRouter } from 'vue-router'
+import BackButton from '@/components/ui/BackButton.vue'
+import LobbyIDField from '@/components/ui/LobbyIDField.vue'
+import UsernameField from '@/components/ui/UsernameField.vue'
 
 const router = useRouter()
 
@@ -21,19 +23,10 @@ const playerColors = ['#44ff44', '#ffff44', '#ff4444', '#4444ff']
 // Liste der Spieler
 const players = ref([
     { name: 'Spieler 1', color: playerColors[0] },
+    { name: 'Spieler 2', color: playerColors[1] },
+    { name: 'Spieler 3', color: playerColors[2] },
+    { name: 'Spieler 4', color: playerColors[3] },
 ])
-
-/**
- * copyToClipboard()
- * Diese Funktion kopiert die Lobby-ID ins Clipboard.
- */
-const copyToClipboard = async () => {
-    try {
-        await navigator.clipboard.writeText(lobbyId.value)
-    } catch (err) {
-        console.error('Fehler beim Kopieren der Lobby-ID:', err)
-    }
-}
 
 /**
  * handleFileChange (event: Event)
@@ -67,17 +60,7 @@ const handleFileChange = (event: Event) => {
                 <div class="form-column">
 
                     <!-- Lobby-ID -->
-                    <div class="form-row">
-                        <label>Lobby-ID</label>
-
-                        <div class="input-with-button">
-                            <input type="text" v-model="lobbyId" disabled class="form-input">
-                            <button type="button" @click="copyToClipboard" class="copy-button"
-                                title="In Zwischenablage kopieren">
-                                <img src="@/assets/buttons/copy-clipboard-icon.png" alt="Copy" width="20" height="20">
-                            </button>
-                        </div>
-                    </div>
+                    <LobbyIDField />
 
                     <!-- Lobby-Name -->
                     <div class="form-row">
@@ -114,10 +97,7 @@ const handleFileChange = (event: Event) => {
                 <div class="form-column">
 
                     <!-- Username -->
-                    <div class="form-row">
-                        <label>Username</label>
-                        <input type="text" v-model="username" class="form-input" placeholder="Username">
-                    </div>
+                    <UsernameField />
 
                     <!-- Spieler-Liste -->
                     <div class="form-row">
@@ -142,9 +122,6 @@ const handleFileChange = (event: Event) => {
                 </div>
             </form>
         </div>
-
-
-
     </div>
 
 </template>
@@ -231,9 +208,9 @@ select {
 .players-list,
 .map-button,
 .start-game-button {
-    border: 2px solid black;
+    border: 3px solid black;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
 }
 
 .input-with-button {
@@ -251,20 +228,6 @@ select {
     font-size: 1.2rem;
 }
 
-.copy-button {
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-}
-
-.copy-button:hover {
-    background-color: rgba(200, 200, 200, 0.95);
-}
-
 .map-buttons {
     display: flex;
     gap: 10px;
@@ -274,34 +237,36 @@ select {
 .map-button {
     flex: 1;
     padding: 10px 20px;
-    border: 2px solid black;
-    border-radius: 8px;
     font-size: 1.1rem;
     cursor: pointer;
-    background-color: rgba(100, 100, 100, 0.8);
+    background-color: var(--button-color-inactive);
     color: white;
     transition: background-color 0.2s;
     min-width: 0;
 }
 
 .map-button.active {
-    background-color: #234420;
+    background-image: var(--button-gradient-green);
 }
 
 .file-input {
     padding: 8px;
     font-size: 1rem;
     color: white;
-    background-color: var(--button-color);
+    background-image: var(--button-gradient-green);
 }
 
 .file-input:disabled {
-    background-color: rgba(100, 100, 100, 0.8);
+    background-color: var(--button-color-inactive);
+    background-image: none;
 }
 
 .players-list {
     padding: 15px;
-    min-height: 100px;
+    /** Listen Hoehe fuer 4 Spieler:display: 
+    *   4 * (.player-item font-size + player-item padding + Puffer px) + ().players-list padding * 2)
+     */
+    height: calc(4 * (1.1rem + 16px + 5px) + 30px);
 }
 
 .player-item {
@@ -329,7 +294,7 @@ select {
 
 .start-game-button {
     padding: 15px 30px;
-    background-color: rgba(200, 50, 50, 0.9);
+    background-image: var(--button-gradient-red);
     color: white;
     font-size: 1.3rem;
     cursor: pointer;
