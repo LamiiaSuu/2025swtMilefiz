@@ -222,6 +222,12 @@ select {
     font-size: 1.2rem;
 }
 
+.form-input:focus {
+    background-color: #8b6f47;
+    border-color: #5d4a2f;
+    color: white;
+}
+
 .map-buttons {
     display: flex;
     gap: 10px;
