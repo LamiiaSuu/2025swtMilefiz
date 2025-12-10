@@ -186,41 +186,27 @@ public class FrontendReceiverController {
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleRollDice(@DestinationVariable("lobbyId") UUID lobbyId, RollDiceCommand command) {
-        logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
-        if(gameService.getRollDiceCooldown(command.playerId()) <= 0){
-        int number = gameService.rollDice();
-        try {
-            Lobby lobby = lobbyManager.getLobby(lobbyId);
-            Player player = lobby.getPlayers().stream()
-                .filter(p -> p.getId().equals(command.playerId()))
-                .findFirst()
-                .orElseThrow(() -> new PlayerNotFoundException("Player not found"));
-            if(player.getRemainingMoves() > 0){
-                logger.info("Cannot roll. There are still {} moves remaining for player {}", number, player.getId());
-                return new FrontendRollDiceRejectedMovesLeftEvent(command.playerId(), player.getRemainingMoves());
+    public FrontendEvent handleRollDice(@DestinationVariable("lobbyId") UUID lobbyId, RollDiceCommand command, Player player) {
+        logger.info("Player {} wants to roll dice in lobby {}", player.getId(), lobbyId);
+        if (gameService.getRollDiceCooldown(player.getId()) <= 0) {
+            int number = gameService.rollDice();
+            try {
+                player.setRemainingMoves(number);
+                logger.info("Set {} remaining moves for player {}", number, player.getId());
+            } catch (RuntimeException e) {
+                logger.error("Unexpected error setting remaining moves for player {}", player.getId(), e);
             }
-            player.setRemainingMoves(number);
-            logger.info("Set {} remaining moves for player {}", number, player.getId());
-            
-        } catch (LobbyNotFoundException e) {
-            logger.error("Lobby {} not found for dice roll", lobbyId, e);
-        } catch (PlayerNotFoundException e) {
-            logger.error("Player {} not found in lobby {}", command.playerId(), lobbyId, e);
-        } catch (RuntimeException e) {
-            logger.error("Unexpected error setting remaining moves for player {}", command.playerId(), e);
-        }
-        
-            gameService.addRollDiceCooldown(command.playerId());
-            logger.info("Player {} rolled a {} in lobby {}.", command.playerId(), number, lobbyId);
-            return new FrontendRollDiceEvent(command.playerId(), number,
-                    gameService.getRollDiceCooldown(command.playerId()));
+
+            gameService.addRollDiceCooldown(player.getId());
+            logger.info("Player {} rolled a {} in lobby {}.", player.getId(), number, lobbyId);
+            return new FrontendRollDiceEvent(player.getId(), number,
+                    gameService.getRollDiceCooldown(player.getId()));
         } else {
             logger.info(
                     "Player {} tried to roll dice in Lobby {}. But they still have a cooldown of {} to roll their dice!",
-                    command.playerId(), lobbyId, gameService.getRollDiceCooldown(command.playerId()));
-            return new FrontendRollDiceRejectedEvent(command.playerId(),
-                    gameService.getRollDiceCooldown(command.playerId()));
+                    player.getId(), lobbyId, gameService.getRollDiceCooldown(player.getId()));
+            return new FrontendRollDiceRejectedEvent(player.getId(),
+                    gameService.getRollDiceCooldown(player.getId()));
         }
     }
 
@@ -233,11 +219,10 @@ public class FrontendReceiverController {
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws PlayerNotFoundException {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String playerToken = (String) headerAccessor.getSessionAttributes().get("player-token");
-        Player player = lobbyManager.getPlayerByTokenFromLobbies(playerToken);
+        Player player = (Player) headerAccessor.getSessionAttributes().get("player");
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
-        logger.info("WebSocket disconnected - Player Token: {}", playerToken);
+        logger.info("WebSocket disconnected - Player Token: {}", player.getPlayerToken());
     }
 
     /**

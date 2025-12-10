@@ -48,6 +48,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     stompclient = new Client({
       brokerURL: wsurl,
+      connectHeaders: {
+        "player-token": gamedata.playerToken
+      }
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)
@@ -155,22 +158,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     stompclient.activate()
   }
 
-  // async function joinLobby(lobbyId: string = 'random') {
-  //   console.log('Start receiving Gameboard Data...')
-  //   try {
-  //     if (lobbyId == null) lobbyId = 'random'
-  //     const resp = await fetch('/api/lobby/join/' + lobbyId)
-  //     if (!resp.ok) {
-  //       console.error('Error while recieving Data:\n', resp.statusText)
-  //       throw new Error(resp.statusText)
-  //     }
-  //     const lobbyUpdate = await resp.json() as LobbyUpdateEvent
-  //     handleLobbyUpdate(lobbyUpdate)
-  //     startMilefizLiveUpdate()
-  //   } catch (error_) {
-  //     console.log(error_)
-  //   }
-  // }
   /**
    * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
@@ -184,7 +171,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         console.error('Error while recieving Data:\n', resp.statusText)
         throw new Error(resp.statusText)
       }
-      let responseMsg = await resp.json()
+      const responseMsg = await resp.json()
       console.log(responseMsg.msg)
       gamedata.lobby = responseMsg.lobby as Lobby;
       gamedata.playerId = responseMsg.playerId;
@@ -289,14 +276,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
-   * 
+   *
    */
   const isJumping = ref(false)
 
   /* function requestJump() {
     isJumping.value = true
   } */
-  
+
   return {
     gamedata,
     startMilefizLiveUpdate,
