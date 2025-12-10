@@ -23,7 +23,7 @@ const rollValue = computed(() => {
     </div>
     <div v-else class="no-roll">
       <div class="dice-icon-inactive">
-        <img src="@/assets/hud/dice.png" class="action-icon" />
+        <img src="@/assets/hud/dice.png" class="action-icon" alt="dice"/>
       </div>
       <div class="label">Würfle!</div>
     </div>
