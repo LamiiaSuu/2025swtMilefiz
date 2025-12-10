@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
-import { watchEffect, watch, ref, computed } from 'vue'
+import { watchEffect, watch, ref, computed, onMounted } from 'vue'
 import { useMilefizStore } from "@/stores/milefizstore";
 
 // Zugriff auf globalen PiniaStore
@@ -304,6 +304,11 @@ const rotateToward = (target: [number, number, number]) => {
 
 // Gibt Rotation und Position frei
 defineExpose({ setRotation, jump, characterPosition, meepleId: props.meepleId, getPosition: () => currentPosition.value, })
+
+//Debug: Logging wenn GameCharacter gemounted werden
+onMounted(() => {
+  console.log('GameCharacter mounted:', props.meepleId, '| Barrier:', props.barrier)
+})
 </script>
 
 <template>
