@@ -1,10 +1,14 @@
 <script lang="ts" setup>
+import { useMilefizStore } from '@/stores/milefizstore';
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
 const username = ref('')
+
+const milefizStore = useMilefizStore();
+
 
 
 </script>
