@@ -12,8 +12,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'tile-click', fieldId: string): void
-  (e: 'tile-ready', payload: { id: string; object: Object3D }): void
 }>();
 
 const startColorMap: Record<string, string> = {
@@ -100,9 +98,6 @@ watchEffect(() => {
   }
 })
 
-function handleClick() {
-  emit('tile-click', props.id)
-}
 /**
  * Färbt einmalig das Material 'Main' des Overlays (in diesem Fall Haus) in `colorHex`.
  * Traversiert alle Meshes/Materialien, setzt bei 'Main' die Farbe und `material.needsUpdate = true`.
@@ -130,7 +125,7 @@ function setOverlayMainColor(obj: Object3D, colorHex: string) {
 
 <template>
   <!-- Rendert Basis-Tile (immer) -->
-  <primitive v-if="tileObject" :object="tileObject" @pointerdown="handleClick" />
+  <primitive v-if="tileObject" :object="tileObject" />
   <!-- Rendert Optionales Overlay (Flagge oder Haus) -->
-  <primitive v-if="overlayObject" :object="overlayObject" @pointerdown="handleClick" />
+  <primitive v-if="overlayObject" :object="overlayObject" />
 </template>
