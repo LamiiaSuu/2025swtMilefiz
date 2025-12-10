@@ -108,7 +108,6 @@ public class FrontendReceiverController {
         } catch (LobbyNotFoundException e) {
             e.printStackTrace();
         }
-        System.out.println("PLAYER " + player.getPlayerToken() + " | " + player.getColor());
 
         // nur zum testen FIXME
         player.getMeeples()[0].setId(moveCmd.meepleId());
