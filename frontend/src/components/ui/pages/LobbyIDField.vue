@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router'
 const milefizStore = useMilefizStore();
 
 const router = useRouter()
-
+const base = globalThis.location.origin
 
 const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
 
@@ -16,7 +16,7 @@ const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
  */
 const copyToClipboard = async () => {
     try {
-        await navigator.clipboard.writeText(lobbyId.value)
+        await navigator.clipboard.writeText(`${base}/join/${lobbyId.value}`)
     } catch (err) {
         console.error('Fehler beim Kopieren der Lobby-ID:', err)
     }
