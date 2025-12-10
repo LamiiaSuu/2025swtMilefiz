@@ -109,7 +109,6 @@ public class FrontendReceiverController {
         } catch (Exception e) {
             player = lobby.getPlayers().stream().findFirst().orElse(null);
         }
-        System.out.println("PLAYER " + player.getPlayerToken() + " | " + player.getColor());
 
         // nur zum testen
         // lobby.setBoard(gameService.getTestBoard());
@@ -137,7 +136,7 @@ public class FrontendReceiverController {
         };
 
         if (nextField == null) {
-            System.out.println("invalid direction!");
+            logger.info("invalid direction!");
             return new FrontendMoveRejectedEvent("Field doesnt exist");
         }
 
@@ -149,7 +148,7 @@ public class FrontendReceiverController {
         for (Meeple tempBarrier : board.getBarriers()) {
             if (tempBarrier.getCurrentField().equals(nextField)) {
                 // TODO player loses all unspent steps
-                System.out.println("reached blockade, cant go any further!");
+                logger.info("reached blockade, cant go any further!");
                 return new FrontendMoveRejectedEvent("ran into barrier");
             }
         }
@@ -163,7 +162,7 @@ public class FrontendReceiverController {
                 // Keine Barriere und Meeple vom anderen Spieler steht drauf
                 if (!tempMeeple.isBarrier() && tempMeeple.getCurrentField().equals(nextField)) {
                     // TODO duel starts !!! Erst wenn letzter Move des Wuerfel-Zuges
-                    System.out.println("oh oh, looks like its time to duel!");
+                    logger.info("oh oh, looks like its time to duel!");
                     return new FrontendMoveRejectedEvent("time to duel first");
                 }
             }
@@ -171,7 +170,7 @@ public class FrontendReceiverController {
 
         // Rückwärtsbewegung nicht erlaubt
         if (nextField.equals(lastField)) {
-            System.out.println("cannot change direction!");
+            logger.info("cannot change direction!");
             return new FrontendMoveRejectedEvent("cannot change direction!");
         }
 
