@@ -20,7 +20,7 @@
 
         font-weight: bolder;
         color: white;
-        -webkit-text-stroke: 1px black;
+        -webkit-text-stroke: 6px black;
         text-shadow:
             3px 3px 6px rgba(0, 0, 0, 0.8),
             0 0 10px rgba(0, 0, 0, 0.5);
@@ -30,7 +30,7 @@
         padding-bottom: 6vh;
         margin-top: 3vh;
         margin-bottom: -6vh;  /* Verkleinert Abstand zum Header */
-
+        paint-order: stroke fill;
 
         pointer-events: none;
 

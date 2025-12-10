@@ -2,9 +2,10 @@
 
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import BackButton from '@/components/ui/BackButton.vue'
-import LobbyIDField from '@/components/ui/LobbyIDField.vue'
-import UsernameField from '@/components/ui/UsernameField.vue'
+import BackButton from '@/components/ui/pages/BackButton.vue'
+import LobbyIDField from '@/components/ui/pages/LobbyIDField.vue'
+import UsernameField from '@/components/ui/pages/UsernameField.vue'
+import Header from '@/components/ui/pages/Header.vue'
 
 const router = useRouter()
 
@@ -45,14 +46,7 @@ const handleFileChange = (event: Event) => {
 
     <div class="content">
         <!-- MI'lefiz Header -->
-        <div class="header-with-plate">
-            <p>MI'lefiz</p>
-        </div>
-
-        <!-- Seiten Ueberschrift -->
-        <div class="page-title">
-            <h1>Neues Spiel</h1>
-        </div>
+        <Header>Neues Spiel</Header>
 
         <div class="new-game-form">
             <form>
@@ -183,6 +177,7 @@ form {
     grid-template-columns: 150px 1fr;
     align-items: center;
     gap: 15px;
+    z-index: 20;
 }
 
 .form-row label {
