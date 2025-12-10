@@ -29,16 +29,16 @@ const { state } = useGLTF('/Grass_Platform.glb', { draco: true })
 const { state: houseState } = useGLTF('/House.glb', { draco: true })
 const { state: goalState } = useGLTF('/Goal_Flag.glb', { draco: true })
 
-// Basis-Scene (immer das Tile) und optionales Overlay (Flagge / Haus)
-const baseScene = computed<Object3D | null>(() => state.value?.scene ?? null)
-const overlayScene = computed<Object3D | null>(() => {
+// tileObject und optionales Overlay (Flagge / Haus)
+const tileObject = computed<Object3D | null>(() => state.value?.scene ?? null)
+const overlayObject = computed<Object3D | null>(() => {
   if (props.type === 'END') return goalState.value?.scene ?? null
   if (props.type?.startsWith?.('START_')) return houseState.value?.scene ?? null
   return null
 })
 
 // Position und Skalierung aktualisieren, sobald Modell oder Props sich ändern
-const baseScale = 2
+const tileScale = 2
 const overlayScale = computed(() => {
   switch (props.type) {
     case 'END': return 0.7
@@ -51,7 +51,7 @@ const overlayXOffset = computed(() => {
     default: return 0.2
   }
 })
-const baseYOffset = -0.3
+const tileYOffset = -0.3
 const overlayYOffset = computed(() => {
   // Y höher = oberhalb, niedriger = unterhalb
   if (props.type === 'END') return -0.1
@@ -65,16 +65,16 @@ const overlayZOffset = computed(() => {
   return 0
 })
 
-//Setzt für base die Position und Skalierung im Raum
-//Setzt für Overlay die Position basierend auf der dazu gehörigen Base und Skalierung
+//Setzt für tile die Position und Skalierung im Raum
+//Setzt für Overlay die Position basierend auf dem dazu gehörigen tile und Skalierung
 watchEffect(() => {
-  const base = baseScene.value
-  if (base) {
-    if (typeof base.position?.set === 'function') {
-      base.position.set(props.position[0], baseYOffset, props.position[2])
+  const tile = tileObject.value
+  if (tile) {
+    if (typeof tile.position?.set === 'function') {
+      tile.position.set(props.position[0], tileYOffset, props.position[2])
     }
-    if (typeof base.scale?.set === 'function') {
-      base.scale.set(baseScale, baseScale, baseScale)
+    if (typeof tile.scale?.set === 'function') {
+      tile.scale.set(tileScale, tileScale, tileScale)
     }
     //    Sobald das Modell existiert und positioniert wurde,
     //    wird ein Custom-Event an den übergeordneten Parent (GameBoard.vue) gesendet.
@@ -83,7 +83,7 @@ watchEffect(() => {
 
   }
 
-  const overlay = overlayScene.value
+  const overlay = overlayObject.value
   if (overlay) {
 
     if (props.type?.startsWith?.('START_')) {
@@ -130,7 +130,7 @@ function setOverlayMainColor(obj: Object3D, colorHex: string) {
 
 <template>
   <!-- Rendert Basis-Tile (immer) -->
-  <primitive v-if="baseScene" :object="baseScene" @pointerdown="handleClick" />
+  <primitive v-if="tileObject" :object="tileObject" @pointerdown="handleClick" />
   <!-- Rendert Optionales Overlay (Flagge oder Haus) -->
-  <primitive v-if="overlayScene" :object="overlayScene" @pointerdown="handleClick" />
+  <primitive v-if="overlayObject" :object="overlayObject" @pointerdown="handleClick" />
 </template>
