@@ -1,10 +1,11 @@
 package de.hs_rm.de.milefiz.game.model;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
-public class Player {
+public class Player implements Principal {
 
     private UUID id;
     private String playerToken;
@@ -48,6 +49,14 @@ public class Player {
 
     public void setPlayerToken(String sessionId) {
         this.playerToken = sessionId;
+    }
+
+    /**
+     * Wichitg für das Mapping des PlayerTokens
+     */
+    @Override
+    public String getName() {
+        return playerToken;
     }
 
     public Meeple[] getMeeples() {
