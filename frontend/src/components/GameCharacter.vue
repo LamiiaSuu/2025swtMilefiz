@@ -2,6 +2,10 @@
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
 import { watchEffect, watch, ref, computed } from 'vue'
+import { useMilefizStore } from "@/stores/milefizstore";
+
+// Zugriff auf globalen PiniaStore
+const milefizStore = useMilefizStore()
 
 //Definierte Props für Augen, Körperfarbe und Position
 const props = defineProps<{
@@ -25,8 +29,8 @@ const defaultUpDuration = 300
 const defaultFallDuration = 2000
 
 // Kleine Hüpfer (bei Bewegung)
-const smallJumpHeight = 1.2
-const smallUpDuration = 120   
+const smallJumpHeight = 0.7
+const smallUpDuration = 120
 const smallFallDuration = 170
 
 // Animation-Variablen
@@ -34,7 +38,7 @@ const mixer = ref<any>(null)
 const jumpAction = ref<any>(null)
 
 // NEU: Y-Offset für unterschiedliche Modelle
-const yOffset = computed(() => props.barrier ? 0.85 : 0)
+const yOffset = computed(() => props.barrier ? 0.85 : 0.135)
 
 // Berechne aktuelle Position (inklusive jumpOffset)
 const currentPosition = computed<[number, number, number]>(() => [
@@ -50,7 +54,7 @@ const modelPath = computed(() => props.barrier ? '/Rock.glb' : '/Block Character
 const { state } = useGLTF(modelPath, { draco: true })
 
 // Unterschiedliche Scale für Barriere und Character
-const scale = computed(() => props.barrier ? 1.5 : 1)
+const scale = computed(() => props.barrier ? 1.5 : 0.55)
 watchEffect(async () => {
   if (state.value?.scene) {
     state.value.scene.scale.set(scale.value, scale.value, scale.value)
@@ -139,7 +143,7 @@ const animateCustomJump = (
     const elapsed = now - startTime
 
     if (elapsed < upMs) {
-      
+
       const progress = elapsed / upMs
       jumpOffset.value = height * easeOutCubic(progress)
     } else if (elapsed < total) {
@@ -150,6 +154,7 @@ const animateCustomJump = (
 
       jumpOffset.value = 0
       isJumping.value = false
+      milefizStore.isJumping = false
       if (onComplete) onComplete()
       return
     }
@@ -164,6 +169,7 @@ const jump = () => {
   if (isJumping.value) return
 
   isJumping.value = true
+  milefizStore.isJumping = true
 
   // Spiele GLB-Animation ab (falls verfügbar)
   if (jumpAction.value) {
@@ -174,6 +180,8 @@ const jump = () => {
   // Führe immer Custom-Animation für Höhe aus
   animateCustomJump(defaultJumpHeight, defaultUpDuration, defaultFallDuration)
 }
+
+
 
 // Position für Animation
 const animatedPosition = ref<[number, number, number]>([...(props.position ?? [0, 0, 0])])
@@ -299,10 +307,7 @@ defineExpose({ setRotation, jump, characterPosition, meepleId: props.meepleId, g
 </script>
 
 <template>
-  <TresGroup 
-    ref="characterPosition" 
-    :position="currentPosition" 
-    :rotation="[0, characterRotation, 0]">
+  <TresGroup ref="characterPosition" :position="currentPosition" :rotation="[0, characterRotation, 0]">
     <primitive v-if="state" :object="state?.scene" />
   </TresGroup>
 </template>

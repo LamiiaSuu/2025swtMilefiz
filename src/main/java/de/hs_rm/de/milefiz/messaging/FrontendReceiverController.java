@@ -28,6 +28,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -187,26 +188,29 @@ public class FrontendReceiverController {
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleRollDice(@DestinationVariable("lobbyId") UUID lobbyId, RollDiceCommand command) {
         logger.info("Player {} wants to roll dice in lobby {}", command.playerId(), lobbyId);
-        if (gameService.getRollDiceCooldown(command.playerId()) <= 0) {
-            int number = gameService.rollDice();
-            try {
-                Lobby lobby = lobbyManager.getLobby(lobbyId);
-                Player player = lobby.getPlayers().stream()
-                        .filter(p -> p.getId().equals(command.playerId()))
-                        .findFirst()
-                        .orElseThrow(() -> new PlayerNotFoundException("Player not found"));
-
-                player.setRemainingMoves(number);
-                logger.info("Set {} remaining moves for player {}", number, player.getId());
-
-            } catch (LobbyNotFoundException e) {
-                logger.error("Lobby {} not found for dice roll", lobbyId, e);
-            } catch (PlayerNotFoundException e) {
-                logger.error("Player {} not found in lobby {}", command.playerId(), lobbyId, e);
-            } catch (RuntimeException e) {
-                logger.error("Unexpected error setting remaining moves for player {}", command.playerId(), e);
+        if(gameService.getRollDiceCooldown(command.playerId()) <= 0){
+        int number = gameService.rollDice();
+        try {
+            Lobby lobby = lobbyManager.getLobby(lobbyId);
+            Player player = lobby.getPlayers().stream()
+                .filter(p -> p.getId().equals(command.playerId()))
+                .findFirst()
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found"));
+            if(player.getRemainingMoves() > 0){
+                logger.info("Cannot roll. There are still {} moves remaining for player {}", number, player.getId());
+                return new FrontendRollDiceRejectedMovesLeftEvent(command.playerId(), player.getRemainingMoves());
             }
-
+            player.setRemainingMoves(number);
+            logger.info("Set {} remaining moves for player {}", number, player.getId());
+            
+        } catch (LobbyNotFoundException e) {
+            logger.error("Lobby {} not found for dice roll", lobbyId, e);
+        } catch (PlayerNotFoundException e) {
+            logger.error("Player {} not found in lobby {}", command.playerId(), lobbyId, e);
+        } catch (RuntimeException e) {
+            logger.error("Unexpected error setting remaining moves for player {}", command.playerId(), e);
+        }
+        
             gameService.addRollDiceCooldown(command.playerId());
             logger.info("Player {} rolled a {} in lobby {}.", command.playerId(), number, lobbyId);
             return new FrontendRollDiceEvent(command.playerId(), number,
