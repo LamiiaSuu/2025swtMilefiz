@@ -64,7 +64,6 @@ const handleFileChange = (event: Event) => {
 
                     <!-- Map Buttons -->
                     <div class="form-row">
-                        <!-- NOSONAR -->
                         <label>Map</label>
                         <div class="map-buttons">
                             <button type="button" class="map-button" :class="{ active: mapMode === 'standard' }"
@@ -162,6 +161,7 @@ form {
     gap: 40px;
     width: 100%;
     justify-content: center;
+    margin-top: -5vh;
 }
 
 
