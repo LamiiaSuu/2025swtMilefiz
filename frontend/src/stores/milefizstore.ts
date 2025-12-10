@@ -47,6 +47,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     stompclient = new Client({
       brokerURL: wsurl,
+      connectHeaders: {
+        "player-token": gamedata.playerToken
+      }
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)
@@ -79,10 +82,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           cooldown.remainingSeconds = event.cooldown
         }
 
-        // Wenn der Spieler im Moment noch nicht Würfeln darf, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
+        // Wenn der Spieler im Moment noch nicht Würfeln darf, weil er noch aktiven Cooldown hat, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
         else if (event.type === 'ROLL_DICE_ERROR' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`)
           cooldown.remainingSeconds = event.seconds
+        }
+
+        // Wenn der Spieler im Moment noch nicht Würfeln darf, weil er noch Moves übrig hat, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
+        else if (event.type === 'ROLL_DICE_ERROR_MOVES_LEFT' && event.playerId === gamedata.playerId) {
+          console.log(`Player ${event.playerId} still has ${event.moves} moves left and therefor can't roll their dice yet!`)
+          gamedata.currentDiceRoll = event.moves
         }
 
         // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
@@ -114,22 +123,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     stompclient.activate()
   }
 
-  // async function joinLobby(lobbyId: string = 'random') {
-  //   console.log('Start receiving Gameboard Data...')
-  //   try {
-  //     if (lobbyId == null) lobbyId = 'random'
-  //     const resp = await fetch('/api/lobby/join/' + lobbyId)
-  //     if (!resp.ok) {
-  //       console.error('Error while recieving Data:\n', resp.statusText)
-  //       throw new Error(resp.statusText)
-  //     }
-  //     const lobbyUpdate = await resp.json() as LobbyUpdateEvent
-  //     handleLobbyUpdate(lobbyUpdate)
-  //     startMilefizLiveUpdate()
-  //   } catch (error_) {
-  //     console.log(error_)
-  //   }
-  // }
   /**
    * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
@@ -143,7 +136,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         console.error('Error while recieving Data:\n', resp.statusText)
         throw new Error(resp.statusText)
       }
-      let responseMsg = await resp.json()
+      const responseMsg = await resp.json()
       console.log(responseMsg.msg)
       gamedata.lobby = responseMsg.lobby as Lobby;
       gamedata.playerId = responseMsg.playerId;
@@ -228,14 +221,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
-   * 
+   *
    */
   const isJumping = ref(false)
 
   /* function requestJump() {
     isJumping.value = true
   } */
-  
+
   return {
     gamedata,
     startMilefizLiveUpdate,
