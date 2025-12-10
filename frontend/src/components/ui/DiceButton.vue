@@ -195,6 +195,7 @@ function triggerPressAnimation() {
     font-weight: bold;
     color: #ffffff;
     border-radius: 3px;
+    font-family: "AcmeFont", sans-serif;
 }
 
 .cooldown-overlay {
@@ -205,8 +206,9 @@ function triggerPressAnimation() {
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: 26px;
+    font-size: 32px;
     font-weight: bold;
     pointer-events: none;
+    font-family: "AcmeFont", sans-serif;
 }
 </style>
