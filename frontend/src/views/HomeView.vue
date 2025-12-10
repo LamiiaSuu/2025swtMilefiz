@@ -6,9 +6,9 @@
 
     <div class="button-container">
       <button class="menu-button">Neues Spiel</button>
-      <button class="menu-button">Spiel beitreten</button>
-      <button class="menu-button">Map erstellen</button>
-      <button class="menu-button">Einstellungen</button>
+      <button class="menu-button" @click="goToJoinGame">Spiel beitreten</button>
+      <button class="menu-button" @click="goToMapEditor">Map erstellen</button>
+      <button class="menu-button" @click="goToSettings">Einstellungen</button>
     </div>
   </div>
 </template>
@@ -17,6 +17,18 @@
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+const goToJoinGame = () => {
+  router.push('/join-game')
+}
+
+const goToMapEditor = () => {
+  router.push('map-editor')
+}
+
+const goToSettings = () => {
+  router.push('/settings')
+}
 </script>
 
 <style scoped>
