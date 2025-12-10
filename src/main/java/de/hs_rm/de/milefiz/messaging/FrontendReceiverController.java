@@ -24,17 +24,18 @@ import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
 import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -43,12 +44,16 @@ public class FrontendReceiverController {
     private LobbyManager lobbyManager;
     private GameService gameService;
     private final SimpMessagingTemplate messagingTemplate;
+    private FrontendMessagingService messagingService;
+    private LobbyMapper lobbyMapper;
 
     public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService,
-            SimpMessagingTemplate messagingTemplate) {
+            SimpMessagingTemplate messagingTemplate, FrontendMessagingServiceImpl frontendMessagingServiceImpl, LobbyMapper lobbyMapper) {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
+        this.lobbyMapper = lobbyMapper;
         this.messagingTemplate = messagingTemplate;
+        this.messagingService = frontendMessagingServiceImpl;
     }
 
     /**
@@ -295,6 +300,8 @@ public class FrontendReceiverController {
         Player player = (Player) headerAccessor.getSessionAttributes().get("player");
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
+        messagingService.sendEvent(new LobbyMessage(lobby,
+                    new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler hat das Spiel verlassen")));
         logger.info("WebSocket disconnected - Player Token: {}", player.getPlayerToken());
     }
 
