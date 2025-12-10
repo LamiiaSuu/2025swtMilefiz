@@ -18,8 +18,7 @@ const goBack = () => {
   </button>
 </template>
 
-<style>
-
+<style scoped>
 .back-button {
   background: none;
   border: none;
@@ -29,7 +28,7 @@ const goBack = () => {
   cursor: pointer;
   font-family: "AcmeFont", sans-serif;
   transition: all 0.2s;
-  -webkit-text-stroke: 4px black;
+  -webkit-text-stroke: 6px black;
   text-shadow:
     2px 2px 4px rgba(0, 0, 0, 0.8),
     0 0 8px rgba(0, 0, 0, 0.5);
