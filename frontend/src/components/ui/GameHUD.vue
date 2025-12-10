@@ -4,6 +4,7 @@
 <script setup lang="ts">
 import DiceButton from './DiceButton.vue'
 import DiceCounter from './DiceCounter.vue';
+import JumpButton from './JumpButton.vue';
 import EnergyBar from './EnergyBar.vue';
 </script>
 
@@ -19,6 +20,7 @@ import EnergyBar from './EnergyBar.vue';
     <div style="position: absolute;bottom: 2vw; right: 0px;">
       <div class="button-bar">
         <DiceButton />
+        <JumpButton />
       </div>
     </div>
 
