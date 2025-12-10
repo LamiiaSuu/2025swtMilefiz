@@ -12,7 +12,7 @@ const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
 
 /**
  * copyToClipboard()
- * Diese Funktion kopiert die Lobby-ID ins Clipboard.
+ * Diese Funktion kopiert den Join-Link mit der Lobby-ID ins Clipboard.
  */
 const copyToClipboard = async () => {
     try {
