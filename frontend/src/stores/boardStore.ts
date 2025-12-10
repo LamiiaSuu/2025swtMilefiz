@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import type { IBoardDTD } from './IBoardDTD'
 import { ref } from 'vue'
+import { useMilefizStore } from './milefizstore'
+import type {Player} from '../types/lobbyupdate'
+import type {Lobby} from '../types/lobbyupdate'
 
 const gameBoardTiles = ref<IBoardDTD>()
 /**
@@ -16,7 +19,7 @@ export const useBoardStore = defineStore('board', {
     board: null as IBoardDTD | null,
     /** meeple positionen */
     meeplePositions: {} as Record<string, string>,
-    testMeepleId: '123e4567-e89b-12d3-a456-426614174000' as string,
+    //testMeepleId: '123e4567-e89b-12d3-a456-426614174000' as string,
     lastFields: {} as Record<string, string | null>,
   }),
   actions: {
@@ -41,14 +44,39 @@ export const useBoardStore = defineStore('board', {
 
         // noch zum testen
         if (this.board) {
-          const startField = this.board.fields.find((f) => f.type === 'START_GREEN')
+          // const startField = this.board.fields.find((f) => f.type === 'START_GREEN')
 
-          if (startField) {
-            this.meeplePositions[this.testMeepleId] = startField.id
-            this.lastFields[this.testMeepleId] = null
-            console.log(`TestMeeple ${this.testMeepleId} startet auf Feld ${startField.id}`)
-          } else {
-            console.warn('Kein Startfeld bei (0,0) gefunden!')
+          // if (startField) {
+          //   this.meeplePositions[this.testMeepleId] = startField.id
+          //   this.lastFields[this.testMeepleId] = null
+          //   console.log(`TestMeeple ${this.testMeepleId} startet auf Feld ${startField.id}`)
+          // } else {
+          //   console.warn('Kein Startfeld bei (0,0) gefunden!')
+          // }
+
+          const milefizStore = useMilefizStore()
+          const lobby: Lobby | null = milefizStore.gamedata.lobby
+          if (lobby) {
+            const players: Player[] = lobby.players
+            for (const player of players) {
+              // const colorField: string = "START_" + player.color
+              // const startField = this.board.fields.find( (f) => f.type === colorField)
+
+              // if (startField) {
+              //   for (const meeple of player.meeples) {
+              //     meeple.currentFieldId = startField.id
+              //     this.meeplePositions[meeple.id] = startField.id
+              //     this.lastFields[meeple.id] = null
+              //     console.log(`Meeple ${meeple.id} startet auf Feld ${colorField} + id: ${startField.id}`)
+              //   }
+              // }
+              for (const meeple of player.meeples) {
+                if(meeple.currentFieldId) {
+                  this.meeplePositions[meeple.id] = meeple.currentFieldId
+                }
+                this.lastFields[meeple.id] = null
+              }
+            }
           }
         }
       } catch (error_) {

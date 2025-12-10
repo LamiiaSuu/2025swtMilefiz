@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, onUnmounted, computed, watchEffect } from 'vue'
+import { ref, shallowRef, onMounted, onUnmounted, computed, watchEffect, type ShallowRef, type ComputedRef } from 'vue'
 import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
@@ -13,10 +13,13 @@ import { Raycaster, Vector3 } from 'three'
 import { watch } from 'vue'
 
 const milefizStore = useMilefizStore();
-const gameCharRef = shallowRef<TresObject | null>(null)
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
 
+//record: meepleID -> gameCharRef
+const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
+const gameCharPositions: Record<string, ComputedRef<[number, number, number]>> = {}
+const meepleIDs: string[] = []
 
 // Board-Daten laden wenn die App startet
 onMounted(async () => {
@@ -33,21 +36,28 @@ onMounted(async () => {
  * 
  * @returns [x, y, z] - Weltkoordinaten des Spielcharakters
  */
-const gameCharPosition = computed<[number, number, number]>(() => {
-  const board = boardStore.board
-  const fieldId = boardStore.meeplePositions[boardStore.testMeepleId]
+for (const [meepleID, posID] of Object.entries(boardStore.meeplePositions)) {
 
-  if (!board || !fieldId) {
-    return [0, 0, 0]
-  }
+  const gameCharPosition = computed<[number, number, number]>(() => {
+    const board = boardStore.board
+    const fieldId = posID
 
-  const field = board.fields.find(f => f.id === fieldId)
-  if (!field) {
-    return [0, 0, 0]
-  }
+    if (!board || !fieldId) {
+      return [0, 0, 0]
+    }
 
-  return [field.position.x, 0, field.position.y]
-})
+    const field = board.fields.find(f => f.id === fieldId)
+    if (!field) {
+      return [0, 0, 0]
+    }
+
+    return [field.position.x, 0, field.position.y]
+  })
+
+  gameCharPositions[meepleID] = gameCharPosition
+  gameCharRefs[meepleID] = shallowRef<TresObject | null>(null)
+  meepleIDs.push(meepleID)
+}
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
@@ -210,38 +220,20 @@ onUnmounted(() => {
     <TresAmbientLight :intensity=".75" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
-    <TresDirectionalLight 
-      :position="[10, 15, 10]"  
-      :intensity="2" 
-    />
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" />
 
     <!-- Himmel + Bodenlicht für GLTF 75%-->
-    <TresHemisphereLight 
-      :intensity=".75"
-      skyColor="#ffffff"
-      groundColor="#888888"
+    <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
-    />
-  
+    <GameCharacter v-for="id in meepleIDs" :ref="gameCharRefs[id]"
+      :position="gameCharPositions[id]?.value ?? [0, 0, 0]" :meepleId="id" bodyColor="pink" eyeColor="white" />
 
-    <!-- Game Character includiert (position - Position auf Plane), (bodyColor - Farbe der Figur), (eyeColor - Farbe der Augen) -->
-    <GameCharacter ref="gameCharRef" :position="gameCharPosition" bodyColor="pink" eyeColor="white"
-      :meepleId="boardStore.testMeepleId"/>
-
-    <GameCharacter 
-      v-for="barrier in boardStore.barriersWithPositions"
-      :key="barrier.fieldId"
-      :position="barrier.position"
-      bodyColor="gray"
-      eyeColor="red"
-      :meepleId="barrier.fieldId"
-      :barrier="true"
-    />
+    <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
+      :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
-      :position="[field.position.x, 0, field.position.y]" :type="field.type"
-/>
+      :position="[field.position.x, 0, field.position.y]" :type="field.type" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
@@ -268,7 +260,8 @@ onUnmounted(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: white; /* <-- immer weiß */
+  background: white;
+  /* <-- immer weiß */
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
   transition: background 0.1s ease, transform 0.1s ease;
 }
