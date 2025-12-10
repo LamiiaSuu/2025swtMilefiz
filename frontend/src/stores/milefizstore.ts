@@ -233,12 +233,23 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /**
+   * 
+   */
+  const isJumping = ref(false)
+
+  /* function requestJump() {
+    isJumping.value = true
+  } */
+  
   return {
     gamedata,
     startMilefizLiveUpdate,
     sendRollDice,
     joinLobby,
     cooldown,
-    sendMove
+    sendMove,
+    isJumping,
+    /* requestJump */
   }
 })
