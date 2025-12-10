@@ -290,7 +290,7 @@ public class FrontendReceiverController {
 
     /**
      * Handelt bei disconnects die Spieler -> Leave aus Lobby
-     * 
+     * Sende per STOMP zuätzlich allen bereits in der Lobby vorhandenen Spielern ein Update
      * @param event
      * @throws PlayerNotFoundException
      */
