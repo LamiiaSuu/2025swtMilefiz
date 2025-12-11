@@ -33,7 +33,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
-    energy: 0,
+    energy: 0, //Energy des Spielers
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
   })
@@ -106,11 +106,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           console.log(`Player ${event.playerId} can roll again!`)
           cooldown.active = false
           cooldown.remainingSeconds = 0
-
         } else if (event.type === 'MOVE_ERROR') {
           console.warn('Move rejected:', event.msg)
           return
-
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           gamedata.currentDiceRoll = event.remainingMoves
@@ -119,15 +117,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         else if (event.type === 'LOBBY_UPDATE') {
           const lobbyUpdate = event as LobbyUpdateEvent
           handleLobbyUpdate(lobbyUpdate)
-        }
 
-        else if (event.type === 'SAVE_ENERGY'){
+        //Wenn Energy erfolgreich gesaved wurde wird Frontendseitig der Würfelwurf ebenfalls auf 0 gesetzt und die gamedata.energy geupdated
+        } else if (event.type === 'SAVE_ENERGY') {
           gamedata.currentDiceRoll = 0
           gamedata.energy = event.energy
           return
-        }
-
-        else if (event.type === 'SAVE_ENERGY_ERROR'){
+        } else if (event.type === 'SAVE_ENERGY_ERROR') {
           console.warn('Energy save rejected:', event.msg)
           return
         }
@@ -238,6 +234,24 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /**
+   * Sendeteinen Energie-Speichern-Befehl an den Spielserver
+   *
+   * Wird aufgerufen, wenn der Spieler im Fronten die gewürfelte Zahl als Energie speichern möchte.
+   *
+   * Erstellt ein EnergyCommand-Objekt mit der Spieler-ID und veröffentlicht es über den STOMP-Endpunkt `/app/milefiz/lobby/{lobbyId}/saveEnergy`.
+   *
+   * Ablauf:
+   * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.
+   * 2. Lobby-ID und Spieler-ID validieren – Abbruch bei fehlenden Daten.
+   * 3. Energy-Command serialisieren (`JSON.stringify`).
+   * 4. Nachricht an den Server senden.
+   *
+   * @returns void
+   * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
+   * 
+   * @author Elisabeth Gehdt
+   */
   function sendEnergySave() {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot save energy: STOMP client not connected.')
