@@ -182,13 +182,12 @@ public class FrontendReceiverController {
         player.useMove();
 
         // Erfolgreiche Bewegung an Clients senden
-        FrontendMoveEvent move = new FrontendMoveEvent(
+        return new FrontendMoveEvent(
                 player.getId(),
                 meeple.getId(),
                 nextField.getId(),
                 player.getRemainingMoves());
 
-        return move;
     }
 
     
