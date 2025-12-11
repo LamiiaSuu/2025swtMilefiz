@@ -183,12 +183,15 @@ public class FrontendReceiverController {
 
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(
+                player.getId(),
                 meeple.getId(),
                 nextField.getId(),
                 player.getRemainingMoves());
 
         return move;
     }
+
+    
 
     /**
      * WebSocket Message Handler für Würfel-Aktionen in einer Lobby.
