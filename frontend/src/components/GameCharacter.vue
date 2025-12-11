@@ -186,11 +186,29 @@ const jump = () => {
 // Position für Animation
 const animatedPosition = ref<[number, number, number]>([...(props.position ?? [0, 0, 0])])
 
-// auf Änderung der Position reagieren
-watch(() => props.position, (newPos) => {
-  if (!newPos) return
-  animateTo(newPos)
-}, { deep: true })
+// auf Änderung der Position reagieren (nur bei tatsächlicher Positionsänderung)
+const _lastPropPosition = ref<[number, number, number] | null>(null)
+watch(
+  () => props.position,
+  (newPos) => {
+    if (!newPos) return
+    const last = _lastPropPosition.value
+    if (
+      last &&
+      Math.abs(last[0] - newPos[0]) < 1e-6 &&
+      Math.abs(last[1] - newPos[1]) < 1e-6 &&
+      Math.abs(last[2] - newPos[2]) < 1e-6
+    ) {
+      // no meaningful change -> do nothing
+      return
+    }
+
+    // record and animate
+    _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
+    animateTo(newPos)
+  },
+  { deep: true }
+)
 
 const speed = 0.08
 let moveAnimationFrame: number | null = null
