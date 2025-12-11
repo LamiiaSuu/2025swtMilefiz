@@ -1,6 +1,5 @@
 package de.hs_rm.de.milefiz.game.service;
 
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,7 +12,6 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
@@ -80,7 +78,7 @@ public class MovementServiceImpl implements MovementService {
     private LobbyManager lobbyManager;
     private static final int LAST_MOVE = 1;
     private static final int SECOND_TO_LAST_MOVE = 2;
-    private static final boolean TESTING = false;
+    private static final boolean TESTING_LOCALLY = false;
 
     /**
      * Erstellt eine neue Instanz des MovementServiceImpl.
@@ -147,25 +145,21 @@ public class MovementServiceImpl implements MovementService {
      * @param lobbyId   die eindeutige ID der Lobby, in der die Bewegung stattfindet
      * @param moveCmd   der vom Frontend übermittelte Bewegungsbefehl mit Meeple-ID
      *                  und Bewegungsrichtung
-     * @param principal der Spieler (bzw. dessen Benutzerkontext), der den Zug
+     * @param player    der Spieler (bzw. dessen Benutzerkontext), der den Zug
      *                  ausführt
-     * @param sha       WebSocket-Header mit Sitzungsinformationen (z. B.
-     *                  Session-ID)
      * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
      *         das Ergebnis der Bewegung beschreibt
      *
      *         Author: Maximilian Ressel
      */
     @Override
-    public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Principal principal,
-            SimpMessageHeaderAccessor sha) {
+    public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Player player) {
 
         logger.info("Moving meeple {} from player '{}' in lobby {} in direction {} (sessionId={})",
                 moveCmd.meepleId(),
-                principal != null ? principal.getName() : "anonymous",
+                player != null ? player.getName() : "anonymous",
                 lobbyId,
-                moveCmd.direction(),
-                sha.getSessionId());
+                moveCmd.direction());
 
         Lobby lobby = null;
         try {
@@ -173,35 +167,6 @@ public class MovementServiceImpl implements MovementService {
         } catch (LobbyNotFoundException e) {
             e.printStackTrace();
         }
-
-        String principalName = null;
-        if (principal != null) {
-            principalName = principal.getName();
-        }
-
-        Player player = null;
-        try {
-            player = lobby.getPlayers().stream().findFirst().orElse(null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        /**
-         * ⚠️ Temporärer Testcode:
-         * Setzt den Meeple des ersten Spielers manuell auf das Startfeld, falls noch
-         * keine
-         * Position vorhanden ist. Dieser Block dient ausschließlich Testzwecken und
-         * sollte im Produktionscode entfernt werden.
-         *
-         * TODO remove this
-         * 
-         * 
-         **********************************************************************************************************************/
-        player.getMeeples()[0].setId(moveCmd.meepleId());
-        if (player.getMeeples()[0].getCurrentField() == null) {
-            player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartGreen());
-        }
-        /**********************************************************************************************************************/
 
         Board board = lobby.getBoard();
         Meeple meeple = player.getMeepleWithId(moveCmd.meepleId());
@@ -469,24 +434,21 @@ public class MovementServiceImpl implements MovementService {
      * @param lobbyId     die ID der Lobby, in der die Barriere verschoben wird
      * @param moveBarrCmd der vom Frontend übermittelte Befehl mit Barriere-ID und
      *                    Ziel-Feld-ID
-     * @param principal   der Spieler, der die Aktion ausführt
-     * @param sha         WebSocket-Header mit Sitzungsinformationen
+     * @param player  der Spieler, der die Aktion ausführt
      * @return ein passendes {@link FrontendEvent}, das angibt, ob die Bewegung
      *         erfolgreich war oder nicht
      *
      *         Author: Maximilian Ressel
      */
     @Override
-    public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Principal principal,
-            SimpMessageHeaderAccessor sha) {
+    public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Player player) {
 
         logger.info(
                 "Moving Barrier {} in lobby {} by player '{}' to field {} (sessionId={})",
                 moveBarrCmd.barrierId(),
                 lobbyId,
-                principal != null ? principal.getName() : "anonymous",
-                moveBarrCmd.targetFieldId(),
-                sha.getSessionId());
+                player != null ? player.getName() : "anonymous",
+                moveBarrCmd.targetFieldId());
 
         Lobby lobby = null;
         try {
@@ -506,10 +468,10 @@ public class MovementServiceImpl implements MovementService {
 
         Field targetField = board.getFieldById(getRandomField(board));
 
-        if (!TESTING) {
+        if (!TESTING_LOCALLY) {
             targetField = board.getFieldById(moveBarrCmd.targetFieldId());
         }
-        if (TESTING) {
+        if (TESTING_LOCALLY) {
             while (targetField.getType().isEnd() || targetField.getType().isStart()
                     || isOccupied(lobby, board, targetField)) {
                 targetField = board.getFieldById(getRandomField(board));

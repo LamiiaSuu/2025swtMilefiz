@@ -7,6 +7,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
 import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Field;
+import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
@@ -73,9 +74,7 @@ public interface GameService {
 
     Board getTestBoard();
 
-    FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Principal principal,
-            SimpMessageHeaderAccessor sha);
+    FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Player player);
 
-    FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveCmd, Principal principal,
-            SimpMessageHeaderAccessor sha);
+    FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveCmd, Player player);
 }

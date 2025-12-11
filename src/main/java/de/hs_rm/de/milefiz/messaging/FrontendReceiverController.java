@@ -32,7 +32,6 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -71,11 +70,11 @@ public class FrontendReceiverController {
      * - Automatische Weiterleitung des Ergebnisses an alle Clients der betroffenen
      * Lobby über {@code /topic/milefiz/lobby/{lobbyId}}
      *
-     * @param lobbyId   die eindeutige ID der Lobby, in der der Zug ausgeführt wird
-     * @param moveCmd   der empfangene Bewegungsbefehl mit Meeple-ID und
-     *                  {@link Direction}
-     * @param player der authentifizierte Benutzer, der die Nachricht gesendet
-     *                  hat
+     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
+     * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und
+     *                {@link Direction}
+     * @param player  der authentifizierte Benutzer, der die Nachricht gesendet
+     *                hat
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
      *         ({@link FrontendMoveEvent}) oder einen Fehler
      *         ({@link FrontendMoveRejectedEvent}) an die Clients sendet
@@ -83,16 +82,15 @@ public class FrontendReceiverController {
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleMove(@DestinationVariable("lobbyId") UUID lobbyId, MovementCommand moveCmd,
-            Principal principal, SimpMessageHeaderAccessor sha) {
+            Player player) {
 
-        logger.info("Received movement command in lobby {} from player '{}': meeple {} moving {} (sessionId={})",
+        logger.info("Received movement command in lobby {} from player '{}': meeple {} moving {} ",
                 lobbyId,
-                principal != null ? principal.getName() : "anonymous",
+                player != null ? player.getName() : "anonymous",
                 moveCmd.meepleId(),
-                moveCmd.direction(),
-                sha.getSessionId());
+                moveCmd.direction());
 
-        return gameService.moveMeeple(lobbyId, moveCmd, principal, sha);
+        return gameService.moveMeeple(lobbyId, moveCmd, player);
     }
 
     /**
@@ -109,8 +107,10 @@ public class FrontendReceiverController {
      * - Empfang der Nachricht über den Endpunkt
      * {@code /milefiz/lobby/{lobbyId}/movebarrier}
      * - Logging des Befehls (Lobby, Spieler, Barrieren-ID, Ziel-Feld-ID)
-     * - Weiterleitung an {@link de.hs_rm.de.milefiz.game.service.GameService#moveBarrier(UUID, MoveBarrierCommand, Principal, SimpMessageHeaderAccessor)}
-     * - Rückgabe des vom Service erzeugten {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}
+     * - Weiterleitung an
+     * {@link de.hs_rm.de.milefiz.game.service.GameService#moveBarrier(UUID, MoveBarrierCommand, Principal, SimpMessageHeaderAccessor)}
+     * - Rückgabe des vom Service erzeugten
+     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}
      * - Automatische Weiterleitung des Ergebnisses an alle Clients der betroffenen
      * Lobby über {@code /topic/milefiz/lobby/{lobbyId}}
      *
@@ -118,10 +118,8 @@ public class FrontendReceiverController {
      *                    verschoben wird
      * @param moveBarrCmd der vom Frontend übermittelte Befehl mit Barrieren-ID und
      *                    Ziel-Feld-ID
-     * @param principal   der Spieler (bzw. dessen Benutzerkontext), der die
+     * @param player      der Spieler (bzw. dessen Benutzerkontext), der die
      *                    Barriere verschiebt
-     * @param sha         der WebSocket-Header mit Sitzungsinformationen (z. B.
-     *                    Session-ID)
      * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
      *         das Ergebnis der Barrierenbewegung beschreibt
      *
@@ -130,17 +128,16 @@ public class FrontendReceiverController {
     @MessageMapping("/milefiz/lobby/{lobbyId}/movebarrier")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleBarrierMove(@DestinationVariable("lobbyId") UUID lobbyId, MoveBarrierCommand moveBarrCmd,
-            Principal principal, SimpMessageHeaderAccessor sha) {
+            Player player) {
 
         logger.info(
-                "Received MoveBarrierCommand in lobby {} from player '{}': barrier {} moving to field {} (sessionId={})",
+                "Received MoveBarrierCommand in lobby {} from player '{}': barrier {} moving to field {}",
                 lobbyId,
-                principal != null ? principal.getName() : "anonymous",
+                player != null ? player.getName() : "anonymous",
                 moveBarrCmd.barrierId(),
-                moveBarrCmd.targetFieldId(),
-                sha.getSessionId());
+                moveBarrCmd.targetFieldId());
 
-        return gameService.moveBarrier(lobbyId, moveBarrCmd, principal, sha);
+        return gameService.moveBarrier(lobbyId, moveBarrCmd, player);
     }
 
     /**

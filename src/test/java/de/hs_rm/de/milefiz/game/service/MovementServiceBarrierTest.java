@@ -36,12 +36,6 @@ public class MovementServiceBarrierTest {
     @Mock
     private LobbyManager lobbyManager;
 
-    @Mock
-    private Principal principal;
-
-    @Mock
-    private SimpMessageHeaderAccessor sha;
-
     private MovementService movementService;
     private Lobby lobby;
     private Board board;
@@ -95,8 +89,7 @@ public class MovementServiceBarrierTest {
         lobby.setPlayers(List.of(player));
 
         when(lobbyManager.getLobby(lobby.getId())).thenReturn(lobby);
-        when(principal.getName()).thenReturn("player1");
-        when(sha.getSessionId()).thenReturn("session1");
+        
     }
 
     // Barriere erfolgreich auf freies Feld setzen
@@ -104,7 +97,7 @@ public class MovementServiceBarrierTest {
     void moveBarrierToValidFieldSucceeds() {
         MoveBarrierCommand cmd = new MoveBarrierCommand(barrier.getId(), freeField.getId());
 
-        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveBarrierEvent.class, result);
 
@@ -119,7 +112,7 @@ public class MovementServiceBarrierTest {
     void moveBarrierOntoStartFieldIsRejected() {
         MoveBarrierCommand cmd = new MoveBarrierCommand(barrier.getId(), startField.getId());
 
-        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveBarrierRejectedEvent.class, result);
 
@@ -133,7 +126,7 @@ public class MovementServiceBarrierTest {
     void moveBarrierOntoEndFieldIsRejected() {
         MoveBarrierCommand cmd = new MoveBarrierCommand(barrier.getId(), endField.getId());
 
-        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveBarrierRejectedEvent.class, result);
 
@@ -148,7 +141,7 @@ public class MovementServiceBarrierTest {
         // Das Feld ist bereits durch einen Meeple des Spielers besetzt
         MoveBarrierCommand cmd = new MoveBarrierCommand(barrier.getId(), meepleField.getId());
 
-        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveBarrierRejectedEvent.class, result);
 
@@ -167,7 +160,7 @@ public class MovementServiceBarrierTest {
 
         MoveBarrierCommand cmd = new MoveBarrierCommand(barrier.getId(), freeField.getId());
 
-        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveBarrier(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveBarrierRejectedEvent.class, result);
 

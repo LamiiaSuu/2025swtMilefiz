@@ -43,12 +43,6 @@ public class MovementServiceMeepleTest {
     @Mock
     private LobbyManager lobbyManager;
 
-    @Mock
-    private Principal principal;
-
-    @Mock
-    private SimpMessageHeaderAccessor sha;
-
     private MovementService movementService;
     private Lobby lobby;
     private Board board;
@@ -88,8 +82,6 @@ public class MovementServiceMeepleTest {
         lobby.setPlayers(List.of(player));
 
         when(lobbyManager.getLobby(lobby.getId())).thenReturn(lobby);
-        when(principal.getName()).thenReturn("player1");
-        when(sha.getSessionId()).thenReturn("session1");
     }
 
     // Erfolgreicher Move
@@ -101,7 +93,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveEvent.class, result);
 
@@ -120,7 +112,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveRejectedEvent.class, result);
 
@@ -136,7 +128,7 @@ public class MovementServiceMeepleTest {
         // kein Feld in Richtung South
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.SOUTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveRejectedEvent.class, result);
 
@@ -155,7 +147,7 @@ public class MovementServiceMeepleTest {
         // Jetzt versucht er, zurueck nach Sueden zu gehen (auf lastField)
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.SOUTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveRejectedEvent.class, result);
 
@@ -174,7 +166,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.EAST);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveRejectedEvent.class, result);
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
@@ -192,7 +184,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.EAST);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveRejectedEvent.class, result);
 
@@ -212,7 +204,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.WEST);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendPlayerHasWonEvent.class, result);
 
@@ -242,7 +234,7 @@ public class MovementServiceMeepleTest {
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
         // Bewegung ausführen
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         // Erwartung: Zug endet automatisch
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
@@ -280,7 +272,7 @@ public class MovementServiceMeepleTest {
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
         // Bewegung ausführen
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         // Erwartung: Zug endet automatisch
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
@@ -320,7 +312,7 @@ public class MovementServiceMeepleTest {
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
         // Bewegung ausführen
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         // Erwartung: Zug endet automatisch
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
@@ -346,7 +338,7 @@ public class MovementServiceMeepleTest {
         board.addBarrier(barrier);
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveEvent.class, result);
     }
@@ -364,7 +356,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendRejectedByBarrierEvent.class, result);
 
@@ -388,7 +380,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendTriggerBarrierMoveEvent.class, result);
 
@@ -414,7 +406,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveRejectedEvent.class, result);
 
@@ -448,7 +440,7 @@ public class MovementServiceMeepleTest {
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
         // Bewegung ausführen
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         // ✅ Erwartung: MoveWithLossEvent, Zug endet
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
@@ -486,7 +478,7 @@ public class MovementServiceMeepleTest {
         board.setStartGreen(east);
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
 
@@ -515,7 +507,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendMoveEvent.class, result);
 
@@ -543,7 +535,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         assertInstanceOf(FrontendDuelEvent.class, result);
 
@@ -574,7 +566,7 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, principal, sha);
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
         // ✅ Erwartung: normaler Move, kein Duell
         assertInstanceOf(FrontendMoveEvent.class, result);

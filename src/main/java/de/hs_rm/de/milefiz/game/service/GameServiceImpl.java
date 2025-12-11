@@ -16,6 +16,7 @@ import java.security.Principal;
 
 import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Field;
+import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
@@ -145,27 +146,23 @@ public class GameServiceImpl implements GameService {
      * @param lobbyId   die eindeutige ID der Lobby, in der die Bewegung ausgeführt
      *                  wird
      * @param moveCmd   der Bewegungsbefehl mit Meeple-ID und Bewegungsrichtung
-     * @param principal der Spieler (bzw. dessen Benutzerkontext), der den Zug
+     * @param player    der Spieler (bzw. dessen Benutzerkontext), der den Zug
      *                  ausgelöst hat
-     * @param sha       WebSocket-Header mit Sitzungsinformationen (z. B.
-     *                  Session-ID)
      * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
      *         das Ergebnis der Bewegung enthält
      *
      *         Author: Maximilian Ressel
      */
     @Override
-    public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Principal principal,
-            SimpMessageHeaderAccessor sha) {
+    public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Player player) {
 
         logger.info("Processing movement command in lobby {} from player '{}': meeple {} moving {} (sessionId={})",
                 lobbyId,
-                principal != null ? principal.getName() : "anonymous",
+                player != null ? player.getName() : "anonymous",
                 moveCmd.meepleId(),
-                moveCmd.direction(),
-                sha.getSessionId());
+                moveCmd.direction());
 
-        return movementService.moveMeeple(lobbyId, moveCmd, principal, sha);
+        return movementService.moveMeeple(lobbyId, moveCmd, player);
     }
 
     /**
@@ -199,27 +196,23 @@ public class GameServiceImpl implements GameService {
      *                    verschoben wird
      * @param moveBarrCmd der Barrierenbewegungsbefehl mit Barrieren-ID und
      *                    Ziel-Feld-ID
-     * @param principal   der Spieler (bzw. dessen Benutzerkontext), der die Aktion
+     * @param player      der Spieler (bzw. dessen Benutzerkontext), der die Aktion
      *                    ausgelöst hat
-     * @param sha         WebSocket-Header mit Sitzungsinformationen (z. B.
-     *                    Session-ID)
      * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
      *         das Ergebnis der Barrierenbewegung enthält
      *
      *         Author: Maximilian Ressel
      */
     @Override
-    public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Principal principal,
-            SimpMessageHeaderAccessor sha) {
+    public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Player player) {
 
         logger.info(
                 "Processing MoveBarrierCommand in lobby {} from player '{}': barrier {} moving to field {} (sessionId={})",
                 lobbyId,
-                principal != null ? principal.getName() : "anonymous",
+                player != null ? player.getName() : "anonymous",
                 moveBarrCmd.barrierId(),
-                moveBarrCmd.targetFieldId(),
-                sha.getSessionId());
+                moveBarrCmd.targetFieldId());
 
-        return movementService.moveBarrier(lobbyId, moveBarrCmd, principal, sha);
+        return movementService.moveBarrier(lobbyId, moveBarrCmd, player);
     }
 }
