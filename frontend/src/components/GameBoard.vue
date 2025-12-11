@@ -17,14 +17,6 @@ const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
 let started: boolean = false
 
-//TODO 
-// Refs richtig setzen ✓
-// Meeple auf Feld versetzt anzeigen ✓
-// Zischen meeple switchen ✓
-// Fix: camera init x
-// Fix: alle hüpfen beim laufen x
-// Fix: movement issues
-
 // record: meepleID -> gameCharRef
 const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
 
@@ -57,9 +49,9 @@ const meepleEntries = computed(() => {
     let center: [number, number, number] = [0, 0, 0]
 
     if (board && fieldID) {
-      const field = board.fields.find( (f) => f.id === fieldID)
+      const field = board.fields.find((f) => f.id === fieldID)
       if (field) {
-        center = [field.position.x , 0, field.position.y]
+        center = [field.position.x, 0, field.position.y]
       }
     }
 
@@ -73,7 +65,7 @@ const meepleEntries = computed(() => {
       if (!meepleID) continue
 
       if (count === 1) {
-        out.push({ id: meepleID, position: center})
+        out.push({ id: meepleID, position: center })
       } else {
         const angle = (i / count) * Math.PI * 2
         const x = center[0] + radius * Math.cos(angle)
@@ -108,32 +100,39 @@ function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPubl
   // Cast the template ref value to TresObject | null in a type-safe place
   registerGameCharRef(id, el as unknown as TresObject | null)
 
-  if(!started) {
+  if (!started) {
     cycleSelection(1)
     started = true
   }
 }
 
-// Board-Daten laden wenn die App startet
-// onMounted(async () => {
-//   console.log('App mounted - loading board data...')
-//   await boardStore.getBoard()
-// })
-
 // Board erst laden, wenn Meeples verfügbar sind
 const meeplesReady = computed(() => {
   const lobby = milefizStore.gamedata.lobby
+  console.log('meeplesReady check:', {
+    hasLobby: !!lobby,
+    playersLength: lobby?.players?.length,
+    players: lobby?.players,
+    playersIsArray: Array.isArray(lobby?.players)
+  })
   if (!lobby || !lobby.players?.length) return false
-  return lobby.players.some(p => Array.isArray(p.meeples) && p.meeples.length > 0)
+  const ready = lobby.players.some(p => {
+    const hasMeeples = Array.isArray(p.meeples) && p.meeples.length > 0
+    console.log(`Player ${p.id}: meeples=${p.meeples?.length}, hasMeeples=${hasMeeples}`)
+    return hasMeeples
+  })
+  console.log('→ meeplesReady result:', ready)
+  return ready
 })
 
 // Lädt Board automatisch, sobald Meeples da sind
 watch(meeplesReady, async (ready) => {
+  console.log('meeplesReady changed to:', ready, 'boardStore.ok:', boardStore.ok)
   if (ready && !boardStore.ok) {
-    console.log("🎯 Meeples detected — loading board data now...")
+    console.log("Meeples detected — loading board data now...")
     await boardStore.getBoard()
   }
-})
+}, { immediate: true })
 
 //eigene Meeple aus der Lobby merken 
 const ownMeepleIds = computed(() => {
@@ -163,7 +162,7 @@ watch(ownMeepleIds, (ids) => {
   if (!me) return
   if ((!me.activeMeeple || !me.activeMeeple.id) && me.meeples.length > 0) {
     // erste Meeple als active setzen
-    if(me.meeples[0]) {
+    if (me.meeples[0]) {
       me.activeMeeple = me.meeples[0]
       console.log('Set initial activeMeeple to', me.activeMeeple.id)
     }
@@ -302,12 +301,6 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   milefizStore.sendMove(meepleId, direction)
 }
 
-
-
-
-
-
-
 // Updated Rotation vom Charakter für First Person Kamera
 const onRotateCharacter = (yRotation: number) => {
   const id = selectedMeepleId.value
@@ -355,8 +348,8 @@ onUnmounted(() => {
     <OrbitControls v-if="!useFirstPerson" />
 
     <!-- First Person Kamera (Folgt dem Charakter) -->
-    <Camera ref="fpsCamera" :gameCharRef="(gameCharRefs[selectedMeepleId ?? '']?.value) ?? null" :use-first-person="useFirstPerson"
-      @rotate-character="onRotateCharacter" />
+    <Camera ref="fpsCamera" :gameCharRef="(gameCharRefs[selectedMeepleId ?? '']?.value) ?? null"
+      :use-first-person="useFirstPerson" @rotate-character="onRotateCharacter" />
 
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
      vertikal ist -->
@@ -371,10 +364,10 @@ onUnmounted(() => {
 
     <!-- Directional Licht von "vorne rechts" 200%-->
     <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
-    
+
     <GameCharacter v-for="entry in meepleEntries" :key="entry.id"
-      :ref="el => registerGameCharRefFromTemplate(entry.id, el)"
-      :position="entry.position" :meepleId="entry.id" bodyColor="pink" eyeColor="white" />
+      :ref="el => registerGameCharRefFromTemplate(entry.id, el)" :position="entry.position" :meepleId="entry.id"
+      bodyColor="pink" eyeColor="white" />
 
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
