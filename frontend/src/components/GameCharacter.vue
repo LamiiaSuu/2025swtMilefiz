@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
-import { watchEffect, watch, ref, computed } from 'vue'
+import { watchEffect, watch, ref, computed, onMounted } from 'vue'
 import { useMilefizStore } from "@/stores/milefizstore";
 
 // Zugriff auf globalen PiniaStore
@@ -186,11 +186,29 @@ const jump = () => {
 // Position für Animation
 const animatedPosition = ref<[number, number, number]>([...(props.position ?? [0, 0, 0])])
 
-// auf Änderung der Position reagieren
-watch(() => props.position, (newPos) => {
-  if (!newPos) return
-  animateTo(newPos)
-}, { deep: true })
+// auf Änderung der Position reagieren (nur bei tatsächlicher Positionsänderung)
+const _lastPropPosition = ref<[number, number, number] | null>(null)
+watch(
+  () => props.position,
+  (newPos) => {
+    if (!newPos) return
+    const last = _lastPropPosition.value
+    if (
+      last &&
+      Math.abs(last[0] - newPos[0]) < 1e-6 &&
+      Math.abs(last[1] - newPos[1]) < 1e-6 &&
+      Math.abs(last[2] - newPos[2]) < 1e-6
+    ) {
+      // no meaningful change -> do nothing
+      return
+    }
+
+    // record and animate
+    _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
+    animateTo(newPos)
+  },
+  { deep: true }
+)
 
 const speed = 0.08
 let moveAnimationFrame: number | null = null
@@ -304,6 +322,11 @@ const rotateToward = (target: [number, number, number]) => {
 
 // Gibt Rotation und Position frei
 defineExpose({ setRotation, jump, characterPosition, meepleId: props.meepleId, getPosition: () => currentPosition.value, })
+
+//Debug: Logging wenn GameCharacter gemounted werden
+onMounted(() => {
+  console.log('GameCharacter mounted:', props.meepleId, '| Barrier:', props.barrier)
+})
 </script>
 
 <template>
