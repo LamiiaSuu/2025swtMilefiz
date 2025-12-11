@@ -16,6 +16,11 @@ const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
 
+//TODO 
+// Refs richtig setzen
+// Meeple auf Feld versetzt anzeigen
+// Zischen meeple switchen
+
 // record: meepleID -> gameCharRef
 const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
 
@@ -26,6 +31,7 @@ const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | nu
  * 
  * Nutzt die gespeicherte Meeple-Position aus dem BoardStore und 
  * wandelt sie in Three.js-Koordinaten um. 
+ * Wenn mehrere Meeple auf einem Feld stehen werden sie auf einem Kreis platziert
  * Wird automatisch neu berechnet, wenn sich das Board oder die Meeple-Position ändert.
  * 
  * @returns {id, [x, y, z]} - Key: Id des Meeple, Value: Weltkoordinaten des Spielcharakters
@@ -33,18 +39,48 @@ const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | nu
 const meepleEntries = computed(() => {
   const out: { id: string; position: [number, number, number] }[] = []
   const board = boardStore.board
+
+  //field -> meeple[]
+  const groups = new Map<string, string[]>()
+
   for (const [meepleID, posID] of Object.entries(boardStore.meeplePositions)) {
-    if (!board || !posID) {
-      out.push({ id: meepleID, position: [0, 0, 0] })
-      continue
+    const fieldID = posID ?? ''
+    const meeples = groups.get(fieldID) || []
+    meeples.push(meepleID)
+    groups.set(fieldID, meeples)
+
+  }
+
+  for (const [fieldID, meepleIDs] of groups.entries()) {
+    let center: [number, number, number] = [0, 0, 0]
+
+    if (board && fieldID) {
+      const field = board.fields.find( (f) => f.id === fieldID)
+      if (field) {
+        center = [field.position.x , 0, field.position.y]
+      }
     }
-    const field = board.fields.find((f) => f.id === posID)
-    if (!field) {
-      out.push({ id: meepleID, position: [0, 0, 0] })
-    } else {
-      out.push({ id: meepleID, position: [field.position.x, 0, field.position.y] })
+
+    const count = meepleIDs.length
+    const baseRadius = 0.5
+    const radius = count <= 1 ? 0 : baseRadius
+
+    for (let i = 0; i < count; i++) {
+      const meepleID = meepleIDs[i]
+
+      if (!meepleID) continue
+
+      if (count === 1) {
+        out.push({ id: meepleID, position: center})
+      } else {
+        const angle = (i / count) * Math.PI * 2
+        const x = center[0] + radius * Math.cos(angle)
+        const z = center[2] + radius * Math.sin(angle)
+        out.push({ id: meepleID, position: [x, center[1], z] })
+      }
     }
   }
+  console.log("Computed Meeple Entries", out)
   return out
 })
 
