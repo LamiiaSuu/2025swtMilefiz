@@ -93,7 +93,7 @@ public class FrontendReceiverController {
      * @param lobbyId   die eindeutige ID der Lobby, in der der Zug ausgeführt wird
      * @param moveCmd   der empfangene Bewegungsbefehl mit Meeple-ID und
      *                  {@link Direction}
-     * @param principal der authentifizierte Benutzer, der die Nachricht gesendet
+     * @param player der authentifizierte Benutzer, der die Nachricht gesendet
      *                  hat
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
      *         ({@link FrontendMoveEvent}) oder einen Fehler
