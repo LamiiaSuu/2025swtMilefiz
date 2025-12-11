@@ -17,14 +17,14 @@ const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
 
 //TODO 
-// Refs richtig setzen
-// Meeple auf Feld versetzt anzeigen
-// Zischen meeple switchen
+// Refs richtig setzen ✓
+// Meeple auf Feld versetzt anzeigen ✓
+// Zischen meeple switchen ✓
+// Fix: andere Meeple werden gerade erst angezeigt, wenn man die sich vorher mit bird view angeguckt hat
+// Fix: movement issues
 
 // record: meepleID -> gameCharRef
 const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
-
-// computed list of meeples with resolved 3D positions (reactive)
 
 /**
  * Berechnet die aktuelle 3D-Position des Spielcharakters auf dem Spielfeld.
@@ -94,7 +94,6 @@ function registerGameCharRef(id: string, el: TresObject | null) {
   }
 }
 
-// Debug: watch meepleEntries and meeplePositions to see updates
 watch(meepleEntries, (val) => {
   console.log('meepleEntries changed:', val)
 }, { deep: true })
@@ -114,22 +113,86 @@ onMounted(async () => {
   await boardStore.getBoard()
 })
 
-// kleiner Helper zum testen
-const firstMeepleId = computed(() => meepleEntries.value[0]?.id ?? null)
+//eigene Meeple aus der Lobby merken 
+const ownMeepleIds = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return [] as string[]
+  const me = lobby.players.find((p) => p.id === myId)
+  if (!me) return [] as string[]
+  return me.meeples.map((m) => m.id)
+})
+
+// activeMeeple merken
+const selectedMeepleId = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return null
+  const me = lobby.players.find((p) => p.id === myId)
+  return (me?.activeMeeple?.id) ?? null
+})
+
+// falls kein activeMeeple gesetzt ist, wird hier das erste gesetzt
+watch(ownMeepleIds, (ids) => {
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return
+  const me = lobby.players.find((p) => p.id === myId)
+  if (!me) return
+  if ((!me.activeMeeple || !me.activeMeeple.id) && me.meeples.length > 0) {
+    // erste Meeple als active setzen
+    if(me.meeples[0]) {
+      me.activeMeeple = me.meeples[0]
+      console.log('Set initial activeMeeple to', me.activeMeeple.id)
+    }
+  }
+})
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
+  // Tab zum wechseln verwenden + default verhalten verhindern
+  if (e.key === 'Tab') {
+    e.preventDefault()
+    cycleSelection(e.shiftKey ? -1 : 1)
+    return
+  }
+
   toggleCamera(e)
   handleJump(e)
   handleMoveKeys(e)
 }
 
+/**
+ * rotiert durch die eigenen Meeple durch
+ */
+function cycleSelection(offset: number = 1) {
+  const ids = ownMeepleIds.value
+  if (!ids.length) return
+  if (!ids[0]) return
+  const current = selectedMeepleId.value ?? ids[0]
+  const idx = Math.max(0, ids.indexOf(current))
+  const next = (idx + offset + ids.length) % ids.length
+
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return
+  const me = lobby.players.find((p) => p.id === myId)
+  if (!me) return
+
+  // activeMeeple setzen
+  const nextMeeple = me.meeples.find((m) => m.id === ids[next])
+  if (nextMeeple) {
+    me.activeMeeple = nextMeeple
+    console.log('Cycled activeMeeple ->', nextMeeple.id)
+  }
+}
+
 const handleJump = (e: KeyboardEvent) => {
   if (e.code === 'Space') {
     e.preventDefault()
-    const id = firstMeepleId.value
+    const id = selectedMeepleId.value
     if (!id) return
     const ref = gameCharRefs[id]
     if (!ref || !ref.value) return
@@ -166,7 +229,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
 
   const cam = fpsCamera.value?.camera
   // const meepleId = gameCharRef.value?.meepleId
-  const meepleId = firstMeepleId.value
+  const meepleId = selectedMeepleId.value
   if (!cam || !meepleId) return
 
   // Blickrichtung der Kamera holen
@@ -225,7 +288,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
 
 // Updated Rotation vom Charakter für First Person Kamera
 const onRotateCharacter = (yRotation: number) => {
-  const id = firstMeepleId.value
+  const id = selectedMeepleId.value
   if (!id) return
   const ref = gameCharRefs[id]
   if (!ref || !ref.value) return
@@ -270,7 +333,7 @@ onUnmounted(() => {
     <OrbitControls v-if="!useFirstPerson" />
 
     <!-- First Person Kamera (Folgt dem Charakter) -->
-    <Camera ref="fpsCamera" :gameCharRef="(gameCharRefs[firstMeepleId ?? '']?.value) ?? null" :use-first-person="useFirstPerson"
+    <Camera ref="fpsCamera" :gameCharRef="(gameCharRefs[selectedMeepleId ?? '']?.value) ?? null" :use-first-person="useFirstPerson"
       @rotate-character="onRotateCharacter" />
 
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
