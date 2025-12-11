@@ -111,11 +111,11 @@ public class FrontendReceiverController {
             e.printStackTrace();
         }
 
-        // nur zum testen FIXME
-        // player.getMeeples()[0].setId(moveCmd.meepleId());
-        // if (player.getMeeples()[0].getCurrentField() == null) {
-        //     player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartGreen());
-        // }
+        // // nur zum testen FIXME
+        // // player.getMeeples()[0].setId(moveCmd.meepleId());
+        // // if (player.getMeeples()[0].getCurrentField() == null) {
+        // //     player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartGreen());
+        // // }
 
         Board board = lobby.getBoard();
         Meeple meeple = player.getMeepleWithId(moveCmd.meepleId());

@@ -15,12 +15,14 @@ import { watch } from 'vue'
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
+let started: boolean = false
 
 //TODO 
 // Refs richtig setzen ✓
 // Meeple auf Feld versetzt anzeigen ✓
 // Zischen meeple switchen ✓
-// Fix: andere Meeple werden gerade erst angezeigt, wenn man die sich vorher mit bird view angeguckt hat
+// Fix: camera init x
+// Fix: alle hüpfen beim laufen x
 // Fix: movement issues
 
 // record: meepleID -> gameCharRef
@@ -105,6 +107,11 @@ watch(() => boardStore.meeplePositions, (val) => {
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
   // Cast the template ref value to TresObject | null in a type-safe place
   registerGameCharRef(id, el as unknown as TresObject | null)
+
+  if(!started) {
+    cycleSelection(1)
+    started = true
+  }
 }
 
 // Board-Daten laden wenn die App startet
