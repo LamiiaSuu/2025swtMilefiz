@@ -111,17 +111,20 @@ public class FrontendReceiverController {
             e.printStackTrace();
         }
 
-        // nur zum testen FIXME
-        player.getMeeples()[0].setId(moveCmd.meepleId());
-        if (player.getMeeples()[0].getCurrentField() == null) {
-            player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartGreen());
-        }
+        // // nur zum testen FIXME
+        // // player.getMeeples()[0].setId(moveCmd.meepleId());
+        // // if (player.getMeeples()[0].getCurrentField() == null) {
+        // //     player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartGreen());
+        // // }
 
         Board board = lobby.getBoard();
         Meeple meeple = player.getMeepleWithId(moveCmd.meepleId());
         Field currentField = meeple.getCurrentField();
         Field lastField = meeple.getLastField();
         Direction direction = moveCmd.direction();
+
+        System.out.println("meeple:" + meeple.getId());
+        System.out.println("aktuelles feld" + currentField.getId());
 
         // Ziel-Feld anhand der Bewegungsrichtung bestimmen
         Field nextField = switch (direction) {
