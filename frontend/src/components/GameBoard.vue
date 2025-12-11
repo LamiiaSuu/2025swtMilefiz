@@ -108,9 +108,24 @@ function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPubl
 }
 
 // Board-Daten laden wenn die App startet
-onMounted(async () => {
-  console.log('App mounted - loading board data...')
-  await boardStore.getBoard()
+// onMounted(async () => {
+//   console.log('App mounted - loading board data...')
+//   await boardStore.getBoard()
+// })
+
+// Board erst laden, wenn Meeples verfügbar sind
+const meeplesReady = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  if (!lobby || !lobby.players?.length) return false
+  return lobby.players.some(p => Array.isArray(p.meeples) && p.meeples.length > 0)
+})
+
+// Lädt Board automatisch, sobald Meeples da sind
+watch(meeplesReady, async (ready) => {
+  if (ready && !boardStore.ok) {
+    console.log("🎯 Meeples detected — loading board data now...")
+    await boardStore.getBoard()
+  }
 })
 
 //eigene Meeple aus der Lobby merken 
@@ -309,7 +324,7 @@ onMounted(() => {
    */
   const waitForCamera = () => {
     const cam = fpsCamera.value?.camera
-    if (!cam) {
+    if (!cam || !meeplesReady.value || !boardStore.ok) {
       requestAnimationFrame(waitForCamera)
       return
     }
