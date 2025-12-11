@@ -127,6 +127,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           console.warn('Energy save rejected:', event.msg)
           return
         }
+        // SPIEL STARTET
+        else if (event.type === 'GAME_START') {
+          console.log('Spiel startet')
+        }
       })
     }
     stompclient.onDisconnect = () => {
