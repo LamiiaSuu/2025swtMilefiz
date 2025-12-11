@@ -7,14 +7,15 @@
 <style scoped>
     .component-list {
         display: flex;
-        height: 50%;
+        max-height: 50%;
         flex-direction: column;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         gap: 2vh;
     }
 
     .component-list > * {
-        flex: 1;
+        width: 25%;
+        min-width: 400px;
     }
 </style>

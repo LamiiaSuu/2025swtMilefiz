@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-/* TODO: vielleicht lobby interface aus lobbyupdate (vielleicht anpassen?) */
+/* TODO: lobby interface aus lobbyupdate (vielleicht anpassen?) */
 export interface Lobby {
     id: string,
     name: string,
@@ -14,29 +14,58 @@ const lobbyid = defineModel('lobbyid')
 </script>
 
 <template>
-    <div class="lobby-list-container">
-        <label>Lobbys</label>
-        <div class="lobby-list">
-            <select v-model="lobbyid" multiple>
-                  <option :value="lobby.id" class="lobby-item" v-for="(lobby) in lobbies" :key="lobby.id" >
-                        {{ lobby.id }} / {{ lobby.name }}
-                  </option>
-            </select>
+    <div class="game-container">
+        <div class="game-label">Lobbys</div>
+        <div class="lobby-list game-content">
+            <template v-for="(lobby) in lobbies" :key="lobby.id">
+                <label class="lobby-item">
+                    <input class="radio-input" type="radio" :value="lobby.id" v-model="lobbyid" />
+                    <div class="radio-content">{{ lobby.name }}</div>
+                </label>
+            </template>
         </div>
     </div>
 </template>
 
 <style scoped>
-    .component-list {
-        display: flex;
-        height: 50%;
-        flex-direction: column;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 2vh;
-    }
 
-    .component-list > * {
-        flex: 1;
-    }
+/** lobby-list **/
+
+.lobby-list {
+    overflow: scroll;
+    width: 100%;
+    max-height: 100%;
+    min-height: 50px;
+}
+
+/** lobby-item **/
+
+.lobby-item {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    font-size: 1.2rem;
+}
+
+.lobby-item input {
+    display: none;
+}
+
+.radio-content {
+    border-radius: inherit;
+    padding: 10px 15px;
+}
+
+.radio-content:hover {
+    background-color: #ccc;
+}
+
+.radio-input:checked~.radio-content {
+    background-color: #2196F3;
+}
 </style>
