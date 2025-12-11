@@ -110,7 +110,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
-          gamedata.currentDiceRoll = event.remainingMoves
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves 
+          }
         }
         // LOBBY_UPDATE wird immer ausgerufen, wenn sich Werte der Lobby (außer das Board) geupdatet haben. Dazu zählt auch, wenn neue Spieler gejoint sind
         else if (event.type === 'LOBBY_UPDATE') {
