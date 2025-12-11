@@ -24,6 +24,7 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.service.GameService;
+import de.hs_rm.de.milefiz.messaging.commands.EnergyCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
@@ -32,7 +33,8 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyRejectedEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -178,6 +180,7 @@ public class FrontendReceiverController {
 
         // Spieler nutzt einen Zug
         player.useMove();
+        player.setMoved(true);
 
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(
@@ -237,7 +240,8 @@ public class FrontendReceiverController {
         if (gameService.getRollDiceCooldown(player.getId()) <= 0) {
             int number = gameService.rollDice();
             try {
-                player.setRemainingMoves(number);
+                player.setRemainingMoves(number); //Spieler weiß was er gewürfelt hat
+                player.setMoved(false);
                 logger.info("Set {} remaining moves for player {}", number, player.getId());
             } catch (RuntimeException e) {
                 logger.error("Unexpected error setting remaining moves for player {}", player.getId(), e);
@@ -314,4 +318,24 @@ public class FrontendReceiverController {
                 "/topic/milefiz/lobby/" + lobby.getId(),
                 payload);
     }
+
+    @MessageMapping("/milefiz/lobby/{lobbyId}/saveEnergy")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendEvent handleSaveEnergy(@DestinationVariable("lobbyId") UUID lobbyId, EnergyCommand command, Player player) {
+        logger.info("Player {} wants to save Energy {}", player.getId(), lobbyId);
+
+        if (!player.isMoved() && !player.hasFullEnergy()){
+            try {
+                player.saveEnergy();
+                logger.info("Saved Energy for player {}", player.getId());
+            } catch (RuntimeException e) {
+                logger.error("Unexpected error saving energy for Player {}", player.getId(), e);
+            }
+
+            return new FrontendSaveEnergyEvent(lobbyId, player.getEnergy());
+        }
+
+        return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy");
+    }
+     
 }

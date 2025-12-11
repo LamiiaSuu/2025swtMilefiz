@@ -13,6 +13,9 @@ public class Player implements Principal {
     private Color color;
     private Meeple activeMeeple;
     private int remainingMoves = 0;
+    private int energy = 0;
+    private final int MAX_ENERGY = 6;
+    private boolean moved = false;
 
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
@@ -49,6 +52,22 @@ public class Player implements Principal {
 
     public void setPlayerToken(String sessionId) {
         this.playerToken = sessionId;
+    }
+
+     public int getEnergy() {
+        return energy;
+    }
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+
+    public boolean isMoved() {
+        return moved;
+    }
+
+    public void setMoved(boolean moved) {
+        this.moved = moved;
     }
 
     /**
@@ -154,6 +173,18 @@ public class Player implements Principal {
         if (this.canMove()) {
             remainingMoves--;
         }
+    }
+
+    public boolean hasFullEnergy(){
+        return energy >= MAX_ENERGY;
+    }
+
+    public void saveEnergy(){
+        energy += remainingMoves;
+        if (energy > MAX_ENERGY){
+            energy = MAX_ENERGY;
+        }
+        remainingMoves = 0;
     }
 
     @Override
