@@ -78,7 +78,9 @@ public class MovementServiceImpl implements MovementService {
     private LobbyManager lobbyManager;
     private static final int LAST_MOVE = 1;
     private static final int SECOND_TO_LAST_MOVE = 2;
-    private static final boolean TESTING_LOCALLY = false;
+    private static final boolean TESTING_LOCALLY = true; // true wenn es bei sich lokal laufen lässt, damit die
+                                                         // barriere vorerst randomly verschoben wird.
+                                                         // muss false sein für die unit tests
 
     /**
      * Erstellt eine neue Instanz des MovementServiceImpl.
@@ -142,11 +144,11 @@ public class MovementServiceImpl implements MovementService {
      * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent} wenn ein
      * Duell zwischen zwei Meeples ausgelöst wird
      *
-     * @param lobbyId   die eindeutige ID der Lobby, in der die Bewegung stattfindet
-     * @param moveCmd   der vom Frontend übermittelte Bewegungsbefehl mit Meeple-ID
-     *                  und Bewegungsrichtung
-     * @param player    der Spieler (bzw. dessen Benutzerkontext), der den Zug
-     *                  ausführt
+     * @param lobbyId die eindeutige ID der Lobby, in der die Bewegung stattfindet
+     * @param moveCmd der vom Frontend übermittelte Bewegungsbefehl mit Meeple-ID
+     *                und Bewegungsrichtung
+     * @param player  der Spieler (bzw. dessen Benutzerkontext), der den Zug
+     *                ausführt
      * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
      *         das Ergebnis der Bewegung beschreibt
      *
@@ -434,7 +436,7 @@ public class MovementServiceImpl implements MovementService {
      * @param lobbyId     die ID der Lobby, in der die Barriere verschoben wird
      * @param moveBarrCmd der vom Frontend übermittelte Befehl mit Barriere-ID und
      *                    Ziel-Feld-ID
-     * @param player  der Spieler, der die Aktion ausführt
+     * @param player      der Spieler, der die Aktion ausführt
      * @return ein passendes {@link FrontendEvent}, das angibt, ob die Bewegung
      *         erfolgreich war oder nicht
      *
