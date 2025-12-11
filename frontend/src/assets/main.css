@@ -3,6 +3,25 @@
   src: url("/fonts/BubblegumSans-Regular.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "AcmeFont";
+  src: url("/fonts/Acme-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "AlegreyaSansFont";
+  src: url("/fonts/AlegreyaSans-Regular.ttf") format("truetype");
+}
+
+:root {
+  --button-color: #234420;
+  --button-gradient-green: linear-gradient(to top, var(--button-color), #57AA51);
+  --button-gradient-red: linear-gradient(to top, #691515, #b52326);
+  --button-color-inactive: rgba(100, 100, 100);
+
+  --background-color-forms: #D9D9D9;
+}
+
 * {
   font-family: "MainFont", sans-serif;
   margin: 0;
@@ -24,29 +43,31 @@
   font-size: 8vh;
   font-weight: bolder;
   color: white;
-  -webkit-text-stroke: 1px black;
+  -webkit-text-stroke: 6px black;
   text-shadow:
     3px 3px 6px rgba(0, 0, 0, 0.8),
     0 0 10px rgba(0, 0, 0, 0.5);
-  
+  paint-order: stroke fill;
+
   width: 100vw;
   height: 100vh;
   padding-bottom: 8vh;
   margin-top: 3vh;
 
-  pointer-events: none;
+  pointer-events: none; 
 }
 
 /* Oder nur für body */
-.menu-button{
+.menu-button {
   font-family: "MainFont", sans-serif;
   background-image: url("/backgrounds/ButtonPlate.png");
   background-color: transparent;
-  background-size:contain;
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   border: none;
   cursor: pointer;
+  display: flex;
 
   align-items: center;
   justify-content: center;
@@ -54,14 +75,57 @@
 
   color: white;
   font-size: 3.5vh;
-  min-width: 35vw;    
-  min-height: 9vh;  
+  min-width: 35vw;
+  min-height: 9vh;
   outline: none;
 
-   padding-bottom: 1vh;
+  padding-bottom: 1vh;
 
-  -webkit-text-stroke: 1px black;
+  -webkit-text-stroke: 6px black;
   text-shadow:
     3px 3px 6px rgba(0, 0, 0, 0.8),
     0 0 10px rgba(0, 0, 0, 0.5);
+  paint-order: stroke fill;
+}
+
+.page-title {
+  font-family: "MainFont", sans-serif;
+  border: none;
+  cursor: pointer;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-bottom: 1vh;
+
+  font-size: 1rem;
+  font-weight: bolder;
+  color: white;
+  -webkit-text-stroke: 6px black;
+  text-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5);
+
+  position: relative;
+  top: -15vh;
+  left: 0;
+  transform: none;
+  margin-top: -10vh;
+
+  paint-order: stroke fill;
+}
+
+
+form label {
+  font-family: "MainFont", sans-serif;
+  font-size: 1.5rem;
+  font-weight: bolder;
+  color: white;
+  -webkit-text-stroke: 6px black;
+  text-shadow:
+    1px 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 5px rgba(0, 0, 0, 0.5);
+    
+  paint-order: stroke fill;
 }

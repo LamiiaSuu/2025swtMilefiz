@@ -10,6 +10,8 @@ public class Player implements Principal {
 
     private UUID id;
     private String playerToken;
+    private String playerName;
+    private boolean isLeader;
     private Meeple[] meeples;
     private Color color;
     private Meeple activeMeeple;
@@ -17,6 +19,8 @@ public class Player implements Principal {
 
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
+        isLeader = false;
+        playerName = "Anonymer Kek";
         id = UUID.randomUUID();
         for (int i = 0; i < noOfMeeples; i++) {
             meeples[i] = new Meeple(false);
@@ -50,6 +54,22 @@ public class Player implements Principal {
 
     public void setPlayerToken(String sessionId) {
         this.playerToken = sessionId;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
+    public boolean isLeader() {
+        return isLeader;
+    }
+
+    public void setLeader(boolean isLeader) {
+        this.isLeader = isLeader;
     }
 
     /**

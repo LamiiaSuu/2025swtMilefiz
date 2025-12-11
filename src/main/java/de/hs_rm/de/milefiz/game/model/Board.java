@@ -13,7 +13,7 @@ public class Board {
     /**
      * Repraesentiert das ganze Board
      * 
-     * @param name       Name des Boards
+     * @param name             Name des Boards
      * @param startField Eingangsfeld ins Board
      * @param barriers   barrieren des Boards
      */
@@ -76,6 +76,15 @@ public class Board {
         if (!this.barriers.removeIf(b -> b.getId().equals(barrier.getId()))) {
             throw new IllegalArgumentException("Barriere nicht im Board");
         }
+    }
+
+    public Field getStartField(Color color) {
+        return switch (color) {
+            case BLUE -> getStartBlue();
+            case GREEN -> getStartGreen();
+            case YELLOW -> getStartYellow();
+            case RED -> getStartRed();
+        };
     }
 
     public Field getStartGreen() {
