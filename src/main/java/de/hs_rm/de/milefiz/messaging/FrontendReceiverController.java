@@ -67,15 +67,13 @@ public class FrontendReceiverController {
      * - Logging des Befehls mit relevanten Daten (Lobby, Spieler, Meeple-ID,
      * Richtung)
      * - Weiterleitung an
-     * {@link de.hs_rm.de.milefiz.game.service.GameService#moveMeeple(UUID, MovementCommand, Principal, SimpMessageHeaderAccessor)}
      * - Rückgabe des vom Service erzeugten
      * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}
      * - Automatische Weiterleitung des Ergebnisses an alle Clients der betroffenen
      * Lobby über {@code /topic/milefiz/lobby/{lobbyId}}
      *
      * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
-     * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und
-     *                {@link Direction}
+     * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und direction
      * @param player  der authentifizierte Benutzer, der die Nachricht gesendet
      *                hat
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
@@ -111,7 +109,6 @@ public class FrontendReceiverController {
      * {@code /milefiz/lobby/{lobbyId}/movebarrier}
      * - Logging des Befehls (Lobby, Spieler, Barrieren-ID, Ziel-Feld-ID)
      * - Weiterleitung an
-     * {@link de.hs_rm.de.milefiz.game.service.GameService#moveBarrier(UUID, MoveBarrierCommand, Principal, SimpMessageHeaderAccessor)}
      * - Rückgabe des vom Service erzeugten
      * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}
      * - Automatische Weiterleitung des Ergebnisses an alle Clients der betroffenen
