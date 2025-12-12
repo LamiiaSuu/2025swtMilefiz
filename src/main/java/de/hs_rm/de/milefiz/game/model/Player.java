@@ -2,6 +2,7 @@ package de.hs_rm.de.milefiz.game.model;
 
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -104,6 +105,7 @@ public class Player implements Principal {
 
     public Meeple getMeepleWithId(UUID id) {
         Optional<Meeple> opt = Arrays.stream(meeples)
+                .filter(Objects::nonNull)
                 .filter(m -> id.equals(m.getId()))
                 .findFirst();
         if (opt.isPresent()) {
@@ -196,6 +198,7 @@ public class Player implements Principal {
     public void useMove() {
         if (this.canMove()) {
             remainingMoves--;
+            moved = true;
         }
     }
 

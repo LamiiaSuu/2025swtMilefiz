@@ -76,6 +76,33 @@ export const useBoardStore = defineStore('board', {
       }
       this.meeplePositions[meepleId] = fieldId
     },
+
+    updateBarrierPosition(barrierId: string, fieldId: string) {
+      if (!this.board) return;
+
+      //Alte Barriere entfernen
+      const oldField = this.board.fields.find(f => f.barrier);
+      if (oldField) {
+        oldField.barrier = false;
+      }
+
+      //Neue Barriere setzen
+      const newField = this.board.fields.find(f => f.id === fieldId);
+      if (newField) {
+        newField.barrier = true;
+      } else {
+        console.warn(`Barrier target field ${fieldId} not found.`);
+        return;
+      }
+
+      //Reaktivität erzwingen (damit Vue neu rendert)
+      this.board = {
+        ...this.board,
+        fields: [...this.board.fields],
+      };
+
+      console.log(`Barrier moved to field ${fieldId}`);
+    }
   },
   // Getter um alle Barriere-Meeple ans Frontend zu übergeben
   getters: {
