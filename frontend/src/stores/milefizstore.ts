@@ -143,7 +143,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           //aktuell einfach random platzhalter uuid
           moveBarrier(event.barrierId, crypto.randomUUID())
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
-          gamedata.currentDiceRoll = event.remainingMoves
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves
+          }
+          
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
