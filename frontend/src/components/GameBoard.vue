@@ -11,6 +11,7 @@ import type { Direction } from "@/types/movement"
 import type { Object3D } from 'three'
 import { Raycaster, Vector3 } from 'three'
 import { watch } from 'vue'
+import { isAssertEntry } from 'typescript'
 
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
@@ -168,6 +169,27 @@ watch(ownMeepleIds, (ids) => {
     }
   }
 })
+
+// Computed Property für Meeple → PlayerColor Mapping
+const meepleColorMap = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  if (!lobby) return new Map<string, string>()
+  
+  const map = new Map<string, string>()
+  
+  for (const player of lobby.players) {
+    for (const meeple of player.meeples) {
+      map.set(meeple.id, player.color) // Spielerfarbe zuordnen
+    }
+  }
+  
+  return map
+})
+
+// Helper-Funktion: Holt Spielerfarbe für eine Meeple-ID
+function getPlayerColorForMeeple(meepleId: string): string | undefined {
+  return meepleColorMap.value.get(meepleId)
+}
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
@@ -363,15 +385,14 @@ onUnmounted(() => {
     <TresAmbientLight :intensity=".75" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
-    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2"/>
-
-    <!-- Himmel + Bodenlicht für GLTF 75%-->
     <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
+    <!--Spawnen der Meeple-->
     <GameCharacter v-for="entry in meepleEntries" :key="entry.id"
       :ref="el => registerGameCharRefFromTemplate(entry.id, el)" :position="entry.position" :meepleId="entry.id"
-      bodyColor="pink" eyeColor="white" />
+      :playerColor="getPlayerColorForMeeple(entry.id)"/>
 
+    <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 

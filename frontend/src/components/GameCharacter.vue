@@ -3,6 +3,7 @@
 import { useGLTF } from '@tresjs/cientos'
 import { watchEffect, watch, ref, computed, onMounted } from 'vue'
 import { useMilefizStore } from "@/stores/milefizstore";
+import { getCharacterColors, type PlayerColor } from '@/types/colors';
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -14,6 +15,7 @@ const props = defineProps<{
   position?: [number, number, number]
   meepleId: string
   barrier?: boolean
+  playerColor?: PlayerColor | string
 }>()
 
 const characterRotation = ref(0)
@@ -55,6 +57,34 @@ const { state } = useGLTF(modelPath, { draco: true })
 
 // Unterschiedliche Scale für Barriere und Character
 const scale = computed(() => props.barrier ? 1.5 : 0.55)
+
+const colors = computed(() => {
+  // Prüfe ob playerColor gesetzt ist UND es keine Barriere ist
+  if (props.playerColor && !props.barrier) {
+    // Type Guard: Prüfe ob es eine gültige PlayerColor ist
+    const validColors: PlayerColor[] = ['RED', 'GREEN', 'YELLOW', 'BLUE']
+    const upperColor = (props.playerColor as string).toUpperCase()
+    
+    if (validColors.includes(upperColor as PlayerColor)) {
+      return getCharacterColors(upperColor as PlayerColor)
+    }
+  }
+  
+  // Fallback: Nur wenn manuelle Farben explizit gesetzt sind
+  if (props.bodyColor || props.eyeColor) {
+    return {
+      bodyColor: props.bodyColor,
+      eyeColor: props.eyeColor
+    }
+  }
+  
+  // Default-Farben falls nichts gesetzt ist
+  return {
+    bodyColor: '#ffffff',
+    eyeColor: '#000000'
+  }
+})
+
 watchEffect(async () => {
   if (state.value?.scene) {
     state.value.scene.scale.set(scale.value, scale.value, scale.value)
@@ -64,12 +94,12 @@ watchEffect(async () => {
       if (child.material) {
         // Unterscheidung zwischen body und eye_color Material
         if (child.material.name === 'body' || child.name?.includes('body')) {
-          if (props.bodyColor) {
-            child.material.color.set(props.bodyColor)
+          if (colors.value.bodyColor) {
+            child.material.color.set(colors.value.bodyColor)
           }
         } else if (child.material.name === 'eye_color' || child.name?.includes('eye')) {
-          if (props.eyeColor) {
-            child.material.color.set(props.eyeColor)
+          if (colors.value.eyeColor) {
+            child.material.color.set(colors.value.eyeColor)
           }
         }
       }
