@@ -255,6 +255,7 @@ public class MovementServiceImpl implements MovementService {
                     player.useMove();
                     logger.info("Direct hit on barrier {} with meeple {}", tempBarrier.getId(), meeple.getId());
                     return new FrontendTriggerBarrierMoveEvent(
+                            player.getId(),
                             meeple.getId(),
                             nextField.getId(),
                             player.getRemainingMoves(),
