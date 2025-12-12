@@ -316,7 +316,7 @@ public class MovementServiceImpl implements MovementService {
                         player.useMove();
                         logger.info("Initiating duel between meeple {} and meeple {}", meeple.getId(),
                                 rivalMeeple.getId());
-                        return new FrontendDuelEvent(meeple.getId(), rivalMeeple.getId(), nextField.getId(),
+                        return new FrontendDuelEvent(player.getId(), meeple.getId(), rivalMeeple.getId(), nextField.getId(),
                                 player.getRemainingMoves());
                     }
                 }
