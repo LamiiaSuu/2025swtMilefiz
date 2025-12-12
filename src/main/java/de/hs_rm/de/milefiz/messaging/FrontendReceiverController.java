@@ -436,7 +436,7 @@ public class FrontendReceiverController {
             Player player) {
         logger.info("Player {} wants to save Energy {}", player.getId(), lobbyId);
 
-        if (!player.isMoved() && !player.hasFullEnergy()) {
+        if (!player.hasMoved() && !player.hasFullEnergy()) {
             try {
                 player.saveEnergy();
                 logger.info("Saved Energy for player {}", player.getId());

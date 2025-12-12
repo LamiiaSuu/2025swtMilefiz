@@ -82,7 +82,7 @@ public class Player implements Principal {
         this.energy = energy;
     }
 
-    public boolean isMoved() {
+    public boolean hasMoved() {
         return moved;
     }
 
