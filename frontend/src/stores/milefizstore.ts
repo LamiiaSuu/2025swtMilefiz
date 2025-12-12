@@ -131,9 +131,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         }        if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
-          gamedata.currentDiceRoll = event.remainingMoves
-          //TODO moveloss animieren
-          console.warn("lost remaining moves")
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves
+            //TODO moveloss animieren
+            console.warn("lost remaining moves")
+          }
+
         }
         if (event.type === "TRIGGER_BARRIER_MOVE") {
           //TODO verschieben der barriere implementieren
