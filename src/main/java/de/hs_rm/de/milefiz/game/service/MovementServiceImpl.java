@@ -237,6 +237,7 @@ public class MovementServiceImpl implements MovementService {
             endTurnWithMove(player, meeple, nextField);
             logger.info("All possible moves would lead into Barriers, player loses remaining Moves, turn is over");
             return new FrontendMoveWithLossEvent(
+                    player.getId(),
                     meeple.getId(),
                     nextField.getId(),
                     player.getRemainingMoves());
@@ -290,6 +291,7 @@ public class MovementServiceImpl implements MovementService {
                 endTurnWithMove(player, meeple, nextField);
                 logger.info("Player entered dead-end");
                 return new FrontendMoveWithLossEvent(
+                        player.getId(),
                         meeple.getId(),
                         nextField.getId(),
                         player.getRemainingMoves());
