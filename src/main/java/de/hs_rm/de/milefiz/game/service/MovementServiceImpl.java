@@ -265,7 +265,7 @@ public class MovementServiceImpl implements MovementService {
                 player.setRemainingMoves(0);
                 meeple.clearLastField();
                 logger.info("ran into barrier, cant go any further! (loses remaining moves)");
-                return new FrontendRejectedByBarrierEvent(player.getRemainingMoves());
+                return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
             }
         }
 
