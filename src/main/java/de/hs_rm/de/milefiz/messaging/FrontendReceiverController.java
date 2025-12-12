@@ -25,6 +25,7 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.service.GameService;
+import de.hs_rm.de.milefiz.messaging.commands.EnergyCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
@@ -34,7 +35,8 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyRejectedEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -81,7 +83,7 @@ public class FrontendReceiverController {
      * - Steht dort ein Meeple eines anderen Spielers (→ Duell)?
      * - Ist der Zug eine verbotene Rückwärtsbewegung?
      * 6. Wenn keine Regel verletzt wird, wird das Meeple auf das neue Feld gesetzt,
-     * ein Zug verbraucht und
+     * ein Zug verbraucht, der Spieler geflagt, dass er sich bewegt (Zug beginnt), und
      * ein {@link FrontendMoveEvent} an alle Clients der Lobby gesendet.
      * 7. Bei einem ungültigen Zug wird stattdessen ein
      * {@link FrontendMoveRejectedEvent} mit einer Fehlermeldung gesendet.
@@ -183,6 +185,7 @@ public class FrontendReceiverController {
 
         // Spieler nutzt einen Zug
         player.useMove();
+        player.setMoved(true);
 
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(
@@ -211,6 +214,7 @@ public class FrontendReceiverController {
      * <li>{@link GameService#rollDice()} wird aufgerufen um Zufallszahl zu
      * generieren</li>
      * <li>Speichert die gewürfelte zahl im Spieler ab</li>
+     * <li>Spieler flagt, dass er sich noch nicht bewegt hat (neuer Zug beginnt)</li>
      * <li>Würfelergebnis wird in {@link FrontendRollDiceEvent} verpackt</li>
      * <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}} gesendet</li>
      * <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
@@ -243,7 +247,8 @@ public class FrontendReceiverController {
         if (gameService.getRollDiceCooldown(player.getId()) <= 0) {
             int number = gameService.rollDice();
             try {
-                player.setRemainingMoves(number);
+                player.setRemainingMoves(number); // Spieler weiß was er gewürfelt hat
+                player.setMoved(false);
                 logger.info("Set {} remaining moves for player {}", number, player.getId());
             } catch (RuntimeException e) {
                 logger.error("Unexpected error setting remaining moves for player {}", player.getId(), e);
@@ -344,4 +349,105 @@ public class FrontendReceiverController {
                 "/topic/milefiz/lobby/" + lobby.getId(),
                 payload);
     }
+
+    /**
+     * WebSocket Message Handler für Energie-Speichern-Aktionen in einer Lobby.
+     * 
+     * <p>
+     * Diese Methode verarbeitet eingehende Energie-Speichern-Befehle von Clients.
+     * Spieler können damit ihre Würfelzüge in Energie umwandeln,
+     * um diese für spätere Spezialaktionen zu nutzen. Das Ergebnis wird an alle
+     * Teilnehmer der Lobby gebroadcastet.
+     * </p>
+     * 
+     * Ablauf:
+     * <ol>
+     * <li>Client sendet {@link EnergyCommand} an den WebSocket-Endpoint</li>
+     * <li>Methode loggt die Energie-Speicher-Anfrage mit Spieler-ID und
+     * Lobby-ID</li>
+     * <li>Validierung: Spieler darf sich noch nicht bewegt haben</li>
+     * <li>Validierung: Spieler darf nicht bereits maximale Energie haben</li>
+     * <li>Falls gültig: {@link Player#saveEnergy()} konvertiert gewürfelte Züge in Energie</li>
+     * <li>Erfolg: {@link FrontendSaveEnergyEvent} mit neuer Energie wird gesendet</li>
+     * <li>Fehler: {@link FrontendSaveEnergyRejectedEvent} mit Fehlermeldung wird gesendet</li>
+     * <li>Alle Clients der Lobby erhalten das Event</li>
+     * </ol>
+     * 
+     * <p>
+     * <strong>Validierungsregeln:</strong>
+     * </p>
+     * <ul>
+     * <li>{@code player.isMoved() == false} - Spieler darf sich in dieser Runde noch nicht bewegt haben</li>
+     * <li>{@code player.hasFullEnergy() == false} - Spieler darf nicht bereits {@link Player#MAX_ENERGY} erreicht haben</li>
+     * </ul>
+     * 
+     * <p>
+     * <strong>Erfolgsfall:</strong>
+     * </p>
+     * <ul>
+     * <li>Verbleibende Züge werden zu Energie addiert</li>
+     * <li>{@code remainingMoves} wird auf 0 gesetzt</li>
+     * <li>Energie wird auf {@link Player#MAX_ENERGY} begrenzt falls nötig</li>
+     * <li>{@link FrontendSaveEnergyEvent} enthält Lobby-ID und neuen
+     * Energie-Wert</li>
+     * </ul>
+     * 
+     * <p>
+     * <strong>Fehlerfall:</strong>
+     * </p>
+     * <ul>
+     * <li>Spieler hat sich bereits bewegt → Energie-Speichern nicht möglich</li>
+     * <li>Spieler hat bereits maximale Energie → keine weitere Speicherung
+     * möglich</li>
+     * <li>{@link FrontendSaveEnergyRejectedEvent} enthält Fehlermeldung: "Player
+     * moved or has full energy"</li>
+     * </ul>
+     * 
+     * <p>
+     * <strong>WebSocket-Mapping:</strong>
+     * </p>
+     * <ul>
+     * <li><strong>Eingang:</strong>
+     * {@code /milefiz/lobby/{lobbyId}/saveEnergy}</li>
+     * <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
+     * <li><strong>Protokoll:</strong> STOMP über WebSocket</li>
+     * </ul>
+     * 
+     * @param lobbyId die eindeutige UUID der Lobby in der Energie gespeichert wird
+     * @param command der Energie-Befehl vom Client, enthält die Spieler-ID
+     * @param player  der authentifizierte Spieler, der Energie speichern möchte
+     * 
+     * @return {@link FrontendSaveEnergyEvent} bei Erfolg mit Lobby-ID und neuer
+     *         Energie,
+     *         oder {@link FrontendSaveEnergyRejectedEvent} bei ungültiger Anfrage
+     * 
+     * @see Player#saveEnergy()
+     * @see Player#hasFullEnergy()
+     * @see Player#isMoved()
+     * @see FrontendSaveEnergyEvent
+     * @see FrontendSaveEnergyRejectedEvent
+     * @see EnergyCommand
+     * 
+     * @author Elisabeth Gehdt
+     */
+    @MessageMapping("/milefiz/lobby/{lobbyId}/saveEnergy")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendEvent handleSaveEnergy(@DestinationVariable("lobbyId") UUID lobbyId, EnergyCommand command,
+            Player player) {
+        logger.info("Player {} wants to save Energy {}", player.getId(), lobbyId);
+
+        if (!player.hasMoved() && !player.hasFullEnergy()) {
+            try {
+                player.saveEnergy();
+                logger.info("Saved Energy for player {}", player.getId());
+            } catch (RuntimeException e) {
+                logger.error("Unexpected error saving energy for Player {}", player.getId(), e);
+            }
+
+            return new FrontendSaveEnergyEvent(lobbyId, player.getEnergy());
+        }
+
+        return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy");
+    }
+
 }

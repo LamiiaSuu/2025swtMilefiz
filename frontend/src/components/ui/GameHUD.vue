@@ -5,22 +5,31 @@
 import DiceButton from './DiceButton.vue'
 import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
+import SaveEnergyButton from './SaveEnergyButton.vue'
 </script>
 
 
 <template>
   <div class="hud-container">
+    <!-- Würfelergebnis -->
     <div class="dice-counter-container">
       <DiceCounter />
     </div>
-    <div style="position: absolute;bottom: 40px;right: 0px;">
+
+    <!-- Button Bar -->
+    <div style="position: absolute;bottom: 2vw; right: 0px;">
       <div class="button-bar">
-        <DiceButton />
+        <SaveEnergyButton />
         <JumpButton />
+        <DiceButton />
       </div>
     </div>
+
+    
+
   </div>
 </template>
+
 <style>
 
 .hud-container {

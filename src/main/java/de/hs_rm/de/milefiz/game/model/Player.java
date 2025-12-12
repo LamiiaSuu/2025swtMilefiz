@@ -15,6 +15,9 @@ public class Player implements Principal {
     private Color color;
     private Meeple activeMeeple;
     private int remainingMoves = 0;
+    private int energy = 0;
+    private final int MAX_ENERGY = 6;
+    private boolean moved = false;
 
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
@@ -69,6 +72,22 @@ public class Player implements Principal {
 
     public void setLeader(boolean isLeader) {
         this.isLeader = isLeader;
+    }
+
+    public int getEnergy() {
+        return energy;
+    }
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+
+    public boolean hasMoved() {
+        return moved;
+    }
+
+    public void setMoved(boolean moved) {
+        this.moved = moved;
     }
 
     /**
@@ -178,6 +197,83 @@ public class Player implements Principal {
         if (this.canMove()) {
             remainingMoves--;
         }
+    }
+
+    /**
+     * Prüft, ob der Spieler die maximale Energie erreicht hat.
+     *
+     * <p>
+     * Ein Spieler hat volle Energie, wenn sein aktueller Energiewert
+     * ({@code energy}) größer oder gleich dem maximalen Energiewert
+     * ({@code MAX_ENERGY}) ist.
+     * </p>
+     *
+     * <p>
+     * Diese Methode wird verwendet, um zu prüfen, ob ein Spieler noch
+     * Energie speichern kann oder ob die Energiespeicherung blockiert
+     * werden sollte.
+     * </p>
+     *
+     * @return {@code true} wenn der Spieler volle Energie hat
+     *         ({@code energy >= MAX_ENERGY}),
+     *         {@code false} wenn noch Energie gespeichert werden kann
+     *
+     * @see #saveEnergy()
+     * @see #MAX_ENERGY
+     *
+     * @author Elisabeth Gehdt
+     */
+    public boolean hasFullEnergy() {
+        return energy >= MAX_ENERGY;
+    }
+
+    /**
+     * Speichert gerollte Züge als Energie.
+     *
+     * <p>
+     * Konvertiert alle gewürfelten Züge ({@code remainingMoves})
+     * in Energie. Die Anzahl der Züge wird zum aktuellen
+     * Energiewert addiert. Falls die Summe die maximale Energie
+     * ({@code MAX_ENERGY}) überschreitet, wird der Energiewert auf das
+     * Maximum begrenzt.
+     * </p>
+     *
+     * <p>
+     * Nach der Energiespeicherung werden die verbleibenden Züge auf 0
+     * zurückgesetzt, sodass der Spieler in dieser Runde keine weiteren
+     * Bewegungen mehr durchführen kann.
+     * </p>
+     *
+     * <p>
+     * <strong>Verwendung:</strong> Diese Methode wird aufgerufen, wenn
+     * ein Spieler seine Würfelwürfe nicht für Bewegungen nutzen möchte,
+     * sondern stattdessen Energie für spätere Spielaktionen (Hüpfen) sammelt.
+     * </p>
+     *
+     * <p>
+     * <strong>Beispiel:</strong><br>
+     * Spieler hat eine 2 gewürfelt und 4 Energie.<br>
+     * Nach {@code saveEnergy()}: energy = 6, remainingMoves = 0
+     * </p>
+     *
+     * <p>
+     * <strong>Beispiel mit Begrenzung:</strong><br>
+     * Spieler hat eine 3 gewürfelt und 5 Energie (MAX_ENERGY = 6).<br>
+     * Nach {@code saveEnergy()}: energy = 6 (begrenzt), remainingMoves = 0
+     * </p>
+     *
+     * @see #hasFullEnergy()
+     * @see #getRemainingMoves()
+     * @see #MAX_ENERGY
+     *
+     * @author Elisabeth Gehdt
+     */
+    public void saveEnergy() {
+        energy += remainingMoves;
+        if (energy > MAX_ENERGY) {
+            energy = MAX_ENERGY;
+        }
+        remainingMoves = 0;
     }
 
     @Override
