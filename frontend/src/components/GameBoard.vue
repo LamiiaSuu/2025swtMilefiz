@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, onUnmounted, computed, watchEffect } from 'vue'
+import { ref, shallowRef, onMounted, onUnmounted, computed, watchEffect, type ShallowRef, type ComputedRef, type ComponentPublicInstance } from 'vue'
 import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
@@ -13,56 +13,212 @@ import { Raycaster, Vector3 } from 'three'
 import { watch } from 'vue'
 
 const milefizStore = useMilefizStore();
-const gameCharRef = shallowRef<TresObject | null>(null)
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
+let started: boolean = false
 
-
-// Board-Daten laden wenn die App startet
-onMounted(async () => {
-  console.log('App mounted - loading board data...')
-  await boardStore.getBoard()
-})
+// record: meepleID -> gameCharRef
+const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
 
 /**
  * Berechnet die aktuelle 3D-Position des Spielcharakters auf dem Spielfeld.
  * 
  * Nutzt die gespeicherte Meeple-Position aus dem BoardStore und 
  * wandelt sie in Three.js-Koordinaten um. 
+ * Wenn mehrere Meeple auf einem Feld stehen werden sie auf einem Kreis platziert
  * Wird automatisch neu berechnet, wenn sich das Board oder die Meeple-Position ändert.
  * 
- * @returns [x, y, z] - Weltkoordinaten des Spielcharakters
+ * @returns {id, [x, y, z]} - Key: Id des Meeple, Value: Weltkoordinaten des Spielcharakters
  */
-const gameCharPosition = computed<[number, number, number]>(() => {
+const meepleEntries = computed(() => {
+  const out: { id: string; position: [number, number, number] }[] = []
   const board = boardStore.board
-  const fieldId = boardStore.meeplePositions[boardStore.testMeepleId]
 
-  if (!board || !fieldId) {
-    return [0, 0, 0]
+  //field -> meeple[]
+  const groups = new Map<string, string[]>()
+
+  for (const [meepleID, posID] of Object.entries(boardStore.meeplePositions)) {
+    const fieldID = posID ?? ''
+    const meeples = groups.get(fieldID) || []
+    meeples.push(meepleID)
+    groups.set(fieldID, meeples)
+
   }
 
-  const field = board.fields.find(f => f.id === fieldId)
-  if (!field) {
-    return [0, 0, 0]
-  }
+  for (const [fieldID, meepleIDs] of groups.entries()) {
+    let center: [number, number, number] = [0, 0, 0]
 
-  return [field.position.x, 0, field.position.y]
+    if (board && fieldID) {
+      const field = board.fields.find((f) => f.id === fieldID)
+      if (field) {
+        center = [field.position.x, 0, field.position.y]
+      }
+    }
+
+    const count = meepleIDs.length
+    const baseRadius = 0.5
+    const radius = count <= 1 ? 0 : baseRadius
+
+    for (let i = 0; i < count; i++) {
+      const meepleID = meepleIDs[i]
+
+      if (!meepleID) continue
+
+      if (count === 1) {
+        out.push({ id: meepleID, position: center })
+      } else {
+        const angle = (i / count) * Math.PI * 2
+        const x = center[0] + radius * Math.cos(angle)
+        const z = center[2] + radius * Math.sin(angle)
+        out.push({ id: meepleID, position: [x, center[1], z] })
+      }
+    }
+  }
+  console.log("Computed Meeple Entries", out)
+  return out
+})
+
+function registerGameCharRef(id: string, el: TresObject | null) {
+  if (!gameCharRefs[id]) {
+    gameCharRefs[id] = shallowRef<TresObject | null>(null)
+  }
+  gameCharRefs[id].value = el
+  if (el) {
+    console.log('GameCharacter created:', id, el)
+  }
+}
+
+watch(meepleEntries, (val) => {
+  console.log('meepleEntries changed:', val)
+}, { deep: true })
+
+watch(() => boardStore.meeplePositions, (val) => {
+  console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
+}, { deep: true })
+
+function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
+  // Cast the template ref value to TresObject | null in a type-safe place
+  registerGameCharRef(id, el as unknown as TresObject | null)
+
+  if (!started) {
+    cycleSelection(1)
+    started = true
+  }
+}
+
+// Board erst laden, wenn Meeples verfügbar sind
+const meeplesReady = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  console.log('meeplesReady check:', {
+    hasLobby: !!lobby,
+    playersLength: lobby?.players?.length,
+    players: lobby?.players,
+    playersIsArray: Array.isArray(lobby?.players)
+  })
+  if (!lobby || !lobby.players?.length) return false
+  const ready = lobby.players.some(p => {
+    const hasMeeples = Array.isArray(p.meeples) && p.meeples.length > 0
+    console.log(`Player ${p.id}: meeples=${p.meeples?.length}, hasMeeples=${hasMeeples}`)
+    return hasMeeples
+  })
+  console.log('→ meeplesReady result:', ready)
+  return ready
+})
+
+// Lädt Board automatisch, sobald Meeples da sind
+watch(meeplesReady, async (ready) => {
+  console.log('meeplesReady changed to:', ready, 'boardStore.ok:', boardStore.ok)
+  if (ready && !boardStore.ok) {
+    console.log("Meeples detected — loading board data now...")
+    await boardStore.getBoard()
+  }
+}, { immediate: true })
+
+//eigene Meeple aus der Lobby merken 
+const ownMeepleIds = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return [] as string[]
+  const me = lobby.players.find((p) => p.id === myId)
+  if (!me) return [] as string[]
+  return me.meeples.map((m) => m.id)
+})
+
+// activeMeeple merken
+const selectedMeepleId = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return null
+  const me = lobby.players.find((p) => p.id === myId)
+  return (me?.activeMeeple?.id) ?? null
+})
+
+// falls kein activeMeeple gesetzt ist, wird hier das erste gesetzt
+watch(ownMeepleIds, (ids) => {
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return
+  const me = lobby.players.find((p) => p.id === myId)
+  if (!me) return
+  if ((!me.activeMeeple || !me.activeMeeple.id) && me.meeples.length > 0) {
+    // erste Meeple als active setzen
+    if (me.meeples[0]) {
+      me.activeMeeple = me.meeples[0]
+      console.log('Set initial activeMeeple to', me.activeMeeple.id)
+    }
+  }
 })
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
+  // Tab zum wechseln verwenden + default verhalten verhindern
+  if (e.key === 'Tab') {
+    e.preventDefault()
+    cycleSelection(e.shiftKey ? -1 : 1)
+    return
+  }
+
   toggleCamera(e)
   handleJump(e)
   handleMoveKeys(e)
 }
 
+/**
+ * rotiert durch die eigenen Meeple durch
+ */
+function cycleSelection(offset: number = 1) {
+  const ids = ownMeepleIds.value
+  if (!ids.length) return
+  if (!ids[0]) return
+  const current = selectedMeepleId.value ?? ids[0]
+  const idx = Math.max(0, ids.indexOf(current))
+  const next = (idx + offset + ids.length) % ids.length
+
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return
+  const me = lobby.players.find((p) => p.id === myId)
+  if (!me) return
+
+  // activeMeeple setzen
+  const nextMeeple = me.meeples.find((m) => m.id === ids[next])
+  if (nextMeeple) {
+    me.activeMeeple = nextMeeple
+    console.log('Cycled activeMeeple ->', nextMeeple.id)
+  }
+}
+
 const handleJump = (e: KeyboardEvent) => {
   if (e.code === 'Space') {
     e.preventDefault()
-    if (gameCharRef.value && gameCharRef.value.jump) {
-      gameCharRef.value.jump()
+    const id = selectedMeepleId.value
+    if (!id) return
+    const ref = gameCharRefs[id]
+    if (!ref || !ref.value) return
+    if (ref.value && ref.value.jump) {
+      ref.value.jump()
     }
   }
 }
@@ -93,7 +249,8 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   if (!useFirstPerson.value) return
 
   const cam = fpsCamera.value?.camera
-  const meepleId = gameCharRef.value?.meepleId
+  // const meepleId = gameCharRef.value?.meepleId
+  const meepleId = selectedMeepleId.value
   if (!cam || !meepleId) return
 
   // Blickrichtung der Kamera holen
@@ -144,17 +301,13 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   milefizStore.sendMove(meepleId, direction)
 }
 
-
-
-
-
-
-
 // Updated Rotation vom Charakter für First Person Kamera
 const onRotateCharacter = (yRotation: number) => {
-  if (gameCharRef.value) {
-    gameCharRef.value.setRotation(yRotation)
-  }
+  const id = selectedMeepleId.value
+  if (!id) return
+  const ref = gameCharRefs[id]
+  if (!ref || !ref.value) return
+  ref.value.setRotation(yRotation)
 }
 
 onMounted(() => {
@@ -171,7 +324,7 @@ onMounted(() => {
    */
   const waitForCamera = () => {
     const cam = fpsCamera.value?.camera
-    if (!cam) {
+    if (!cam || !meeplesReady.value || !boardStore.ok) {
       requestAnimationFrame(waitForCamera)
       return
     }
@@ -195,8 +348,8 @@ onUnmounted(() => {
     <OrbitControls v-if="!useFirstPerson" />
 
     <!-- First Person Kamera (Folgt dem Charakter) -->
-    <Camera ref="fpsCamera" :gameCharRef="gameCharRef" :use-first-person="useFirstPerson"
-      @rotate-character="onRotateCharacter" />
+    <Camera ref="fpsCamera" :gameCharRef="(gameCharRefs[selectedMeepleId ?? '']?.value) ?? null"
+      :use-first-person="useFirstPerson" @rotate-character="onRotateCharacter" />
 
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
      vertikal ist -->
@@ -210,38 +363,21 @@ onUnmounted(() => {
     <TresAmbientLight :intensity=".75" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
-    <TresDirectionalLight 
-      :position="[10, 15, 10]"  
-      :intensity="2" 
-    />
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2"/>
 
     <!-- Himmel + Bodenlicht für GLTF 75%-->
-    <TresHemisphereLight 
-      :intensity=".75"
-      skyColor="#ffffff"
-      groundColor="#888888"
+    <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
-    />
-  
+    <GameCharacter v-for="entry in meepleEntries" :key="entry.id"
+      :ref="el => registerGameCharRefFromTemplate(entry.id, el)" :position="entry.position" :meepleId="entry.id"
+      bodyColor="pink" eyeColor="white" />
 
-    <!-- Game Character includiert (position - Position auf Plane), (bodyColor - Farbe der Figur), (eyeColor - Farbe der Augen) -->
-    <GameCharacter ref="gameCharRef" :position="gameCharPosition" bodyColor="pink" eyeColor="white"
-      :meepleId="boardStore.testMeepleId"/>
-
-    <GameCharacter 
-      v-for="barrier in boardStore.barriersWithPositions"
-      :key="barrier.fieldId"
-      :position="barrier.position"
-      bodyColor="gray"
-      eyeColor="red"
-      :meepleId="barrier.fieldId"
-      :barrier="true"
-    />
+    <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
+      :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
-      :position="[field.position.x, 0, field.position.y]" :type="field.type"
-/>
+      :position="[field.position.x, 0, field.position.y]" :type="field.type" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
@@ -268,7 +404,8 @@ onUnmounted(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: white; /* <-- immer weiß */
+  background: white;
+  /* <-- immer weiß */
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
   transition: background 0.1s ease, transform 0.1s ease;
 }

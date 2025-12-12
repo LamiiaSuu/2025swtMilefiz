@@ -1,15 +1,19 @@
 package de.hs_rm.de.milefiz.game.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 
 public class Board {
 
     /**
      * Repraesentiert das ganze Board
-     *
-     * @param name       Name des Boards
+     * 
+     * @param name             Name des Boards
      * @param startField Eingangsfeld ins Board
      * @param barriers   barrieren des Boards
      */
@@ -38,6 +42,7 @@ public class Board {
 
     public Board() {
         id = UUID.randomUUID();
+        this.barriers = new ArrayList<>();
     }
 
     public UUID getId() {
@@ -54,6 +59,13 @@ public class Board {
 
     public List<Meeple> getBarriers() {
         return barriers;
+    }
+
+    public Meeple getBarrierById(UUID id) {
+        return barriers.stream()
+                .filter(b -> b.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Barrier with id " + id + " not found"));
     }
 
     public void addBarrier(Meeple barrier) {
@@ -105,5 +117,31 @@ public class Board {
 
     public void setStartRed(Field startRed) {
         this.startRed = startRed;
+    }
+
+    public Field getFieldById(UUID id) {
+        Set<Field> visited = new HashSet<>();
+        Queue<Field> queue = new LinkedList<>();
+
+        List<Field> starts = List.of(startGreen, startYellow, startBlue, startRed);
+        queue.addAll(starts);
+        visited.addAll(starts);
+
+        while (!queue.isEmpty()) {
+            Field current = queue.poll();
+
+            if (current.getId().equals(id)) {
+                return current;
+            }
+
+            for (Field neighbour : current.getNeighbours().values()) {
+                if (neighbour != null && !visited.contains(neighbour)) {
+                    visited.add(neighbour);
+                    queue.add(neighbour);
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Field with id " + id + " not found on this board");
     }
 }
