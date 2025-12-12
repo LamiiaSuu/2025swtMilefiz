@@ -5,6 +5,11 @@ export interface MovementCommand {
   direction: Direction;
 }
 
+export interface MoveBarrierCommand {
+  barrierId: string,
+  targetFieldId: string
+}
+
 export interface FrontendMoveEvent {
   sessionId: string;
   meepleId: string;

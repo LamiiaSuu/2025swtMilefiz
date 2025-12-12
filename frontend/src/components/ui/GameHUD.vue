@@ -36,8 +36,11 @@ import SaveEnergyButton from './SaveEnergyButton.vue';
       </div>
     </div>
 
+    
+
   </div>
 </template>
+
 <style>
 .hud-container {
   position: fixed;

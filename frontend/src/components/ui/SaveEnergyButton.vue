@@ -19,6 +19,7 @@ const onKeypress = (e: KeyboardEvent) => {
 
 function saveEnergy(){
     console.log("Würfelzahl als Energie speichern")
+    milefizStore.sendEnergySave()
     triggerPressAnimation()
 }
 
