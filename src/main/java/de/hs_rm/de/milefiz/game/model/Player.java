@@ -198,6 +198,7 @@ public class Player implements Principal {
     public void useMove() {
         if (this.canMove()) {
             remainingMoves--;
+            moved = true;
         }
     }
 
