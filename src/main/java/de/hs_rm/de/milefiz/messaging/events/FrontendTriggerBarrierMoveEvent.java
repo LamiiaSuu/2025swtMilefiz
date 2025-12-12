@@ -20,8 +20,8 @@ import java.util.UUID;
  *
  * Author: Maximilian Ressel
  */
-public record FrontendTriggerBarrierMoveEvent (String type, UUID meepleId, UUID targetField, int remainingMoves, UUID barrierId) implements FrontendEvent{
-    public FrontendTriggerBarrierMoveEvent(UUID meepleId, UUID targetField, int remainingMoves, UUID barrierId) {
-        this(EventType.TRIGGER_BARRIER_MOVE.name(), meepleId, targetField, remainingMoves, barrierId);
+public record FrontendTriggerBarrierMoveEvent (String type, UUID playerId, UUID meepleId, UUID targetField, int remainingMoves, UUID barrierId) implements FrontendEvent{
+    public FrontendTriggerBarrierMoveEvent(UUID playerId, UUID meepleId, UUID targetField, int remainingMoves, UUID barrierId) {
+        this(EventType.TRIGGER_BARRIER_MOVE.name(), playerId, meepleId, targetField, remainingMoves, barrierId);
     }
 }
