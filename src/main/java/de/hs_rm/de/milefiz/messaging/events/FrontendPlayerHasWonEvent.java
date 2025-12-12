@@ -19,8 +19,8 @@ import java.util.UUID;
  *
  * Author: Maximilian Ressel
  */
-public record FrontendPlayerHasWonEvent (String type, UUID playerId) implements FrontendEvent{
-    public FrontendPlayerHasWonEvent(UUID playerId){
-        this(EventType.WIN.name(), playerId);
+public record FrontendPlayerHasWonEvent (String type, UUID playerId, UUID meepleId, UUID targetField) implements FrontendEvent{
+    public FrontendPlayerHasWonEvent(UUID playerId, UUID meepleId, UUID targetField){
+        this(EventType.WIN.name(), playerId, meepleId, targetField);
     }
 }

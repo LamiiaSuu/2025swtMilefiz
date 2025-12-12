@@ -220,7 +220,7 @@ public class MovementServiceImpl implements MovementService {
             if (player.getRemainingMoves() == LAST_MOVE) {
                 player.useMove();
                 logger.info("player {} has won", player.getId());
-                return new FrontendPlayerHasWonEvent(player.getId());
+                return new FrontendPlayerHasWonEvent(player.getId(), meeple.getId(), nextField.getId());
             }
             logger.info("Cant enter End with remaining moves");
             return new FrontendMoveRejectedEvent("Cant enter End with remaining Moves");
