@@ -125,7 +125,6 @@ public class MovementServiceMeepleTest {
     @Test
     void moveMeepleToNonExistingFieldIsRejected() {
 
-        // kein Feld in Richtung South
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.SOUTH);
 
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
@@ -141,10 +140,8 @@ public class MovementServiceMeepleTest {
     @Test
     void moveMeepleChangeDirectionIsRejected() {
 
-        // Meeple zieht aufs naechste Feld
         meeple.setCurrentField(nextField);
 
-        // Jetzt versucht er, zurueck nach Sueden zu gehen (auf lastField)
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.SOUTH);
 
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
@@ -196,7 +193,7 @@ public class MovementServiceMeepleTest {
     // Sieg, wenn erster Meeple das Ziel erreicht
     @Test
     void moveMeepleLastMoveOntoEndFieldTriggersPlayerHasWonEvent() throws LobbyNotFoundException {
-        
+
         Field endField = new Field(UUID.randomUUID(), FieldType.END, new Position(0, 1));
         currentField.addNeighbour(endField, Direction.WEST);
 
@@ -219,12 +216,10 @@ public class MovementServiceMeepleTest {
     @Test
     void moveMeepleEntersBarrierDeadEndTriggersMoveWithLossEvent() {
 
-        // Nachbarfelder
         Field blocked = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(1, 1));
 
         nextField.addNeighbour(blocked, Direction.NORTH);
 
-        // Barrieren auf diesen beiden Nachbarfeldern
         Meeple barrier = new Meeple(true);
 
         barrier.setCurrentField(blocked);
@@ -233,10 +228,8 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        // Bewegung ausführen
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
-        // Erwartung: Zug endet automatisch
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
 
         FrontendMoveWithLossEvent evt = (FrontendMoveWithLossEvent) result;
@@ -244,7 +237,6 @@ public class MovementServiceMeepleTest {
         assertEquals(nextField.getId(), evt.targetField());
         assertEquals(0, evt.remainingMoves());
 
-        // Prüfen, dass der Meeple tatsächlich auf dem Dead-End-Feld steht
         assertEquals(nextField, meeple.getCurrentField());
     }
 
@@ -253,14 +245,12 @@ public class MovementServiceMeepleTest {
     @Test
     void moveMeepleEntersBarrierAndStartDeadEndTriggersMoveWithLossEvent() {
 
-        // Nachbarfelder
         Field blocked = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(1, 1));
         Field startGreen = new Field(UUID.randomUUID(), FieldType.START_GREEN, new Position(1, 0));
 
         nextField.addNeighbour(blocked, Direction.NORTH);
         nextField.addNeighbour(startGreen, Direction.WEST);
 
-        // Barrieren auf diesen beiden Nachbarfeldern
         Meeple barrier = new Meeple(true);
 
         barrier.setCurrentField(blocked);
@@ -271,10 +261,8 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        // Bewegung ausführen
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
-        // Erwartung: Zug endet automatisch
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
 
         FrontendMoveWithLossEvent evt = (FrontendMoveWithLossEvent) result;
@@ -282,7 +270,6 @@ public class MovementServiceMeepleTest {
         assertEquals(nextField.getId(), evt.targetField());
         assertEquals(0, evt.remainingMoves());
 
-        // Prüfen, dass der Meeple tatsächlich auf dem Dead-End-Feld steht
         assertEquals(nextField, meeple.getCurrentField());
     }
 
@@ -291,7 +278,6 @@ public class MovementServiceMeepleTest {
     @Test
     void moveMeepleEntersBarrieAndStartAndEndDeadEndTriggersMoveWithLossEvent() {
 
-        // Nachbarfelder
         Field blocked = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(1, 1));
         Field startGreen = new Field(UUID.randomUUID(), FieldType.START_GREEN, new Position(1, 0));
         Field endField = new Field(UUID.randomUUID(), FieldType.END, new Position(0, 2));
@@ -300,7 +286,6 @@ public class MovementServiceMeepleTest {
         nextField.addNeighbour(blocked, Direction.NORTH);
         nextField.addNeighbour(startGreen, Direction.WEST);
 
-        // Barrieren auf diesen beiden Nachbarfeldern
         Meeple barrier = new Meeple(true);
 
         barrier.setCurrentField(blocked);
@@ -311,10 +296,8 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        // Bewegung ausführen
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
-        // Erwartung: Zug endet automatisch
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
 
         FrontendMoveWithLossEvent evt = (FrontendMoveWithLossEvent) result;
@@ -322,7 +305,6 @@ public class MovementServiceMeepleTest {
         assertEquals(nextField.getId(), evt.targetField());
         assertEquals(0, evt.remainingMoves());
 
-        // Prüfen, dass der Meeple tatsächlich auf dem Dead-End-Feld steht
         assertEquals(nextField, meeple.getCurrentField());
     }
 
@@ -394,9 +376,11 @@ public class MovementServiceMeepleTest {
         assertEquals(0, player.getRemainingMoves());
     }
 
-    // Versuch auf ein Feld zu ziehen, auf dem bereits ein eigener Meeple steht
+    // Versuch mit letztem Zug auf ein Feld zu ziehen, auf dem bereits ein eigener Meeple steht
     @Test
-    void moveMeepleOntoOwnMeepleIsRejected() {
+    void moveMeepleOntoOwnMeepleWithLastMoveIsRejected() {
+
+        player.setRemainingMoves(LAST_MOVE);
 
         Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
         nextField.addNeighbour(dummyField, Direction.NORTH);
@@ -417,21 +401,41 @@ public class MovementServiceMeepleTest {
         assertEquals(currentField, meeple.getCurrentField());
     }
 
+    // Feld ueberspringen, auf dem bereits ein eigener Meeple steht
+    @Test
+    void moveMeepleJumpOverOwnMeeple() {
+
+        Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
+        nextField.addNeighbour(dummyField, Direction.NORTH);
+
+        Meeple otherMeeple = player.getMeeples()[1];
+        otherMeeple.setCurrentField(nextField);
+
+        MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
+
+        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
+
+        assertInstanceOf(FrontendMoveEvent.class, result);
+
+        FrontendMoveEvent evt = (FrontendMoveEvent) result;
+        assertEquals("MOVE", evt.type());
+        assertEquals(MOVES - 1, evt.remainingMoves());
+        assertEquals(nextField, meeple.getCurrentField());
+    }
+
     // Move in Sackgasse aus eigenen Meeplen fuehrt zu Verlust des letzten Moves,
     // wenn man sich mit dem vorletzten in die Sackgasse begibt
     @Test
     void moveMeepleEntersDeadEndOfOwnMeeplesTriggersMoveWithLossEvent() {
-        // Spieler hat genau SECOND_TO_LAST_MOVE übrig
+
         player.setRemainingMoves(SECOND_TO_LAST_MOVE);
 
-        // 🧩 Setup: nextField ist umstellt von eigenen Meeplen
         Field north = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
         Field west = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(-1, 1));
 
         nextField.addNeighbour(north, Direction.NORTH);
         nextField.addNeighbour(west, Direction.WEST);
 
-        // Eigene Meeple auf den Nachbarfeldern platzieren
         Meeple m1 = player.getMeeples()[1];
         Meeple m2 = player.getMeeples()[2];
         m1.setCurrentField(north);
@@ -439,10 +443,8 @@ public class MovementServiceMeepleTest {
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
 
-        // Bewegung ausführen
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
-        // ✅ Erwartung: MoveWithLossEvent, Zug endet
         assertInstanceOf(FrontendMoveWithLossEvent.class, result);
 
         FrontendMoveWithLossEvent evt = (FrontendMoveWithLossEvent) result;
@@ -450,7 +452,6 @@ public class MovementServiceMeepleTest {
         assertEquals(nextField.getId(), evt.targetField());
         assertEquals(0, evt.remainingMoves());
 
-        // Meeple steht jetzt auf nextField
         assertEquals(nextField, meeple.getCurrentField());
     }
 
@@ -568,7 +569,6 @@ public class MovementServiceMeepleTest {
 
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
-        // ✅ Erwartung: normaler Move, kein Duell
         assertInstanceOf(FrontendMoveEvent.class, result);
 
         FrontendMoveEvent evt = (FrontendMoveEvent) result;
