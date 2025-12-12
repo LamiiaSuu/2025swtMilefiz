@@ -423,7 +423,7 @@ public class FrontendReceiverController {
      * 
      * @see Player#saveEnergy()
      * @see Player#hasFullEnergy()
-     * @see Player#isMoved()
+     * @see Player#hasMoved()
      * @see FrontendSaveEnergyEvent
      * @see FrontendSaveEnergyRejectedEvent
      * @see EnergyCommand

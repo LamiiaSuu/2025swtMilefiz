@@ -28,7 +28,7 @@ import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
  * 
  * @see FrontendReceiverController#handleSaveEnergy
  * @see Player#hasFullEnergy()
- * @see Player#isMoved()
+ * @see Player#hasMoved()
  * 
  * @author Elisabeth Gehdt
  */
