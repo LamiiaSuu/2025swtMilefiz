@@ -37,6 +37,10 @@ public class Meeple {
         return lastField;
     }
 
+    public void clearLastField(){
+        this.lastField = null;
+    }
+
     public boolean isBarrier() {
         return isBarrier;
     }
