@@ -1,5 +1,7 @@
 package de.hs_rm.de.milefiz.messaging.events;
 
+import java.util.UUID;
+
 /**
  * Frontend-Event, das ausgelöst wird, wenn ein Meeple durch eine Barriere
  * an der weiteren Bewegung gehindert wird und der aktuelle Zug dadurch endet.
@@ -14,8 +16,8 @@ package de.hs_rm.de.milefiz.messaging.events;
  *
  * Author: Maximilian Ressel
  */
-public record FrontendRejectedByBarrierEvent (String type, int remainingMoves) implements FrontendEvent{
-    public FrontendRejectedByBarrierEvent(int remainingMoves){
-        this(EventType.REJECTED_BY_BARRIER.name(), remainingMoves);
+public record FrontendRejectedByBarrierEvent (String type, UUID playerId, int remainingMoves) implements FrontendEvent{
+    public FrontendRejectedByBarrierEvent(UUID playerId, int remainingMoves){
+        this(EventType.REJECTED_BY_BARRIER.name(), playerId, remainingMoves);
     }
 }

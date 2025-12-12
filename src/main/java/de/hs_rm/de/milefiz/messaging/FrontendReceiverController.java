@@ -144,7 +144,10 @@ public class FrontendReceiverController {
                 moveBarrCmd.targetFieldId());
 
         return gameService.moveBarrier(lobbyId, moveBarrCmd, player);
+
     }
+
+    
 
     /**
      * WebSocket Message Handler für Würfel-Aktionen in einer Lobby.

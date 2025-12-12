@@ -112,7 +112,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
-          gamedata.currentDiceRoll = event.remainingMoves
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves 
+          }
         }
         // LOBBY_UPDATE wird immer ausgerufen, wenn sich Werte der Lobby (außer das Board) geupdatet haben. Dazu zählt auch, wenn neue Spieler gejoint sind
         else if (event.type === 'LOBBY_UPDATE') {
@@ -129,16 +131,22 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         }        if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
-          gamedata.currentDiceRoll = event.remainingMoves
-          //TODO moveloss animieren
-          console.warn("lost remaining moves")
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves
+            //TODO moveloss animieren
+            console.warn("lost remaining moves")
+          }
+
         }
         if (event.type === "TRIGGER_BARRIER_MOVE") {
           //TODO verschieben der barriere implementieren
           //aktuell einfach random platzhalter uuid
           moveBarrier(event.barrierId, crypto.randomUUID())
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
-          gamedata.currentDiceRoll = event.remainingMoves
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves
+          }
+          
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
@@ -147,11 +155,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
           console.warn("u ran into barrieeer oh no")
-          gamedata.currentDiceRoll = event.remainingMoves
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves
+          }
         }
         if (event.type === "DUEL") {
           boardStore.updateMeeplePosition(event.firstMeepleId, event.targetField)
-          gamedata.currentDiceRoll = event.remainingMoves
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves
+          }
           //TODO duel zwischen zwei meeples einleiten
         }
         if (event.type === "WIN"){

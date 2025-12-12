@@ -235,6 +235,7 @@ public class MovementServiceImpl implements MovementService {
             endTurnWithMove(player, meeple, nextField);
             logger.info("All possible moves would lead into Barriers, player loses remaining Moves, turn is over");
             return new FrontendMoveWithLossEvent(
+                    player.getId(),
                     meeple.getId(),
                     nextField.getId(),
                     player.getRemainingMoves());
@@ -252,6 +253,7 @@ public class MovementServiceImpl implements MovementService {
                     player.useMove();
                     logger.info("Direct hit on barrier {} with meeple {}", tempBarrier.getId(), meeple.getId());
                     return new FrontendTriggerBarrierMoveEvent(
+                            player.getId(),
                             meeple.getId(),
                             nextField.getId(),
                             player.getRemainingMoves(),
@@ -261,7 +263,7 @@ public class MovementServiceImpl implements MovementService {
                 player.setRemainingMoves(0);
                 meeple.clearLastField();
                 logger.info("ran into barrier, cant go any further! (loses remaining moves)");
-                return new FrontendRejectedByBarrierEvent(player.getRemainingMoves());
+                return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
             }
         }
 
@@ -288,6 +290,7 @@ public class MovementServiceImpl implements MovementService {
                 endTurnWithMove(player, meeple, nextField);
                 logger.info("Player entered dead-end");
                 return new FrontendMoveWithLossEvent(
+                        player.getId(),
                         meeple.getId(),
                         nextField.getId(),
                         player.getRemainingMoves());
@@ -311,7 +314,7 @@ public class MovementServiceImpl implements MovementService {
                         player.useMove();
                         logger.info("Initiating duel between meeple {} and meeple {}", meeple.getId(),
                                 rivalMeeple.getId());
-                        return new FrontendDuelEvent(meeple.getId(), rivalMeeple.getId(), nextField.getId(),
+                        return new FrontendDuelEvent(player.getId(), meeple.getId(), rivalMeeple.getId(), nextField.getId(),
                                 player.getRemainingMoves());
                     }
                 }
@@ -330,6 +333,7 @@ public class MovementServiceImpl implements MovementService {
 
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(
+                player.getId(),
                 meeple.getId(),
                 nextField.getId(),
                 player.getRemainingMoves());
