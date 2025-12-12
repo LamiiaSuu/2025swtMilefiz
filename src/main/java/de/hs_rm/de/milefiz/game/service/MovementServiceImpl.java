@@ -332,6 +332,7 @@ public class MovementServiceImpl implements MovementService {
 
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(
+                player.getId(),
                 meeple.getId(),
                 nextField.getId(),
                 player.getRemainingMoves());
