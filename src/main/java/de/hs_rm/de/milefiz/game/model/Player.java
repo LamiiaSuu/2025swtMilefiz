@@ -84,10 +84,6 @@ public class Player implements Principal {
         return meeples;
     }
 
-    public boolean hasMeeples() {
-        return meeples != null && meeples.length > 0;
-    }
-
     public Meeple getMeepleWithId(UUID id) {
         Optional<Meeple> opt = Arrays.stream(meeples)
                 .filter(Objects::nonNull)
