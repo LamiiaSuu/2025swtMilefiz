@@ -140,7 +140,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           gamedata.currentDiceRoll = event.remainingMoves
         }
         if (event.type === "DUEL") {
-          boardStore.updateMeeplePosition(event.meepleId, event.targetField)
+          boardStore.updateMeeplePosition(event.firstMeepleId, event.targetField)
           gamedata.currentDiceRoll = event.remainingMoves
           //TODO duel zwischen zwei meeples einleiten
         }

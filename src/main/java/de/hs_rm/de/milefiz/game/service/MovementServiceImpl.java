@@ -274,7 +274,7 @@ public class MovementServiceImpl implements MovementService {
                 .toList();
 
         // Ueberpruefen, ob das Zielfeld durch einen eigenen Meeple blockiert ist
-        if (ownMeepleFields.contains(nextField)) {
+        if (player.getRemainingMoves() == LAST_MOVE && ownMeepleFields.contains(nextField)) {
             logger.info("Attempt to occupy a field with multiple meeple failed");
             return new FrontendMoveRejectedEvent("Attempt to occupy a field with multiple meeple failed");
         }
