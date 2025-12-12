@@ -136,8 +136,6 @@ public class MovementServiceImpl implements MovementService {
      * {@link de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent}
      * wenn der Meeple direkt auf einer Barriere landet
      * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendRejectedByBarrierEvent}
-     * wenn der Meeple gegen eine Barriere läuft und der Zug endet
-     * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendMeepleReachedEndEvent}
      * wenn ein Meeple das Zielfeld erreicht
      * - {@link de.hs_rm.de.milefiz.messaging.events.FrontendPlayerHasWonEvent} wenn
      * ein Spieler alle Meeples entfernt hat und gewinnt

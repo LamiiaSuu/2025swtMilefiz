@@ -21,6 +21,7 @@ import de.hs_rm.de.milefiz.game.lobby.PlayerHasNoPermissionException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
 import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.commands.EnergyCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
@@ -29,6 +30,7 @@ import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
@@ -43,12 +45,16 @@ public class FrontendReceiverController {
     private LobbyManager lobbyManager;
     private GameService gameService;
     private final SimpMessagingTemplate messagingTemplate;
+    private FrontendMessagingService messagingService;
+    private LobbyMapper lobbyMapper;
 
     public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService,
-            SimpMessagingTemplate messagingTemplate) {
+            SimpMessagingTemplate messagingTemplate, FrontendMessagingServiceImpl frontendMessagingServiceImpl, LobbyMapper lobbyMapper) {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
+        this.lobbyMapper = lobbyMapper;
         this.messagingTemplate = messagingTemplate;
+        this.messagingService = frontendMessagingServiceImpl;
     }
 
     /**
@@ -67,15 +73,13 @@ public class FrontendReceiverController {
      * - Logging des Befehls mit relevanten Daten (Lobby, Spieler, Meeple-ID,
      * Richtung)
      * - Weiterleitung an
-     * {@link de.hs_rm.de.milefiz.game.service.GameService#moveMeeple(UUID, MovementCommand, Principal, SimpMessageHeaderAccessor)}
      * - Rückgabe des vom Service erzeugten
      * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}
      * - Automatische Weiterleitung des Ergebnisses an alle Clients der betroffenen
      * Lobby über {@code /topic/milefiz/lobby/{lobbyId}}
      *
      * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
-     * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und
-     *                {@link Direction}
+     * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und direction
      * @param player  der authentifizierte Benutzer, der die Nachricht gesendet
      *                hat
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
@@ -111,7 +115,6 @@ public class FrontendReceiverController {
      * {@code /milefiz/lobby/{lobbyId}/movebarrier}
      * - Logging des Befehls (Lobby, Spieler, Barrieren-ID, Ziel-Feld-ID)
      * - Weiterleitung an
-     * {@link de.hs_rm.de.milefiz.game.service.GameService#moveBarrier(UUID, MoveBarrierCommand, Principal, SimpMessageHeaderAccessor)}
      * - Rückgabe des vom Service erzeugten
      * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}
      * - Automatische Weiterleitung des Ergebnisses an alle Clients der betroffenen
@@ -243,7 +246,7 @@ public class FrontendReceiverController {
 
     /**
      * Handelt bei disconnects die Spieler -> Leave aus Lobby
-     * 
+     * Sende per STOMP zuätzlich allen bereits in der Lobby vorhandenen Spielern ein Update
      * @param event
      * @throws PlayerNotFoundException
      */
@@ -253,6 +256,8 @@ public class FrontendReceiverController {
         Player player = (Player) headerAccessor.getSessionAttributes().get("player");
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
+        messagingService.sendEvent(new LobbyMessage(lobby,
+                    new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler hat das Spiel verlassen")));
         logger.info("WebSocket disconnected - Player Token: {}", player.getPlayerToken());
     }
 

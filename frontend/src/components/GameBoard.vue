@@ -363,6 +363,9 @@ onUnmounted(() => {
     <TresAmbientLight :intensity=".75" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2"/>
+
+    <!-- Himmel + Bodenlicht für GLTF 75%-->
     <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
     <GameCharacter v-for="entry in meepleEntries" :key="entry.id"
