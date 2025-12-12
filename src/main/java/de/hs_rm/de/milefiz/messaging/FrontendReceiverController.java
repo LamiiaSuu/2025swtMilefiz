@@ -21,6 +21,7 @@ import de.hs_rm.de.milefiz.game.lobby.PlayerHasNoPermissionException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
 import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.commands.EnergyCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
@@ -29,6 +30,7 @@ import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
@@ -43,12 +45,16 @@ public class FrontendReceiverController {
     private LobbyManager lobbyManager;
     private GameService gameService;
     private final SimpMessagingTemplate messagingTemplate;
+    private FrontendMessagingService messagingService;
+    private LobbyMapper lobbyMapper;
 
     public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService,
-            SimpMessagingTemplate messagingTemplate) {
+            SimpMessagingTemplate messagingTemplate, FrontendMessagingServiceImpl frontendMessagingServiceImpl, LobbyMapper lobbyMapper) {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
+        this.lobbyMapper = lobbyMapper;
         this.messagingTemplate = messagingTemplate;
+        this.messagingService = frontendMessagingServiceImpl;
     }
 
     /**
@@ -237,7 +243,7 @@ public class FrontendReceiverController {
 
     /**
      * Handelt bei disconnects die Spieler -> Leave aus Lobby
-     * 
+     * Sende per STOMP zuätzlich allen bereits in der Lobby vorhandenen Spielern ein Update
      * @param event
      * @throws PlayerNotFoundException
      */
@@ -247,6 +253,8 @@ public class FrontendReceiverController {
         Player player = (Player) headerAccessor.getSessionAttributes().get("player");
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
+        messagingService.sendEvent(new LobbyMessage(lobby,
+                    new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler hat das Spiel verlassen")));
         logger.info("WebSocket disconnected - Player Token: {}", player.getPlayerToken());
     }
 
