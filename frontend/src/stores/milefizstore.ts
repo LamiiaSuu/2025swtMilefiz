@@ -155,7 +155,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
           console.warn("u ran into barrieeer oh no")
-          gamedata.currentDiceRoll = event.remainingMoves
+          if(event.playerId === gamedata.playerId){
+            gamedata.currentDiceRoll = event.remainingMoves
+          }
         }
         if (event.type === "DUEL") {
           boardStore.updateMeeplePosition(event.firstMeepleId, event.targetField)
