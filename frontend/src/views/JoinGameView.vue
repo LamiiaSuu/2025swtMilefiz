@@ -15,13 +15,17 @@ const selectedLobby = ref<string>('')
 
 const fetchLobbies = async () => {
   try {
-    const response = await fetch('/api/lobbies') 
+    const response = await fetch('/api/lobby/list') 
     if (!response.ok) throw new Error('Fehler beim Laden der Lobbies')
     const data = await response.json()
-    lobbies.value = data 
+    lobbies.value = data
+    console.log(lobbies.value)
   } catch (err) {
     console.error('Lobby-Liste konnte nicht geladen werden:', err)
   }
+
+}
+
 
 onMounted(() => {
   fetchLobbies()
@@ -31,7 +35,6 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(interval)
 })
-}
 
 </script>
 
