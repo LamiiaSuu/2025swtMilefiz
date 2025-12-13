@@ -13,17 +13,6 @@ let interval: number
 const username = ref<string>('')
 const selectedLobby = ref<string>('')
 
-
-/* ## Testcode ## */
-const addtest = () => {
-  if (lobbies.value)
-    lobbies.value.push({ id: Math.random().toString(36).slice(2), name: Math.random().toString(36).slice(2) })
-}
-addtest()
-addtest()
-addtest()
-/* #### */
-
 const fetchLobbies = async () => {
   try {
     const response = await fetch('/api/lobbies') 
