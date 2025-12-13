@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-/* TODO: lobby interface aus lobbyupdate (vielleicht anpassen?) */
+/* TODO: lobby interface aus lobbyupdate nehmen (vielleicht anpassen?) */
 export interface Lobby {
     id: string,
     name: string,
