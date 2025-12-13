@@ -3,10 +3,12 @@ import Header from '@/components/ui/pages/Header.vue'
 import ComponentList from '@/components/ui/pages/ComponentList.vue'
 import LobbyList, { type Lobby } from '@/components/ui/pages/LobbyList.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const lobbies = ref<Lobby[]>([])
 const lobbyid = ref<string>('')
+
+let interval: number
 
 const username = ref<string>('')
 const selectedLobby = ref<string>('')
@@ -21,6 +23,27 @@ addtest()
 addtest()
 addtest()
 /* #### */
+
+const fetchLobbies = async () => {
+  try {
+    const response = await fetch('/api/lobbies') 
+    if (!response.ok) throw new Error('Fehler beim Laden der Lobbies')
+    const data = await response.json()
+    lobbies.value = data 
+  } catch (err) {
+    console.error('Lobby-Liste konnte nicht geladen werden:', err)
+  }
+
+onMounted(() => {
+  fetchLobbies()
+  interval = globalThis.setInterval(fetchLobbies, 2000)
+})
+
+onUnmounted(() => {
+  clearInterval(interval)
+})
+}
+
 </script>
 
 <template>
