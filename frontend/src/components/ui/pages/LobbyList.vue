@@ -36,7 +36,8 @@ const lobbyid = defineModel('lobbyid')
 }
 
 .lobby-list {
-    overflow: scroll;
+    overflow-y: auto;   
+    overflow-x: hidden; 
     width: 100%;
     max-height: 100%;
     min-height: 100px;
