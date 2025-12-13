@@ -1,5 +1,5 @@
 import { reactive, readonly, computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import router from '@/router'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
 import type { Direction, MoveBarrierCommand, MovementCommand } from "@/types/movement";
@@ -14,7 +14,6 @@ const DEST = '/topic/milefiz/lobby/'
 
 let stompclient: Client | null = null
 
-const router = useRouter()
 export const useMilefizStore = defineStore('milefizstore', () => {
   /**
    * Cooldown für das Würfelsystem
