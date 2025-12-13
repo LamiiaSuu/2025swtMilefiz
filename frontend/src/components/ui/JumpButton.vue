@@ -47,8 +47,7 @@ function jump() {
     }
     
     console.log("Hüpfen Request gesendet.")
-    /* milefizStore.requestJump() */
-
+    
     /* Press Animation für den Button*/
     triggerPressAnimation();
 }

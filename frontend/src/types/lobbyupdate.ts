@@ -8,10 +8,12 @@ export interface Lobby {
 export interface Player {
   id: string
   meeples: Meeple[]
+  playerName: String
   color: string
   leader: boolean,
   activeMeeple: Meeple | null
   remainingMoves: number
+  maxEnergy: number
 }
 
 export interface Meeple {
