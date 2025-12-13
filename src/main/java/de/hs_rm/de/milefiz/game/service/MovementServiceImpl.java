@@ -217,7 +217,7 @@ public class MovementServiceImpl implements MovementService {
             // Wenn man darauf endet, wird der meeple entfernt.
             if (player.getRemainingMoves() == LAST_MOVE) {
                 player.useMove();
-                logger.info("player {} has won", player.getId());
+                logger.info("player {} has won", player.getName());
                 return new FrontendPlayerHasWonEvent(player.getName(), meeple.getId(), nextField.getId());
             }
             logger.info("Cant enter End with remaining moves");
