@@ -96,6 +96,12 @@ watch(() => boardStore.meeplePositions, (val) => {
   console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
 }, { deep: true })
 
+watchEffect(() => {
+  if (milefizStore.gameFinished) {
+    useFirstPerson.value = false
+  }
+})
+
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
   // Cast the template ref value to TresObject | null in a type-safe place
   registerGameCharRef(id, el as unknown as TresObject | null)
