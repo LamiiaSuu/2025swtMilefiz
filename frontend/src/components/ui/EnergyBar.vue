@@ -78,17 +78,22 @@ const barWidth = computed(() => (currentEnergy.value / maxEnergy.value) * 100 + 
 .energy-info {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 0px;
     white-space: nowrap;
 }
 
 .energy-icon {
-    width: 2vw;
+    width: 1.5vw;
     min-width: 20px;
 }
 
 .energy-text {
+    display: inline-block;
+    width: 3ch;
+    text-align: right;
     font-weight: bold;
+    font-size: 1.2vw;
     color: #ffffff;
+
 }
 </style>
