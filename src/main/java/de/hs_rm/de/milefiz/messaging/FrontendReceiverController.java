@@ -438,7 +438,7 @@ public class FrontendReceiverController {
             throw new PlayerHasNoPermissionException();
         }
         logger.info(
-                "Received UpdateLobbySettingsCommand in lobby {} from player '{}': lobby Name {} moving to field {}",
+                "Received UpdateLobbySettingsCommand in lobby {} from player '{}': lobby Name {} maxplayers {}",
                 lobbyId,
                 player.getName(),
                 lobbyUpdateSettingsCmd.newLobbyName(),

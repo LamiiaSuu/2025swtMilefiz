@@ -414,9 +414,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * die eigene playerId mit dem entsprechenden Eintrag.
    */
   function isOwnLeader(): boolean {
-    let player = getOwnPlayer() as Player
-    let isLeader = player.leader
-    console.log(`${player} is leader? ${isLeader}`)
     return getOwnPlayer()?.leader ?? false
   }
 
