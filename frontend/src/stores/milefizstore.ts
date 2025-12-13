@@ -1,4 +1,5 @@
 import { reactive, readonly, computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
 import type { Direction, MoveBarrierCommand, MovementCommand } from "@/types/movement";
@@ -13,6 +14,7 @@ const DEST = '/topic/milefiz/lobby/'
 
 let stompclient: Client | null = null
 
+const router = useRouter()
 export const useMilefizStore = defineStore('milefizstore', () => {
   /**
    * Cooldown für das Würfelsystem
@@ -178,6 +180,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         // SPIEL STARTET
         else if (event.type === 'GAME_START') {
           console.log('Spiel startet')
+          router.push({ name: 'game'})
         }
       })
     }
@@ -306,6 +309,28 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function startGameCommand() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot start game commnand: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id) {
+      console.error('Cannot start game command.')
+      return
+    }
+
+
+    try {
+      stompclient.publish({
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`,
+      })
+      console.log('Start game command sent for all players in lobby:', gamedata.lobby?.id)
+    } catch (err) {
+      console.error('Error sending start game command:', err)
+    }
+  }
+
   /**
    * Sendeteinen Energie-Speichern-Befehl an den Spielserver
    *
@@ -357,9 +382,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    */
   const isJumping = ref(false)
 
-  /* function requestJump() {
-    isJumping.value = true
-  } */
 
   return {
     gamedata,
@@ -370,6 +392,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     sendMove,
     sendEnergySave,
     isJumping,
-    /* requestJump */
+    startGameCommand
   }
 })

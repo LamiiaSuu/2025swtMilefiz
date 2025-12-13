@@ -8,7 +8,8 @@ import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 
-const { joinLobby } = useMilefizStore()
+const { startGameCommand, joinLobby} = useMilefizStore()
+startGameCommand()
 
 const milefizStore = useMilefizStore()
 
@@ -111,7 +112,7 @@ const handleFileChange = (event: Event) => {
                     <!-- Buttons -->
                     <div class="form-row">
                         <div class="button-container">
-                            <button class="start-game-button" @click="$router.push({ name: 'game' })">
+                            <button class="start-game-button" @click="startGameCommand()">
                                 Spiel Starten
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />
