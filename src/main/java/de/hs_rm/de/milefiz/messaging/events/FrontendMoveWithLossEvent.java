@@ -28,8 +28,8 @@ import java.util.UUID;
  *
  * Author: Maximilian Ressel
  */
-public record FrontendMoveWithLossEvent (String type, UUID id, UUID targetField, int remainingMoves) implements FrontendEvent{
-    public FrontendMoveWithLossEvent(UUID id, UUID targetField, int remainingMoves) {
-        this(EventType.MOVE_WITH_LOSS.name(), id, targetField, remainingMoves);
+public record FrontendMoveWithLossEvent (String type, UUID id, UUID targetField, int remainingMoves, boolean moved) implements FrontendEvent{
+    public FrontendMoveWithLossEvent(UUID id, UUID targetField, int remainingMoves, boolean moved) {
+        this(EventType.MOVE_WITH_LOSS.name(), id, targetField, remainingMoves, moved);
     }
 }

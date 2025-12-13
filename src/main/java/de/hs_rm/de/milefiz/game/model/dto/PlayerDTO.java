@@ -18,6 +18,7 @@ public class PlayerDTO {
     private Color color;
     private MeepleDTO activeMeeple;
     private int remainingMoves;
+    private boolean moved;
 
     public PlayerDTO() {
     }
@@ -77,4 +78,13 @@ public class PlayerDTO {
     public void setRemainingMoves(int remainingMoves) {
         this.remainingMoves = remainingMoves;
     }
+
+    public boolean isMoved() {
+        return moved;
+    }
+
+    public void setMoved(boolean moved) {
+        this.moved = moved;
+    }
+    
 }

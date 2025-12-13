@@ -176,6 +176,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
     e.preventDefault()
+    if (milefizStore.gamedata.moved) return
     cycleSelection(e.shiftKey ? -1 : 1)
     return
   }
@@ -296,6 +297,11 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     direction = moveDir.x > 0 ? "EAST" : "WEST"
   } else {
     direction = moveDir.z > 0 ? "SOUTH" : "NORTH"
+  }
+
+  //initial setzen für responiveness, wird beim empfangen des Move Events aus dem Backend auf den wahren Wert gesetzt
+  if(milefizStore.gamedata.currentDiceRoll && milefizStore.gamedata.currentDiceRoll > 0) {
+    milefizStore.gamedata.moved = true
   }
 
   milefizStore.sendMove(meepleId, direction)

@@ -31,12 +31,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy: number
     currentDiceRoll?: number
     lobby: Lobby | null
+    moved: boolean
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
     energy: 0, //Energy des Spielers
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
+    moved: false
   })
 
   function startMilefizLiveUpdate() {
@@ -113,6 +115,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           gamedata.currentDiceRoll = event.remainingMoves
+          gamedata.moved = event.moved
         }
         // LOBBY_UPDATE wird immer ausgerufen, wenn sich Werte der Lobby (außer das Board) geupdatet haben. Dazu zählt auch, wenn neue Spieler gejoint sind
         else if (event.type === 'LOBBY_UPDATE') {
@@ -130,6 +133,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }        if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           gamedata.currentDiceRoll = event.remainingMoves
+          gamedata.moved = event.moved
           //TODO moveloss animieren
           console.warn("lost remaining moves")
         }

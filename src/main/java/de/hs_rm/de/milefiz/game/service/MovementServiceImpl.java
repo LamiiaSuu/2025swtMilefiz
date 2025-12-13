@@ -239,7 +239,8 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveWithLossEvent(
                     meeple.getId(),
                     nextField.getId(),
-                    player.getRemainingMoves());
+                    player.getRemainingMoves(),
+                    player.hasMoved());
         }
 
         // BARRIERE
@@ -292,7 +293,8 @@ public class MovementServiceImpl implements MovementService {
                 return new FrontendMoveWithLossEvent(
                         meeple.getId(),
                         nextField.getId(),
-                        player.getRemainingMoves());
+                        player.getRemainingMoves(),
+                        player.hasMoved());
             }
         }
 
@@ -328,13 +330,15 @@ public class MovementServiceImpl implements MovementService {
         player.useMove();
         if (player.getRemainingMoves() == 0) {
             meeple.clearLastField();
+            player.setMoved(false);
         }
 
         // Erfolgreiche Bewegung an Clients senden
         FrontendMoveEvent move = new FrontendMoveEvent(
                 meeple.getId(),
                 nextField.getId(),
-                player.getRemainingMoves());
+                player.getRemainingMoves(),
+                player.hasMoved());
 
         logger.info("Meeple {} moved to {} ({} remaining moves)", meeple.getId(), nextField.getId(),
                 player.getRemainingMoves());
@@ -413,6 +417,7 @@ public class MovementServiceImpl implements MovementService {
         meeple.setCurrentField(nextField);
         meeple.clearLastField();
         player.setRemainingMoves(0);
+        player.setMoved(false);
     }
 
     /**
