@@ -18,7 +18,7 @@ const newGameStart = () => {
 
 
       <div class="win-message">
-        <h1>Spieler 1 hat gewonnen!</h1>
+        <h1>{{ store.winnerName }} hat gewonnen!</h1>
       </div>
 
 

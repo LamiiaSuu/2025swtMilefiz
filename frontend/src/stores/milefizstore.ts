@@ -375,6 +375,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     sendMove,
     sendEnergySave,
     isJumping,
+    winnerName,
+    gameFinished
     /* requestJump */
   }
 })
