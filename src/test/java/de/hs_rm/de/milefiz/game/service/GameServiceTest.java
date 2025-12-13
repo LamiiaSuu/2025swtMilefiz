@@ -39,12 +39,15 @@ class GameServiceTest {
     @Mock
     private ApplicationEventPublisher publisher; // Mock wird automatisch erstellt
 
+    @Mock
+    private MovementServiceImpl movementService;
+
     private GameService gameService;
 
     @BeforeEach
 
     void setUp() throws StreamReadException, DatabindException, IOException {
-        gameService = new GameServiceImpl(diceService, publisher, cooldownService);
+        gameService = new GameServiceImpl(diceService, publisher, cooldownService, movementService);
 
     }
 
