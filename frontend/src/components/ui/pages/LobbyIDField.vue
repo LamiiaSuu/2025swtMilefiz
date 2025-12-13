@@ -1,22 +1,28 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { useMilefizStore } from '@/stores/milefizstore';
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-const router = useRouter()
+const milefizStore = useMilefizStore()
 
-const lobbyId = ref('ABC-123-XYZ')
+const router = useRouter()
+const base = globalThis.location.origin
+
+const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
 
 /**
  * copyToClipboard()
- * Diese Funktion kopiert die Lobby-ID ins Clipboard.
+ * Diese Funktion kopiert den Join-Link mit der Lobby-ID ins Clipboard.
  */
 const copyToClipboard = async () => {
     try {
-        await navigator.clipboard.writeText(lobbyId.value)
+        await navigator.clipboard.writeText(`${base}/join/${lobbyId.value}`)
     } catch (err) {
         console.error('Fehler beim Kopieren der Lobby-ID:', err)
     }
 }
+
+
 </script>
 
 <template>

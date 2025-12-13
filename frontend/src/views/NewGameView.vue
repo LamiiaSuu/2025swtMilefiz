@@ -1,16 +1,23 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import LobbyIDField from '@/components/ui/pages/LobbyIDField.vue'
 import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
+import { useMilefizStore } from '@/stores/milefizstore'
 
+const { joinLobby } = useMilefizStore()
+
+const milefizStore = useMilefizStore()
+
+onMounted(() => {
+    milefizStore.joinLobby()
+})
 const router = useRouter()
 
 // Daten
-const lobbyId = ref('ABC-123-XYZ')
 const lobbyName = ref('')
 const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
@@ -22,12 +29,9 @@ const selectedFile = ref<File | null>(null)
 const playerColors = ['#44ff44', '#ffff44', '#ff4444', '#4444ff']
 
 // Liste der Spieler
-const players = ref([
-    { name: 'Spieler 1', color: playerColors[0] },
-    { name: 'Spieler 2', color: playerColors[1] },
-    { name: 'Spieler 3', color: playerColors[2] },
-    { name: 'Spieler 4', color: playerColors[3] },
-])
+const players = computed(() => milefizStore.gamedata.lobby?.players)
+
+
 
 /**
  * handleFileChange (event: Event)
@@ -40,6 +44,7 @@ const handleFileChange = (event: Event) => {
         selectedFile.value = target.files[0]
     }
 }
+
 </script>
 
 <template>
@@ -98,7 +103,7 @@ const handleFileChange = (event: Event) => {
                         <div class="players-list">
                             <div v-for="(player, index) in players" :key="index" class="player-item">
                                 <span class="player-color-dot" :style="{ backgroundColor: player.color }"></span>
-                                {{ player.name }}
+                                {{ player.playerName }}
                             </div>
                         </div>
                     </div>

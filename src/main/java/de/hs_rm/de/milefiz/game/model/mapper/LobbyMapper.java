@@ -44,7 +44,7 @@ public interface LobbyMapper {
      * @return das Set von LobbyDTOs
      */
     Set<LobbyDTO> toDTOSet(Set<Lobby> lobbies);
-
+    
     /**
      * Konvertiert ein {@code Set<LobbyDTO>} zu einem {@code Set<Lobby>}.
      *

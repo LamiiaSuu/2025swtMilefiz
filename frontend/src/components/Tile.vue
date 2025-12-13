@@ -40,13 +40,13 @@ const tileScale = 2
 const overlayScale = computed(() => {
   switch (props.type) {
     case 'END': return 0.7
-    default: return 2.7
+    default: return 3.75
   }
 })
 const overlayXOffset = computed(() => {
   switch (props.type) {
     case 'END': return 0.05
-    default: return 0.2
+    default: return 0.35
   }
 })
 const tileYOffset = -0.3
