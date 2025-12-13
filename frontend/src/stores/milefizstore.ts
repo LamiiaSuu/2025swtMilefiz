@@ -25,6 +25,23 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     remainingSeconds: 0,
     active: false,
   })
+
+  /**
+   * Energy State für das Energiesystem
+   * @prop {number} maxEnergy - Maximal speicherbare Energie, wird aus dem Backend gesetzt
+   * @prop {boolean} isEnergyFull - True, genau dann, wenn gespeicherte Energie maxEnergy entspricht
+   * @prop {boolean} isEnergyFresh - gibt an, ob es sich um "frische Energie" handelt, d.h. Würfelergebnis kann nur gespeichert werden, wenn der Spieler noch keine Moves mit dem Würfelergebnis getätigt hat
+   */
+  const energy = reactive<{
+    maxEnergy: number,
+    isEnergyFull: boolean,
+    isEnergyFresh: boolean,
+  }>({
+    maxEnergy: 0,
+    isEnergyFull: false,
+    isEnergyFresh: false,
+  })
+
   // Beispiele für Daten
   const gamedata = reactive<{
     playerId: string
@@ -77,11 +94,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
 
+        // Wenn der Spieler erfolgreich gewürfelt hat, wird hier die die Nachricht abgefangen und die entsprechenden Daten werden aktualisiert
         if (event.type === 'ROLL_DICE' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} rolled: ${event.number}`)
           gamedata.currentDiceRoll = event.number
           cooldown.active = true
           cooldown.remainingSeconds = event.cooldown
+          energy.isEnergyFresh = true
         }
 
         // Wenn der Spieler im Moment noch nicht Würfeln darf, weil er noch aktiven Cooldown hat, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
@@ -113,6 +132,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
+          energy.isEnergyFresh = false;
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
@@ -124,11 +144,20 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           //Wenn Energy erfolgreich gesaved wurde wird Frontendseitig der Würfelwurf ebenfalls auf 0 gesetzt und die gamedata.energy geupdated
         } else if (event.type === 'SAVE_ENERGY') {
-          gamedata.currentDiceRoll = 0
-          gamedata.energy = event.energy
+          energy.maxEnergy = event.maxEnergy
+          if (event.playerId === gamedata.playerId) {
+            gamedata.currentDiceRoll = 0
+            gamedata.energy = event.energy
+            energy.isEnergyFresh = false;
+            if (event.hasFullEnergy) {
+              energy.isEnergyFull = true
+            }
+          }
           return
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
-          console.warn('Energy save rejected:', event.msg)
+          if (event.playerId == gamedata.playerId) {
+            console.warn('Energy save rejected:', event.msg)
+          }
           return
         } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
@@ -195,6 +224,52 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
+ * Synchronisiert energiebezogene Zustände des eigenen Spielers aus dem aktuellen Lobby-State.
+ *
+ * <p>
+ * Diese Funktion extrahiert den eigenen Spieler aus der übergebenen {@link Lobby}
+ * anhand der {@code playerId} und übernimmt dessen energierelevante Werte in den
+ * lokalen Pinia-Store.
+ * </p>
+ *
+ * <p>
+ * Konkret werden:
+ * <ul>
+ *   <li>die maximale Energie ({@code maxEnergy}) einmalig aus dem Backend übernommen</li>
+ *   <li>der Status {@code isEnergyFull} basierend auf aktueller und maximaler Energie berechnet</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Die Funktion wird sowohl beim initialen Lobby-Join als auch bei jedem
+ * {@code LOBBY_UPDATE}-Event aufgerufen, um sicherzustellen, dass der Frontend-State
+ * stets konsistent mit dem Backend bleibt.
+ * </p>
+ *
+ * <p>
+ * Falls der eigene Spieler noch nicht in der Lobby vorhanden ist (z. B. während
+ * früher Initialisierungsphasen), wird die Funktion ohne Seiteneffekte beendet.
+ * </p>
+ *
+ * @param lobby Aktueller Lobby-Zustand vom Backend
+ */
+  function syncOwnPlayerEnergy(lobby: Lobby) {
+    const ownPlayer = lobby.players.find(
+      p => p.id === gamedata.playerId
+    )
+
+    if (!ownPlayer) return
+
+    console.log('Own player:', ownPlayer)
+    if (ownPlayer.maxEnergy !== undefined) {
+      energy.maxEnergy = ownPlayer.maxEnergy
+    }
+
+    energy.isEnergyFull = gamedata.energy >= energy.maxEnergy
+  }
+
+
+  /**
    * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
    */
@@ -212,6 +287,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       gamedata.lobby = responseMsg.lobby as Lobby
       gamedata.playerId = responseMsg.playerId
       gamedata.playerToken = responseMsg.playerToken
+
+      syncOwnPlayerEnergy(gamedata.lobby)
+
       startMilefizLiveUpdate()
     } catch (error_) {
       console.log(error_)
@@ -409,6 +487,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     sendRollDice,
     joinLobby,
     cooldown,
+    energy,
     sendMove,
     sendEnergySave,
     isJumping,
