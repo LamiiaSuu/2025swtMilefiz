@@ -26,17 +26,14 @@ import SaveEnergyButton from './SaveEnergyButton.vue';
       </div>
     </div>
 
-    <div style="position: absolute;bottom: 5vw; left: 3vw;">
+    <!-- Energy Bar -->
+    <div style="position: absolute;bottom: 3vw; left: 3vw;">
       <div class="energy-bar-container">
-
-        <div>
-          <img src="@/assets/hud/lightning.png" class="action-icon" style="width: 2vw;"/>
-        </div>
         <EnergyBar />
       </div>
     </div>
 
-    
+
 
   </div>
 </template>
@@ -52,11 +49,8 @@ import SaveEnergyButton from './SaveEnergyButton.vue';
 .dice-counter-container {
   position: absolute;
   top: 20px;
-  /* Abstand von oben */
   left: 50%;
-  /* Mittig horizontal */
   transform: translateX(-50%);
-  /* Zentriert das Element */
 }
 
 .button-bar {

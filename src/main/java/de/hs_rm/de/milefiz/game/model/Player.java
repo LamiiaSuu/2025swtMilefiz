@@ -83,6 +83,10 @@ public class Player implements Principal {
         this.energy = energy;
     }
 
+    public int getMaxEnergy() {
+        return MAX_ENERGY;
+    }
+
     public boolean hasMoved() {
         return moved;
     }

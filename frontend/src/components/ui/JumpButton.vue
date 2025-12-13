@@ -47,7 +47,7 @@ function jump() {
     }
     
     console.log("Hüpfen Request gesendet.")
-    milefizStore.gamedata.energy = 0
+    
     /* Press Animation für den Button*/
     triggerPressAnimation();
 }

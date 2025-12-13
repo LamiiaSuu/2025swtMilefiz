@@ -4,37 +4,53 @@ import { useMilefizStore } from '@/stores/milefizstore'
 
 // Zugriff auf PiniaStore
 const milefizStore = useMilefizStore()
-const currentEnergy = computed(() => milefizStore.gamedata.energy)
-
-/* erstmal hardcoded energy */
-const maxEnergy = 6
-//const currentEnergy = ref(2)
 
 /**
- * Energy
+ * 
  */
-const barWidth = computed(() => (currentEnergy.value / maxEnergy) * 100 + "%")
+const currentEnergy = computed(() => milefizStore.gamedata?.energy ?? 0)
+
+/**
+ * Zugriff auf Energy-State
+ *  maxEnergy: gibt die maxEnergy an, verwendet für die visuelle Darstellung X/6 
+ * */ 
+const maxEnergy = computed(()=>milefizStore.energy.maxEnergy || 1)
+
+
+/**
+ * Ermittelt den prozentualen Wert der currentEnergy in Bezug zur maxEnergy an
+ */
+const barWidth = computed(() => (currentEnergy.value / maxEnergy.value) * 100 + "%")
 </script>
 
 <template>
-    <div>
-        <hbox>
+    <div class="energy-container">
+        <div class="energy-info">
+            <img src="@/assets/hud/lightning.png" class="energy-icon" />
+            <span class="energy-text">{{ currentEnergy }}/{{ maxEnergy }}</span>
+        </div>
 
-            <div class="energy-bar">
-                <div class="saved-energy" :style="{ width: barWidth }"></div>
+        <div class="energy-bar">
+            <div class="saved-energy" :style="{ width: barWidth }">
             </div>
-        </hbox>
+        </div>
     </div>
-
 </template>
 
 <style>
+.energy-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 40vw;
+    max-width: 500px;
+    min-width: 400px;
+}
+
 .energy-bar {
-    position: absolute;
-    width: 25vw;
+    flex: 1;
     height: 30px;
-    fill-opacity: 80%;
-    background-color: #b3dbd7; 
+    background-color: rgba(179, 219, 215, 0.8);
     /* border: 3px solid #c8a25d; */
     border-top-right-radius: 120px;
     border-bottom-right-radius: 20px;
@@ -43,6 +59,8 @@ const barWidth = computed(() => (currentEnergy.value / maxEnergy) * 100 + "%")
     border-bottom-left-radius: 20px;
     /* border-radius: 16px; */
     box-sizing: border-box;
+
+    overflow: hidden;
 
 }
 
@@ -53,10 +71,24 @@ const barWidth = computed(() => (currentEnergy.value / maxEnergy) * 100 + "%")
     /* border: 4px solid #c8a25d; */
     border-top-right-radius: 120px;
     border-bottom-right-radius: 20px;
-
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
-    ;
     transition: width 0.8s ease;
+}
+
+
+.energy-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.energy-icon {
+    width: 2vw;
+    min-width: 20px;
+}
+
+.energy-text {
+    font-weight: bold;
+    color: #ffffff;
 }
 </style>
