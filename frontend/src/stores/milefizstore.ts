@@ -24,6 +24,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     remainingSeconds: 0,
     active: false,
   })
+  const gameFinished = ref(false)
+  const winnerName = ref<string | null>(null)
+
   // Beispiele für Daten
   const gamedata = reactive<{
     playerId: string
