@@ -1,5 +1,6 @@
 export interface Lobby {
   id: string
+  lobbyName: string
   players: Player[]
   maxPlayers: number
 }
@@ -8,6 +9,7 @@ export interface Player {
   id: string
   meeples: Meeple[]
   color: string
+  leader: boolean,
   activeMeeple: Meeple | null
   remainingMoves: number
 }

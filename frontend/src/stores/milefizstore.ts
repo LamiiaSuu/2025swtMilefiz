@@ -202,6 +202,27 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function sendLobbyMessage(destination: string, payload: any) {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot update lobby settings: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id) {
+      console.error('Cannot send lobby message: Missing lobbyId')
+      return
+    }
+    try {
+      stompclient.publish({
+        destination: destination,
+        body: JSON.stringify(payload),
+      })
+      console.log('Lobby message sent:', payload)
+    } catch (err) {
+      console.error('Error sending lobby message:', err)
+    }
+  }
+
   function sendRollDice() {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot roll dice: STOMP client not connected.')
@@ -229,6 +250,27 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
+   * Prüft, ob der eigene Spieler Leader der aktuellen Lobby ist
+   *
+   * Nutzt die in der Lobby vorhandene Spielerliste und vergleicht
+   * die eigene playerId mit dem entsprechenden Eintrag.
+   */
+  function isOwnLeader(): boolean {
+    let player = getOwnPlayer() as Player
+    let isLeader = player.leader
+    console.log(`${player} is leader? ${isLeader}`)
+    return getOwnPlayer()?.leader ?? false
+  }
+
+  function getOwnPlayer(): Player | undefined {
+    if (!gamedata.lobby || !gamedata.playerId) return
+
+    // Spieler abgleichen mit eigenen Daten
+    const me = gamedata.lobby.players?.find((p: Player) => p.id === gamedata.playerId) as Player
+    return me
+  }
+
+  /**
    *
    */
   const isJumping = ref(false)
@@ -241,10 +283,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     gamedata,
     startMilefizLiveUpdate,
     sendRollDice,
+    sendLobbyMessage,
     joinLobby,
     cooldown,
     sendMove,
     isJumping,
+    getOwnPlayer,
+    isOwnLeader,
     /* requestJump */
   }
 })

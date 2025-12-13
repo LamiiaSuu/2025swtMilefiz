@@ -24,12 +24,15 @@ import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
 import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
+import de.hs_rm.de.milefiz.messaging.commands.UpdateLobbySettingsCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
@@ -41,12 +44,14 @@ public class FrontendReceiverController {
     private final Logger logger = LoggerFactory.getLogger(FrontendReceiverController.class);
     private LobbyManager lobbyManager;
     private GameService gameService;
+    private LobbyMapper lobbyMapper;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService,
+    public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService, LobbyMapper lobbyMapper,
             SimpMessagingTemplate messagingTemplate) {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
+        this.lobbyMapper = lobbyMapper;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -180,6 +185,50 @@ public class FrontendReceiverController {
                 player.getRemainingMoves());
 
         return move;
+    }
+
+    /**
+     * WebSocket Message Handler zur Aktualisierung der Lobby-Einstellungen
+     *
+     * Verarbeitet Anfragen zum Ändern von Lobby-Name und maximaler
+     * Spieleranzahl. Nur der Lobby-Leader darf diese Einstellungen ändern. Das
+     * Update wird an alle Clients der Lobby broadcastet.
+     *
+     * WebSocket: Eingang /milefiz/lobby/{lobbyId}/rename Weiterleitung
+     * /topic/milefiz/lobby/{lobbyId}
+     *
+     * @param lobbyId die UUID der zu aktualisierenden Lobby
+     * @param lobbyUpdateSettingsCmd Command mit newLobbyName und maxPlayers
+     * @param player der authentifizierte Leader-Spieler
+     * @return FrontendLobbyUpdateEvent mit aktualisiertem Lobby-DTO
+     * @throws PlayerHasNoPermissionException falls Spieler nicht Leader ist
+     * @throws LobbyNotFoundException wird gecatcht, rückgabe leeres Event
+     * @see FrontendLobbyUpdateEvent, UpdateLobbySettingsCommand, LobbyMapper
+     */
+    @MessageMapping("/milefiz/lobby/{lobbyId}/updateSettings")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendEvent handleLobbyUpdate(@DestinationVariable("lobbyId") UUID lobbyId, UpdateLobbySettingsCommand lobbyUpdateSettingsCmd,
+            Player player) {
+        if (!player.isLeader()) {
+            throw new PlayerHasNoPermissionException();
+        }
+        logger.info(
+                "Received UpdateLobbySettingsCommand in lobby {} from player '{}': lobby Name {} moving to field {}",
+                lobbyId,
+                player.getName(),
+                lobbyUpdateSettingsCmd.newLobbyName(),
+                lobbyUpdateSettingsCmd.maxPlayers());
+
+        Lobby lobby;
+        try {
+            lobby = lobbyManager.getLobby(lobbyId);
+            lobby.setLobbyName(lobbyUpdateSettingsCmd.newLobbyName());
+            lobby.setMaxPlayers(lobbyUpdateSettingsCmd.maxPlayers());
+            return new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Update der Einstellungen");
+        } catch (LobbyNotFoundException e) {
+            e.printStackTrace();
+        }
+        return new FrontendLobbyUpdateEvent(null, "");
     }
 
     /**

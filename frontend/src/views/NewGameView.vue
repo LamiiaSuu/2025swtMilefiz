@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import LobbyIDField from '@/components/ui/pages/LobbyIDField.vue'
@@ -8,12 +8,30 @@ import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 
-const { joinLobby } = useMilefizStore()
+const { joinLobby, gamedata, sendLobbyMessage, isOwnLeader } = useMilefizStore()
 joinLobby()
 const router = useRouter()
 
 // Daten
-const lobbyName = ref('')
+const lobbyName = computed({
+    get: () => gamedata?.lobby?.lobbyName ?? '',
+    set: (value: string) => {
+        if (gamedata?.lobby) {
+            gamedata.lobby.lobbyName = value
+        }
+        if (!isOwnLeader()) return // keine Änderung für non-Leader
+        // Änderung an Backend senden
+        const lobbyId = gamedata?.lobby?.id
+        if (lobbyId) {
+            const destination = `/app/milefiz/lobby/${lobbyId}/updateSettings`
+            const payload = {
+                newLobbyName: value,
+                maxPlayers: gamedata?.lobby?.maxPlayers ?? 4,
+            }
+            sendLobbyMessage(destination, payload)
+        }
+    }
+})
 const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
 
@@ -64,7 +82,8 @@ const handleFileChange = (event: Event) => {
                     <!-- Lobby-Name -->
                     <div class="form-row">
                         <label>Lobby-Name</label>
-                        <input type="text" v-model="lobbyName" class="form-input" placeholder="Lobby-Name">
+                        <input type="text" v-model="lobbyName" class="form-input" placeholder="Lobby-Name"
+                            :disabled="!isOwnLeader()">
                     </div>
 
                     <!-- Map Buttons -->
@@ -111,8 +130,9 @@ const handleFileChange = (event: Event) => {
                     <!-- Buttons -->
                     <div class="form-row">
                         <div class="button-container">
-                            <button class="start-game-button" @click="$router.push({ name: 'game' })">
-                                Spiel Starten
+                            <button class="start-game-button" @click="isOwnLeader() && $router.push({ name: 'game' })"
+                                :disabled="!isOwnLeader()" :class="{ active: isOwnLeader() }">
+                                {{ isOwnLeader() ? 'Spiel Starten' : 'Warten auf Leader...' }}
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />
                         </div>
@@ -299,14 +319,22 @@ select {
 
 .start-game-button {
     padding: 15px 30px;
-    background-image: var(--button-gradient-red);
+    background-image: var(--button-gradient-gray);
     color: white;
     font-size: 1.3rem;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
+.start-game-button.active {
+    background-image: var(--button-gradient-red);
+}
+
 .start-game-button:hover {
+    background-image: var(--button-gradient-gray);
+}
+
+.start-game-button:hover.active {
     background-color: rgba(180, 40, 40, 0.95);
 }
 </style>
