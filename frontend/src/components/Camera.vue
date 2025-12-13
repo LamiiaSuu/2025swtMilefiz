@@ -2,6 +2,9 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import type { TresObject } from '@tresjs/core'
 import type { PerspectiveCamera, Vector3 } from 'three'
+import { useMilefizStore } from '@/stores/milefizstore';
+
+const milefizStore = useMilefizStore()
 
 // Definiert Props für den zugehörigen Character, 
 // ob First Person an ist und das Offset der Kamera
@@ -55,7 +58,7 @@ const onMouseMove = (e: MouseEvent) => {
   if (!props.useFirstPerson) return // Keine Maussteurung
   
   // Pointer Lock versuchen
-  if (props.useFirstPerson) {
+  if (props.useFirstPerson && milefizStore.gameFinished) {
     const requestLock = () => {
       if (!document.pointerLockElement && props.useFirstPerson) {
         document.body.requestPointerLock()
