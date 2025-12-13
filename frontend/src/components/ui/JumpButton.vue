@@ -5,7 +5,7 @@ import { useMilefizStore } from "@/stores/milefizstore";
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
 
-const isEnergyEnough = true;
+const isEnergyFull = computed(()=> milefizStore.energy.isEnergyFull);
 
 /**
  * - Registriert EventListener für Keyboard Input 
@@ -19,7 +19,7 @@ onMounted(() => {
  * → true, solange nicht genügend Energie gesammelt wurde
  */
 const disabled = computed(() =>
-    !isEnergyEnough
+    !isEnergyFull.value
 )
 
 
@@ -32,16 +32,11 @@ const onKeypress = (e: KeyboardEvent) => {
 
 
 /**
- * - Überprüft, ob Meeple im Moment hüpft
+ * - Überprüft zunächst, ob Spieler genug Energie zum Hüpfen hat
  * - visuelles Feedback für Aktivierung des Buttons
  */
 function jump() {
-    /* if (disabled.value) {
-        return
-    } */
-
-    // Jump Button deaktivieren, solange Meeple noch hüpft
-    if (milefizStore.isJumping) {
+    if (disabled.value) {
         console.log("Hüpfen nicht erlaubt!")
         return
     }
@@ -65,10 +60,8 @@ function triggerPressAnimation() {
 
 </script>
 <template>
-    <div class="action-button" :class="{ pressed: isPressed, disabled: milefizStore.isJumping}">
-        <!-- Jumping Meeple Icon -->
+    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled}">
         <img src="@/assets/hud/JumpingMeeple.png" class="action-icon" />
-        <!-- Spacebar Icon -->
         <img src="@/assets/hud/spacebar_icon_light.png" class="hotkey-space" />
     </div>
 </template>
