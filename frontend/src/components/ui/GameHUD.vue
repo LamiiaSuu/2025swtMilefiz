@@ -15,7 +15,10 @@ const milefizStore = useMilefizStore()
 
 <template>
   <div class="hud-container">
-    <WinPopUp v-if="milefizStore.gameFinished"/>
+    <!-- Win Popup -->
+    <transition name="fade">
+      <WinPopUp v-if="milefizStore.gameFinished"/>
+    </transition>
     <!-- Würfelergebnis -->
     <div class="dice-counter-container">
       <DiceCounter />
@@ -64,5 +67,13 @@ const milefizStore = useMilefizStore()
   width: 100%;
   box-sizing: border-box;
   right: 0px;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
