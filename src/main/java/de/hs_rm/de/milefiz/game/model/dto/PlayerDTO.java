@@ -18,6 +18,7 @@ public class PlayerDTO {
     private Color color;
     private MeepleDTO activeMeeple;
     private int remainingMoves;
+    private int maxEnergy;
 
     public PlayerDTO() {
     }
@@ -77,4 +78,13 @@ public class PlayerDTO {
     public void setRemainingMoves(int remainingMoves) {
         this.remainingMoves = remainingMoves;
     }
+
+    public int getMaxEnergy() {
+        return maxEnergy;
+    }
+
+    public void setMaxEnergy(int maxEnergy) {
+        this.maxEnergy = maxEnergy;
+    }
+    
 }

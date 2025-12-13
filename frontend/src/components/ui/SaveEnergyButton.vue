@@ -1,11 +1,33 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useMilefizStore } from '@/stores/milefizstore';
 
+// Zugriff auf den globalen PiniaStore
 const milefizStore = useMilefizStore()
 
 /**
- * - Registriert EventListener für Keyboard Input 
+ * Zugriff auf Energy-State
+ *  isEnergyFresh: gibt an, ob es sich um "frisch gewürfelte" Energie handelt --> true, wenn sich Spieler noch nicht bewegt hat
+ *  isEnergyFull: true, wenn die gesammelte Energie gleich der maxEnergy ist
+ */
+const isEnergyFresh = computed(()=> milefizStore.energy.isEnergyFresh)
+const isEnergyFull = computed(() => milefizStore.energy.isEnergyFull)
+
+
+/**
+ * Steuert, ob der Würfelbutton deaktiviert wird/bleibt
+ * Wird deaktiviert,
+ *  - sobald Energy nicht mehr fresh ist oder
+ *  - solange maxEnergy erreicht ist
+ */
+const disabled = computed(()=> {
+    return !isEnergyFresh.value || isEnergyFull.value
+}
+)
+
+/**
+ * Registriert EventListener für Keyboard Input
+ * Hotkey "E"
  */
 onMounted(() => {
     window.addEventListener("keydown", onKeypress)
@@ -17,8 +39,15 @@ const onKeypress = (e: KeyboardEvent) => {
     }
 }
 
-function saveEnergy(){
-    console.log("Würfelzahl als Energie speichern")
+/**
+ * Versucht das Speichern der Energie im Backend auszulösen
+ * - wenn disabled: Abbruch
+ * - sonst Anfrage ans Backend senden
+ */
+function saveEnergy() {
+    if (disabled.value){
+        return
+    }
     milefizStore.sendEnergySave()
     triggerPressAnimation()
 }
@@ -35,7 +64,7 @@ function triggerPressAnimation() {
 </script>
 
 <template>
-    <div class="action-button" :class="{pressed: isPressed}">
+    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled  }">
         <img src="@/assets/hud/lightning.png" class="action-icon" />
         <span class="hotkey">E</span>
     </div>
@@ -100,5 +129,4 @@ function triggerPressAnimation() {
     color: #ffffff;
     border-radius: 3px;
 }
-
 </style>
