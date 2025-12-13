@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
+import { useMilefizStore } from '@/stores/milefizstore'
 
+const store = useMilefizStore()
 const router = useRouter()
 
 const newGameStart = () => {
