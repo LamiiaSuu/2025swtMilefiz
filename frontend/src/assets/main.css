@@ -20,6 +20,10 @@
   --button-color-inactive: rgba(100, 100, 100);
 
   --background-color-forms: #D9D9D9;
+
+  --background-color-input-focus: #8b6f47;
+  --border-color-input-focus: #5d4a2f;
+  --text-color-input-focus: white;
 }
 
 * {

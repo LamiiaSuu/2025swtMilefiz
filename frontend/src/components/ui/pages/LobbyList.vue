@@ -7,15 +7,15 @@ export interface Lobby {
     //...
 }
 
-defineProps<{ lobbies : Lobby[]}>()
+defineProps<{ lobbies : Lobby[], label: string }>()
 const lobbyid = defineModel('lobbyid')
 
 // für filtern https://vuejs.org/guide/essentials/list.html#displaying-filtered-sorted-results
 </script>
 
 <template>
-    <div class="game-container">
-        <div class="game-label">Lobbys</div>
+    <div class="game-container lobby-container">
+        <div class="game-label">{{ label }}</div>
         <div class="lobby-list game-content">
             <template v-for="(lobby) in lobbies" :key="lobby.id">
                 <label class="lobby-item">
@@ -31,11 +31,15 @@ const lobbyid = defineModel('lobbyid')
 
 /** lobby-list **/
 
+.lobby-container {
+    min-height: 0;
+}
+
 .lobby-list {
     overflow: scroll;
     width: 100%;
     max-height: 100%;
-    min-height: 50px;
+    min-height: 100px;
 }
 
 /** lobby-item **/
@@ -59,6 +63,8 @@ const lobbyid = defineModel('lobbyid')
 .radio-content {
     border-radius: inherit;
     padding: 10px 15px;
+    background-color: var(--background-color-forms);
+    text-align: center;
 }
 
 .radio-content:hover {
@@ -66,6 +72,6 @@ const lobbyid = defineModel('lobbyid')
 }
 
 .radio-input:checked~.radio-content {
-    background-color: #2196F3;
+    background-color: var(--background-color-input-focus);
 }
 </style>
