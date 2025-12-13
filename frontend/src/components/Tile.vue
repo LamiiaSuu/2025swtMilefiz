@@ -2,7 +2,7 @@
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
 import { computed, watchEffect } from 'vue'
-import { Object3D } from 'three'
+import { DoubleSide, Object3D } from 'three'
 
 // Props definieren
 const props = defineProps<{
@@ -84,6 +84,15 @@ watchEffect(() => {
   const overlay = overlayObject.value
   if (overlay) {
 
+    //Interior wird auf Double-Side gestellt, damit es von innen sichtbar ist.
+    if (overlay && !(overlay as any).userData?.interiorFixed) {
+      fixInteriorVisibility(overlay)
+      ;(overlay as any).userData = {
+        ...(overlay as any).userData,
+        interiorFixed: true
+      }
+    }
+
     if (props.type?.startsWith?.('START_')) {
       const col = startColorMap[props.type] ?? '#ffffff'
       setOverlayMainColor(overlay, col)
@@ -119,6 +128,25 @@ function setOverlayMainColor(obj: Object3D, colorHex: string) {
       }
     })
   }); (obj as any).userData = { ...(obj as any).userData, mainColorApplied: true, mainColor: colorHex }
+}
+
+/**
+ * Die Innenseite des Hausmodels wird als Double-Side markiert, damit man die Wände auch von innen sieht.
+ * @param obj Overlay-`Object3D` (Hausmodell).
+ * @author Robert Bothfeld
+ */
+function fixInteriorVisibility(obj: Object3D) {
+  obj.traverse((child: any) => {
+    if (!child.isMesh || !child.material) return
+
+    const mats = Array.isArray(child.material) ? child.material : [child.material]
+
+    mats.forEach((m: any) => {
+      if (!m) return
+      m.side = DoubleSide
+      m.needsUpdate = true
+    })
+  })
 }
 
 </script>
