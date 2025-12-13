@@ -7,9 +7,6 @@ import { useMilefizStore } from '@/stores/milefizstore'
 const store = useMilefizStore()
 const router = useRouter()
 
-const newGameStart = () => {
-  router.push({ name: 'game-start' })
-}
 </script>
 
 <template>
@@ -25,7 +22,6 @@ const newGameStart = () => {
 
       <div class="button-container">
         <BackButton :to="{ name: 'Homepage' }">&lt; Hauptmenü</BackButton>
-        <button class="menu-button" @click="newGameStart">Neues Spiel</button>
       </div>
     </div>
   </div>
