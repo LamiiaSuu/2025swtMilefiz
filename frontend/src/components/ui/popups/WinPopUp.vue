@@ -50,7 +50,7 @@ const router = useRouter()
   overflow: hidden;
 
   background-color: var(--button-color);
-  z-index: 100;
+  z-index: 9100;
   border: 5px solid red;
 }
 

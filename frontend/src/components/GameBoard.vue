@@ -342,12 +342,10 @@ onUnmounted(() => {
 
 <template>
 
-  <transition name="fade">
-    <WinPopup v-if="milefizStore.gameFinished" />
-  </transition>
 
   <!-- 3D-Canvas Element das den ganzen Bildschirm ausfüllt-->
   <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB">
+
     <!-- Kameraposition und Kamerasteuerung via OrbitControls -->
     <TresPerspectiveCamera v-if="!useFirstPerson" ref="orbitCam" :position="[0, 8, 15]" :fov="60" />
     <OrbitControls v-if="!useFirstPerson" />
@@ -389,6 +387,7 @@ onUnmounted(() => {
   <div v-if="useFirstPerson" class="crosshair">
     <div class="dot"></div>
   </div>
+
 </template>
 
 <style scoped>
@@ -415,12 +414,4 @@ onUnmounted(() => {
   transition: background 0.1s ease, transform 0.1s ease;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
 </style>
