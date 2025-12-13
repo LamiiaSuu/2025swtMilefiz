@@ -134,13 +134,11 @@ public class GameServiceImpl implements GameService {
      * - Logging des Bewegungsbefehls mit Lobby, Spieler, Meeple-ID, Richtung und
      * Session-ID
      * - Delegation an
-     * {@link de.hs_rm.de.milefiz.game.service.MovementService#moveMeeple(UUID, MovementCommand, Principal, SimpMessageHeaderAccessor)}
      * - Rückgabe des {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent},
      * das das Ergebnis beschreibt
      *
      * Diese Methode enthält selbst keine Spiellogik, sondern fungiert als
      * Vermittler zwischen Controllerebene (z. B.
-     * {@link de.hs_rm.de.milefiz.web.FrontendReceiverController})
      * und der tatsächlichen Spiellogik im MovementService.
      *
      * @param lobbyId   die eindeutige ID der Lobby, in der die Bewegung ausgeführt
@@ -181,12 +179,10 @@ public class GameServiceImpl implements GameService {
      * - Logging des Befehls mit Lobby, Spieler, Barrieren-ID, Ziel-Feld-ID und
      * Session-ID
      * - Delegation an
-     * {@link de.hs_rm.de.milefiz.game.service.MovementService#moveBarrier(UUID, MoveBarrierCommand, Principal, SimpMessageHeaderAccessor)}
      * - Rückgabe des {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent},
      * das das Ergebnis beschreibt
      *
      * Wie
-     * {@link #moveMeeple(UUID, MovementCommand, Principal, SimpMessageHeaderAccessor)}
      * enthält
      * auch diese Methode keine Spiellogik, sondern dient der Weiterleitung an die
      * zuständige

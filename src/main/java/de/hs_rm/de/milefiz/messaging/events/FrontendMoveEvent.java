@@ -8,9 +8,9 @@ import java.util.UUID;
  * @param targetField Ziel wo der Spieler hin will
  * @param remainingMoves Anzahl der übrigbleibenden Züge
  */
-public record FrontendMoveEvent(String type, UUID id, UUID targetField, int remainingMoves, boolean moved) implements FrontendEvent {
+public record FrontendMoveEvent(String type,UUID playerId, UUID id, UUID targetField, int remainingMoves, boolean moved) implements FrontendEvent {
 
-    public FrontendMoveEvent(UUID id, UUID targetField, int remainingMoves, boolean moved) {
-        this(EventType.MOVE.name(), id, targetField, remainingMoves, moved);
+    public FrontendMoveEvent(UUID playerId, UUID id, UUID targetField, int remainingMoves, boolean moved) {
+        this(EventType.MOVE.name(), playerId, id, targetField, remainingMoves, moved);
     }
 }

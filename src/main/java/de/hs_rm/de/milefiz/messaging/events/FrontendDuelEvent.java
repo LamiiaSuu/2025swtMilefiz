@@ -23,8 +23,8 @@ import java.util.UUID;
  *
  * Author: Maximilian Ressel
  */
-public record FrontendDuelEvent (String type, UUID firstMeepleId, UUID secondMeepleId, UUID targetField, int remainingMoves) implements FrontendEvent{
-    public FrontendDuelEvent(UUID firstMeepleId, UUID secondMeepleId, UUID targetField, int remainingMoves) {
-        this(EventType.DUEL.name(), firstMeepleId, secondMeepleId, targetField, remainingMoves);
+public record FrontendDuelEvent (String type, UUID playerId, UUID firstMeepleId, UUID secondMeepleId, UUID targetField, int remainingMoves) implements FrontendEvent{
+    public FrontendDuelEvent(UUID playerId, UUID firstMeepleId, UUID secondMeepleId, UUID targetField, int remainingMoves) {
+        this(EventType.DUEL.name(), playerId, firstMeepleId, secondMeepleId, targetField, remainingMoves);
     }
 }
