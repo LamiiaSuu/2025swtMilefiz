@@ -19,6 +19,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * cooldown
    * @prop {number} remainingSeconds - Beschreibt verbleibende Sekunden des Würfelcooldowns.
    * @prop {boolean} active - Wenn 'true', dann läuft gerade aktiv ein Cooldown herunter. Wenn 'false' steht der Cooldown auf 0 und es läuft gerade kein Timer.
+   * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
+   * @prop {string} winnerName - Name des gewinnenden Spielers.
    */
   const cooldown = reactive({
     remainingSeconds: 0,
