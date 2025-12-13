@@ -11,6 +11,7 @@ import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 public class Lobby {
 
     private UUID id;
+    private String lobbyName;
     private List<Player> players;
     private Board board;
     private int maxPlayers;
@@ -18,6 +19,7 @@ public class Lobby {
     public Lobby() {
         id = UUID.randomUUID();
         players = new ArrayList<>();
+        lobbyName = "Neue Lobby";
         maxPlayers = Color.values().length;
     }
 
@@ -55,11 +57,16 @@ public class Lobby {
         throw new LobbyJoinException("Die Lobby ist zurzeit nicht beitretbar!");
     }
 
+    public boolean isEmpty() {
+        return players == null || players.isEmpty();
+    }
+
     /**
-     * Diese Methode ändert das Board im MODEL. Um es an alle Clients zu schicken,
-     * muss {@link de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent}
+     * Diese Methode ändert das Board im MODEL. Um es an alle Clients zu
+     * schicken, muss
+     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent}
      * gesendet werden.
-     * 
+     *
      * @param board das neue Board
      */
     public void setBoard(Board board) {
@@ -117,5 +124,13 @@ public class Lobby {
 
     public Board getBoard() {
         return board;
+    }
+
+    public String getLobbyName() {
+        return lobbyName;
+    }
+
+    public void setLobbyName(String lobbyName) {
+        this.lobbyName = lobbyName;
     }
 }

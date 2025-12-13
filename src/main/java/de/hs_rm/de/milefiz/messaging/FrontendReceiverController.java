@@ -34,7 +34,6 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
 
 @Controller
 public class FrontendReceiverController {
@@ -53,53 +52,44 @@ public class FrontendReceiverController {
 
     /**
      * Verarbeitet eingehende Bewegungsbefehle eines Spielers innerhalb einer
-     * bestimmten Lobby
-     * und gibt ein entsprechendes Frontend-Event an alle Clients in dieser Lobby
-     * zurück.
+     * bestimmten Lobby und gibt ein entsprechendes Frontend-Event an alle
+     * Clients in dieser Lobby zurück.
      *
      * Diese Methode wird über einen STOMP-Nachrichtentyp unter dem Endpunkt
-     * /milefiz/lobby/{lobbyId}/move aufgerufen.
-     * Der Client sendet einen {@link MovementCommand}, der die Bewegungsrichtung
-     * und Meeple-ID enthält.
+     * /milefiz/lobby/{lobbyId}/move aufgerufen. Der Client sendet einen
+     * {@link MovementCommand}, der die Bewegungsrichtung und Meeple-ID enthält.
      * Nach der Verarbeitung wird das Ergebnis (z. B. eine erfolgreiche Bewegung
-     * oder eine Fehlermeldung)
-     * an das Topic /topic/milefiz/lobby/{lobbyId} gesendet, sodass alle verbundenen
-     * Clients die Änderung erhalten.
+     * oder eine Fehlermeldung) an das Topic /topic/milefiz/lobby/{lobbyId}
+     * gesendet, sodass alle verbundenen Clients die Änderung erhalten.
      *
-     * Ablauf:
-     * 1. Die Methode ermittelt die betreffende {@link Lobby} anhand der übergebenen
-     * lobbyId.
-     * 2. Der Spieler wird über das {@link Principal}-Objekt identifiziert.
-     * 3. Das zu bewegende {@link Meeple} wird aus dem {@link MovementCommand}
-     * ausgelesen.
-     * 4. Das Ziel-Feld wird basierend auf der angegebenen {@link Direction} vom
-     * aktuellen Feld bestimmt.
-     * 5. Es erfolgen verschiedene Validierungen:
-     * - Existiert das Zielfeld überhaupt?
-     * - Hat der Spieler überhaupt Züge frei
-     * - Blockiert ein anderes Meeple oder eine Barriere das Feld?
-     * - Steht dort ein Meeple eines anderen Spielers (→ Duell)?
-     * - Ist der Zug eine verbotene Rückwärtsbewegung?
-     * 6. Wenn keine Regel verletzt wird, wird das Meeple auf das neue Feld gesetzt,
-     * ein Zug verbraucht und
-     * ein {@link FrontendMoveEvent} an alle Clients der Lobby gesendet.
-     * 7. Bei einem ungültigen Zug wird stattdessen ein
+     * Ablauf: 1. Die Methode ermittelt die betreffende {@link Lobby} anhand der
+     * übergebenen lobbyId. 2. Der Spieler wird über das
+     * {@link Principal}-Objekt identifiziert. 3. Das zu bewegende
+     * {@link Meeple} wird aus dem {@link MovementCommand} ausgelesen. 4. Das
+     * Ziel-Feld wird basierend auf der angegebenen {@link Direction} vom
+     * aktuellen Feld bestimmt. 5. Es erfolgen verschiedene Validierungen: -
+     * Existiert das Zielfeld überhaupt? - Hat der Spieler überhaupt Züge frei -
+     * Blockiert ein anderes Meeple oder eine Barriere das Feld? - Steht dort
+     * ein Meeple eines anderen Spielers (→ Duell)? - Ist der Zug eine verbotene
+     * Rückwärtsbewegung? 6. Wenn keine Regel verletzt wird, wird das Meeple auf
+     * das neue Feld gesetzt, ein Zug verbraucht und ein
+     * {@link FrontendMoveEvent} an alle Clients der Lobby gesendet. 7. Bei
+     * einem ungültigen Zug wird stattdessen ein
      * {@link FrontendMoveRejectedEvent} mit einer Fehlermeldung gesendet.
      *
-     * WebSocket-Mapping:
-     * Eingang: /milefiz/lobby/{lobbyId}/move
-     * Ausgang: /topic/milefiz/lobby/{lobbyId}
+     * WebSocket-Mapping: Eingang: /milefiz/lobby/{lobbyId}/move Ausgang:
+     * /topic/milefiz/lobby/{lobbyId}
      *
-     * @param lobbyId   die eindeutige ID der Lobby, in der der Zug ausgeführt wird
-     * @param moveCmd   der empfangene Bewegungsbefehl mit Meeple-ID und
-     *                  {@link Direction}
+     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt
+     * wird
+     * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und
+     * {@link Direction}
      * @param player der authentifizierte Benutzer, der die Nachricht gesendet
-     *                  hat
+     * hat
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
-     *         ({@link FrontendMoveEvent}) oder einen Fehler
-     *         ({@link FrontendMoveRejectedEvent}) an die Clients sendet
+     * ({@link FrontendMoveEvent}) oder einen Fehler
+     * ({@link FrontendMoveRejectedEvent}) an die Clients sendet
      */
-
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
     public FrontendEvent handleMove(@DestinationVariable("lobbyId") UUID lobbyId, MovementCommand moveCmd,
@@ -116,7 +106,6 @@ public class FrontendReceiverController {
         // // if (player.getMeeples()[0].getCurrentField() == null) {
         // //     player.getMeeples()[0].setCurrentField(lobby.getBoard().getStartGreen());
         // // }
-
         Board board = lobby.getBoard();
         Meeple meeple = player.getMeepleWithId(moveCmd.meepleId());
         Field currentField = meeple.getCurrentField();
@@ -195,15 +184,15 @@ public class FrontendReceiverController {
 
     /**
      * WebSocket Message Handler für Würfel-Aktionen in einer Lobby.
-     * 
+     *
      * <p>
      * Diese Methode verarbeitet eingehende Würfel-Befehle von Clients und
-     * broadcastet das Würfelergebnis an alle Teilnehmer der entsprechenden Lobby.
-     * Der Würfelwurf wird über den {@link GameService} durchgeführt und das
-     * Ergebnis
-     * als {@link FrontendRollDiceEvent} an alle verbundenen Clients gesendet.
+     * broadcastet das Würfelergebnis an alle Teilnehmer der entsprechenden
+     * Lobby. Der Würfelwurf wird über den {@link GameService} durchgeführt und
+     * das Ergebnis als {@link FrontendRollDiceEvent} an alle verbundenen
+     * Clients gesendet.
      * </p>
-     * 
+     *
      * Ablauf:
      * <ol>
      * <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
@@ -212,28 +201,31 @@ public class FrontendReceiverController {
      * generieren</li>
      * <li>Speichert die gewürfelte zahl im Spieler ab</li>
      * <li>Würfelergebnis wird in {@link FrontendRollDiceEvent} verpackt</li>
-     * <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}} gesendet</li>
+     * <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}}
+     * gesendet</li>
      * <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
      * </ol>
-     * 
+     *
      * <h4>WebSocket-Mapping:</h4>
      * <ul>
-     * <li><strong>Eingang:</strong> {@code /milefiz/lobby/{lobbyId}/rollDice}</li>
+     * <li><strong>Eingang:</strong>
+     * {@code /milefiz/lobby/{lobbyId}/rollDice}</li>
      * <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
      * <li><strong>Protokoll:</strong> STOMP über WebSocket</li>
      * </ul>
-     * 
+     *
      * @param lobbyId die eindeutige UUID der Lobby in der gewürfelt wird
      * @param command der Würfel-Befehl vom Client, enthält die Spieler-ID
-     * @return {@link FrontendRollDiceEvent} mit Lobby-ID und Würfelergebnis (1-6)
-     * 
+     * @return {@link FrontendRollDiceEvent} mit Lobby-ID und Würfelergebnis
+     * (1-6)
+     *
      * @see GameService#rollDice()
      * @see FrontendRollDiceEvent
      * @see RollDiceCommand
      * @see FrontendRollDiceRejectedEvent
-     * 
+     *
      * @author Leon Schäfer
-     * 
+     *
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -263,9 +255,9 @@ public class FrontendReceiverController {
     }
 
     /**
-     * Wird aufgerufen wenn das Spiel losgehen soll (kann nur vom Leader ausgeführt
-     * werden)
-     * 
+     * Wird aufgerufen wenn das Spiel losgehen soll (kann nur vom Leader
+     * ausgeführt werden)
+     *
      * @param lobbyId
      * @param player
      * @return
@@ -288,7 +280,7 @@ public class FrontendReceiverController {
 
     /**
      * Handelt bei disconnects die Spieler -> Leave aus Lobby
-     * 
+     *
      * @param event
      * @throws PlayerNotFoundException
      */
@@ -296,8 +288,22 @@ public class FrontendReceiverController {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws PlayerNotFoundException {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         Player player = (Player) headerAccessor.getSessionAttributes().get("player");
+        boolean wasLeader = player.isLeader();
+
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
+
+        // ggf. neuen Leader bestimmen
+        if (wasLeader) {
+            lobby.getPlayers().stream().findAny().ifPresent(newLeader -> {
+                newLeader.setLeader(true);
+            });
+        }
+
+        // Wenn kein Spieler mehr drin: Lobby Löschen
+        if (lobby.isEmpty()) {
+            lobbyManager.deleteLobby(lobby);
+        }
         logger.info("WebSocket disconnected - Player Token: {}", player.getPlayerToken());
     }
 
@@ -306,8 +312,9 @@ public class FrontendReceiverController {
      * abgelaufen ist.
      *
      * <p>
-     * Dieser Listener reagiert auf {@link FrontendCooldownFinishedEvent}-Events,
-     * die vom {@link de.hs_rm.de.milefiz.game.service.CooldownService} publiziert
+     * Dieser Listener reagiert auf
+     * {@link FrontendCooldownFinishedEvent}-Events, die vom
+     * {@link de.hs_rm.de.milefiz.game.service.CooldownService} publiziert
      * werden, sobald der Cooldown eines Spielers den Wert 0 erreicht.
      * </p>
      *
@@ -315,8 +322,8 @@ public class FrontendReceiverController {
      * <ol>
      * <li>Der Listener ermittelt anhand der playerId, in welcher {@link Lobby}
      * sich der Spieler aktuell befindet.</li>
-     * <li>Es wird ein neues {@link FrontendCooldownFinishedEvent} erzeugt,
-     * das zusätzlich die Lobby-ID enthält.</li>
+     * <li>Es wird ein neues {@link FrontendCooldownFinishedEvent} erzeugt, das
+     * zusätzlich die Lobby-ID enthält.</li>
      * <li>Dieses Event wird via STOMP über den WebSocket-Broker an alle Clients
      * der betroffenen Lobby gesendet.</li>
      * </ol>
