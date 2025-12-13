@@ -1,23 +1,32 @@
 <script setup lang="ts">
 
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import LobbyIDField from '@/components/ui/pages/LobbyIDField.vue'
 import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
+import { storeToRefs } from 'pinia'
 
-const { startGameCommand, joinLobby} = useMilefizStore()
-startGameCommand()
+const { startGameCommand, joinLobby } = useMilefizStore()
+
 
 const milefizStore = useMilefizStore()
 
 onMounted(() => {
     milefizStore.joinLobby()
 })
+
+
 const router = useRouter()
 
+watch(() => milefizStore.gameStarted, (started) => {
+    if (started) {
+        router.push({ name: 'game' })
+    }
+}
+)
 // Daten
 const lobbyName = ref('')
 const username = ref('')
@@ -112,7 +121,7 @@ const handleFileChange = (event: Event) => {
                     <!-- Buttons -->
                     <div class="form-row">
                         <div class="button-container">
-                            <button class="start-game-button" @click="startGameCommand()">
+                            <button class="start-game-button" @click="startGameCommand">
                                 Spiel Starten
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />

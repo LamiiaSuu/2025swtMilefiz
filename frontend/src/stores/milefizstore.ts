@@ -114,8 +114,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
-          if(event.playerId === gamedata.playerId){
-            gamedata.currentDiceRoll = event.remainingMoves 
+          if (event.playerId === gamedata.playerId) {
+            gamedata.currentDiceRoll = event.remainingMoves
           }
         }
         // LOBBY_UPDATE wird immer ausgerufen, wenn sich Werte der Lobby (außer das Board) geupdatet haben. Dazu zählt auch, wenn neue Spieler gejoint sind
@@ -123,7 +123,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           const lobbyUpdate = event as LobbyUpdateEvent
           handleLobbyUpdate(lobbyUpdate)
 
-        //Wenn Energy erfolgreich gesaved wurde wird Frontendseitig der Würfelwurf ebenfalls auf 0 gesetzt und die gamedata.energy geupdated
+          //Wenn Energy erfolgreich gesaved wurde wird Frontendseitig der Würfelwurf ebenfalls auf 0 gesetzt und die gamedata.energy geupdated
         } else if (event.type === 'SAVE_ENERGY') {
           gamedata.currentDiceRoll = 0
           gamedata.energy = event.energy
@@ -131,9 +131,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
           console.warn('Energy save rejected:', event.msg)
           return
-        }        if (event.type === "MOVE_WITH_LOSS") {
+        } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             //TODO moveloss animieren
             console.warn("lost remaining moves")
@@ -145,10 +145,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           //aktuell einfach random platzhalter uuid
           moveBarrier(event.barrierId, crypto.randomUUID())
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
-          
+
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
@@ -157,30 +157,33 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
           console.warn("u ran into barrieeer oh no")
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
         }
         if (event.type === "DUEL") {
           boardStore.updateMeeplePosition(event.firstMeepleId, event.targetField)
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
           //TODO duel zwischen zwei meeples einleiten
         }
-        if (event.type === "WIN"){
+        if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0
           //TODO meeple bei spieler und von board entfernen
         }
-         if (event.type === "BARRIER_MOVE_ERROR"){
+        if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
         }
 
         // SPIEL STARTET
         else if (event.type === 'GAME_START') {
+          const event = JSON.parse(message.body)
+          console.log('FULL EVENT:', event)
+
           console.log('Spiel startet')
-          router.push({ name: 'game'})
+          router.push({ name: 'game' })
         }
       })
     }
@@ -221,6 +224,32 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
     gamedata.lobby = lobbyUpdate.lobby
   }
+
+
+  function startGameCommand() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot start game commnand: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id) {
+      console.error('Cannot start game command.')
+      return
+    }
+
+    try {
+      stompclient.publish({
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`,
+        body: JSON.stringify({
+          playerId: gamedata.playerId,
+        })
+      })
+      console.log('Start game command sent for all players in lobby:', gamedata.lobby?.id)
+    } catch (err) {
+      console.error('Error sending start game command:', err)
+    }
+  }
+
 
   /**
    * Sendet eine Bewegungsaktion (Move) an den Spielserver.
@@ -268,7 +297,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       console.error("Cannot send move: STOMP client not connected.")
       return
     }
-    const moveBarrCmd: MoveBarrierCommand = { barrierId, targetFieldId};
+    const moveBarrCmd: MoveBarrierCommand = { barrierId, targetFieldId };
     const body = JSON.stringify(moveBarrCmd)
     const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
 
@@ -309,27 +338,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
-  function startGameCommand() {
-    if (!stompclient || !stompclient.connected) {
-      console.error('Cannot start game commnand: STOMP client not connected.')
-      return
-    }
 
-    if (!gamedata.lobby?.id) {
-      console.error('Cannot start game command.')
-      return
-    }
-
-
-    try {
-      stompclient.publish({
-        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`,
-      })
-      console.log('Start game command sent for all players in lobby:', gamedata.lobby?.id)
-    } catch (err) {
-      console.error('Error sending start game command:', err)
-    }
-  }
 
   /**
    * Sendeteinen Energie-Speichern-Befehl an den Spielserver
