@@ -5,9 +5,11 @@ import { useMilefizStore } from '@/stores/milefizstore'
 
 const store = useMilefizStore()
 const router = useRouter()
+
 </script>
 
 <template>
+  <!-- GIF von Pixelmotion4096 von Pixabay (https://pixabay.com/de//?utm_source=link-attribution&utm_medium=referral&utm_campaign=animation&utm_content=12378) -->
   <img src="/winPopUpAssets/confetti_down.gif" alt="Confetti" class="confetti" />
   <div class="overlay">
     <div class="popup">
@@ -48,7 +50,7 @@ const router = useRouter()
   height: 40vh;
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  border: 7px solid #4caf50;
+  border: 7px solid #efbf04;
   animation: fadeIn 0.3s ease;
 }
 
