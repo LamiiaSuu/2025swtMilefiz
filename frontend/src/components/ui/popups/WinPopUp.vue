@@ -2,6 +2,8 @@
 import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
+import WinCharacter from './WinCharacter.vue'
+import { TresCanvas } from '@tresjs/core'
 
 const store = useMilefizStore()
 const router = useRouter()
@@ -17,6 +19,17 @@ const router = useRouter()
         <h1 class="title">{{ store.winnerName || 'Unbekannter Spieler' }} hat gewonnen!</h1>
         <p class="info-text">Du kannst jetzt zurück ins Hauptmenü gehen.</p>
       </div>
+
+      <div class="character-container">
+        <TresCanvas :alpha="true" :clear-color="0x000000" :clear-alpha="0" style="width: 100%; height: 100%; background: transparent !important;">
+          <TresPerspectiveCamera :position="[0, 2, 7]" />
+          <TresAmbientLight :intensity="1" />
+          <TresDirectionalLight :position="[3, 5, 2]" :intensity="5" />
+
+          <WinCharacter :scale="1.4" :y-position="0" bodyColor="lightgray" eyeColor="black"  :rotation-y="-0.35"/>
+        </TresCanvas>
+      </div>
+
       <div class="button-container">
         <BackButton :to="{ name: 'Homepage' }">&lt; Zurück zum Hauptmenü</BackButton>
       </div>
@@ -47,7 +60,7 @@ const router = useRouter()
   background-color: var(--background-color-forms);
   border-radius: 15px;
   width: 45vw;
-  height: 40vh;
+  height: 55vh;
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   border: 7px solid #efbf04;
@@ -58,9 +71,8 @@ const router = useRouter()
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin: auto 0;
+  margin: 3vh 0;
   text-align: center;
-  justify-content: center;
   align-items: center;
 }
 
@@ -73,7 +85,17 @@ const router = useRouter()
 .info-text {
   font-size: 4vh;
   color: var(--button-color-inactive);
-  margin-bottom: 3vh;
+  margin-bottom: 2vh;
+}
+
+.character-container {
+  width: 100%;
+  height: 60%;
+  margin: 1vh 0;
+  flex-shrink: 0;
+  margin-top: -25vh;
+  margin-bottom: -1vh;
+  
 }
 
 .button-container {
