@@ -46,15 +46,18 @@ const router = createRouter({
     },
     {
       path: '/join/:lobbyid',
-      beforeEnter: async (to, from, next) => {
+      component: NewGameView,
+      beforeEnter: async (to, from) => {
         // lobbyid aus parametern
         const id: string | undefined = (to.params.lobbyid as string | undefined)
 
         // warten bis lobby gejoint
-        await joinLobby(id)
-        next()
+        if (id) {
+          console.log(`joine mit ${id}`);
+          await joinLobby(id)
+        }
+        return { name: 'game-start', replace: true }
       },
-      redirect: { name: 'game-start', replace: true }
     },
   ],
 })
