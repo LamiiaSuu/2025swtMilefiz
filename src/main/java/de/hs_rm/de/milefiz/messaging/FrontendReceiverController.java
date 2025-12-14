@@ -399,7 +399,7 @@ public class FrontendReceiverController {
                 logger.error("Unexpected error saving energy for Player {}", player.getId(), e);
             }
 
-            return new FrontendSaveEnergyEvent(lobbyId, player.getEnergy());
+            return new FrontendSaveEnergyEvent(player.getId(), player.getEnergy(), player.getMaxEnergy(), player.hasFullEnergy());
         }
 
         return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy");

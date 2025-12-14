@@ -11,6 +11,7 @@ export interface Player {
   color: string
   activeMeeple: Meeple | null
   remainingMoves: number
+  maxEnergy: number
 }
 
 export interface Meeple {
