@@ -1,5 +1,13 @@
+<script lang="ts" setup>
+
+defineProps({
+  overlay: Boolean
+})
+
+</script>
+
 <template>
-    <div class="header">
+    <div class="header" :class="{ 'overlay': overlay }">
         <h1>MI'lefiz</h1>
         <h2><slot>&nbsp;</slot></h2>
     </div>
@@ -34,8 +42,6 @@
 
         pointer-events: none;
 
-        z-index: 1;
-
         h1 {
             font-size: 8vh;
         }
@@ -44,5 +50,9 @@
             font-size: 4vh;
             line-height: 0.6;
         }
+    }
+
+    .header.overlay {
+        z-index: 1;
     }
 </style>

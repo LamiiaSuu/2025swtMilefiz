@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useMilefizStore } from '@/stores/milefizstore'
+
+const milefizStore = useMilefizStore()
+const { disconnectAndReset } = milefizStore
 
 const props = defineProps<{ to: string | { name: string } }>()
 const router = useRouter()
@@ -7,6 +11,7 @@ const router = useRouter()
 const goBack = () => {
   if (props.to) {
     router.push(props.to)
+    disconnectAndReset() // disconnect current lobby
   }
 }
 </script>

@@ -91,24 +91,6 @@ function rollDice() {
     triggerPressAnimation();
 }
 
-/**
- * Started den lokalen Frontend-Countdown
- * @param seconds Sekundenanzahl, bei der der Countdown startet
- */
-function startLocalCountdown(seconds: number) {
-    localCountdown.value = seconds
-
-    if (interval) clearInterval(interval)
-
-    interval = window.setInterval(() => {
-        if (localCountdown.value > 0) {
-            localCountdown.value--
-        } else {
-            clearInterval(interval!)
-            interval = null
-        }
-    }, 1000)
-}
 
 /**
  * Bereinigung: Falls Komponente zerstört wird: Timer stoppen und Leaks vermeiden
