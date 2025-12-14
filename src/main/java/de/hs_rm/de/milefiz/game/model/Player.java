@@ -283,6 +283,10 @@ public class Player implements Principal {
         remainingMoves = 0;
     }
 
+    public void consumeEnergy(){
+        energy = 0;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

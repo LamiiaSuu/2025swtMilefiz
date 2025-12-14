@@ -159,6 +159,17 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             console.warn('Energy save rejected:', event.msg)
           }
           return
+        } 
+        // Wenn energy erfolgreich konsumiert wurde, wird frontendseitig auch die energy resettet
+        else if (event.type === 'CONSUME_ENERGY') {
+          if (event.playerId == gamedata.playerId) {
+            gamedata.energy = event.energy
+            energy.isEnergyFull = event.hasFullEnergy
+          }
+        } else if (event.type === 'CONSUME_ENERGY_REJECTED') {
+          if (event.playerId == gamedata.playerId) {
+            console.warn('Consume energy rejected:', event.msg)
+          }
         } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           if (event.playerId === gamedata.playerId) {
@@ -512,12 +523,38 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function sendEnergyConsume() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot save energy: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id || !gamedata.playerId) {
+      console.error('Cannot save energy: Missing lobbyId or playerId')
+      return
+    }
+    const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId }
+    const body = JSON.stringify(energyConsumeCommand)
+
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
+
+    try {
+      stompclient.publish({
+        destination: DEST_APP + '/consumeEnergy',
+        body,
+      })
+      console.log('Energy consume:', body)
+    } catch (err) {
+      console.error('Error consuming energy:', err)
+    }
+  }
+
   /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
   function disconnectAndReset() {
     // WebSocket-Verbindung trennen
-    if(stompclient && stompclient.connected) {
+    if (stompclient && stompclient.connected) {
       stompclient.deactivate()
       stompclient = null
     }
@@ -536,15 +573,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy.isEnergyFull = false
     energy.isEnergyFresh = false
 
-    isJumping.value = false
 
     console.log('Store reset complete')
   }
 
-  /**
-   *
-   */
-  const isJumping = ref(false)
 
 
   return {
@@ -557,10 +589,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy,
     sendMove,
     sendEnergySave,
+    sendEnergyConsume,
     startGameCommand,
     getOwnPlayer,
     isOwnLeader,
     disconnectAndReset,
-    /* requestJump */
   }
 })

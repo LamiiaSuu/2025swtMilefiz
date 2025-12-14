@@ -26,6 +26,8 @@ import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.commands.UpdateLobbySettingsCommand;
+import de.hs_rm.de.milefiz.messaging.events.FrontendConsumeEnergyEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendConsumeEnergyRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
@@ -49,7 +51,8 @@ public class FrontendReceiverController {
     private FrontendMessagingService messagingService;
 
     public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService,
-            SimpMessagingTemplate messagingTemplate, FrontendMessagingServiceImpl frontendMessagingServiceImpl, LobbyMapper lobbyMapper) {
+            SimpMessagingTemplate messagingTemplate, FrontendMessagingServiceImpl frontendMessagingServiceImpl,
+            LobbyMapper lobbyMapper) {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
         this.lobbyMapper = lobbyMapper;
@@ -77,13 +80,13 @@ public class FrontendReceiverController {
      * {@code /topic/milefiz/lobby/{lobbyId}}
      *
      * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt
-     * wird
+     *                wird
      * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und direction
-     * @param player der authentifizierte Benutzer, der die Nachricht gesendet
-     * hat
+     * @param player  der authentifizierte Benutzer, der die Nachricht gesendet
+     *                hat
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
-     * ({@link FrontendMoveEvent}) oder einen Fehler
-     * ({@link FrontendMoveRejectedEvent}) an die Clients sendet
+     *         ({@link FrontendMoveEvent}) oder einen Fehler
+     *         ({@link FrontendMoveRejectedEvent}) an die Clients sendet
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -117,16 +120,17 @@ public class FrontendReceiverController {
      * Weiterleitung des Ergebnisses an alle Clients der betroffenen Lobby über
      * {@code /topic/milefiz/lobby/{lobbyId}}
      *
-     * @param lobbyId die eindeutige ID der Lobby, in der die Barriere
-     * verschoben wird
+     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere
+     *                    verschoben wird
      * @param moveBarrCmd der vom Frontend übermittelte Befehl mit Barrieren-ID
-     * und Ziel-Feld-ID
-     * @param player der Spieler (bzw. dessen Benutzerkontext), der die Barriere
-     * verschiebt
+     *                    und Ziel-Feld-ID
+     * @param player      der Spieler (bzw. dessen Benutzerkontext), der die
+     *                    Barriere
+     *                    verschiebt
      * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent},
-     * das das Ergebnis der Barrierenbewegung beschreibt
+     *         das das Ergebnis der Barrierenbewegung beschreibt
      *
-     * Author: Maximilian Ressel
+     *         Author: Maximilian Ressel
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/movebarrier")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -181,7 +185,7 @@ public class FrontendReceiverController {
      * @param lobbyId die eindeutige UUID der Lobby in der gewürfelt wird
      * @param command der Würfel-Befehl vom Client, enthält die Spieler-ID
      * @return {@link FrontendRollDiceEvent} mit Lobby-ID und Würfelergebnis
-     * (1-6)
+     *         (1-6)
      *
      * @see GameService#rollDice()
      * @see FrontendRollDiceEvent
@@ -197,8 +201,9 @@ public class FrontendReceiverController {
             Player player) {
         logger.info("Player {} wants to roll dice in lobby {}", player.getId(), lobbyId);
         if (gameService.getRollDiceCooldown(player.getId()) <= 0) {
-            if(player.getRemainingMoves() > 0){
-                logger.info("Cannot roll. There are still {} moves remaining for player {}", player.getRemainingMoves(), player.getId());
+            if (player.getRemainingMoves() > 0) {
+                logger.info("Cannot roll. There are still {} moves remaining for player {}", player.getRemainingMoves(),
+                        player.getId());
                 return new FrontendRollDiceRejectedMovesLeftEvent(command.playerId(), player.getRemainingMoves());
             }
             int number = gameService.rollDice();
@@ -388,13 +393,13 @@ public class FrontendReceiverController {
      * </ul>
      *
      * @param lobbyId die eindeutige UUID der Lobby in der Energie gespeichert
-     * wird
+     *                wird
      * @param command der Energie-Befehl vom Client, enthält die Spieler-ID
-     * @param player der authentifizierte Spieler, der Energie speichern möchte
+     * @param player  der authentifizierte Spieler, der Energie speichern möchte
      *
      * @return {@link FrontendSaveEnergyEvent} bei Erfolg mit Lobby-ID und neuer
-     * Energie, oder {@link FrontendSaveEnergyRejectedEvent} bei ungültiger
-     * Anfrage
+     *         Energie, oder {@link FrontendSaveEnergyRejectedEvent} bei ungültiger
+     *         Anfrage
      *
      * @see Player#saveEnergy()
      * @see Player#hasFullEnergy()
@@ -419,10 +424,29 @@ public class FrontendReceiverController {
                 logger.error("Unexpected error saving energy for Player {}", player.getId(), e);
             }
 
-            return new FrontendSaveEnergyEvent(player.getId(), player.getEnergy(), player.getMaxEnergy(), player.hasFullEnergy());
+            return new FrontendSaveEnergyEvent(player.getId(), player.getEnergy(), player.getMaxEnergy(),
+                    player.hasFullEnergy());
         }
 
         return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy");
+    }
+
+    @MessageMapping("/milefiz/lobby/{lobbyId}/consumeEnergy")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendEvent handleConsumeEnergy(@DestinationVariable("lobbyId") UUID lobbyId, EnergyCommand command, Player player) {
+        logger.info("Player {} wants to consume energy for jump.", player.getId());
+        if (player.hasFullEnergy()){
+            try{
+                player.consumeEnergy();
+                logger.info("Energy consumed for player {}.", player.getId());
+            } catch (RuntimeException e){
+                logger.error("Unexpected error occurred when trying to consume energy for Player {}", player.getId(), e);
+            }
+
+            return new FrontendConsumeEnergyEvent(player.getId(), player.getEnergy(), player.hasFullEnergy());
+        }
+
+        return new FrontendConsumeEnergyRejectedEvent("Player does not have enough energy saved.");
     }
 
     /**
@@ -435,9 +459,9 @@ public class FrontendReceiverController {
      * WebSocket: Eingang /milefiz/lobby/{lobbyId}/rename Weiterleitung
      * /topic/milefiz/lobby/{lobbyId}
      *
-     * @param lobbyId die UUID der zu aktualisierenden Lobby
+     * @param lobbyId                die UUID der zu aktualisierenden Lobby
      * @param lobbyUpdateSettingsCmd Command mit newLobbyName und maxPlayers
-     * @param player der authentifizierte Leader-Spieler
+     * @param player                 der authentifizierte Leader-Spieler
      * @return FrontendLobbyUpdateEvent mit aktualisiertem Lobby-DTO
      * @throws PlayerHasNoPermissionException falls Spieler nicht Leader ist
      * @see FrontendLobbyUpdateEvent
@@ -446,7 +470,8 @@ public class FrontendReceiverController {
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/updateSettings")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleLobbyUpdate(@DestinationVariable("lobbyId") UUID lobbyId, UpdateLobbySettingsCommand lobbyUpdateSettingsCmd,
+    public FrontendEvent handleLobbyUpdate(@DestinationVariable("lobbyId") UUID lobbyId,
+            UpdateLobbySettingsCommand lobbyUpdateSettingsCmd,
             Player player) {
         if (!player.isLeader()) {
             throw new PlayerHasNoPermissionException();

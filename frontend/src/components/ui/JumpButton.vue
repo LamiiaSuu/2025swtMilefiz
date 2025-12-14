@@ -42,7 +42,7 @@ function jump() {
     }
     
     console.log("Hüpfen Request gesendet.")
-    
+    milefizStore.sendEnergyConsume()
     /* Press Animation für den Button*/
     triggerPressAnimation();
 }
