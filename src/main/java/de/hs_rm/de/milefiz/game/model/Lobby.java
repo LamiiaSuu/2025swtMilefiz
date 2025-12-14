@@ -11,6 +11,7 @@ import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 public class Lobby {
 
     private UUID id;
+    private String lobbyName;
     private List<Player> players;
     private Board board;
     private int maxPlayers;
@@ -18,6 +19,7 @@ public class Lobby {
     public Lobby() {
         id = UUID.randomUUID();
         players = new ArrayList<>();
+        lobbyName = "Neue Lobby";
         maxPlayers = Color.values().length;
     }
 
@@ -28,7 +30,7 @@ public class Lobby {
      */
     public Color getAvailableColor() {
         return EnumSet.allOf(Color.class).stream()
-                //filter: Players->UsedColors dann Abfrage von Color die noch nicht existiert
+                // filter: Players->UsedColors dann Abfrage von Color die noch nicht existiert
                 .filter(c -> players.stream().map(e -> e.getColor()).noneMatch(e -> c.equals(e)))
                 .findFirst()
                 .orElse(null);
@@ -48,12 +50,53 @@ public class Lobby {
 
     public boolean join(Player player) throws LobbyJoinException {
         if (isJoinable()) {
+            // Alle Meeples Startfelder setzen
+            updatePlayerStarts(player);
             return addPlayer(player);
         }
         throw new LobbyJoinException("Die Lobby ist zurzeit nicht beitretbar!");
     }
 
+    public boolean isEmpty() {
+        return players == null || players.isEmpty();
+    }
+
+    /**
+     * Diese Methode ändert das Board im MODEL. Um es an alle Clients zu
+     * schicken, muss
+     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent}
+     * gesendet werden.
+     *
+     * @param board das neue Board
+     */
+    public void setBoard(Board board) {
+        this.board = board;
+        updatePlayerStarts();
+    }
+
+    private void updatePlayerStarts(Player player) {
+        if (board == null) {
+            return;
+        }
+        for (Meeple m : player.getMeeples()) {
+            m.setCurrentField(board.getStartField(player.getColor()));
+        }
+    }
+
+    private void updatePlayerStarts() {
+        players.forEach(p -> {
+            updatePlayerStarts(p);
+        });
+    }
+
     public boolean leave(Player player) {
+        boolean wasLeader = player.isLeader();
+        // ggf. neuen Leader bestimmen
+        if (wasLeader) {
+            getPlayers().stream().filter(p -> !p.equals(player)).findAny().ifPresent(newLeader -> {
+                newLeader.setLeader(true);
+            });
+        }
         return players.remove(player);
     }
 
@@ -78,14 +121,23 @@ public class Lobby {
     }
 
     public Player getPlayerByToken(String sessionId) throws Exception {
-        return players.stream().filter(p -> p.getPlayerToken() != null && p.getPlayerToken().equals(sessionId)).findFirst().orElseThrow(PlayerNotFoundException::new);
+        return players.stream().filter(p -> p.getPlayerToken() != null && p.getPlayerToken().equals(sessionId))
+                .findFirst().orElseThrow(PlayerNotFoundException::new);
     }
+
+    public Player getLeader() {
+        return players.stream().filter(p -> p.isLeader()).findAny().orElse(null);
+    }
+
     public Board getBoard() {
         return board;
     }
 
-    public void setBoard(Board board) {
-        this.board = board;
+    public String getLobbyName() {
+        return lobbyName;
     }
 
+    public void setLobbyName(String lobbyName) {
+        this.lobbyName = lobbyName;
+    }
 }

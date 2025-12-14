@@ -1,6 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import GameView from '../views/GameView.vue'
+import HomeView from '@/views/HomeView.vue'
+import NewGameView from '@/views/NewGameView.vue'
+import JoinGameView from '@/views/JoinGameView.vue'
+import SettingView from '@/views/SettingView.vue'
+import MapEditorView from '@/views/MapEditorView.vue'
+
 import { useMilefizStore } from '@/stores/milefizstore'
-import HomeView from '../views/HomeView.vue'
 
 const { joinLobby } = useMilefizStore()
 
@@ -9,17 +15,34 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: 'Homepage',
       component: HomeView,
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
+      path: '/game',
+      name: 'game',
+      component: GameView,
     },
+    {
+      path: '/gameStart',
+      name: 'game-start',
+      component: NewGameView,
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: SettingView,
+    },
+    {
+      path: '/join-game',
+      name: 'join-game',
+      component: JoinGameView,
+    },
+        {
+      path: '/map-editor',
+      name: 'map-editor',
+      component: MapEditorView,
+    }
     {
       path: '/lobby/:lobbyid',
       redirect: (to) => {

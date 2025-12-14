@@ -23,7 +23,7 @@ public class FrontendMessagingServiceImpl implements FrontendMessagingService {
      * Sendet ein Event an alle Clients die die Lobby abonniert haben.
      *
      * @param lobbyEvent beinhaltet Lobby (Empfänger) und FrontendEvent
-     * (Payload). Verfügbare Eventtypen:
+     * (Payload). Verfügbare Eventtypen, z.B.:
      * <ul>
      * <li>{@link de.hs_rm.de.milefiz.messaging.events.FrontendJumpEvent}</li>
      * <li>{@link de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent}</li>

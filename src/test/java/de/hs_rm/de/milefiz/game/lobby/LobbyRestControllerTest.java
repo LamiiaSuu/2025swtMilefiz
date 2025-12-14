@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,8 +22,10 @@ import org.springframework.http.ResponseEntity;
 import de.hs_rm.de.milefiz.game.model.Color;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.dto.LobbyDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
 import de.hs_rm.de.milefiz.game.service.GameService;
-import jakarta.servlet.http.HttpSession;
+import de.hs_rm.de.milefiz.messaging.FrontendMessagingServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class LobbyRestControllerTest {
@@ -36,7 +37,10 @@ class LobbyRestControllerTest {
     private GameService gameService;
 
     @Mock
-    private HttpSession httpSession;
+    private LobbyMapper lobbyMapper;
+
+    @Mock
+    private FrontendMessagingServiceImpl messagingService;
 
     @InjectMocks
     private LobbyRestController lobbyRestController;
@@ -62,21 +66,31 @@ class LobbyRestControllerTest {
         lobbies.add(testLobby);
         lobbies.add(new Lobby());
         
+        Set<LobbyDTO> lobbyDTOs = new HashSet<>();
+        lobbyDTOs.add(new LobbyDTO());
+        lobbyDTOs.add(new LobbyDTO());
+        
         when(lobbyManager.getLobbies()).thenReturn(lobbies);
-        Set<Lobby> result = lobbyRestController.getLobbyList();
+        when(lobbyMapper.toDTOSet(lobbies)).thenReturn(lobbyDTOs);
+        
+        Set<LobbyDTO> result = lobbyRestController.getLobbyList();
 
         assertNotNull(result);
         assertEquals(2, result.size());
         verify(lobbyManager).getLobbies();
+        verify(lobbyMapper).toDTOSet(lobbies);
     }
 
     @Test
     @DisplayName("getLobbyList sollte leere Liste zurückgeben wenn keine Lobbys existieren")
     void getLobbyList_shouldReturnEmptySetWhenNoLobbies() {
         Set<Lobby> emptyLobbies = new HashSet<>();
+        Set<LobbyDTO> emptyLobbyDTOs = new HashSet<>();
+        
         when(lobbyManager.getLobbies()).thenReturn(emptyLobbies);
+        when(lobbyMapper.toDTOSet(emptyLobbies)).thenReturn(emptyLobbyDTOs);
 
-        Set<Lobby> result = lobbyRestController.getLobbyList();
+        Set<LobbyDTO> result = lobbyRestController.getLobbyList();
 
         assertNotNull(result);
         assertEquals(0, result.size());
@@ -85,16 +99,24 @@ class LobbyRestControllerTest {
     @Test
     @DisplayName("joinLobby sollte erfolgreich Player zu existierender Lobby hinzufügen")
     void joinLobby_shouldSuccessfullyAddPlayerToExistingLobby() throws Exception {
+        LobbyDTO lobbyDTO = new LobbyDTO();
+        lobbyDTO.setId(testLobbyId);
+        
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, httpSession);
+        when(lobbyMapper.toDTO(testLobby)).thenReturn(lobbyDTO);
+        
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(testLobbyId, response.getBody().lobbyId());
-        assertNotNull(response.getBody().playerId());
-        assertNotNull(response.getBody().color());
-        assertNotNull(response.getBody().playerToken());
-        assertEquals("Erfolgreich gejoint. ", response.getBody().msg());
+        
+        LobbyJoinEvent event = response.getBody();
+        assertNotNull(event);
+        assertNotNull(event.playerId());
+        assertNotNull(event.lobby());
+        assertEquals(testLobbyId, event.lobby().getId());
+        assertNotNull(event.playerToken());
+        assertEquals("Erfolgreich gejoint", event.msg());
         assertEquals(1, testLobby.getPlayers().size());
     }
 
@@ -104,7 +126,7 @@ class LobbyRestControllerTest {
         UUID nonExistentId = UUID.randomUUID();
         when(lobbyManager.getLobby(nonExistentId)).thenThrow(new LobbyNotFoundException());
         try {
-            lobbyRestController.joinLobby(nonExistentId, httpSession);
+            lobbyRestController.joinLobby(nonExistentId);
         } catch (LobbyNotFoundException ex) {
             // Expected exception
             assertNotNull(ex);
@@ -120,16 +142,14 @@ class LobbyRestControllerTest {
         testLobby.join(new Player(Color.BLUE));
         
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, httpSession);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertNull(response.getBody().lobbyId());
-        assertNull(response.getBody().playerId());
-        assertNull(response.getBody().color());
-        assertNull(response.getBody().playerToken());
-        assertNotNull(response.getBody().msg());
-        assertEquals("Die Lobby ist zurzeit nicht beitretbar!", response.getBody().msg());
+        
+        LobbyJoinEvent event = response.getBody();
+        assertNotNull(event);
+        assertEquals("Die Lobby ist zurzeit nicht beitretbar!", event.msg());
     }
 
     @Test
@@ -137,16 +157,19 @@ class LobbyRestControllerTest {
     void joinLobby_shouldCreatePlayerWithAvailableColor() throws Exception {
         testLobby.join(new Player(Color.RED)); // Erste Farbe bereits vergeben
         
+        LobbyDTO lobbyDTO = new LobbyDTO();
+        lobbyDTO.setId(testLobbyId);
+        
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
+        when(lobbyMapper.toDTO(testLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, httpSession);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         
-        // Verifiziere dass die Farbe nicht RED ist (bereits vergeben)
-        String assignedColor = response.getBody().color();
-        assertNotNull(assignedColor);
-        assertEquals(false, "RED".equals(assignedColor));
+        LobbyJoinEvent event = response.getBody();
+        assertNotNull(event);
+        assertNotNull(event.playerId());
         
         // Verifiziere dass 2 Spieler in der Lobby sind
         assertEquals(2, testLobby.getPlayers().size());
@@ -169,15 +192,22 @@ class LobbyRestControllerTest {
         UUID newLobbyId = UUID.randomUUID();
         newLobby.setId(newLobbyId);
         
+        LobbyDTO lobbyDTO = new LobbyDTO();
+        lobbyDTO.setId(newLobbyId);
+        
         when(lobbyManager.getLobbies()).thenReturn(lobbies);
         when(lobbyManager.createLobby()).thenReturn(newLobby);
         when(lobbyManager.getLobby(newLobbyId)).thenReturn(newLobby);
+        when(lobbyMapper.toDTO(newLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby(httpSession);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(newLobbyId, response.getBody().lobbyId());
+
+        LobbyJoinEvent event = response.getBody();
+        assertNotNull(event);
+        assertEquals(newLobbyId, event.lobby().getId());
         verify(lobbyManager).createLobby();
     }
 
@@ -190,15 +220,22 @@ class LobbyRestControllerTest {
         UUID newLobbyId = UUID.randomUUID();
         newLobby.setId(newLobbyId);
         
+        LobbyDTO lobbyDTO = new LobbyDTO();
+        lobbyDTO.setId(newLobbyId);
+        
         when(lobbyManager.getLobbies()).thenReturn(emptyLobbies);
         when(lobbyManager.createLobby()).thenReturn(newLobby);
         when(lobbyManager.getLobby(newLobbyId)).thenReturn(newLobby);
+        when(lobbyMapper.toDTO(newLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby(httpSession);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(newLobbyId, response.getBody().lobbyId());
+
+        LobbyJoinEvent event = response.getBody();
+        assertNotNull(event);
+        assertEquals(newLobbyId, event.lobby().getId());
         verify(lobbyManager).createLobby();
     }
 }

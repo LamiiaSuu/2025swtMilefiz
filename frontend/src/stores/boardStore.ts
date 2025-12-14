@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import type { IBoardDTD } from './IBoardDTD'
 import { ref } from 'vue'
+import { useMilefizStore } from './milefizstore'
+import type {Player} from '../types/lobbyupdate'
+import type {Lobby} from '../types/lobbyupdate'
 
 const gameBoardTiles = ref<IBoardDTD>()
 /**
@@ -16,7 +19,7 @@ export const useBoardStore = defineStore('board', {
     board: null as IBoardDTD | null,
     /** meeple positionen */
     meeplePositions: {} as Record<string, string>,
-    testMeepleId: "123e4567-e89b-12d3-a456-426614174000" as string,
+    //testMeepleId: '123e4567-e89b-12d3-a456-426614174000' as string,
     lastFields: {} as Record<string, string | null>,
   }),
   actions: {
@@ -41,21 +44,23 @@ export const useBoardStore = defineStore('board', {
 
         // noch zum testen
         if (this.board) {
-          const startField = this.board.fields.find(
-            (f) => f.type === 'START_GREEN'
-          )
 
-          if (startField) {
-            this.meeplePositions[this.testMeepleId] = startField.id
-            this.lastFields[this.testMeepleId] = null
-            console.log(
-              `TestMeeple ${this.testMeepleId} startet auf Feld ${startField.id}`
-            )
-          } else {
-            console.warn("Kein Startfeld bei (0,0) gefunden!")
+          const milefizStore = useMilefizStore()
+          const lobby: Lobby | null = milefizStore.gamedata.lobby
+          if (lobby) {
+            const players: Player[] = lobby.players
+            for (const player of players) {
+              for (const meeple of player.meeples) {
+                if(meeple.currentFieldId) {
+                  this.meeplePositions[meeple.id] = meeple.currentFieldId
+                }
+                this.lastFields[meeple.id] = null
+              }
+                // Debug: Meeple Positionen loggen nach assignment
+                console.log('boardStore.getBoard: meeplePositions after init:', JSON.stringify(this.meeplePositions))
+            }
           }
         }
-
       } catch (error_) {
         console.log(error_)
         this.ok = false
@@ -70,6 +75,65 @@ export const useBoardStore = defineStore('board', {
         this.lastFields[meepleId] = previousField
       }
       this.meeplePositions[meepleId] = fieldId
+    },
+
+    updateBarrierPosition(barrierId: string, fieldId: string) {
+      if (!this.board) return;
+
+      //Alte Barriere entfernen
+      const oldField = this.board.fields.find(f => f.barrier);
+      if (oldField) {
+        oldField.barrier = false;
+      }
+
+      //Neue Barriere setzen
+      const newField = this.board.fields.find(f => f.id === fieldId);
+      if (newField) {
+        newField.barrier = true;
+      } else {
+        console.warn(`Barrier target field ${fieldId} not found.`);
+        return;
+      }
+
+      //Reaktivität erzwingen (damit Vue neu rendert)
+      this.board = {
+        ...this.board,
+        fields: [...this.board.fields],
+      };
+
+      console.log(`Barrier moved to field ${fieldId}`);
+    }
+  },
+  // Getter um alle Barriere-Meeple ans Frontend zu übergeben
+  getters: {
+    /**
+     * Gibt alle Felder zurück, die eine Barriere haben
+     */
+    barrierFields: (state) => {
+      return state.board?.fields.filter((f) => f.barrier) || []
+    },
+
+    /**
+     * Prüft ob ein bestimmtes Feld eine Barriere hat
+     * @param fieldId - ID des zu prüfenden Feldes
+     * @returns true wenn Barriere vorhanden, sonst false
+     */
+    hasBarrier: (state) => (fieldId: string) => {
+      return state.board?.fields.find((f) => f.id === fieldId)?.barrier || false
+    },
+
+    /**
+     * Gibt alle Barrieren mit ihren 3D-Positionen für das Rendering zurück
+     */
+    barriersWithPositions: (state) => {
+      if (!state.board) return []
+
+      return state.board.fields
+        .filter((f) => f.barrier)
+        .map((field) => ({
+          fieldId: field.id,
+          position: [field.position.x, 0, field.position.y] as [number, number, number],
+        }))
     },
   },
 })

@@ -80,7 +80,7 @@ public class Field {
     public void addNeighbour(Field field, Direction direction) {
         
         if (neighbours.keySet().contains(direction)) {
-            throw new IllegalArgumentException("Richtung " + direction + " ist schon besetzt");
+            throw new IllegalArgumentException("Richtung " + direction + " ist schon besetzt.\n Feld " + field.id + " kann nicht dem Feld " + this.id + " hinzugefuegt werden.");
         }
 
         neighbours.put(direction, field);

@@ -1,35 +1,135 @@
-@import './base.css';
-
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+@font-face {
+  font-family: "MainFont";
+  src: url("/fonts/BubblegumSans-Regular.ttf") format("truetype");
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+@font-face {
+  font-family: "AcmeFont";
+  src: url("/fonts/Acme-Regular.ttf") format("truetype");
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+@font-face {
+  font-family: "AlegreyaSansFont";
+  src: url("/fonts/AlegreyaSans-Regular.ttf") format("truetype");
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+:root {
+  --button-color: #234420;
+  --button-gradient-green: linear-gradient(to top, var(--button-color), #57AA51);
+  --button-gradient-red: linear-gradient(to top, #691515, #b52326);
+  --button-color-inactive: #737373;
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+  --background-color-forms: #D9D9D9;
+
+  --background-color-input-focus: #8b6f47;
+  --border-color-input-focus: #5d4a2f;
+  --text-color-input-focus: white;
+}
+
+* {
+  font-family: "MainFont", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.header-with-plate {
+  font-family: "MainFont", sans-serif;
+  background-image: url("/backgrounds/HeaderPlate.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  font-size: 8vh;
+  font-weight: bolder;
+  color: white;
+  -webkit-text-stroke: 6px black;
+  text-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5);
+  paint-order: stroke fill;
+
+  width: 100vw;
+  height: 100vh;
+  padding-bottom: 8vh;
+  margin-top: 3vh;
+
+  pointer-events: none; 
+}
+
+/* Oder nur für body */
+.menu-button {
+  font-family: "MainFont", sans-serif;
+  background-image: url("/backgrounds/ButtonPlate.png");
+  background-color: transparent;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  cursor: pointer;
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  color: white;
+  font-size: 3.5vh;
+  min-width: 35vw;
+  min-height: 9vh;
+  outline: none;
+
+  padding-bottom: 1vh;
+
+  -webkit-text-stroke: 6px black;
+  text-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5);
+  paint-order: stroke fill;
+}
+
+.page-title {
+  font-family: "MainFont", sans-serif;
+  border: none;
+  cursor: pointer;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-bottom: 1vh;
+
+  font-size: 1rem;
+  font-weight: bolder;
+  color: white;
+  -webkit-text-stroke: 6px black;
+  text-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5);
+
+  position: relative;
+  top: -15vh;
+  left: 0;
+  transform: none;
+  margin-top: -10vh;
+
+  paint-order: stroke fill;
+}
+
+
+form label {
+  font-family: "MainFont", sans-serif;
+  font-size: 1.5rem;
+  font-weight: bolder;
+  color: white;
+  -webkit-text-stroke: 6px black;
+  text-shadow:
+    1px 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 5px rgba(0, 0, 0, 0.5);
+    
+  paint-order: stroke fill;
 }

@@ -1,7 +1,11 @@
 <script setup lang="ts">
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
-import { watchEffect, watch, ref, computed } from 'vue'
+import { watchEffect, watch, ref, computed, onMounted } from 'vue'
+import { useMilefizStore } from "@/stores/milefizstore";
+
+// Zugriff auf globalen PiniaStore
+const milefizStore = useMilefizStore()
 
 //Definierte Props für Augen, Körperfarbe und Position
 const props = defineProps<{
@@ -9,6 +13,7 @@ const props = defineProps<{
   eyeColor?: string | number
   position?: [number, number, number]
   meepleId: string
+  barrier?: boolean
 }>()
 
 const characterRotation = ref(0)
@@ -24,29 +29,35 @@ const defaultUpDuration = 300
 const defaultFallDuration = 2000
 
 // Kleine Hüpfer (bei Bewegung)
-const smallJumpHeight = 1.2
-const smallUpDuration = 120   
+const smallJumpHeight = 0.7
+const smallUpDuration = 120
 const smallFallDuration = 170
 
 // Animation-Variablen
 const mixer = ref<any>(null)
 const jumpAction = ref<any>(null)
 
+// NEU: Y-Offset für unterschiedliche Modelle
+const yOffset = computed(() => props.barrier ? 0.85 : 0.135)
+
 // Berechne aktuelle Position (inklusive jumpOffset)
 const currentPosition = computed<[number, number, number]>(() => [
   animatedPosition.value[0],
-  animatedPosition.value[1] + jumpOffset.value,
+  animatedPosition.value[1] + jumpOffset.value + yOffset.value,
   animatedPosition.value[2]
 ])
 
+//Rock by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/dmRuyy1VXEv)
 // Block Character by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/ozSIyRIcIj)
-const { state } = useGLTF('/Block Character.glb', { draco: true })
 
-// Modellgröße per Scaling-Faktor, sobald geladen
-const scale = 1
+const modelPath = computed(() => props.barrier ? '/Rock.glb' : '/Block Character.glb')
+const { state } = useGLTF(modelPath, { draco: true })
+
+// Unterschiedliche Scale für Barriere und Character
+const scale = computed(() => props.barrier ? 1.5 : 0.55)
 watchEffect(async () => {
   if (state.value?.scene) {
-    state.value.scene.scale.set(scale, scale, scale)
+    state.value.scene.scale.set(scale.value, scale.value, scale.value)
 
     //Geht über CharacterMesh und unterscheidet nach Körper und Eyes
     state.value.scene.traverse((child: any) => {
@@ -132,7 +143,7 @@ const animateCustomJump = (
     const elapsed = now - startTime
 
     if (elapsed < upMs) {
-      
+
       const progress = elapsed / upMs
       jumpOffset.value = height * easeOutCubic(progress)
     } else if (elapsed < total) {
@@ -143,6 +154,7 @@ const animateCustomJump = (
 
       jumpOffset.value = 0
       isJumping.value = false
+      milefizStore.isJumping = false
       if (onComplete) onComplete()
       return
     }
@@ -157,6 +169,7 @@ const jump = () => {
   if (isJumping.value) return
 
   isJumping.value = true
+  milefizStore.isJumping = true
 
   // Spiele GLB-Animation ab (falls verfügbar)
   if (jumpAction.value) {
@@ -168,14 +181,34 @@ const jump = () => {
   animateCustomJump(defaultJumpHeight, defaultUpDuration, defaultFallDuration)
 }
 
+
+
 // Position für Animation
 const animatedPosition = ref<[number, number, number]>([...(props.position ?? [0, 0, 0])])
 
-// auf Änderung der Position reagieren
-watch(() => props.position, (newPos) => {
-  if (!newPos) return
-  animateTo(newPos)
-}, { deep: true })
+// auf Änderung der Position reagieren (nur bei tatsächlicher Positionsänderung)
+const _lastPropPosition = ref<[number, number, number] | null>(null)
+watch(
+  () => props.position,
+  (newPos) => {
+    if (!newPos) return
+    const last = _lastPropPosition.value
+    if (
+      last &&
+      Math.abs(last[0] - newPos[0]) < 1e-6 &&
+      Math.abs(last[1] - newPos[1]) < 1e-6 &&
+      Math.abs(last[2] - newPos[2]) < 1e-6
+    ) {
+      // no meaningful change -> do nothing
+      return
+    }
+
+    // record and animate
+    _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
+    animateTo(newPos)
+  },
+  { deep: true }
+)
 
 const speed = 0.08
 let moveAnimationFrame: number | null = null
@@ -289,13 +322,15 @@ const rotateToward = (target: [number, number, number]) => {
 
 // Gibt Rotation und Position frei
 defineExpose({ setRotation, jump, characterPosition, meepleId: props.meepleId, getPosition: () => currentPosition.value, })
+
+//Debug: Logging wenn GameCharacter gemounted werden
+onMounted(() => {
+  console.log('GameCharacter mounted:', props.meepleId, '| Barrier:', props.barrier)
+})
 </script>
 
 <template>
-  <TresGroup 
-    ref="characterPosition" 
-    :position="currentPosition" 
-    :rotation="[0, characterRotation, 0]">
+  <TresGroup ref="characterPosition" :position="currentPosition" :rotation="[0, characterRotation, 0]">
     <primitive v-if="state" :object="state?.scene" />
   </TresGroup>
 </template>
