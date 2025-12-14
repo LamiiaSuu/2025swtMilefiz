@@ -432,10 +432,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
-  /**
-   *
-   */
-  const isJumping = ref(false)
 
 
   return {
@@ -446,7 +442,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     cooldown,
     energy,
     sendMove,
-    sendEnergySave,
-    isJumping,
+    sendEnergySave
   }
 })
