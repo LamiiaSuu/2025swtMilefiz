@@ -3,7 +3,7 @@
 /* TODO: lobby interface aus lobbyupdate nehmen (vielleicht anpassen?) */
 export interface Lobby {
     id: string,
-    name: string,
+    lobbyName: string,
     //...
 }
 
@@ -17,10 +17,10 @@ const lobbyid = defineModel('lobbyid')
     <div class="game-container lobby-container">
         <div class="game-label">{{ label }}</div>
         <div class="lobby-list game-content">
-            <template v-for="(lobby) in lobbies" :key="lobby.id">
+            <template v-for="(lobby) in lobbies" :key="lobby.lobbyName">
                 <label class="lobby-item">
-                    <input class="radio-input" type="radio" :value="lobby.id" v-model="lobbyid" />
-                    <div class="radio-content">{{ lobby.id }}</div>
+                    <input class="radio-input" type="radio" :value="lobby.lobbyName" v-model="lobbyid" />
+                    <div class="radio-content">{{ lobby.lobbyName }}</div>
                 </label>
             </template>
         </div>
