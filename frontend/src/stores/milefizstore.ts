@@ -269,7 +269,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy.isEnergyFull = gamedata.energy >= energy.maxEnergy
   }
 
-
   /**
    * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
@@ -345,6 +344,27 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function sendLobbyMessage(destination: string, payload: any) {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot update lobby settings: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id) {
+      console.error('Cannot send lobby message: Missing lobbyId')
+      return
+    }
+    try {
+      stompclient.publish({
+        destination: destination,
+        body: JSON.stringify(payload),
+      })
+      console.log('Lobby message sent:', payload)
+    } catch (err) {
+      console.error('Error sending lobby message:', err)
+
+    }
+  }
   //TODO tatsächliches moven der Barrier implementieren
   function moveBarrier(barrierId: string, targetFieldId: string) {
     if (!stompclient || !stompclient.connected) {
@@ -393,22 +413,39 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
-   * Sendeteinen Energie-Speichern-Befehl an den Spielserver
+   * Prüft, ob der eigene Spieler Leader der aktuellen Lobby ist
    *
-   * Wird aufgerufen, wenn der Spieler im Fronten die gewürfelte Zahl als Energie speichern möchte.
+   * Nutzt die in der Lobby vorhandene Spielerliste und vergleicht
+   * die eigene playerId mit dem entsprechenden Eintrag.
+   */
+  function isOwnLeader(): boolean {
+    return getOwnPlayer()?.leader ?? false
+  }
+
+  function getOwnPlayer(): Player | undefined {
+    if (!gamedata.lobby || !gamedata.playerId) return
+
+    // Spieler abgleichen mit eigenen Daten
+    const me = gamedata.lobby.players?.find((p: Player) => p.id === gamedata.playerId) as Player
+    return me
+  }
+
+  /* Sendeteinen Energie - Speichern - Befehl an den Spielserver
    *
-   * Erstellt ein EnergyCommand-Objekt mit der Spieler-ID und veröffentlicht es über den STOMP-Endpunkt `/app/milefiz/lobby/{lobbyId}/saveEnergy`.
+  * Wird aufgerufen, wenn der Spieler im Fronten die gewürfelte Zahl als Energie speichern möchte.
+  *
+  * Erstellt ein EnergyCommand - Objekt mit der Spieler - ID und veröffentlicht es über den STOMP - Endpunkt`/app/milefiz/lobby/{lobbyId}/saveEnergy`.
+  *
+  * Ablauf:
+  * 1. Verbindung prüfen – Abbruch, falls STOMP - Client nicht verbunden ist.
+  * 2. Lobby - ID und Spieler - ID validieren – Abbruch bei fehlenden Daten.
+  * 3. Energy - Command serialisieren(`JSON.stringify`).
+  * 4. Nachricht an den Server senden.
+  *
+  * @returns void
+  * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
    *
-   * Ablauf:
-   * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.
-   * 2. Lobby-ID und Spieler-ID validieren – Abbruch bei fehlenden Daten.
-   * 3. Energy-Command serialisieren (`JSON.stringify`).
-   * 4. Nachricht an den Server senden.
-   *
-   * @returns void
-   * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
-   * 
-   * @author Elisabeth Gehdt
+  * @author Elisabeth Gehdt
    */
   function sendEnergySave() {
     if (!stompclient || !stompclient.connected) {
@@ -439,6 +476,35 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
+   * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
+   */
+  function disconnectAndReset() {
+    // WebSocket-Verbindung trennen
+    if(stompclient && stompclient.connected) {
+      stompclient.deactivate()
+      stompclient = null
+    }
+
+    // Store-State zurücksetzen
+    gamedata.playerId = ''
+    gamedata.playerToken = ''
+    gamedata.energy = 0
+    gamedata.currentDiceRoll = undefined
+    gamedata.lobby = null
+
+    cooldown.remainingSeconds = 0
+    cooldown.active = false
+
+    energy.maxEnergy = 0
+    energy.isEnergyFull = false
+    energy.isEnergyFresh = false
+
+    isJumping.value = false
+
+    console.log('Store reset complete')
+  }
+
+  /**
    *
    */
   const isJumping = ref(false)
@@ -448,6 +514,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     gamedata,
     startMilefizLiveUpdate,
     sendRollDice,
+    sendLobbyMessage,
     joinLobby,
     cooldown,
     energy,
@@ -455,6 +522,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     sendEnergySave,
     isJumping,
     winnerName,
-    gameFinished
+    gameFinished,
+    getOwnPlayer,
+    isOwnLeader,
+    disconnectAndReset,
+    /* requestJump */
   }
 })
