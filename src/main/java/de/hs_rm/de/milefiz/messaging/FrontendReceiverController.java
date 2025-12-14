@@ -34,6 +34,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyRejectedEvent;
 
@@ -196,6 +197,10 @@ public class FrontendReceiverController {
             Player player) {
         logger.info("Player {} wants to roll dice in lobby {}", player.getId(), lobbyId);
         if (gameService.getRollDiceCooldown(player.getId()) <= 0) {
+            if(player.getRemainingMoves() > 0){
+                logger.info("Cannot roll. There are still {} moves remaining for player {}", player.getRemainingMoves(), player.getId());
+                return new FrontendRollDiceRejectedMovesLeftEvent(command.playerId(), player.getRemainingMoves());
+            }
             int number = gameService.rollDice();
             try {
                 player.setRemainingMoves(number); // Spieler weiß was er gewürfelt hat

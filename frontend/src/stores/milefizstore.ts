@@ -116,7 +116,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           event.playerId === gamedata.playerId
         ) {
           console.log(
-            `Player ${event.playerId} still has ${event.moves} moves left and therefor can't roll their dice yet!`,
+            `Player ${event.playerId} still has ${event.moves} moves left and therefore can't roll their dice yet!`,
           )
           gamedata.currentDiceRoll = event.moves
         }
