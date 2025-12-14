@@ -1,6 +1,5 @@
 package de.hs_rm.de.milefiz.messaging;
 
-import java.security.Principal;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -9,7 +8,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
@@ -27,6 +25,7 @@ import de.hs_rm.de.milefiz.messaging.commands.EnergyCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
+import de.hs_rm.de.milefiz.messaging.commands.UpdateLobbySettingsCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
@@ -35,6 +34,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyRejectedEvent;
 
@@ -44,9 +44,9 @@ public class FrontendReceiverController {
     private final Logger logger = LoggerFactory.getLogger(FrontendReceiverController.class);
     private LobbyManager lobbyManager;
     private GameService gameService;
+    private LobbyMapper lobbyMapper;
     private final SimpMessagingTemplate messagingTemplate;
     private FrontendMessagingService messagingService;
-    private LobbyMapper lobbyMapper;
 
     public FrontendReceiverController(LobbyManager lobbyManager, GameService gameService,
             SimpMessagingTemplate messagingTemplate, FrontendMessagingServiceImpl frontendMessagingServiceImpl, LobbyMapper lobbyMapper) {
@@ -59,32 +59,31 @@ public class FrontendReceiverController {
 
     /**
      * Empfängt einen Bewegungsbefehl
-     * ({@link de.hs_rm.de.milefiz.messaging.commands.MovementCommand})
-     * vom Frontend über WebSocket und leitet ihn an den GameService zur
+     * ({@link de.hs_rm.de.milefiz.messaging.commands.MovementCommand}) vom
+     * Frontend über WebSocket und leitet ihn an den GameService zur
      * Verarbeitung weiter.
      *
-     * Diese Methode fungiert als Bindeglied zwischen der WebSocket-Kommunikation
-     * und der serverseitigen Spiellogik. Sie wird aufgerufen, wenn ein Spieler
-     * im Frontend eine Bewegung für eine seiner Spielfiguren (Meeples) ausführt.
+     * Diese Methode fungiert als Bindeglied zwischen der
+     * WebSocket-Kommunikation und der serverseitigen Spiellogik. Sie wird
+     * aufgerufen, wenn ein Spieler im Frontend eine Bewegung für eine seiner
+     * Spielfiguren (Meeples) ausführt.
      *
-     * Ablauf:
-     * - Empfang der Nachricht über den Endpunkt
-     * {@code /milefiz/lobby/{lobbyId}/move}
-     * - Logging des Befehls mit relevanten Daten (Lobby, Spieler, Meeple-ID,
-     * Richtung)
-     * - Weiterleitung an
+     * Ablauf: - Empfang der Nachricht über den Endpunkt
+     * {@code /milefiz/lobby/{lobbyId}/move} - Logging des Befehls mit
+     * relevanten Daten (Lobby, Spieler, Meeple-ID, Richtung) - Weiterleitung an
      * - Rückgabe des vom Service erzeugten
-     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}
-     * - Automatische Weiterleitung des Ergebnisses an alle Clients der betroffenen
-     * Lobby über {@code /topic/milefiz/lobby/{lobbyId}}
+     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent} - Automatische
+     * Weiterleitung des Ergebnisses an alle Clients der betroffenen Lobby über
+     * {@code /topic/milefiz/lobby/{lobbyId}}
      *
-     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
+     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt
+     * wird
      * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und direction
-     * @param player  der authentifizierte Benutzer, der die Nachricht gesendet
-     *                hat
+     * @param player der authentifizierte Benutzer, der die Nachricht gesendet
+     * hat
      * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
-     *         ({@link FrontendMoveEvent}) oder einen Fehler
-     *         ({@link FrontendMoveRejectedEvent}) an die Clients sendet
+     * ({@link FrontendMoveEvent}) oder einen Fehler
+     * ({@link FrontendMoveRejectedEvent}) an die Clients sendet
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -102,34 +101,32 @@ public class FrontendReceiverController {
 
     /**
      * Empfängt einen Barrierenbewegungsbefehl
-     * ({@link de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand})
-     * vom Frontend über WebSocket und leitet ihn an den GameService zur
+     * ({@link de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand}) vom
+     * Frontend über WebSocket und leitet ihn an den GameService zur
      * Verarbeitung weiter.
      *
      * Diese Methode wird aufgerufen, wenn ein Spieler im Frontend eine Barriere
-     * verschiebt,
-     * nachdem einer seiner Meeples direkt auf dieser Barriere gelandet ist.
+     * verschiebt, nachdem einer seiner Meeples direkt auf dieser Barriere
+     * gelandet ist.
      *
-     * Ablauf:
-     * - Empfang der Nachricht über den Endpunkt
-     * {@code /milefiz/lobby/{lobbyId}/movebarrier}
-     * - Logging des Befehls (Lobby, Spieler, Barrieren-ID, Ziel-Feld-ID)
-     * - Weiterleitung an
-     * - Rückgabe des vom Service erzeugten
-     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}
-     * - Automatische Weiterleitung des Ergebnisses an alle Clients der betroffenen
-     * Lobby über {@code /topic/milefiz/lobby/{lobbyId}}
+     * Ablauf: - Empfang der Nachricht über den Endpunkt
+     * {@code /milefiz/lobby/{lobbyId}/movebarrier} - Logging des Befehls
+     * (Lobby, Spieler, Barrieren-ID, Ziel-Feld-ID) - Weiterleitung an -
+     * Rückgabe des vom Service erzeugten
+     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent} - Automatische
+     * Weiterleitung des Ergebnisses an alle Clients der betroffenen Lobby über
+     * {@code /topic/milefiz/lobby/{lobbyId}}
      *
-     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere
-     *                    verschoben wird
-     * @param moveBarrCmd der vom Frontend übermittelte Befehl mit Barrieren-ID und
-     *                    Ziel-Feld-ID
-     * @param player      der Spieler (bzw. dessen Benutzerkontext), der die
-     *                    Barriere verschiebt
-     * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
-     *         das Ergebnis der Barrierenbewegung beschreibt
+     * @param lobbyId die eindeutige ID der Lobby, in der die Barriere
+     * verschoben wird
+     * @param moveBarrCmd der vom Frontend übermittelte Befehl mit Barrieren-ID
+     * und Ziel-Feld-ID
+     * @param player der Spieler (bzw. dessen Benutzerkontext), der die Barriere
+     * verschiebt
+     * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent},
+     * das das Ergebnis der Barrierenbewegung beschreibt
      *
-     *         Author: Maximilian Ressel
+     * Author: Maximilian Ressel
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/movebarrier")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -147,19 +144,17 @@ public class FrontendReceiverController {
 
     }
 
-    
-
     /**
      * WebSocket Message Handler für Würfel-Aktionen in einer Lobby.
-     * 
+     *
      * <p>
      * Diese Methode verarbeitet eingehende Würfel-Befehle von Clients und
-     * broadcastet das Würfelergebnis an alle Teilnehmer der entsprechenden Lobby.
-     * Der Würfelwurf wird über den {@link GameService} durchgeführt und das
-     * Ergebnis
-     * als {@link FrontendRollDiceEvent} an alle verbundenen Clients gesendet.
+     * broadcastet das Würfelergebnis an alle Teilnehmer der entsprechenden
+     * Lobby. Der Würfelwurf wird über den {@link GameService} durchgeführt und
+     * das Ergebnis als {@link FrontendRollDiceEvent} an alle verbundenen
+     * Clients gesendet.
      * </p>
-     * 
+     *
      * Ablauf:
      * <ol>
      * <li>Client sendet {@link RollDiceCommand} an den WebSocket-Endpoint</li>
@@ -167,30 +162,34 @@ public class FrontendReceiverController {
      * <li>{@link GameService#rollDice()} wird aufgerufen um Zufallszahl zu
      * generieren</li>
      * <li>Speichert die gewürfelte zahl im Spieler ab</li>
-     * <li>Spieler flagt, dass er sich noch nicht bewegt hat (neuer Zug beginnt)</li>
+     * <li>Spieler flagt, dass er sich noch nicht bewegt hat (neuer Zug
+     * beginnt)</li>
      * <li>Würfelergebnis wird in {@link FrontendRollDiceEvent} verpackt</li>
-     * <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}} gesendet</li>
+     * <li>Event wird an Topic {@code /topic/milefiz/lobby/{lobbyId}}
+     * gesendet</li>
      * <li>Alle Clients der Lobby erhalten das Würfelergebnis</li>
      * </ol>
-     * 
+     *
      * <h4>WebSocket-Mapping:</h4>
      * <ul>
-     * <li><strong>Eingang:</strong> {@code /milefiz/lobby/{lobbyId}/rollDice}</li>
+     * <li><strong>Eingang:</strong>
+     * {@code /milefiz/lobby/{lobbyId}/rollDice}</li>
      * <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
      * <li><strong>Protokoll:</strong> STOMP über WebSocket</li>
      * </ul>
-     * 
+     *
      * @param lobbyId die eindeutige UUID der Lobby in der gewürfelt wird
      * @param command der Würfel-Befehl vom Client, enthält die Spieler-ID
-     * @return {@link FrontendRollDiceEvent} mit Lobby-ID und Würfelergebnis (1-6)
-     * 
+     * @return {@link FrontendRollDiceEvent} mit Lobby-ID und Würfelergebnis
+     * (1-6)
+     *
      * @see GameService#rollDice()
      * @see FrontendRollDiceEvent
      * @see RollDiceCommand
      * @see FrontendRollDiceRejectedEvent
-     * 
+     *
      * @author Leon Schäfer
-     * 
+     *
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rollDice")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -198,6 +197,10 @@ public class FrontendReceiverController {
             Player player) {
         logger.info("Player {} wants to roll dice in lobby {}", player.getId(), lobbyId);
         if (gameService.getRollDiceCooldown(player.getId()) <= 0) {
+            if(player.getRemainingMoves() > 0){
+                logger.info("Cannot roll. There are still {} moves remaining for player {}", player.getRemainingMoves(), player.getId());
+                return new FrontendRollDiceRejectedMovesLeftEvent(command.playerId(), player.getRemainingMoves());
+            }
             int number = gameService.rollDice();
             try {
                 player.setRemainingMoves(number); // Spieler weiß was er gewürfelt hat
@@ -221,9 +224,9 @@ public class FrontendReceiverController {
     }
 
     /**
-     * Wird aufgerufen wenn das Spiel losgehen soll (kann nur vom Leader ausgeführt
-     * werden)
-     * 
+     * Wird aufgerufen wenn das Spiel losgehen soll (kann nur vom Leader
+     * ausgeführt werden)
+     *
      * @param lobbyId
      * @param player
      * @return
@@ -245,8 +248,9 @@ public class FrontendReceiverController {
     }
 
     /**
-     * Handelt bei disconnects die Spieler -> Leave aus Lobby
-     * Sende per STOMP zuätzlich allen bereits in der Lobby vorhandenen Spielern ein Update
+     * Handelt bei disconnects die Spieler -> Leave aus Lobby Sende per STOMP
+     * zuätzlich allen bereits in der Lobby vorhandenen Spielern ein Update
+     *
      * @param event
      * @throws PlayerNotFoundException
      */
@@ -254,10 +258,18 @@ public class FrontendReceiverController {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws PlayerNotFoundException {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         Player player = (Player) headerAccessor.getSessionAttributes().get("player");
+
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
+
+        // Wenn kein Spieler mehr drin: Lobby Löschen
+        if (lobby.isEmpty()) {
+            lobbyManager.deleteLobby(lobby);
+        }
+
+        // Sende per STOMP allen bereits in der Lobby vorhandenen Spielern ein Update
         messagingService.sendEvent(new LobbyMessage(lobby,
-                    new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler hat das Spiel verlassen")));
+                new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler ist geleavt")));
         logger.info("WebSocket disconnected - Player Token: {}", player.getPlayerToken());
     }
 
@@ -266,8 +278,9 @@ public class FrontendReceiverController {
      * abgelaufen ist.
      *
      * <p>
-     * Dieser Listener reagiert auf {@link FrontendCooldownFinishedEvent}-Events,
-     * die vom {@link de.hs_rm.de.milefiz.game.service.CooldownService} publiziert
+     * Dieser Listener reagiert auf
+     * {@link FrontendCooldownFinishedEvent}-Events, die vom
+     * {@link de.hs_rm.de.milefiz.game.service.CooldownService} publiziert
      * werden, sobald der Cooldown eines Spielers den Wert 0 erreicht.
      * </p>
      *
@@ -275,8 +288,8 @@ public class FrontendReceiverController {
      * <ol>
      * <li>Der Listener ermittelt anhand der playerId, in welcher {@link Lobby}
      * sich der Spieler aktuell befindet.</li>
-     * <li>Es wird ein neues {@link FrontendCooldownFinishedEvent} erzeugt,
-     * das zusätzlich die Lobby-ID enthält.</li>
+     * <li>Es wird ein neues {@link FrontendCooldownFinishedEvent} erzeugt, das
+     * zusätzlich die Lobby-ID enthält.</li>
      * <li>Dieses Event wird via STOMP über den WebSocket-Broker an alle Clients
      * der betroffenen Lobby gesendet.</li>
      * </ol>
@@ -307,14 +320,14 @@ public class FrontendReceiverController {
 
     /**
      * WebSocket Message Handler für Energie-Speichern-Aktionen in einer Lobby.
-     * 
+     *
      * <p>
-     * Diese Methode verarbeitet eingehende Energie-Speichern-Befehle von Clients.
-     * Spieler können damit ihre Würfelzüge in Energie umwandeln,
-     * um diese für spätere Spezialaktionen zu nutzen. Das Ergebnis wird an alle
+     * Diese Methode verarbeitet eingehende Energie-Speichern-Befehle von
+     * Clients. Spieler können damit ihre Würfelzüge in Energie umwandeln, um
+     * diese für spätere Spezialaktionen zu nutzen. Das Ergebnis wird an alle
      * Teilnehmer der Lobby gebroadcastet.
      * </p>
-     * 
+     *
      * Ablauf:
      * <ol>
      * <li>Client sendet {@link EnergyCommand} an den WebSocket-Endpoint</li>
@@ -322,20 +335,25 @@ public class FrontendReceiverController {
      * Lobby-ID</li>
      * <li>Validierung: Spieler darf sich noch nicht bewegt haben</li>
      * <li>Validierung: Spieler darf nicht bereits maximale Energie haben</li>
-     * <li>Falls gültig: {@link Player#saveEnergy()} konvertiert gewürfelte Züge in Energie</li>
-     * <li>Erfolg: {@link FrontendSaveEnergyEvent} mit neuer Energie wird gesendet</li>
-     * <li>Fehler: {@link FrontendSaveEnergyRejectedEvent} mit Fehlermeldung wird gesendet</li>
+     * <li>Falls gültig: {@link Player#saveEnergy()} konvertiert gewürfelte Züge
+     * in Energie</li>
+     * <li>Erfolg: {@link FrontendSaveEnergyEvent} mit neuer Energie wird
+     * gesendet</li>
+     * <li>Fehler: {@link FrontendSaveEnergyRejectedEvent} mit Fehlermeldung
+     * wird gesendet</li>
      * <li>Alle Clients der Lobby erhalten das Event</li>
      * </ol>
-     * 
+     *
      * <p>
      * <strong>Validierungsregeln:</strong>
      * </p>
      * <ul>
-     * <li>{@code player.isMoved() == false} - Spieler darf sich in dieser Runde noch nicht bewegt haben</li>
-     * <li>{@code player.hasFullEnergy() == false} - Spieler darf nicht bereits {@link Player#MAX_ENERGY} erreicht haben</li>
+     * <li>{@code player.isMoved() == false} - Spieler darf sich in dieser Runde
+     * noch nicht bewegt haben</li>
+     * <li>{@code player.hasFullEnergy() == false} - Spieler darf nicht bereits
+     * {@link Player#MAX_ENERGY} erreicht haben</li>
      * </ul>
-     * 
+     *
      * <p>
      * <strong>Erfolgsfall:</strong>
      * </p>
@@ -346,18 +364,19 @@ public class FrontendReceiverController {
      * <li>{@link FrontendSaveEnergyEvent} enthält Lobby-ID und neuen
      * Energie-Wert</li>
      * </ul>
-     * 
+     *
      * <p>
      * <strong>Fehlerfall:</strong>
      * </p>
      * <ul>
-     * <li>Spieler hat sich bereits bewegt → Energie-Speichern nicht möglich</li>
+     * <li>Spieler hat sich bereits bewegt → Energie-Speichern nicht
+     * möglich</li>
      * <li>Spieler hat bereits maximale Energie → keine weitere Speicherung
      * möglich</li>
-     * <li>{@link FrontendSaveEnergyRejectedEvent} enthält Fehlermeldung: "Player
-     * moved or has full energy"</li>
+     * <li>{@link FrontendSaveEnergyRejectedEvent} enthält Fehlermeldung:
+     * "Player moved or has full energy"</li>
      * </ul>
-     * 
+     *
      * <p>
      * <strong>WebSocket-Mapping:</strong>
      * </p>
@@ -367,22 +386,23 @@ public class FrontendReceiverController {
      * <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
      * <li><strong>Protokoll:</strong> STOMP über WebSocket</li>
      * </ul>
-     * 
-     * @param lobbyId die eindeutige UUID der Lobby in der Energie gespeichert wird
+     *
+     * @param lobbyId die eindeutige UUID der Lobby in der Energie gespeichert
+     * wird
      * @param command der Energie-Befehl vom Client, enthält die Spieler-ID
-     * @param player  der authentifizierte Spieler, der Energie speichern möchte
-     * 
+     * @param player der authentifizierte Spieler, der Energie speichern möchte
+     *
      * @return {@link FrontendSaveEnergyEvent} bei Erfolg mit Lobby-ID und neuer
-     *         Energie,
-     *         oder {@link FrontendSaveEnergyRejectedEvent} bei ungültiger Anfrage
-     * 
+     * Energie, oder {@link FrontendSaveEnergyRejectedEvent} bei ungültiger
+     * Anfrage
+     *
      * @see Player#saveEnergy()
      * @see Player#hasFullEnergy()
      * @see Player#hasMoved()
      * @see FrontendSaveEnergyEvent
      * @see FrontendSaveEnergyRejectedEvent
      * @see EnergyCommand
-     * 
+     *
      * @author Elisabeth Gehdt
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/saveEnergy")
@@ -405,4 +425,48 @@ public class FrontendReceiverController {
         return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy");
     }
 
+    /**
+     * WebSocket Message Handler zur Aktualisierung der Lobby-Einstellungen
+     *
+     * Verarbeitet Anfragen zum Ändern von Lobby-Name und maximaler
+     * Spieleranzahl. Nur der Lobby-Leader darf diese Einstellungen ändern. Das
+     * Update wird an alle Clients der Lobby broadcastet.
+     *
+     * WebSocket: Eingang /milefiz/lobby/{lobbyId}/rename Weiterleitung
+     * /topic/milefiz/lobby/{lobbyId}
+     *
+     * @param lobbyId die UUID der zu aktualisierenden Lobby
+     * @param lobbyUpdateSettingsCmd Command mit newLobbyName und maxPlayers
+     * @param player der authentifizierte Leader-Spieler
+     * @return FrontendLobbyUpdateEvent mit aktualisiertem Lobby-DTO
+     * @throws PlayerHasNoPermissionException falls Spieler nicht Leader ist
+     * @see FrontendLobbyUpdateEvent
+     * @see UpdateLobbySettingsCommand
+     * @see LobbyMapper
+     */
+    @MessageMapping("/milefiz/lobby/{lobbyId}/updateSettings")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendEvent handleLobbyUpdate(@DestinationVariable("lobbyId") UUID lobbyId, UpdateLobbySettingsCommand lobbyUpdateSettingsCmd,
+            Player player) {
+        if (!player.isLeader()) {
+            throw new PlayerHasNoPermissionException();
+        }
+        logger.info(
+                "Received UpdateLobbySettingsCommand in lobby {} from player '{}': lobby Name {} maxplayers {}",
+                lobbyId,
+                player.getName(),
+                lobbyUpdateSettingsCmd.newLobbyName(),
+                lobbyUpdateSettingsCmd.maxPlayers());
+
+        Lobby lobby;
+        try {
+            lobby = lobbyManager.getLobby(lobbyId);
+            lobby.setLobbyName(lobbyUpdateSettingsCmd.newLobbyName());
+            lobby.setMaxPlayers(lobbyUpdateSettingsCmd.maxPlayers());
+            return new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Update der Einstellungen");
+        } catch (LobbyNotFoundException e) {
+            e.printStackTrace();
+        }
+        return new FrontendLobbyUpdateEvent(null, "");
+    }
 }

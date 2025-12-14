@@ -9,9 +9,8 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import { storeToRefs } from 'pinia'
 
 const { startGameCommand } = useMilefizStore()
-
-
 const milefizStore = useMilefizStore()
+const { joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
 
 onMounted(() => {
     milefizStore.joinLobby()
@@ -19,21 +18,46 @@ onMounted(() => {
 
 
 
-// Daten
-const lobbyName = ref('')
+// Reaktive Leader-Prüfung
+const isOwnLeader = computed(() => storeIsOwnLeader())
+
+// Lobby Wrapper mit allen Lobby-Daten
+const lobby = computed({
+    get: () => gamedata?.lobby,
+    set: (value) => {
+        // Lobby wird üblicherweise nicht direkt gesetzt, aber für Vollständigkeit
+        if (gamedata && value) {
+            gamedata.lobby = value
+        }
+    }
+})
+
+// Lobby-Name mit speziellem Setter
+const lobbyName = computed({
+    get: () => lobby.value?.lobbyName ?? '',
+    set: (value: string) => {
+        if (lobby.value) {
+            lobby.value.lobbyName = value
+        }
+        if (!isOwnLeader.value) return // keine Änderung für non-Leader
+        // Änderung an Backend senden
+        const lobbyId = lobby.value?.id
+        if (lobbyId) {
+            const destination = `/app/milefiz/lobby/${lobbyId}/updateSettings`
+            const payload = {
+                newLobbyName: value,
+                maxPlayers: lobby.value?.maxPlayers ?? 4,
+            }
+            sendLobbyMessage(destination, payload)
+        }
+    }
+})
+
 const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
 
 // Importierte Map Datei
 const selectedFile = ref<File | null>(null)
-
-// Spieler Farben: gruen, gelb, rot, blau
-const playerColors = ['#44ff44', '#ffff44', '#ff4444', '#4444ff']
-
-// Liste der Spieler
-const players = computed(() => milefizStore.gamedata.lobby?.players)
-
-
 
 /**
  * handleFileChange (event: Event)
@@ -66,7 +90,8 @@ const handleFileChange = (event: Event) => {
                     <!-- Lobby-Name -->
                     <div class="form-row">
                         <label>Lobby-Name</label>
-                        <input type="text" v-model="lobbyName" class="form-input" placeholder="Lobby-Name">
+                        <input type="text" v-model="lobbyName" class="form-input" placeholder="Lobby-Name"
+                            :disabled="!isOwnLeader">
                     </div>
 
                     <!-- Map Buttons -->
@@ -103,7 +128,7 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <label>Spieler</label>
                         <div class="players-list">
-                            <div v-for="(player, index) in players" :key="index" class="player-item">
+                            <div v-for="(player, index) in lobby?.players" :key="index" class="player-item">
                                 <span class="player-color-dot" :style="{ backgroundColor: player.color }"></span>
                                 {{ player.playerName }}
                             </div>
@@ -113,8 +138,11 @@ const handleFileChange = (event: Event) => {
                     <!-- Buttons -->
                     <div class="form-row">
                         <div class="button-container">
-                            <button type="button" class="start-game-button" @click="startGameCommand">
-                                Spiel Starten
+                            <button type="button" class="start-game-button"
+                                    @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }) }"
+                                    :disabled="!isOwnLeader"
+                                    :class="{ active: isOwnLeader }">
+                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Leader...' }}
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />
                         </div>
@@ -301,14 +329,22 @@ select {
 
 .start-game-button {
     padding: 15px 30px;
-    background-image: var(--button-gradient-red);
+    background-image: var(--button-gradient-gray);
     color: white;
     font-size: 1.3rem;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
+.start-game-button.active {
+    background-image: var(--button-gradient-red);
+}
+
 .start-game-button:hover {
+    background-image: var(--button-gradient-gray);
+}
+
+.start-game-button:hover.active {
     background-color: rgba(180, 40, 40, 0.95);
 }
 </style>
