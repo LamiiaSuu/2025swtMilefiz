@@ -19,7 +19,7 @@ const lobbyid = defineModel('lobbyid')
         <div class="lobby-list game-content">
             <template v-for="(lobby) in lobbies" :key="lobby.lobbyName">
                 <label class="lobby-item">
-                    <input class="radio-input" type="radio" :value="lobby.lobbyName" v-model="lobbyid" />
+                    <input class="radio-input" type="radio" :value="lobby.id" v-model="lobbyid" />
                     <div class="radio-content">{{ lobby.lobbyName }}</div>
                 </label>
             </template>
