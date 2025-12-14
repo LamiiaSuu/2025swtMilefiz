@@ -203,7 +203,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0
-          //TODO meeple bei spieler und von board entfernen
+          //TODO Gewinndialog einblenden
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
