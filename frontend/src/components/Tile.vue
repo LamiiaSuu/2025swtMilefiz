@@ -2,8 +2,8 @@
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
 import { computed, watchEffect } from 'vue'
-import { Object3D } from 'three'
-import { startingbaseColors } from '@/types/colors';
+import { DoubleSide, Object3D } from 'three'
+import { startingbaseColors } from '@/types/colorsAssets';
 
 // Props definieren
 const props = defineProps<{
