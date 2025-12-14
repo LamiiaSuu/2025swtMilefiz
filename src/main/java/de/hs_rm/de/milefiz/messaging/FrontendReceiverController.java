@@ -440,8 +440,9 @@ public class FrontendReceiverController {
      * @param player der authentifizierte Leader-Spieler
      * @return FrontendLobbyUpdateEvent mit aktualisiertem Lobby-DTO
      * @throws PlayerHasNoPermissionException falls Spieler nicht Leader ist
-     * @throws LobbyNotFoundException wird gecatcht, rückgabe leeres Event
-     * @see FrontendLobbyUpdateEvent, UpdateLobbySettingsCommand, LobbyMapper
+     * @see FrontendLobbyUpdateEvent
+     * @see UpdateLobbySettingsCommand
+     * @see LobbyMapper
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/updateSettings")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
