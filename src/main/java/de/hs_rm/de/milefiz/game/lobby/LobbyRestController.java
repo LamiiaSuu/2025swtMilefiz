@@ -49,6 +49,16 @@ public class LobbyRestController {
     }
 
     /**
+     * Erstellt eine Lobby und joint dieser direkt
+     */
+    @GetMapping(path = "/create")
+    public ResponseEntity<LobbyJoinEvent> joinCreateLobby() throws LobbyNotFoundException {
+        // Join Random lobby
+        Lobby lobby = lobbyManager.createLobby();
+        return joinLobby(lobby.getId());
+    }
+
+    /**
      * Joint eine zufällige Lobby. Sollte keine joinable Lobby existieren (z.B.
      * volle Lobby), wird eine neue Lobby erstellt und gejoint.
      */
