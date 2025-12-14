@@ -31,7 +31,7 @@ const filteredLobbies = computed(() => {
   }
 
   return lobbies.value.filter(lobby =>
-    lobby.id.toLowerCase().includes(lobbyid.value.toLowerCase())
+    lobby.id.toLowerCase().includes(lobbyid.value.toLowerCase()) || lobby.lobbyName.toLowerCase().includes(lobbyid.value.toLowerCase())
   )
 })
 
