@@ -1,20 +1,22 @@
 <script setup lang="ts">
 
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import LobbyIDField from '@/components/ui/pages/LobbyIDField.vue'
 import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
+import { storeToRefs } from 'pinia'
 
+const { startGameCommand } = useMilefizStore()
 const milefizStore = useMilefizStore()
 const { joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
 
 onMounted(() => {
     milefizStore.joinLobby()
 })
-const router = useRouter()
+
+
 
 // Reaktive Leader-Prüfung
 const isOwnLeader = computed(() => storeIsOwnLeader())
@@ -137,8 +139,9 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <div class="button-container">
                             <button type="button" class="start-game-button"
-                                @click="isOwnLeader && $router.push({ name: 'game' })" :disabled="!isOwnLeader"
-                                :class="{ active: isOwnLeader }">
+                                    @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }) }"
+                                    :disabled="!isOwnLeader"
+                                    :class="{ active: isOwnLeader }">
                                 {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Leader...' }}
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />

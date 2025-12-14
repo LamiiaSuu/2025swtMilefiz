@@ -1,4 +1,5 @@
 import { reactive, readonly, computed, ref } from 'vue'
+import router from '@/router'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
 import type { Direction, MoveBarrierCommand, MovementCommand } from "@/types/movement";
@@ -206,7 +207,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
         // SPIEL STARTET
         else if (event.type === 'GAME_START') {
+          const event = JSON.parse(message.body)
+          console.log('FULL EVENT:', event)
+
           console.log('Spiel startet')
+          router.push({ name: 'game' })
         }
       })
     }
@@ -294,9 +299,45 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (lobbyUpdate.ownPlayerId) gamedata.playerId = lobbyUpdate.ownPlayerId
     if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
     gamedata.lobby = lobbyUpdate.lobby
-
-    syncOwnPlayerEnergy(gamedata.lobby)
   }
+
+  /**
+   * Sendet einen "Spiel starten"-Befehl an den Server.
+   * 
+   * Diese Funktion wird aufgerufen, wenn der Lobby-Leader im Frontend den "Spiel starten" Button klickt.
+   * 
+   * Ablauf:
+   *  1. Prüft, ob der STOMP Client verbunden ist
+   *  2. Prüft nach einer gültigen Lobby ID
+   *  3. Sende einen StartGameCommand mit eigener PlayerID an den Server-Endpunkt `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`
+   * 
+   * WS empfängt Serverantwort und verarbeitet diese als `GAME_START` Event weiter (--> Weiterleitung an GameView)
+   * @returns void
+   */
+  function startGameCommand() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot start game commnand: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id) {
+      console.error('Cannot start game command.')
+      return
+    }
+
+    try {
+      stompclient.publish({
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`,
+        body: JSON.stringify({
+          playerId: gamedata.playerId,
+        })
+      })
+      console.log('Start game command sent for all players in lobby:', gamedata.lobby?.id)
+    } catch (err) {
+      console.error('Error sending start game command:', err)
+    }
+  }
+
 
   /**
    * Sendet eine Bewegungsaktion (Move) an den Spielserver.
@@ -405,6 +446,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       console.error('Error sending roll dice command:', err)
     }
   }
+
+
 
   /**
    * Prüft, ob der eigene Spieler Leader der aktuellen Lobby ist
@@ -515,6 +558,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     sendMove,
     sendEnergySave,
     isJumping,
+    startGameCommand,
     getOwnPlayer,
     isOwnLeader,
     disconnectAndReset,
