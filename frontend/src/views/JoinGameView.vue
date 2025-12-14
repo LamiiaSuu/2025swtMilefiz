@@ -3,7 +3,7 @@ import Header from '@/components/ui/pages/Header.vue'
 import ComponentList from '@/components/ui/pages/ComponentList.vue'
 import LobbyList, { type Lobby } from '@/components/ui/pages/LobbyList.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const lobbies = ref<Lobby[]>([])
 const lobbyid = ref<string>('')
@@ -25,6 +25,15 @@ const fetchLobbies = async () => {
 
 }
 
+const filteredLobbies = computed(() => {
+  if (!lobbyid.value.trim()) {
+    return lobbies.value
+  }
+
+  return lobbies.value.filter(lobby =>
+    lobby.id.toLowerCase().includes(lobbyid.value.toLowerCase())
+  )
+})
 
 onMounted(() => {
   fetchLobbies()
@@ -55,7 +64,7 @@ onUnmounted(() => {
             <input type="text" v-model="lobbyid" placeholder="Lobby-ID">
           </div>
         </div>
-        <LobbyList v-model:lobbyid="selectedLobby" :lobbies="lobbies" label="Lobbys" />
+        <LobbyList v-model:lobbyid="selectedLobby" :lobbies="filteredLobbies" label="Lobbys" />
         <div class="game-container">
           <div class="button-container">
           <button class="start-game-button game-content" :disabled="!selectedLobby" @click="$router.push({ name: 'game' })">
