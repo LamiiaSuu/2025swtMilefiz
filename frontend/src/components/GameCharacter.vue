@@ -2,8 +2,8 @@
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
 import { watchEffect, watch, ref, computed, onMounted } from 'vue'
-import { useMilefizStore } from "@/stores/milefizstore";
-import { getCharacterColors, type PlayerColor } from '@/types/colors';
+import { useMilefizStore } from '@/stores/milefizstore'
+import { getPlayerColors } from '@/types/colorsAssets';
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -15,7 +15,7 @@ const props = defineProps<{
   position?: [number, number, number]
   meepleId: string
   barrier?: boolean
-  playerColor?: PlayerColor | string
+  playerColor?:  string
 }>()
 
 const characterRotation = ref(0)
@@ -40,70 +40,69 @@ const mixer = ref<any>(null)
 const jumpAction = ref<any>(null)
 
 // NEU: Y-Offset für unterschiedliche Modelle
-const yOffset = computed(() => props.barrier ? 0.85 : 0.135)
+const yOffset = computed(() => (props.barrier ? 0.85 : 0.135))
 
 // Berechne aktuelle Position (inklusive jumpOffset)
 const currentPosition = computed<[number, number, number]>(() => [
   animatedPosition.value[0],
   animatedPosition.value[1] + jumpOffset.value + yOffset.value,
-  animatedPosition.value[2]
+  animatedPosition.value[2],
 ])
 
 //Rock by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/dmRuyy1VXEv)
 // Block Character by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/ozSIyRIcIj)
 
-const modelPath = computed(() => props.barrier ? '/Rock.glb' : '/Block Character.glb')
+const modelPath = computed(() => (props.barrier ? '/Rock.glb' : '/Block Character.glb'))
 const { state } = useGLTF(modelPath, { draco: true })
 
 // Unterschiedliche Scale für Barriere und Character
-const scale = computed(() => props.barrier ? 1.5 : 0.55)
+const scale = computed(() => (props.barrier ? 1.5 : 0.55))
 
-const colors = computed(() => {
-  // Prüfe ob playerColor gesetzt ist UND es keine Barriere ist
-  if (props.playerColor && !props.barrier) {
-    // Type Guard: Prüfe ob es eine gültige PlayerColor ist
-    const validColors: PlayerColor[] = ['RED', 'GREEN', 'YELLOW', 'BLUE']
-    const upperColor = (props.playerColor as string).toUpperCase()
-    
-    if (validColors.includes(upperColor as PlayerColor)) {
-      return getCharacterColors(upperColor as PlayerColor)
-    }
-  }
-  
-  // Fallback: Nur wenn manuelle Farben explizit gesetzt sind
-  if (props.bodyColor || props.eyeColor) {
-    return {
-      bodyColor: props.bodyColor,
-      eyeColor: props.eyeColor
-    }
-  }
-  
-  // Default-Farben falls nichts gesetzt ist
+
+const meepleColors = computed(() => {
+   // Spieler nutzen playerColor
+  const playerColors = getPlayerColors(props.playerColor)
+
   return {
-    bodyColor: '#ffffff',
-    eyeColor: '#000000'
+    body: props.bodyColor ?? playerColors.body,
+    eyes: props.eyeColor ?? playerColors.eyes
   }
+
 })
 
 watchEffect(async () => {
-  if (state.value?.scene) {
-    state.value.scene.scale.set(scale.value, scale.value, scale.value)
+  if (!state.value?.scene) return
 
-    //Geht über CharacterMesh und unterscheidet nach Körper und Eyes
+  state.value.scene.scale.set(scale.value, scale.value, scale.value)
+
+  const userData = (state.value.scene as any).userData
+  if (!userData?.colorsApplied) {
     state.value.scene.traverse((child: any) => {
-      if (child.material) {
-        // Unterscheidung zwischen body und eye_color Material
-        if (child.material.name === 'body' || child.name?.includes('body')) {
-          if (colors.value.bodyColor) {
-            child.material.color.set(colors.value.bodyColor)
-          }
-        } else if (child.material.name === 'eye_color' || child.name?.includes('eye')) {
-          if (colors.value.eyeColor) {
-            child.material.color.set(colors.value.eyeColor)
-          }
+      if (!child.isMesh || !child.material) return
+
+      const mats = Array.isArray(child.material) ? child.material : [child.material]
+
+      mats.forEach((mat: any) => {
+        if (!mat || !mat.color) return
+
+        // Body
+        if (mat.name === 'body' || child.name?.includes('body')) {
+          mat.color.set(meepleColors.value.body)  // ✅ Direkt body
+          mat.needsUpdate = true
         }
-      }
+        // Eyes
+        else if (mat.name === 'eye_color' || child.name?.includes('eye')) {
+          mat.color.set(meepleColors.value.eyes)  // ✅ Direkt eyes
+          mat.needsUpdate = true
+        }
+      })
     })
+
+    ;(state.value.scene as any).userData = {
+      ...userData,
+      colorsApplied: true
+    }
+  }
 
     // Animation Mixer einrichten
     if (state.value.animations && state.value.animations.length > 0) {
@@ -129,7 +128,7 @@ watchEffect(async () => {
       }
     }
   }
-})
+)
 
 // Animation updaten
 const clock = ref<any>(null)
@@ -154,12 +153,12 @@ const setRotation = (yRotation: number) => {
   characterRotation.value = yRotation
 }
 
-// Sprung-Animation 
+// Sprung-Animation
 const animateCustomJump = (
   height = defaultJumpHeight,
   upMs = defaultUpDuration,
   downMs = defaultFallDuration,
-  onComplete?: () => void
+  onComplete?: () => void,
 ) => {
   const startTime = performance.now()
 
@@ -173,15 +172,12 @@ const animateCustomJump = (
     const elapsed = now - startTime
 
     if (elapsed < upMs) {
-
       const progress = elapsed / upMs
       jumpOffset.value = height * easeOutCubic(progress)
     } else if (elapsed < total) {
-
       const progress = (elapsed - upMs) / downMs
       jumpOffset.value = height * (1 - easeInCubic(progress))
     } else {
-
       jumpOffset.value = 0
       isJumping.value = false
       milefizStore.isJumping = false
@@ -211,8 +207,6 @@ const jump = () => {
   animateCustomJump(defaultJumpHeight, defaultUpDuration, defaultFallDuration)
 }
 
-
-
 // Position für Animation
 const animatedPosition = ref<[number, number, number]>([...(props.position ?? [0, 0, 0])])
 
@@ -237,7 +231,7 @@ watch(
     _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
     animateTo(newPos)
   },
-  { deep: true }
+  { deep: true },
 )
 
 const speed = 0.08
@@ -245,15 +239,15 @@ let moveAnimationFrame: number | null = null
 
 /**
  * Animiert die Bewegung des Charakters zu einer Zielposition auf dem Spielfeld.
- * 
+ *
  * - inkl. Sprung und Drehung
- * 
+ *
  * Ablauf:
- * 1. Vorherige Bewegungsanimation (falls vorhanden) wird abgebrochen.  
- * 2. Charakter wird in Richtung des Ziels gedreht (`rotateToward`).  
- * 3. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.  
+ * 1. Vorherige Bewegungsanimation (falls vorhanden) wird abgebrochen.
+ * 2. Charakter wird in Richtung des Ziels gedreht (`rotateToward`).
+ * 3. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.
  * 4. Die Position wird frameweise geglättet interpoliert, bis das Ziel erreicht ist.
- * 
+ *
  * @param target - Zielkoordinaten im 3D-Raum [x, y, z], zu denen sich der Charakter bewegen soll
  */
 const animateTo = (target: [number, number, number]) => {
@@ -297,16 +291,16 @@ const animateTo = (target: [number, number, number]) => {
 
 /**
  * Dreht den Charakter sanft in Richtung einer Zielposition.
- * 
- * Berechnet den Winkel zwischen der aktuellen Position und der Zielposition 
- * und interpoliert die Y-Rotation über eine kurze Zeitspanne, um 
+ *
+ * Berechnet den Winkel zwischen der aktuellen Position und der Zielposition
+ * und interpoliert die Y-Rotation über eine kurze Zeitspanne, um
  * eine fließende Drehbewegung zu erzeugen.
- * 
+ *
  * - wählt immer den kürzesten Drehweg
- * - Verwendet `Math.atan2()` zur Winkelberechnung im XZ-Raum.  
- * - Normalisiert Winkel auf den Bereich [-π, π], um Sprünge zu vermeiden.  
- * - Führt die Drehung innerhalb von ~200 ms aus (Ease-in/Ease-out Kurve).  
- * 
+ * - Verwendet `Math.atan2()` zur Winkelberechnung im XZ-Raum.
+ * - Normalisiert Winkel auf den Bereich [-π, π], um Sprünge zu vermeiden.
+ * - Führt die Drehung innerhalb von ~200 ms aus (Ease-in/Ease-out Kurve).
+ *
  * @param target - Zielkoordinaten [x, y, z], in deren Richtung der Charakter schauen soll
  */
 const rotateToward = (target: [number, number, number]) => {
@@ -351,7 +345,13 @@ const rotateToward = (target: [number, number, number]) => {
 }
 
 // Gibt Rotation und Position frei
-defineExpose({ setRotation, jump, characterPosition, meepleId: props.meepleId, getPosition: () => currentPosition.value, })
+defineExpose({
+  setRotation,
+  jump,
+  characterPosition,
+  meepleId: props.meepleId,
+  getPosition: () => currentPosition.value,
+})
 
 //Debug: Logging wenn GameCharacter gemounted werden
 onMounted(() => {
@@ -360,7 +360,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <TresGroup ref="characterPosition" :position="currentPosition" :rotation="[0, characterRotation, 0]">
+  <TresGroup
+    ref="characterPosition"
+    :position="currentPosition"
+    :rotation="[0, characterRotation, 0]"
+  >
     <primitive v-if="state" :object="state?.scene" />
   </TresGroup>
 </template>

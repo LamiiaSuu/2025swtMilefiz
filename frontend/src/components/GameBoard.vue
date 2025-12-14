@@ -170,26 +170,6 @@ watch(ownMeepleIds, (ids) => {
   }
 })
 
-// Computed Property für Meeple → PlayerColor Mapping
-const meepleColorMap = computed(() => {
-  const lobby = milefizStore.gamedata.lobby
-  if (!lobby) return new Map<string, string>()
-  
-  const map = new Map<string, string>()
-  
-  for (const player of lobby.players) {
-    for (const meeple of player.meeples) {
-      map.set(meeple.id, player.color) // Spielerfarbe zuordnen
-    }
-  }
-  
-  return map
-})
-
-// Helper-Funktion: Holt Spielerfarbe für eine Meeple-ID
-function getPlayerColorForMeeple(meepleId: string): string | undefined {
-  return meepleColorMap.value.get(meepleId)
-}
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
@@ -360,6 +340,24 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
+// Computed Property für Meeple → PlayerColor Mapping
+const meepleColorMap = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  if (!lobby) return new Map<string, string>()
+  
+  const map = new Map<string, string>()
+  
+  // Iteriere über alle Spieler
+  for (const player of lobby.players) {
+    // Alle Meeples dieses Spielers bekommen seine Farbe
+    for (const meeple of player.meeples) {
+      map.set(meeple.id, player.color) // player.color = "RED" | "GREEN" | "YELLOW" | "BLUE"
+    }
+  }
+  
+  return map
+})
+
 </script>
 
 <template>
@@ -390,7 +388,7 @@ onUnmounted(() => {
     <!--Spawnen der Meeple-->
     <GameCharacter v-for="entry in meepleEntries" :key="entry.id"
       :ref="el => registerGameCharRefFromTemplate(entry.id, el)" :position="entry.position" :meepleId="entry.id"
-      :playerColor="getPlayerColorForMeeple(entry.id)"/>
+      :playerColor="meepleColorMap.get(entry.id)"/>
 
     <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
