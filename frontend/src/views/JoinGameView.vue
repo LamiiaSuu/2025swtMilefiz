@@ -33,6 +33,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   clearInterval(interval)
+  selectedLobby.value = ''
 })
 
 </script>
