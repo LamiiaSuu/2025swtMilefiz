@@ -38,11 +38,11 @@ const router = createRouter({
       name: 'join-game',
       component: JoinGameView,
     },
-        {
+    {
       path: '/map-editor',
       name: 'map-editor',
       component: MapEditorView,
-    }
+    },
     {
       path: '/lobby/:lobbyid',
       redirect: (to) => {
@@ -50,7 +50,7 @@ const router = createRouter({
         const id: string | undefined = (to.params.lobbyid as string | undefined)
         if (id)
           if (id) joinLobby(id)
-        return { name: 'home', replace: true }
+        return { name: 'game-start', replace: true }
       },
     },
   ],
