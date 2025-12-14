@@ -40,13 +40,11 @@ addtest()
           </div>
         </div>
         <LobbyList v-model:lobbyid="selectedLobby" :lobbies="lobbies" label="Lobbys" />
-        <div class="game-container">
-          <div class="button-container">
+        <div class="game-container button-container">
           <button class="start-game-button game-content" :disabled="!selectedLobby" @click="$router.push({ name: 'game' })">
-            Spiel Starten
+            Beitreten
           </button>
           <BackButton :to="{ name: 'Homepage' }" />
-        </div>
         </div>
       </ComponentList>
   </div>
@@ -82,7 +80,7 @@ addtest()
   display: flex;
   flex-direction: column;
   gap: 15px;
-  width: 100%;
+  margin-top: 2vh;
 }
 
 .start-game-button {
@@ -132,10 +130,12 @@ fill: var(--text-color-input-focus);
 }
 
 .game-container .game-label {
-  position: relative;
+  position: absolute;
+  transform: translateX(-100%);
+  padding-right: 20px;
   font-family: "MainFont", sans-serif;
-  font-size: 1.5rem;
-  font-weight: bolder;
+  font-size: 2rem;
+  font-weight: 400;
   color: white;
   -webkit-text-stroke: 6px black;
   text-shadow:
@@ -145,13 +145,9 @@ fill: var(--text-color-input-focus);
   paint-order: stroke fill;
 }
 
-.game-container .game-label {
-  position: absolute;
-  transform: translateX(-100%);
-  padding-right: 15px;
-}
 
 .game-content {
+  font-family: "AcmeFont", sans-serif;
   background-color: var(--background-color-forms);
   border: 3px solid black;
   border-radius: 8px;
@@ -163,6 +159,7 @@ fill: var(--text-color-input-focus);
   all: unset;
   width: 100%;
   height: 100%;
+  text-align: center;
 }
 
 .game-content:has(input:focus) {

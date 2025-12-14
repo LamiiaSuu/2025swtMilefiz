@@ -32,7 +32,7 @@ const lobbyid = defineModel('lobbyid')
 /** lobby-list **/
 
 .lobby-container {
-    min-height: 0;
+    min-height: 100px;
 }
 
 .lobby-list {
