@@ -19,7 +19,6 @@ const fetchLobbies = async () => {
     if (!response.ok) throw new Error('Fehler beim Laden der Lobbies')
     const data = await response.json()
     lobbies.value = data
-    console.log(lobbies.value)
   } catch (err) {
     console.error('Lobby-Liste konnte nicht geladen werden:', err)
   }
