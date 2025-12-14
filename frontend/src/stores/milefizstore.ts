@@ -58,7 +58,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   })
 
   const isJoined = computed(() => {
-    return Boolean(gamedata.lobbyId)
+    return Boolean(gamedata.lobby)
   })
 
   function startMilefizLiveUpdate() {
