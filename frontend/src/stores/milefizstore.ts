@@ -263,7 +263,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy.isEnergyFull = gamedata.energy >= energy.maxEnergy
   }
 
-
   /**
    * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
@@ -471,6 +470,35 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
+   * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
+   */
+  function disconnectAndReset() {
+    // WebSocket-Verbindung trennen
+    if(stompclient && stompclient.connected) {
+      stompclient.deactivate()
+      stompclient = null
+    }
+
+    // Store-State zurücksetzen
+    gamedata.playerId = ''
+    gamedata.playerToken = ''
+    gamedata.energy = 0
+    gamedata.currentDiceRoll = undefined
+    gamedata.lobby = null
+
+    cooldown.remainingSeconds = 0
+    cooldown.active = false
+
+    energy.maxEnergy = 0
+    energy.isEnergyFull = false
+    energy.isEnergyFresh = false
+
+    isJumping.value = false
+
+    console.log('Store reset complete')
+  }
+
+  /**
    *
    */
   const isJumping = ref(false)
@@ -489,6 +517,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     isJumping,
     getOwnPlayer,
     isOwnLeader,
+    disconnectAndReset,
     /* requestJump */
   }
 })

@@ -253,10 +253,18 @@ public class FrontendReceiverController {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws PlayerNotFoundException {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         Player player = (Player) headerAccessor.getSessionAttributes().get("player");
+
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
+
+        // Wenn kein Spieler mehr drin: Lobby Löschen
+        if (lobby.isEmpty()) {
+            lobbyManager.deleteLobby(lobby);
+        }
+
+        // Sende per STOMP allen bereits in der Lobby vorhandenen Spielern ein Update
         messagingService.sendEvent(new LobbyMessage(lobby,
-                new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler hat das Spiel verlassen")));
+                new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler ist geleavt")));
         logger.info("WebSocket disconnected - Player Token: {}", player.getPlayerToken());
     }
 

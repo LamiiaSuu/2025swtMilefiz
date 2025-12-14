@@ -8,48 +8,54 @@ import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 
-const { joinLobby, gamedata, sendLobbyMessage, isOwnLeader } = useMilefizStore()
-
 const milefizStore = useMilefizStore()
+const { joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
 
 onMounted(() => {
     milefizStore.joinLobby()
 })
 const router = useRouter()
 
-// Daten
-const lobbyName = computed({
-    get: () => gamedata?.lobby?.lobbyName ?? '',
-    set: (value: string) => {
-        if (gamedata?.lobby) {
-            gamedata.lobby.lobbyName = value
+// Reaktive Leader-Prüfung
+const isOwnLeader = computed(() => storeIsOwnLeader())
+
+// Lobby Wrapper mit allen Lobby-Daten
+const lobby = computed({
+    get: () => gamedata?.lobby,
+    set: (value) => {
+        // Lobby wird üblicherweise nicht direkt gesetzt, aber für Vollständigkeit
+        if (gamedata && value) {
+            gamedata.lobby = value
         }
-        if (!isOwnLeader()) return // keine Änderung für non-Leader
+    }
+})
+
+// Lobby-Name mit speziellem Setter
+const lobbyName = computed({
+    get: () => lobby.value?.lobbyName ?? '',
+    set: (value: string) => {
+        if (lobby.value) {
+            lobby.value.lobbyName = value
+        }
+        if (!isOwnLeader.value) return // keine Änderung für non-Leader
         // Änderung an Backend senden
-        const lobbyId = gamedata?.lobby?.id
+        const lobbyId = lobby.value?.id
         if (lobbyId) {
             const destination = `/app/milefiz/lobby/${lobbyId}/updateSettings`
             const payload = {
                 newLobbyName: value,
-                maxPlayers: gamedata?.lobby?.maxPlayers ?? 4,
+                maxPlayers: lobby.value?.maxPlayers ?? 4,
             }
             sendLobbyMessage(destination, payload)
         }
     }
 })
+
 const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
 
 // Importierte Map Datei
 const selectedFile = ref<File | null>(null)
-
-// Spieler Farben: gruen, gelb, rot, blau
-const playerColors = ['#44ff44', '#ffff44', '#ff4444', '#4444ff']
-
-// Liste der Spieler
-const players = computed(() => milefizStore.gamedata.lobby?.players)
-
-
 
 /**
  * handleFileChange (event: Event)
@@ -83,7 +89,7 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <label>Lobby-Name</label>
                         <input type="text" v-model="lobbyName" class="form-input" placeholder="Lobby-Name"
-                            :disabled="!isOwnLeader()">
+                            :disabled="!isOwnLeader">
                     </div>
 
                     <!-- Map Buttons -->
@@ -120,7 +126,7 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <label>Spieler</label>
                         <div class="players-list">
-                            <div v-for="(player, index) in players" :key="index" class="player-item">
+                            <div v-for="(player, index) in lobby?.players" :key="index" class="player-item">
                                 <span class="player-color-dot" :style="{ backgroundColor: player.color }"></span>
                                 {{ player.playerName }}
                             </div>
@@ -130,9 +136,10 @@ const handleFileChange = (event: Event) => {
                     <!-- Buttons -->
                     <div class="form-row">
                         <div class="button-container">
-                            <button class="start-game-button" @click="isOwnLeader() && $router.push({ name: 'game' })"
-                                :disabled="!isOwnLeader()" :class="{ active: isOwnLeader() }">
-                                {{ isOwnLeader() ? 'Spiel Starten' : 'Warten auf Leader...' }}
+                            <button type="button" class="start-game-button"
+                                @click="isOwnLeader && $router.push({ name: 'game' })" :disabled="!isOwnLeader"
+                                :class="{ active: isOwnLeader }">
+                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Leader...' }}
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />
                         </div>

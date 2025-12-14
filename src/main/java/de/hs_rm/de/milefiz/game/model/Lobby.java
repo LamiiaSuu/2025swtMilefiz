@@ -90,6 +90,13 @@ public class Lobby {
     }
 
     public boolean leave(Player player) {
+        boolean wasLeader = player.isLeader();
+        // ggf. neuen Leader bestimmen
+        if (wasLeader) {
+            getPlayers().stream().filter(p -> !p.equals(player)).findAny().ifPresent(newLeader -> {
+                newLeader.setLeader(true);
+            });
+        }
         return players.remove(player);
     }
 
