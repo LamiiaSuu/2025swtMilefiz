@@ -119,7 +119,7 @@ addtest()
   pointer-events: none;
 }
 
-.username-input input:focus~svg {
+.lobbyid-input input:focus~svg {
 fill: var(--text-color-input-focus);
 }
 </style>
