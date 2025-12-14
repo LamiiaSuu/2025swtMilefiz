@@ -8,8 +8,7 @@ const router = useRouter()
 </script>
 
 <template>
-  
-  <img src="/winPopUpAssets/confetti_down.gif" alt="Confetti" class="confetti"/>
+  <img src="/winPopUpAssets/confetti_down.gif" alt="Confetti" class="confetti" />
   <div class="overlay">
     <div class="popup">
       <div class="text">
@@ -36,8 +35,7 @@ const router = useRouter()
 
 .confetti {
   width: 100vw;
-  height: auto;  
-  
+  height: auto;
   background-color: rgba(0, 0, 0, 0.6);
 }
 
