@@ -15,7 +15,7 @@ const selectedLobby = ref<string>('')
 
 const fetchLobbies = async () => {
   try {
-    const response = await fetch('/api/lobby/list') 
+    const response = await fetch('/api/lobby/list?filter=joinable') 
     if (!response.ok) throw new Error('Fehler beim Laden der Lobbies')
     const data = await response.json()
     lobbies.value = data
