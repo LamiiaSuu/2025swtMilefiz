@@ -51,7 +51,7 @@ function getPlayerFromLobby(): Player | null {
     <!-- Username -->
     <div class="form-row">
         <label>Username</label>
-        <input type="text" v-model="username" class="form-input" placeholder="Username">
+        <input type="text" v-model="username" class="form-input" placeholder="Username" maxlength="16">
     </div>
 </template>
 
