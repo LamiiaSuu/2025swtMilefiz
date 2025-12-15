@@ -9,12 +9,14 @@ import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 
 const milefizStore = useMilefizStore()
-const { joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
+const { isJoined, joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
 
 onMounted(() => {
-    milefizStore.joinLobby()
+    if (!isJoined) {
+        console.log(`keiner lobby gejoint, joine random`)
+        milefizStore.joinLobby()
+    }
 })
-const router = useRouter()
 
 // Reaktive Leader-Prüfung
 const isOwnLeader = computed(() => storeIsOwnLeader())

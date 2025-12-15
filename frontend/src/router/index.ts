@@ -6,6 +6,11 @@ import JoinGameView from '@/views/JoinGameView.vue'
 import SettingView from '@/views/SettingView.vue'
 import MapEditorView from '@/views/MapEditorView.vue'
 
+import pinia from '@/stores/pinia'
+import { useMilefizStore } from '@/stores/milefizstore'
+
+const { joinLobby } = useMilefizStore(pinia)
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -34,11 +39,26 @@ const router = createRouter({
       name: 'join-game',
       component: JoinGameView,
     },
-        {
+    {
       path: '/map-editor',
       name: 'map-editor',
       component: MapEditorView,
-    }
+    },
+    {
+      path: '/join/:lobbyid',
+      component: NewGameView,
+      beforeEnter: async (to, from) => {
+        // lobbyid aus parametern
+        const id: string | undefined = (to.params.lobbyid as string | undefined)
+
+        // warten bis lobby gejoint
+        if (id) {
+          console.log(`joine mit ${id}`);
+          await joinLobby(id)
+        }
+        return { name: 'game-start', replace: true }
+      },
+    },
   ],
 })
 
