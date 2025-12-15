@@ -431,16 +431,92 @@ public class FrontendReceiverController {
         return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy");
     }
 
+    /**
+ * WebSocket Message Handler für Energie-Verbrauchsaktionen in einer Lobby.
+ *
+ * <p>
+ * Diese Methode verarbeitet eingehende Anfragen zum Verbrauchen von Energie,
+ * z. B. für eine Sprungaktion eines Spielers.
+ * </p>
+ *
+ * <p>
+ * Ablauf:
+ * </p>
+ * <ol>
+ *   <li>Client sendet einen {@link EnergyCommand} an den WebSocket-Endpunkt</li>
+ *   <li>Die Anfrage wird mit Spieler-ID und Lobby-ID protokolliert</li>
+ *   <li>Validierung: Der Spieler muss genügend Energie besitzen
+ *       ({@link Player#hasFullEnergy()} muss {@code true} liefern)</li>
+ *   <li>Bei erfolgreicher Validierung wird {@link Player#consumeEnergy()} ausgeführt,
+ *       wodurch die Energie des Spielers reduziert wird</li>
+ *   <li>Ein {@link FrontendConsumeEnergyEvent} mit dem neuen Energiewert wird
+ *       an alle Clients der Lobby gesendet</li>
+ *   <li>Bei fehlender Energie wird ein {@link FrontendConsumeEnergyRejectedEvent}
+ *       mit einer Fehlermeldung gesendet</li>
+ * </ol>
+ *
+ * <p>
+ * <strong>Validierungsregeln:</strong>
+ * </p>
+ * <ul>
+ *   <li>{@link Player#hasFullEnergy()} muss {@code true} sein</li>
+ * </ul>
+ *
+ * <p>
+ * <strong>Erfolgsfall:</strong>
+ * </p>
+ * <ul>
+ *   <li>Die Energie des Spielers wird um die für die Aktion definierte Menge reduziert</li>
+ *   <li>Ein {@link FrontendConsumeEnergyEvent} mit dem aktuellen Energiewert
+ *       und dem Status {@code hasFullEnergy} wird gesendet</li>
+ * </ul>
+ *
+ * <p>
+ * <strong>Fehlerfall:</strong>
+ * </p>
+ * <ul>
+ *   <li>Der Spieler besitzt nicht genügend Energie für die Aktion</li>
+ *   <li>Ein {@link FrontendConsumeEnergyRejectedEvent} mit einer Fehlermeldung
+ *       wird gesendet</li>
+ * </ul>
+ *
+ * <p>
+ * <strong>WebSocket-Mapping:</strong>
+ * </p>
+ * <ul>
+ *   <li><strong>Eingang:</strong> {@code /milefiz/lobby/{lobbyId}/consumeEnergy}</li>
+ *   <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
+ *   <li><strong>Protokoll:</strong> STOMP über WebSocket</li>
+ * </ul>
+ *
+ * @param lobbyId die eindeutige UUID der Lobby, in der die Aktion ausgeführt wird
+ * @param command der Energie-Befehl vom Client, enthält die Spieler-ID
+ * @param player  der authentifizierte Spieler, der Energie verbrauchen möchte
+ *
+ * @return {@link FrontendConsumeEnergyEvent} bei erfolgreichem Energieverbrauch
+ *         oder {@link FrontendConsumeEnergyRejectedEvent} bei ungültiger Anfrage
+ *
+ * @see Player#consumeEnergy()
+ * @see Player#hasFullEnergy()
+ * @see FrontendConsumeEnergyEvent
+ * @see FrontendConsumeEnergyRejectedEvent
+ * @see EnergyCommand
+ *
+ * @author Kevin Tran
+ */
+
     @MessageMapping("/milefiz/lobby/{lobbyId}/consumeEnergy")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleConsumeEnergy(@DestinationVariable("lobbyId") UUID lobbyId, EnergyCommand command, Player player) {
+    public FrontendEvent handleConsumeEnergy(@DestinationVariable("lobbyId") UUID lobbyId, EnergyCommand command,
+            Player player) {
         logger.info("Player {} wants to consume energy for jump.", player.getId());
-        if (player.hasFullEnergy()){
-            try{
+        if (player.hasFullEnergy()) {
+            try {
                 player.consumeEnergy();
                 logger.info("Energy consumed for player {}.", player.getId());
-            } catch (RuntimeException e){
-                logger.error("Unexpected error occurred when trying to consume energy for Player {}", player.getId(), e);
+            } catch (RuntimeException e) {
+                logger.error("Unexpected error occurred when trying to consume energy for Player {}", player.getId(),
+                        e);
             }
 
             return new FrontendConsumeEnergyEvent(player.getId(), player.getEnergy(), player.hasFullEnergy());

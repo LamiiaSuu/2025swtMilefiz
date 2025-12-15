@@ -167,7 +167,7 @@ const animateCustomJump = (
 }
 
 const jump = () => {
-  if (!isJumpAllowed.value) return
+  if (!isJumpAllowed.value) return //Nur dann Jump Animation starten, wenn Sprung auch erlaubt ist, also Spieler maxEnergy gesammelt hat
   if (isJumping.value) return
   
   isJumping.value = true

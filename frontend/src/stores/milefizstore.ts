@@ -54,7 +54,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
     energy: 0, //Energy des Spielers
-    isJumping: false,
+    isJumping: false, //Flag, ob sich der Spieler in einer Sprungaktion befindet
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
   })
@@ -161,8 +161,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             console.warn('Energy save rejected:', event.msg)
           }
           return
-        } 
-        // Wenn energy erfolgreich konsumiert wurde, wird frontendseitig auch die energy resettet
+        }
+        // Wenn energy erfolgreich konsumiert wurde, wird die energy auch frontendseitig resettet
         else if (event.type === 'CONSUME_ENERGY') {
           if (event.playerId == gamedata.playerId) {
             gamedata.energy = event.energy
@@ -525,6 +525,23 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /* Sendet eine Energie-Verbrauchen-Anfrage an den Spielserver.
+  *
+  * Wird aufgerufen, wenn der Spieler springen möchte.
+  *
+  * Erstellt ein EnergyCommand-Objekt mit der Spieler-ID und veröffentlicht es über den STOMP-Endpunkt `/app/milefiz/lobby/{lobbyId}/consumeEnergy`.
+  *
+  * Ablauf:
+  * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.
+  * 2. Lobby-ID und Spieler-ID validieren – Abbruch bei fehlenden Daten.
+  * 3. Energy-Command serialisieren(`JSON.stringify`).
+  * 4. Nachricht an den Server senden.
+  *
+  * @returns void
+  * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
+   *
+  * @author Kevin Tran
+   */
   function sendEnergyConsume() {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot save energy: STOMP client not connected.')

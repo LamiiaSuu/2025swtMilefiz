@@ -32,7 +32,7 @@ const onKeypress = (e: KeyboardEvent) => {
 
 
 /**
- * - Überprüft zunächst, ob Spieler genug Energie zum Hüpfen hat
+ * - Überprüft zunächst frontendseitig, ob Spieler genug Energie zum Hüpfen hat
  * - visuelles Feedback für Aktivierung des Buttons
  */
 function jump() {
