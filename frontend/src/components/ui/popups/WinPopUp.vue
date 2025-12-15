@@ -30,7 +30,7 @@ const router = useRouter()
           <TresAmbientLight :intensity="1" />
           <TresDirectionalLight :position="[3, 5, 2]" :intensity="5" />
 
-          <WinCharacter :scale="1.4" :y-position="0" bodyColor="lightgray" eyeColor="black" :rotation-y="-0.35" />
+          <WinCharacter :scale="1.4" :y-position="0" :bodyColor="store.getWinnerColor()?.body" :eyeColor="store.getWinnerColor()?.eyes" :rotation-y="-0.35" />
         </TresCanvas>
       </div>
 

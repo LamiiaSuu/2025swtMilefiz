@@ -7,6 +7,7 @@ import type { EnergyCommand } from '@/types/energy'
 import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdate";
 import { useBoardStore } from "./boardStore"
 import { generateUUID } from 'three/src/math/MathUtils.js';
+import { startingbaseColors, playerColors } from '@/types/colorsAssets';
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
@@ -46,9 +47,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * Gewinndialog
    * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
    * @prop {string} winnerName - Name des gewinnenden Spielers.
+   * @prop 
   */
   const gameFinished = ref(false)
   const winnerName = ref<string | null>(null)
+  const winnerColor = ref<string | null>(null)
 
   // Beispiele für Daten
   const gamedata = reactive<{
@@ -213,6 +216,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           gamedata.currentDiceRoll = 0
           gameFinished.value = true
           winnerName.value = event.playerName
+          winnerColor.value = event.playerColor
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
@@ -525,6 +529,24 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function getWinnerColor() {
+    if (winnerColor.value == 'RED') {
+      return playerColors.RED
+    }
+
+    if (winnerColor.value == 'GREEN') {
+      return playerColors.GREEN
+    }
+    
+    if (winnerColor.value == 'BLUE') {
+      return playerColors.BLUE
+    }
+
+    if (winnerColor.value == 'YELLOW') {
+      return playerColors.YELLOW
+    }
+  }
+
   /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
@@ -578,6 +600,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     disconnectAndReset,
     winnerName,
     gameFinished,
+    getWinnerColor,
     /* requestJump */
   }
 })
