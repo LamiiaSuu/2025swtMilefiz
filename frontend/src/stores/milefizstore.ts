@@ -168,7 +168,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.energy = event.energy
             energy.isEnergyFull = event.hasFullEnergy
           }
-        } else if (event.type === 'CONSUME_ENERGY_REJECTED') {
+        } else if (event.type === 'CONSUME_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Consume energy rejected:', event.msg)
           }
