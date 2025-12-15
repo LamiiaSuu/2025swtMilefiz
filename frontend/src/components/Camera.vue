@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import type { TresObject } from '@tresjs/core'
-import type { PerspectiveCamera, Vector3 } from 'three'
-import { useMilefizStore } from '@/stores/milefizstore';
+import type { PerspectiveCamera } from 'three'
+import { useMilefizStore } from '@/stores/milefizstore'
 
 const milefizStore = useMilefizStore()
 
+
 // Definiert Props für den zugehörigen Character, 
 // ob First Person an ist und das Offset der Kamera
+
 const props = defineProps<{
   gameCharRef: TresObject | null
   useFirstPerson: boolean
@@ -19,26 +21,30 @@ const emit = defineEmits<{
 }>()
 
 const cameraRef = ref<PerspectiveCamera>()
-const verticalRotation = ref(0) // Hoch + Runter Rotation
-const horizontalRotation = ref(0) // Links + Rechts Rotation
+
+const verticalRotation = ref(0)
+const horizontalRotation = ref(0)
 
 const mouseSensitivity = 0.002
-const maxVerticalAngle = Math.PI / 3 // Limitiert Hoch/Runter
+const maxVerticalAngle = Math.PI / 3
 
+
+/* =========================
+   Computed
+========================= */
 
 
 // Berechnete Kamera Position neu, wenn sie sich ändert
 // Kamera Position = Charakter Position + Offset
-const cameraPosition = computed((): [number, number, number] => {
-  if (!props.gameCharRef || !props.useFirstPerson) {
-    return [0, 1, 0]
-  }
+
+const cameraPosition = computed<[number, number, number]>(() => {
+  if (!props.gameCharRef || !props.useFirstPerson) return [0, 1, 0]
 
   const char = props.gameCharRef as any
   const offset = props.offset || { x: 0, y: 1, z: 0 }
 
   // Position wird vom Charakter abgefragt
-  const charPos = char?.characterPosition?.position || [0, 0, 0]
+  const charPos = char?.characterPosition?.position || { x: 0, y: 0, z: 0 }
 
   // Rückgabe von Kamera Position (Charakter Position + Offset)
   return [
@@ -48,29 +54,19 @@ const cameraPosition = computed((): [number, number, number] => {
   ]
 })
 
-// Berechnete Rotation der Kamera neu, wenn sie sich ändert
-const cameraRotation = computed((): [number, number, number] => {
-  return [verticalRotation.value, horizontalRotation.value + Math.PI, 0]
-})
+const cameraRotation = computed<[number, number, number]>(() => [
+  verticalRotation.value,
+  horizontalRotation.value + Math.PI,
+  0
+])
 
-// Kamera Maussteuerung
+/* =========================
+   Mouse & Pointer Lock
+========================= */
+
 const onMouseMove = (e: MouseEvent) => {
-  if (!props.useFirstPerson) return // Keine Maussteurung
-  
-  // Pointer Lock versuchen
-  if (props.useFirstPerson && !milefizStore.gameFinished) {
-    const requestLock = () => {
-      if (!document.pointerLockElement && props.useFirstPerson) {
-        document.body.requestPointerLock()
-      }
-    }
+  if (!props.useFirstPerson || milefizStore.gameFinished) return
 
-    // Fallback: auf ersten Klick warten
-    document.addEventListener('click', requestLock, { once: true })
-  }
-
-  
-  
   // Horizontale Rotation - Dreht Charakter!
   horizontalRotation.value -= e.movementX * mouseSensitivity
   emit('rotateCharacter', horizontalRotation.value)
@@ -83,77 +79,53 @@ const onMouseMove = (e: MouseEvent) => {
   )
 }
 
-// Lässt Mauszeiger in der First Person Kamera verschwinden 
-// Wenn man im First Person Mode esc drückt, 
-// taucht der Zeiger wieder auf und man kann sich noch umschauen
-watch(() => props.useFirstPerson, (isFirstPerson) => {
-  if (isFirstPerson) {
+const requestPointerLock = () => {
+  if (!document.pointerLockElement && props.useFirstPerson) {
     document.body.requestPointerLock()
-  } else {
-    document.exitPointerLock() // Mauszeiger bei OrbitControl wieder an
   }
-})
+}
 
-onMounted(() => {
-  document.addEventListener('mousemove', onMouseMove)
+/* =========================
+   requestAnimationFrame Loop
+========================= */
 
-  // Direkt Pointer Lock versuchen
-  if (props.useFirstPerson) {
-    const requestLock = () => {
-      if (!document.pointerLockElement) {
-        document.body.requestPointerLock()
-      }
-    }
+let rafId: number | null = null
 
-    // Einige Browser erlauben PointerLock nur nach Benutzerinteraktion
-    // Falls möglich, direkt versuchen:
-    requestLock()
-
-    // Fallback: auf ersten Klick warten
-    document.addEventListener('click', requestLock, { once: true })
-  }
-
-  const updateCamera = () => {
+const updateCamera = () => {
     
-    // Kamera nur updaten, wenn First Person an und cameraRef existiert
-    if (props.useFirstPerson && cameraRef.value && props.gameCharRef?.characterPosition) {
-      const charPos = props.gameCharRef.characterPosition.position
-      const offset = props.offset || { x: 0, y: 0.55, z: 0 }
+  // Kamera nur updaten, wenn First Person an und cameraRef existiert
+  if (
+    props.useFirstPerson &&
+    cameraRef.value &&
+    props.gameCharRef?.characterPosition
+  ) {
+    const charPos = props.gameCharRef.characterPosition.position
+    const offset = props.offset || { x: 0, y: 0.55, z: 0 }
 
-      // Kamera-Position setzen
-      cameraRef.value.position.set(
-        charPos.x + offset.x,
-        charPos.y + offset.y,
-        charPos.z + offset.z
-      )
-
-    }
-
-    // Nächsten Frame planen
-    requestAnimationFrame(updateCamera)
+    // Kamera-Position setzen
+    cameraRef.value.position.set(
+      charPos.x + offset.x,
+      charPos.y + offset.y,
+      charPos.z + offset.z
+    )
   }
+  
+  // Nächsten Frame planen
+  rafId = requestAnimationFrame(updateCamera)
+}
 
-  // Nur starten, wenn cameraRef existiert
-  const stopLoop = () => {
-    if (cameraRef.value) {
-      updateCamera()
-    } else {
-      requestAnimationFrame(stopLoop)
-    }
+/* =========================
+   Watcher
+========================= */
+
+watch(() => props.useFirstPerson, (isFP) => {
+  if (isFP) {
+    requestPointerLock()
+  } else if (document.pointerLockElement) {
+    document.exitPointerLock()
   }
-
-  stopLoop()
 })
 
-/**
- * Beobachtet die Rotation des Spielcharakters und synchronisiert sie mit der Kamerarotation.
- * 
- * Wird die Charakterrotation (z. B. durch Bewegung im Spiel) geändert, 
- * übernimmt die Kamera diese horizontale Ausrichtung, 
- * damit die Blickrichtung im First-Person-Modus mit dem Charakter übereinstimmt.
- * 
- * @param newRotation - Neuer Rotationswert des Charakters
- */
 watch(
   () => props.gameCharRef?.characterRotation?.value,
   (newRotation) => {
@@ -162,29 +134,49 @@ watch(
   }
 )
 
+/* =========================
+   Lifecycle
+========================= */
+
+onMounted(() => {
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('click', requestPointerLock)
+
+  rafId = requestAnimationFrame(updateCamera)
+})
+
 onUnmounted(() => {
   document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('click', requestPointerLock)
+
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId)
+    rafId = null
+  }
+
   if (document.pointerLockElement) {
     document.exitPointerLock()
   }
 })
 
-// Gibt Kamera frei
+/* =========================
+   Expose
+========================= */
+
 defineExpose({
   get camera() {
     return cameraRef.value
   }
 })
-
 </script>
 
 <template>
-  <TresPerspectiveCamera 
-    v-if="useFirstPerson" 
-    ref="cameraRef" 
-    :position="cameraPosition" 
-    :rotation="cameraRotation" 
-    :fov="90" 
-    rotation-order="YXZ" 
+  <TresPerspectiveCamera
+    v-if="useFirstPerson"
+    ref="cameraRef"
+    :position="cameraPosition"
+    :rotation="cameraRotation"
+    :fov="90"
+    rotation-order="YXZ"
   />
 </template>
