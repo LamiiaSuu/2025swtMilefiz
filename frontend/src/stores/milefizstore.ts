@@ -309,6 +309,43 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
+   * Sendet einen "Spiel starten"-Befehl an den Server.
+   * 
+   * Diese Funktion wird aufgerufen, wenn der Lobby-Leader im Frontend den "Spiel starten" Button klickt.
+   * 
+   * Ablauf:
+   *  1. Prüft, ob der STOMP Client verbunden ist
+   *  2. Prüft nach einer gültigen Lobby ID
+   *  3. Sende einen StartGameCommand mit eigener PlayerID an den Server-Endpunkt `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`
+   * 
+   * WS empfängt Serverantwort und verarbeitet diese als `GAME_START` Event weiter (--> Weiterleitung an GameView)
+   * @returns void
+   */
+  function startGameCommand() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot start game commnand: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id) {
+      console.error('Cannot start game command.')
+      return
+    }
+
+    try {
+      stompclient.publish({
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`,
+        body: JSON.stringify({
+          playerId: gamedata.playerId,
+        })
+      })
+      console.log('Start game command sent for all players in lobby:', gamedata.lobby?.id)
+    } catch (err) {
+      console.error('Error sending start game command:', err)
+    }
+  }
+
+  /**
    * Sendet eine Bewegungsaktion (Move) an den Spielserver.
    *
    * Wird aufgerufen, wenn der Spieler im Frontend eine Bewegung
@@ -529,6 +566,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName,
     gameFinished,
     getOwnPlayer,
+    startGameCommand,
     isOwnLeader,
     disconnectAndReset,
     /* requestJump */
