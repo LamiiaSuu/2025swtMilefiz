@@ -206,7 +206,7 @@ public class MovementServiceMeepleTest {
         assertInstanceOf(FrontendPlayerHasWonEvent.class, result);
 
         FrontendPlayerHasWonEvent evt = (FrontendPlayerHasWonEvent) result;
-        assertEquals(player.getName(), evt.playerName());
+        assertEquals(player.getPlayerName(), evt.playerName());
 
         assertEquals(0, player.getRemainingMoves());
     }
