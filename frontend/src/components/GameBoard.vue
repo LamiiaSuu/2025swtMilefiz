@@ -394,6 +394,9 @@ const meepleColorMap = computed(() => {
     <!-- Directional Licht von "vorne rechts" 200%-->
     <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
+    <!-- Directional Licht von "vorne rechts" 200%-->
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2"/>
+
     <!--Spawnen der Meeple-->
     <GameCharacter v-for="entry in meepleEntries" :key="entry.id"
       :ref="el => registerGameCharRefFromTemplate(entry.id, el)" :position="entry.position" :meepleId="entry.id"
