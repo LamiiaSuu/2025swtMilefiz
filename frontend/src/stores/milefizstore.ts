@@ -1,5 +1,6 @@
 import { reactive, readonly, computed, ref } from 'vue'
 import { defineStore } from 'pinia'
+import router from '@/router'
 import { Client, type Message } from '@stomp/stompjs'
 import type { Direction, MoveBarrierCommand, MovementCommand } from "@/types/movement";
 import type { EnergyCommand } from '@/types/energy'
@@ -216,7 +217,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
         // SPIEL STARTET
         else if (event.type === 'GAME_START') {
+          const event = JSON.parse(message.body)
+          console.log('FULL EVENT:', event)
+
           console.log('Spiel startet')
+          router.push({ name: 'game' })
         }
       })
     }
