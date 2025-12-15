@@ -484,7 +484,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    */
   function disconnectAndReset() {
     // WebSocket-Verbindung trennen
-    if(stompclient && stompclient.connected) {
+    if (stompclient && stompclient.connected) {
       stompclient.deactivate()
       stompclient = null
     }
