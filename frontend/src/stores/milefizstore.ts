@@ -42,6 +42,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     isEnergyFresh: false,
   })
 
+  /** 
+   * Gewinndialog
+   * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
+   * @prop {string} winnerName - Name des gewinnenden Spielers.
+  */
   const gameFinished = ref(false)
   const winnerName = ref<string | null>(null)
 
@@ -524,7 +529,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    */
   function disconnectAndReset() {
     // WebSocket-Verbindung trennen
-    if(stompclient && stompclient.connected) {
+    if (stompclient && stompclient.connected) {
       stompclient.deactivate()
       stompclient = null
     }
