@@ -389,7 +389,7 @@ const meepleColorMap = computed(() => {
     <!-- Grundbeleuchtung der Szene (75% Intensität) -->
     <TresAmbientLight :intensity=".75" />
 
-    <!-- Directional Licht von "vorne rechts" 200%-->
+    <!-- Himmel- und Bodenlicht der Szene (75% Intensität)-->
     <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
