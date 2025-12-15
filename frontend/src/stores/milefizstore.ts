@@ -7,6 +7,7 @@ import type { EnergyCommand } from '@/types/energy'
 import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdate";
 import { useBoardStore } from "./boardStore"
 import { generateUUID } from 'three/src/math/MathUtils.js';
+import { startingbaseColors, playerColors } from '@/types/colorsAssets';
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
@@ -42,19 +43,35 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     isEnergyFresh: false,
   })
 
+  /** 
+   * Gewinndialog
+   * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
+   * @prop {string} winnerName    - Name des gewinnenden Spielers.
+   * @prop {string} winnerColor   - Farbe des Gewinners
+  */
+  const gameFinished = ref(false)
+  const winnerName = ref<string | null>(null)
+  const winnerColor = ref<string | null>(null)
+
   // Beispiele für Daten
   const gamedata = reactive<{
     playerId: string
     playerToken: string
     energy: number
+    isJumping: boolean
     currentDiceRoll?: number
     lobby: Lobby | null
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
     energy: 0, //Energy des Spielers
+    isJumping: false, //Flag, ob sich der Spieler in einer Sprungaktion befindet
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
+  })
+
+  const isJoined = computed(() => {
+    return Boolean(gamedata.lobby)
   })
 
   function startMilefizLiveUpdate() {
@@ -159,6 +176,17 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             console.warn('Energy save rejected:', event.msg)
           }
           return
+        }
+        // Wenn energy erfolgreich konsumiert wurde, wird die energy auch frontendseitig resettet
+        else if (event.type === 'CONSUME_ENERGY') {
+          if (event.playerId == gamedata.playerId) {
+            gamedata.energy = event.energy
+            energy.isEnergyFull = event.hasFullEnergy
+          }
+        } else if (event.type === 'CONSUME_ENERGY_ERROR') {
+          if (event.playerId == gamedata.playerId) {
+            console.warn('Consume energy rejected:', event.msg)
+          }
         } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           if (event.playerId === gamedata.playerId) {
@@ -199,7 +227,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0
-          //TODO Gewinndialog einblenden
+          gameFinished.value = true
+          winnerName.value = event.playerName
+          winnerColor.value = event.playerColor
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
@@ -512,12 +542,77 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /* Sendet eine Energie-Verbrauchen-Anfrage an den Spielserver.
+  *
+  * Wird aufgerufen, wenn der Spieler springen möchte.
+  *
+  * Erstellt ein EnergyCommand-Objekt mit der Spieler-ID und veröffentlicht es über den STOMP-Endpunkt `/app/milefiz/lobby/{lobbyId}/consumeEnergy`.
+  *
+  * Ablauf:
+  * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.
+  * 2. Lobby-ID und Spieler-ID validieren – Abbruch bei fehlenden Daten.
+  * 3. Energy-Command serialisieren(`JSON.stringify`).
+  * 4. Nachricht an den Server senden.
+  *
+  * @returns void
+  * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
+   *
+  * @author Kevin Tran
+   */
+  function sendEnergyConsume() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot save energy: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id || !gamedata.playerId) {
+      console.error('Cannot save energy: Missing lobbyId or playerId')
+      return
+    }
+    const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId }
+    const body = JSON.stringify(energyConsumeCommand)
+
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
+
+    try {
+      stompclient.publish({
+        destination: DEST_APP + '/consumeEnergy',
+        body,
+      })
+      console.log('Energy consume:', body)
+    } catch (err) {
+      console.error('Error consuming energy:', err)
+    }
+  }
+
+  /**
+   * Prueft welche Farbe der Gewinner hat und gibt die entsprechende Koerper und Augenfarbe des Meeples zuruek
+   * @returns Koerper und Augenfarbe des Meeples vom Gewinner
+   */
+  function getWinnerColor() {
+    if (winnerColor.value == 'RED') {
+      return playerColors.RED
+    }
+
+    if (winnerColor.value == 'GREEN') {
+      return playerColors.GREEN
+    }
+    
+    if (winnerColor.value == 'BLUE') {
+      return playerColors.BLUE
+    }
+
+    if (winnerColor.value == 'YELLOW') {
+      return playerColors.YELLOW
+    }
+  }
+
   /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
   function disconnectAndReset() {
     // WebSocket-Verbindung trennen
-    if(stompclient && stompclient.connected) {
+    if (stompclient && stompclient.connected) {
       stompclient.deactivate()
       stompclient = null
     }
@@ -536,19 +631,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy.isEnergyFull = false
     energy.isEnergyFresh = false
 
-    isJumping.value = false
 
     console.log('Store reset complete')
   }
 
-  /**
-   *
-   */
-  const isJumping = ref(false)
 
 
   return {
     gamedata,
+    isJoined,
     startMilefizLiveUpdate,
     sendRollDice,
     sendLobbyMessage,
@@ -557,11 +648,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy,
     sendMove,
     sendEnergySave,
-    isJumping,
+    sendEnergyConsume,
     startGameCommand,
     getOwnPlayer,
     isOwnLeader,
     disconnectAndReset,
-    /* requestJump */
+    winnerName,
+    gameFinished,
+    getWinnerColor,
   }
 })

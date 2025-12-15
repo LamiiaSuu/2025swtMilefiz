@@ -3,6 +3,7 @@
 import { useGLTF } from '@tresjs/cientos'
 import { computed, watchEffect } from 'vue'
 import { DoubleSide, Object3D } from 'three'
+import { startingbaseColors } from '@/types/colorsAssets';
 
 // Props definieren
 const props = defineProps<{
@@ -13,13 +14,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 }>();
-
-const startColorMap: Record<string, string> = {
-  START_RED: '#e24b4b',
-  START_GREEN: '#3fc37a',
-  START_YELLOW: '#ffd24d',
-  START_BLUE: '#4da6ff'
-}
 
 // Modell: Grass Platform by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/7xmlX1JEkM)
 const { state } = useGLTF('/Grass_Platform.glb', { draco: true })
@@ -94,7 +88,7 @@ watchEffect(() => {
     }
 
     if (props.type?.startsWith?.('START_')) {
-      const col = startColorMap[props.type] ?? '#ffffff'
+      const col = startingbaseColors[props.type as keyof typeof startingbaseColors] ?? '#ffffff'
       setOverlayMainColor(overlay, col)
     }
     // Position + Scale für Overlay (höher platzieren)

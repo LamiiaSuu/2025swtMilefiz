@@ -11,6 +11,7 @@ import type { Direction } from "@/types/movement"
 import type { Object3D } from 'three'
 import { Raycaster, Vector3 } from 'three'
 import { watch } from 'vue'
+import { isAssertEntry } from 'typescript'
 
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
@@ -96,6 +97,12 @@ watch(() => boardStore.meeplePositions, (val) => {
   console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
 }, { deep: true })
 
+watchEffect(() => {
+  if (milefizStore.gameFinished) {
+    useFirstPerson.value = false
+  }
+})
+
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
   // Cast the template ref value to TresObject | null in a type-safe place
   registerGameCharRef(id, el as unknown as TresObject | null)
@@ -168,6 +175,7 @@ watch(ownMeepleIds, (ids) => {
     }
   }
 })
+
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
@@ -338,9 +346,28 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
+// Computed Property für Meeple → PlayerColor Mapping
+const meepleColorMap = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  if (!lobby) return new Map<string, string>()
+  
+  const map = new Map<string, string>()
+  
+  // Iteriere über alle Spieler
+  for (const player of lobby.players) {
+    // Alle Meeples dieses Spielers bekommen seine Farbe
+    for (const meeple of player.meeples) {
+      map.set(meeple.id, player.color) // player.color = "RED" | "GREEN" | "YELLOW" | "BLUE"
+    }
+  }
+  
+  return map
+})
+
 </script>
 
 <template>
+
   <!-- 3D-Canvas Element das den ganzen Bildschirm ausfüllt-->
   <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB">
     <!-- Kameraposition und Kamerasteuerung via OrbitControls -->
@@ -362,16 +389,18 @@ onUnmounted(() => {
     <!-- Grundbeleuchtung der Szene (75% Intensität) -->
     <TresAmbientLight :intensity=".75" />
 
+    <!-- Himmel- und Bodenlicht der Szene (75% Intensität)-->
+    <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
+
     <!-- Directional Licht von "vorne rechts" 200%-->
     <TresDirectionalLight :position="[10, 15, 10]" :intensity="2"/>
 
-    <!-- Himmel + Bodenlicht für GLTF 75%-->
-    <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
-
+    <!--Spawnen der Meeple-->
     <GameCharacter v-for="entry in meepleEntries" :key="entry.id"
       :ref="el => registerGameCharRefFromTemplate(entry.id, el)" :position="entry.position" :meepleId="entry.id"
-      bodyColor="pink" eyeColor="white" />
+      :playerColor="meepleColorMap.get(entry.id)"/>
 
+    <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
