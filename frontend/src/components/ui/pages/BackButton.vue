@@ -28,7 +28,7 @@ const goBack = () => {
   background: none;
   border: none;
   color: white;
-  font-size: 1.8rem;
+  font-size: 4vh;
   font-weight: bold;
   cursor: pointer;
   font-family: "AcmeFont", sans-serif;
