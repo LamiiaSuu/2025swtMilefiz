@@ -7,11 +7,16 @@ import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
 import EnergyBar from './EnergyBar.vue';
 import SaveEnergyButton from './SaveEnergyButton.vue';
+import { useMilefizStore } from '@/stores/milefizstore'
+
+const milefizStore = useMilefizStore()
+
 </script>
 
 
 <template>
   <div class="hud-container">
+    <WinPopup v-if="milefizStore.gameFinished"/>
     <!-- Würfelergebnis -->
     <div class="dice-counter-container">
       <DiceCounter />

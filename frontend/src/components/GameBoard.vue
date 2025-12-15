@@ -361,9 +361,6 @@ const meepleColorMap = computed(() => {
 </script>
 
 <template>
-  <transition name="fade">
-    <WinPopup v-if="milefizStore.gameFinished" />
-  </transition>
 
   <!-- 3D-Canvas Element das den ganzen Bildschirm ausfüllt-->
   <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB">
@@ -431,14 +428,5 @@ const meepleColorMap = computed(() => {
   /* <-- immer weiß */
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
   transition: background 0.1s ease, transform 0.1s ease;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>
