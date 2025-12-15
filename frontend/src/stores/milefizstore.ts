@@ -631,6 +631,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy.isEnergyFull = false
     energy.isEnergyFresh = false
 
+    gameFinished.value = false
+    winnerName.value = ''
+    winnerColor.value = ''
+
 
     console.log('Store reset complete')
   }

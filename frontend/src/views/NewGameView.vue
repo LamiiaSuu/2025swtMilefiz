@@ -17,6 +17,7 @@ onMounted(() => {
         console.log(`keiner lobby gejoint, joine random`)
         milefizStore.joinLobby()
     }
+    
 })
 
 // Reaktive Leader-Prüfung
