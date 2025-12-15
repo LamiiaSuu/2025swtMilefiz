@@ -525,10 +525,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
-  function requestJump() {
-
-  }
-  
   function sendEnergyConsume() {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot save energy: STOMP client not connected.')
