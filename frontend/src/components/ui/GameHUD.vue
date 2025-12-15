@@ -16,7 +16,7 @@ const milefizStore = useMilefizStore()
 
 <template>
   <div class="hud-container">
-    <WinPopup v-if="milefizStore.gameFinished"/>
+    <WinPopUp v-if="milefizStore.gameFinished"/>
     <!-- Würfelergebnis -->
     <div class="dice-counter-container">
       <DiceCounter />
