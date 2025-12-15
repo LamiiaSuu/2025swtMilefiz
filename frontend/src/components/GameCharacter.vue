@@ -346,13 +346,38 @@ const rotateToward = (target: [number, number, number]) => {
   animate()
 }
 
-// Gibt Rotation und Position frei
+/**
+ * Setzt die Position des Charakters
+ *
+ * Wird als Fallback verwendet, falls kein `animateTo` verfügbar ist
+ * oder wenn ein sofortiger Snap auf die Zielposition erwünscht ist.
+ *
+ * @param {[number, number, number]} pos - Zielposition [x, y, z]
+ */
+const setPositionImmediate = (pos: [number, number, number]) => {
+  animatedPosition.value = [pos[0], pos[1], pos[2]]
+}
+
+/**
+ * Gibt Methoden und reactive Refs für Elternkomponenten frei.
+ *
+ * - `setRotation(yRotation)` : setzt die Y-Rotation des Charakters
+ * - `jump()` : startet die Sprung-Animation
+ * - `characterPosition` : Ref auf das `TresGroup`-Referenzobjekt
+ * - `meepleId` : identifier des Meeple
+ * - `getPosition()` : liefert die aktuelle Weltposition (inkl. Jump-Offset)
+ * - `animateTo(target)` : animiert den Charakter zu `target` (smooth)
+ * - `setPositionImmediate(pos)` : setzt Position ohne Animation
+ */
 defineExpose({
   setRotation,
   jump,
   characterPosition,
   meepleId: props.meepleId,
   getPosition: () => currentPosition.value,
+  // Expose animateTo so parent can trigger movement directly
+  animateTo,
+  setPositionImmediate,
 })
 
 //Debug: Logging wenn GameCharacter gemounted werden
