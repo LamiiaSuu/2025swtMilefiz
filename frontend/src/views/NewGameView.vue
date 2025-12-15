@@ -9,7 +9,7 @@ import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 
 const milefizStore = useMilefizStore()
-const { isJoined, joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
+const { isJoined, joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset, startGameCommand } = milefizStore
 
 onMounted(() => {
     if (!isJoined) {
@@ -139,8 +139,9 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <div class="button-container">
                             <button type="button" class="start-game-button"
-                                @click="isOwnLeader && $router.push({ name: 'game' })" :disabled="!isOwnLeader"
-                                :class="{ active: isOwnLeader }">
+                                    @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }) }"
+                                    :disabled="!isOwnLeader"
+                                    :class="{ active: isOwnLeader }">
                                 {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Leader...' }}
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />
