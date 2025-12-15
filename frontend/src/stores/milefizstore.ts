@@ -57,6 +57,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
   })
 
+  const isJoined = computed(() => {
+    return Boolean(gamedata.lobby)
+  })
+
   function startMilefizLiveUpdate() {
     console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
     // Nur eine Instanz
@@ -549,6 +553,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
   return {
     gamedata,
+    isJoined,
     startMilefizLiveUpdate,
     sendRollDice,
     sendLobbyMessage,
