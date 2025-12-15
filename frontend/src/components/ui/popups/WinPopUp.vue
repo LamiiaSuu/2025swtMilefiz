@@ -10,6 +10,8 @@ const router = useRouter()
 </script>
 
 <template>
+
+  <img src="/winPopUpAssets/confetti_down.gif" alt="Confetti" class="confetti"/>
   <div class="overlay">
     <div class="popup">
       <div class="text">
@@ -28,13 +30,18 @@ const router = useRouter()
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  /* dunkler Hintergrund */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 10000;
   pointer-events: auto;
+}
+
+.confetti {
+  width: 100vw;
+  height: auto;  
+  
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .popup {
