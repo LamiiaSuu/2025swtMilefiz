@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { useMilefizStore } from '@/stores/milefizstore';
 
 // Zugriff auf den globalen PiniaStore
@@ -31,6 +31,14 @@ const disabled = computed(()=> {
  */
 onMounted(() => {
     window.addEventListener("keydown", onKeypress)
+});
+
+
+/**
+ * Beim unmounten wird Listener removed
+ */
+onUnmounted(() => {
+    window.removeEventListener("keydown", onKeypress)
 });
 
 const onKeypress = (e: KeyboardEvent) => {

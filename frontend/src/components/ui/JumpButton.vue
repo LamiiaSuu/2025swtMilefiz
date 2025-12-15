@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, ref, watch } from "vue";
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
 
 // Zugriff auf globalen PiniaStore
@@ -13,6 +13,13 @@ const isEnergyFull = computed(()=> milefizStore.energy.isEnergyFull);
 onMounted(() => {
     window.addEventListener("keydown", onKeypress)
 });
+
+/**
+ * Beim unmounten wird Listener removed
+ */
+onUnmounted(() => {
+  window.removeEventListener("keydown", onKeypress)
+})
 
 /**
  * steuert, ob der Jump Button deaktiviert wird/bleibt
