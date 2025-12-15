@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router'
-import BackButton from '../pages/BackButton.vue';
+import BackButton from '../pages/BackButton.vue'
 
 const router = useRouter()
 
@@ -11,38 +11,69 @@ const newGameStart = () => {
 </script>
 
 <template>
+  <div class="page">
+    <div class="popup">
+      <div class="win-message">
+        <h1>Spieler 1 hat gewonnen!</h1>
+      </div>
 
-  <div class="popup">
-    <span>Spieler 1 hat gewonnen!</span>
+      <div class="button-container">
+        <BackButton :to="{ name: 'Homepage' }">&lt; Hauptmenü</BackButton>
 
-    <div class="button-container">
-      <BackButton :to="{ name: 'Homepage' }">&lt; Hauptmenü</BackButton>
-
-      <button class="menu-button" @click="newGameStart">Neues Spiel</button>
+        <button class="menu-button" @click="newGameStart">Neues Spiel</button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.page {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+}
+
 .popup {
   position: relative;
-  height: 50vh;
-  width: 50vw;
+  margin: auto;
+  width: 75vw;
+  height: 75vh;
   display: flex;
   flex-direction: column;
 
   align-items: center;
+  padding: 1vh;
+
   overflow: hidden;
-  padding-bottom: 4rem;
+
+  background-color: var(--button-color);
 
   z-index: 100;
+
+  border: 5px solid red;
 }
 
 .button-container {
   display: flex;
   flex-direction: row;
-  gap: 2vh;
+  gap: 4vh;
   align-items: center;
+
+  width: 100%;
+
+  border: 5px solid yellow;
+}
+
+.button-container :deep(button) {
+  flex: 1;
+}
+
+h1 {
+
+  font-weight: bolder;
+  color: #0A0A0A;
+  paint-order: stroke fill;
 }
 
 .menu-button:hover {
