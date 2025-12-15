@@ -8,6 +8,7 @@ import JumpButton from './JumpButton.vue';
 import EnergyBar from './EnergyBar.vue';
 import SaveEnergyButton from './SaveEnergyButton.vue';
 import { useMilefizStore } from '@/stores/milefizstore'
+import WinPopUp from './popups/WinPopUp.vue';
 
 const milefizStore = useMilefizStore()
 
