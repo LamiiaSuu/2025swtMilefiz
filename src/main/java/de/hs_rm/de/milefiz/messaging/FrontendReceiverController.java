@@ -250,6 +250,7 @@ public class FrontendReceiverController {
             throw new PlayerHasNoPermissionException("Der Spieler ist kein Leader");
         }
         logger.info("Spiel {} wurde gestartet", lobbyId);
+        lobby.setGameStarted(true);
         return new FrontendGameStartEvent("Das Spiel wurde gestartet!");
     }
 
