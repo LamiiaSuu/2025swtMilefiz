@@ -7,6 +7,11 @@ const router = useRouter()
 const milefizStore = useMilefizStore();
 const { gamedata, sendLobbyMessage} = milefizStore
 
+/**
+ * setzt den Usernamen aus der Lobby ins textfeld
+ * 
+ * bei Änderungen wird ein Update an das Backend geschickt
+ */
 const username = computed({
     get: () => {
         const me = getPlayerFromLobby()
