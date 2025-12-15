@@ -58,7 +58,7 @@ const onMouseMove = (e: MouseEvent) => {
   if (!props.useFirstPerson) return // Keine Maussteurung
   
   // Pointer Lock versuchen
-  if (props.useFirstPerson && milefizStore.gameFinished) {
+  if (props.useFirstPerson && !milefizStore.gameFinished) {
     const requestLock = () => {
       if (!document.pointerLockElement && props.useFirstPerson) {
         document.body.requestPointerLock()
