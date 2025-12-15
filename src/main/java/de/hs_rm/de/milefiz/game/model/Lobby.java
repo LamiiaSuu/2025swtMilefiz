@@ -15,12 +15,14 @@ public class Lobby {
     private List<Player> players;
     private Board board;
     private int maxPlayers;
+    private boolean gameStarted;
 
     public Lobby() {
         id = UUID.randomUUID();
         players = new ArrayList<>();
         lobbyName = "Neue Lobby";
         maxPlayers = Color.values().length;
+        gameStarted = false;
     }
 
     /**
@@ -37,7 +39,7 @@ public class Lobby {
     }
 
     public boolean isJoinable() {
-        return players.size() < maxPlayers;
+        return players.size() < maxPlayers && !gameStarted;
     }
 
     public UUID getId() {
@@ -139,5 +141,13 @@ public class Lobby {
 
     public void setLobbyName(String lobbyName) {
         this.lobbyName = lobbyName;
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        this.gameStarted = gameStarted;
     }
 }
