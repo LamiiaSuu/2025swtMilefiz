@@ -635,6 +635,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName.value = ''
     winnerColor.value = ''
 
+    const boardStore = useBoardStore()
+
+    boardStore.resetBoardStore()
+
 
     console.log('Store reset complete')
   }

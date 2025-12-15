@@ -68,6 +68,14 @@ export const useBoardStore = defineStore('board', {
       }
     },
 
+    // Variablen zurücksetzen
+    resetBoardStore() {
+      this.ok = false
+      this.board = null
+      this.meeplePositions = {}
+      this.lastFields = {}
+    },
+
     // meeple bewegen und letztes Feld merken
     updateMeeplePosition(meepleId: string, fieldId: string) {
       const previousField = this.meeplePositions[meepleId] ?? null
