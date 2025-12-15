@@ -26,6 +26,7 @@ import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.commands.UpdateLobbySettingsCommand;
+import de.hs_rm.de.milefiz.messaging.commands.UpdatePlayerNameCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
@@ -468,5 +469,44 @@ public class FrontendReceiverController {
             e.printStackTrace();
         }
         return new FrontendLobbyUpdateEvent(null, "");
+    }
+
+    /**
+     * WebSocket Message Handler zur Aktualisierung vom Usernamen
+     * 
+     * Verarbeitet Anfragen zu Änderungen des Usernamen/Playernamen.
+     * Update wird an alle Clients der Lobby gesendet.
+     * 
+     * @param lobbyId die UUID der zu aktualisierenden Lobby
+     * @param updatePlayerNameCommand Command mit newPlayerName
+     * @param player der authentifizierte Spieler, der seinen Namen ändern möchte
+     * @return FrontendLobbyUpdateEvent mit aktualisiertem Lobby-DTO
+     * @see FrontendLobbyUpdateEvent
+     * @see LobbyMapper
+     * @see UpdatePlayerNameCommand
+     * 
+     * @author Thilo Wittmer
+     */
+    @MessageMapping("/milefiz/lobby/{lobbyId}/updatePlayerName")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendEvent handlePlayerNameChange(@DestinationVariable("lobbyId") UUID lobbyId, UpdatePlayerNameCommand updatePlayerNameCommand, Player player) {
+        logger.info(
+            "Recieved UpdatePlayerNameCommand in lobby {} from player '{}': PlayerName {}' ",
+            lobbyId,
+            player.getName(),
+            updatePlayerNameCommand.newPlayerName()
+        );
+
+        player.setPlayerName(updatePlayerNameCommand.newPlayerName());
+
+        Lobby lobby;
+        try {
+            lobby = lobbyManager.getLobby(lobbyId);
+            return new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Update PlayerName");
+        } catch (LobbyNotFoundException e) {
+            e.printStackTrace();
+        }
+        return new FrontendLobbyUpdateEvent(null, "");
+
     }
 }

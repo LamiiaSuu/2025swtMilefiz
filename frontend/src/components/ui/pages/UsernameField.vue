@@ -1,12 +1,45 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { useMilefizStore } from '@/stores/milefizstore'
+import type { Player} from "@/types/lobbyupdate"
 const router = useRouter()
+const milefizStore = useMilefizStore;
+const { gamedata, sendLobbyMessage} = milefizStore
 
-const username = ref('')
+const username = computed({
+    get: () => {
+        const me = getPlayerFromLobby(gamedata)
+        if(!me) return ""
+        return me.playerName
+    },
+    set: (strValue: string) => {
+        if (gamedata.lobby.value) {
+            const me = getPlayerFromLobby(gamedata)
+            if (!me) return
+            me.playerName = strValue
+        }
+        const lobbyId = gamedata.lobby.value?.id
+        if (lobbyId) {
+            const destination = `/app/milefiz/lobby/${lobbyId}/updatePlayerName`
+            const payload = {
+                newPlayerName: strValue
+            }
+            sendLobbyMessage(destination, payload)
+  
+        }
+    }
+})
 
+function getPlayerFromLobby(gdata): Player | null {
+    const lobby = gdata.lobby
+    const myId = gdata.playerId
+    if(!lobby || !myId) return null
+    const me  = lobby.players.find((p) => p.id === myId)
+    if (!me) return null
+    return me
 
+}
 </script>
 
 <template>
