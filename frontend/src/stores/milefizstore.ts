@@ -46,8 +46,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   /** 
    * Gewinndialog
    * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
-   * @prop {string} winnerName - Name des gewinnenden Spielers.
-   * @prop 
+   * @prop {string} winnerName    - Name des gewinnenden Spielers.
+   * @prop {string} winnerColor   - Farbe des Gewinners
   */
   const gameFinished = ref(false)
   const winnerName = ref<string | null>(null)
@@ -529,6 +529,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /**
+   * Prueft welche Farbe der Gewinner hat und gibt die entsprechende Koerper und Augenfarbe des Meeples zuruek
+   * @returns Koerper und Augenfarbe des Meeples vom Gewinner
+   */
   function getWinnerColor() {
     if (winnerColor.value == 'RED') {
       return playerColors.RED
