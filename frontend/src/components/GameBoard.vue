@@ -97,6 +97,12 @@ watch(() => boardStore.meeplePositions, (val) => {
   console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
 }, { deep: true })
 
+watchEffect(() => {
+  if (milefizStore.gameFinished) {
+    useFirstPerson.value = false
+  }
+})
+
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
   // Cast the template ref value to TresObject | null in a type-safe place
   registerGameCharRef(id, el as unknown as TresObject | null)
@@ -361,6 +367,7 @@ const meepleColorMap = computed(() => {
 </script>
 
 <template>
+
   <!-- 3D-Canvas Element das den ganzen Bildschirm ausfüllt-->
   <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB">
     <!-- Kameraposition und Kamerasteuerung via OrbitControls -->
@@ -382,7 +389,7 @@ const meepleColorMap = computed(() => {
     <!-- Grundbeleuchtung der Szene (75% Intensität) -->
     <TresAmbientLight :intensity=".75" />
 
-    <!-- Directional Licht von "vorne rechts" 200%-->
+    <!-- Himmel- und Bodenlicht der Szene (75% Intensität)-->
     <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->

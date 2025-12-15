@@ -3,24 +3,48 @@ import Header from '@/components/ui/pages/Header.vue'
 import ComponentList from '@/components/ui/pages/ComponentList.vue'
 import LobbyList, { type Lobby } from '@/components/ui/pages/LobbyList.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
-import { ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const lobbies = ref<Lobby[]>([])
 const lobbyid = ref<string>('')
 
+let interval: number
+
 const username = ref<string>('')
 const selectedLobby = ref<string>('')
 
+const fetchLobbies = async () => {
+  try {
+    const response = await fetch('/api/lobby/list?filter=joinable') 
+    if (!response.ok) throw new Error('Fehler beim Laden der Lobbies')
+    const data = await response.json()
+    lobbies.value = data
+  } catch (err) {
+    console.error('Lobby-Liste konnte nicht geladen werden:', err)
+  }
 
-/* ## Testcode ## */
-const addtest = () => {
-  if (lobbies.value)
-    lobbies.value.push({ id: Math.random().toString(36).slice(2), name: Math.random().toString(36).slice(2) })
 }
-addtest()
-addtest()
-addtest()
-/* #### */
+
+const filteredLobbies = computed(() => {
+  if (!lobbyid.value.trim()) {
+    return lobbies.value
+  }
+
+  return lobbies.value.filter(lobby =>
+    lobby.id.toLowerCase().includes(lobbyid.value.toLowerCase()) || lobby.lobbyName.toLowerCase().includes(lobbyid.value.toLowerCase())
+  )
+})
+
+onMounted(() => {
+  fetchLobbies()
+  interval = globalThis.setInterval(fetchLobbies, 2000)
+})
+
+onUnmounted(() => {
+  clearInterval(interval)
+  selectedLobby.value = ''
+})
+
 </script>
 
 <template>
@@ -33,13 +57,13 @@ addtest()
             <input type="text" v-model="username" placeholder="Username"></div>
         </div>
         <div class="game-container">
-          <div class="game-label">Lobby-ID</div>
+          <div class="game-label">Suche</div>
           <div class="lobbyid-input game-content">
-            <input type="text" v-model="lobbyid" placeholder="Lobby-ID">
+            <input type="text" v-model="lobbyid" placeholder="nach Lobby-ID oder Name">
             <svg viewBox="0 -960 960 960"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
           </div>
         </div>
-        <LobbyList v-model:lobbyid="selectedLobby" :lobbies="lobbies" label="Lobbys" />
+        <LobbyList v-model:lobbyid="selectedLobby" :lobbies="filteredLobbies" label="Lobbys" />
         <div class="game-container">
           <div class="button-container">
           <button class="start-game-button game-content" :disabled="!selectedLobby" @click="$router.push({ name: 'game' })">

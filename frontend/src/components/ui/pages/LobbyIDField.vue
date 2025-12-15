@@ -16,7 +16,7 @@ const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
  */
 const copyToClipboard = async () => {
     try {
-        await navigator.clipboard.writeText(`${base}/join/${lobbyId.value}`)
+        await navigator.clipboard.writeText(lobbyId.value)
     } catch (err) {
         console.error('Fehler beim Kopieren der Lobby-ID:', err)
     }

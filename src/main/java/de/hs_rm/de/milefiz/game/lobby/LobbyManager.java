@@ -3,6 +3,7 @@ package de.hs_rm.de.milefiz.game.lobby;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -93,4 +94,11 @@ public class LobbyManager {
     public Set<Lobby> getLobbies() {
         return lobbies;
     }
+
+    public Set<Lobby> getJoinableLobbies() {
+        return lobbies.stream()
+            .filter(Lobby::isJoinable)
+            .collect(Collectors.toSet());
+    }
+    
 }

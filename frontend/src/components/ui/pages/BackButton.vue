@@ -19,7 +19,7 @@ const goBack = () => {
 
 <template>
   <button class="back-button" @click="goBack">
-    &lt; zurück
+    <slot>&lt; zurück</slot>
   </button>
 </template>
 
@@ -28,7 +28,7 @@ const goBack = () => {
   background: none;
   border: none;
   color: white;
-  font-size: 1.8rem;
+  font-size: 4vh;
   font-weight: bold;
   cursor: pointer;
   font-family: "AcmeFont", sans-serif;
