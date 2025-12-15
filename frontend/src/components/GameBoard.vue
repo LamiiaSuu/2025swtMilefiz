@@ -125,9 +125,16 @@ function registerGameCharRef(id: string, el: TresObject | null) {
  *
  * @param {Map<string,[number,number,number]>} map - Map von MeepleID → Position
  */
+
+// Vorherige Positionen merken, um nur geänderte Positionen zu animieren
+const _prevMeeplePositions = new Map<string, [number, number, number]>()
 watch(meeplePositions3D, (map) => {
   // map is a Map<string, [number,number,number]>
   for (const [id, pos] of map.entries()) {
+    const prev = _prevMeeplePositions.get(id)
+    const changed = !prev || Math.abs(prev[0] - pos[0]) > 1e-6 || Math.abs(prev[1] - pos[1]) > 1e-6 || Math.abs(prev[2] - pos[2]) > 1e-6
+    if (!changed) continue
+
     const ref = gameCharRefs[id]
     const inst: any = ref?.value
     if (inst && typeof inst.animateTo === 'function') {
@@ -136,6 +143,8 @@ watch(meeplePositions3D, (map) => {
       // fallback: snap into position if animateTo not present
       inst.setPositionImmediate(pos)
     }
+
+    _prevMeeplePositions.set(id, [pos[0], pos[1], pos[2]])
   }
 }, { deep: true })
 
