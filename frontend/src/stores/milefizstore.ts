@@ -47,12 +47,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     playerId: string
     playerToken: string
     energy: number
+    isJumping: boolean
     currentDiceRoll?: number
     lobby: Lobby | null
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
     energy: 0, //Energy des Spielers
+    isJumping: false,
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
   })
@@ -523,6 +525,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function requestJump() {
+
+  }
+  
   function sendEnergyConsume() {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot save energy: STOMP client not connected.')

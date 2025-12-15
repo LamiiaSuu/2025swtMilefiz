@@ -22,6 +22,7 @@ const characterPosition = ref(null)
 //Variablen für Anpassung des Sprungs definiert
 const jumpOffset = ref(0)
 const isJumping = ref(false)
+const isJumpAllowed = computed(() => milefizStore.energy.isEnergyFull)
 
 // Standard-Sprunghöhe (wird für große Sprünge verwendet)
 const defaultJumpHeight = 4
@@ -154,7 +155,7 @@ const animateCustomJump = (
 
       jumpOffset.value = 0
       isJumping.value = false
-      milefizStore.isJumping = false
+      milefizStore.gamedata.isJumping = false
       if (onComplete) onComplete()
       return
     }
@@ -166,10 +167,11 @@ const animateCustomJump = (
 }
 
 const jump = () => {
+  if (!isJumpAllowed.value) return
   if (isJumping.value) return
-
+  
   isJumping.value = true
-  milefizStore.isJumping = true
+  milefizStore.gamedata.isJumping = true
 
   // Spiele GLB-Animation ab (falls verfügbar)
   if (jumpAction.value) {
