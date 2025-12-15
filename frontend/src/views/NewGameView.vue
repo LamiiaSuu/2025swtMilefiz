@@ -10,13 +10,14 @@ import { storeToRefs } from 'pinia'
 
 const { startGameCommand } = useMilefizStore()
 const milefizStore = useMilefizStore()
-const { joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
+const { isJoined, joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
 
 onMounted(() => {
-    milefizStore.joinLobby()
+    if (!isJoined) {
+        console.log(`keiner lobby gejoint, joine random`)
+        milefizStore.joinLobby()
+    }
 })
-
-
 
 // Reaktive Leader-Prüfung
 const isOwnLeader = computed(() => storeIsOwnLeader())
