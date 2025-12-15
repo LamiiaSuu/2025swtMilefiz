@@ -575,6 +575,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     getOwnPlayer,
     isOwnLeader,
     disconnectAndReset,
+    winnerName,
+    gameFinished,
     /* requestJump */
   }
 })
