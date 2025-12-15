@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
@@ -14,7 +13,7 @@ const router = useRouter()
 <template>
 
   <!-- GIF von Pixelmotion4096 von Pixabay (https://pixabay.com/de//?utm_source=link-attribution&utm_medium=referral&utm_campaign=animation&utm_content=12378) -->
-  <img src="/winPopUpAssets/confetti_down.gif" alt="Confetti" class="confetti" />
+  <img src="@/assets/winPopUpAssets/confetti_down.gif" alt="Confetti" class="confetti" />
 
   <div class="overlay">
     <div class="popup">
@@ -38,6 +37,7 @@ const router = useRouter()
       <div class="button-container">
         <BackButton :to="{ name: 'Homepage' }">&lt; Zurück zum Hauptmenü</BackButton>
       </div>
+
     </div>
   </div>
 </template>
@@ -56,7 +56,6 @@ const router = useRouter()
 .confetti {
   width: 100vw;
   height: auto;
-
   background-color: rgba(0, 0, 0, 0.6);
 }
 
@@ -67,7 +66,6 @@ const router = useRouter()
   border-radius: 15px;
   width: 45vw;
   height: 55vh;
-
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   border: 7px solid #efbf04;
@@ -80,7 +78,6 @@ const router = useRouter()
   flex-direction: column;
   margin: 3vh 0;
   text-align: center;
-  justify-content: center;
   align-items: center;
 }
 
@@ -96,14 +93,6 @@ const router = useRouter()
   margin-bottom: 2vh;
 }
 
-.button-container {
-  display: flex;
-  justify-content: center;
-
-  margin-top: auto;
-  margin-bottom: 3vh;
-}
-
 .character-container {
   width: 100%;
   height: 60%;
@@ -112,6 +101,14 @@ const router = useRouter()
   margin-top: -25vh;
   margin-bottom: -1vh;
 
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+
+  margin-top: auto;
+  margin-bottom: 3vh;
 }
 
 .button-container :deep(button) {
