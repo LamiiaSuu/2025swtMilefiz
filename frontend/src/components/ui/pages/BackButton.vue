@@ -19,7 +19,7 @@ const goBack = () => {
 
 <template>
   <button class="back-button" @click="goBack">
-    &lt; zurück
+    <slot>&lt; zurück</slot>
   </button>
 </template>
 
