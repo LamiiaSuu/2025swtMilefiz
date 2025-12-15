@@ -7,11 +7,21 @@ import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
 import EnergyBar from './EnergyBar.vue';
 import SaveEnergyButton from './SaveEnergyButton.vue';
+import { useMilefizStore } from '@/stores/milefizstore'
+import WinPopUp from './popups/WinPopUp.vue';
+
+const milefizStore = useMilefizStore()
+
 </script>
 
 
 <template>
   <div class="hud-container">
+    <!-- Win Popup -->
+    <transition name="fade">
+      <WinPopUp v-if="milefizStore.gameFinished"/>
+    </transition>
+
     <!-- Würfelergebnis -->
     <div class="dice-counter-container">
       <DiceCounter />
@@ -78,5 +88,14 @@ import SaveEnergyButton from './SaveEnergyButton.vue';
   border-radius: 8px;
   width: 25vw;
   box-sizing: border-box;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
