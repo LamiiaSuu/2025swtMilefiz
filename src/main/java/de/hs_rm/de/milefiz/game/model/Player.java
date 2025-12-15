@@ -304,7 +304,7 @@ public class Player implements Principal {
      * @author Kevin Tran
      */
     public void consumeEnergy() {
-        energy = 0;
+        if (hasFullEnergy()) energy = 0;
     }
 
     @Override
