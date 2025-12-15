@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue';
 
+const router = useRouter()
 
+const newGameStart = () => {
+  router.push({ name: 'game-start' })
+}
 </script>
 
 <template>
 
 	<div class="popup">
-		<div class="popup-inner">
-            <BackButton :to="{ name: 'Homepage' }" class="popup-close"/>
+		<div class="button-container">
+			<BackButton :to="{ name: 'Homepage' }">&lt; Hauptmenü</BackButton>
+			
+      		<button class="menu-button" @click="newGameStart">Neues Spiel</button>
 		</div>
 	</div>
 </template>
