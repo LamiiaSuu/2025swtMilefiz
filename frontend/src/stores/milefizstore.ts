@@ -212,6 +212,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0
           gameFinished.value = true
+          winnerName.value = event.playerId
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
