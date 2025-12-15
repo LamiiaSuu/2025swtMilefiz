@@ -11,9 +11,12 @@ const router = useRouter()
 
 <template>
 
+  <!-- GIF von Pixelmotion4096 von Pixabay (https://pixabay.com/de//?utm_source=link-attribution&utm_medium=referral&utm_campaign=animation&utm_content=12378) -->
   <img src="/winPopUpAssets/confetti_down.gif" alt="Confetti" class="confetti" />
+  
   <div class="overlay">
     <div class="popup">
+
       <div class="text">
         <h1 class="title">{{ store.winnerName || 'Unbekannter Spieler' }} hat gewonnen!</h1>
         <p class="info-text">Du kannst jetzt zurück ins Hauptmenü gehen.</p>
@@ -54,7 +57,7 @@ const router = useRouter()
 
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  border: 7px solid #4caf50;
+  border: 7px solid #efbf04;
   animation: fadeIn 0.3s ease;
 }
 
