@@ -3,7 +3,7 @@
 /* TODO: lobby interface aus lobbyupdate nehmen (vielleicht anpassen?) */
 export interface Lobby {
     id: string,
-    name: string,
+    lobbyName: string,
     //...
 }
 
@@ -20,7 +20,7 @@ const lobbyid = defineModel('lobbyid')
             <template v-for="(lobby) in lobbies" :key="lobby.id">
                 <label class="lobby-item">
                     <input class="radio-input" type="radio" :value="lobby.id" v-model="lobbyid" />
-                    <div class="radio-content">{{ lobby.name }}</div>
+                    <div class="radio-content">{{ lobby.lobbyName }}</div>
                 </label>
             </template>
         </div>
@@ -36,7 +36,8 @@ const lobbyid = defineModel('lobbyid')
 }
 
 .lobby-list {
-    overflow: scroll;
+    overflow-y: auto;   
+    overflow-x: hidden; 
     width: 100%;
     max-height: 100%;
     min-height: 100px;
