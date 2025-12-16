@@ -12,6 +12,7 @@ import WinPopUp from './popups/WinPopUp.vue';
 
 const milefizStore = useMilefizStore()
 
+import ErrorMessage from './ErrorMessage.vue';
 </script>
 
 
@@ -25,6 +26,10 @@ const milefizStore = useMilefizStore()
     <!-- Würfelergebnis -->
     <div class="dice-counter-container">
       <DiceCounter />
+    </div>
+
+    <div class="error-message-container">
+        <ErrorMessage />
     </div>
 
     <!-- Button Bar -->
@@ -61,6 +66,12 @@ const milefizStore = useMilefizStore()
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.error-message-container {
+  position: absolute;
+  top: 2vh;            /* Abstand von oben */
+  left: 2vw;          /* Abstand von rechts */
 }
 
 .button-bar {

@@ -7,6 +7,7 @@ import type { EnergyCommand } from '@/types/energy'
 import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdate";
 import { useBoardStore } from "./boardStore"
 import { generateUUID } from 'three/src/math/MathUtils.js';
+import { useErrorHandler } from '@/composables/useErrorHandler';
 import { startingbaseColors, playerColors } from '@/types/colorsAssets';
 
 // const wsurl = `ws://${window.location.host}/milefiz`
@@ -73,6 +74,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const isJoined = computed(() => {
     return Boolean(gamedata.lobby)
   })
+
+  const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
+
 
   function startMilefizLiveUpdate() {
     console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
@@ -174,6 +178,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Energy save rejected:', event.msg)
+            showWarning(`Energie speichern fehlgeschlagen: ${event.msg}`)
           }
           return
         }
