@@ -2,7 +2,8 @@
 // https://cientos.tresjs.org/guide/loaders/use-gltf
 import { useGLTF } from '@tresjs/cientos'
 import { watchEffect, watch, ref, computed, onMounted } from 'vue'
-import { useMilefizStore } from "@/stores/milefizstore";
+import { useMilefizStore } from '@/stores/milefizstore'
+import { getPlayerColors } from '@/types/colorsAssets';
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -14,6 +15,7 @@ const props = defineProps<{
   position?: [number, number, number]
   meepleId: string
   barrier?: boolean
+  playerColor?:  string
 }>()
 
 const characterRotation = ref(0)
@@ -22,6 +24,7 @@ const characterPosition = ref(null)
 //Variablen für Anpassung des Sprungs definiert
 const jumpOffset = ref(0)
 const isJumping = ref(false)
+const isJumpAllowed = computed(() => milefizStore.energy.isEnergyFull)
 
 // Standard-Sprunghöhe (wird für große Sprünge verwendet)
 const defaultJumpHeight = 4
@@ -38,42 +41,69 @@ const mixer = ref<any>(null)
 const jumpAction = ref<any>(null)
 
 // NEU: Y-Offset für unterschiedliche Modelle
-const yOffset = computed(() => props.barrier ? 0.85 : 0.135)
+const yOffset = computed(() => (props.barrier ? 0.85 : 0.135))
 
 // Berechne aktuelle Position (inklusive jumpOffset)
 const currentPosition = computed<[number, number, number]>(() => [
   animatedPosition.value[0],
   animatedPosition.value[1] + jumpOffset.value + yOffset.value,
-  animatedPosition.value[2]
+  animatedPosition.value[2],
 ])
 
 //Rock by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/dmRuyy1VXEv)
 // Block Character by J-Toastie [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/ozSIyRIcIj)
 
-const modelPath = computed(() => props.barrier ? '/Rock.glb' : '/Block Character.glb')
+const modelPath = computed(() => (props.barrier ? '/Rock.glb' : '/Block Character.glb'))
 const { state } = useGLTF(modelPath, { draco: true })
 
 // Unterschiedliche Scale für Barriere und Character
-const scale = computed(() => props.barrier ? 1.5 : 0.55)
-watchEffect(async () => {
-  if (state.value?.scene) {
-    state.value.scene.scale.set(scale.value, scale.value, scale.value)
+const scale = computed(() => (props.barrier ? 1.5 : 0.55))
 
-    //Geht über CharacterMesh und unterscheidet nach Körper und Eyes
+
+const meepleColors = computed(() => {
+   // Spieler nutzen playerColor
+  const playerColors = getPlayerColors(props.playerColor)
+
+  return {
+    body: props.bodyColor ?? playerColors.body,
+    eyes: props.eyeColor ?? playerColors.eyes
+  }
+
+})
+
+watchEffect(async () => {
+  if (!state.value?.scene) return
+
+  state.value.scene.scale.set(scale.value, scale.value, scale.value)
+
+  const userData = (state.value.scene as any).userData
+  if (!userData?.colorsApplied) {
     state.value.scene.traverse((child: any) => {
-      if (child.material) {
-        // Unterscheidung zwischen body und eye_color Material
-        if (child.material.name === 'body' || child.name?.includes('body')) {
-          if (props.bodyColor) {
-            child.material.color.set(props.bodyColor)
-          }
-        } else if (child.material.name === 'eye_color' || child.name?.includes('eye')) {
-          if (props.eyeColor) {
-            child.material.color.set(props.eyeColor)
-          }
+      if (!child.isMesh || !child.material) return
+
+      const mats = Array.isArray(child.material) ? child.material : [child.material]
+
+      mats.forEach((mat: any) => {
+        if (!mat || !mat.color) return
+
+        // Body
+        if (mat.name === 'body' || child.name?.includes('body')) {
+          mat.color.set(meepleColors.value.body)  // ✅ Direkt body
+          mat.needsUpdate = true
         }
-      }
+        // Eyes
+        else if (mat.name === 'eye_color' || child.name?.includes('eye')) {
+          mat.color.set(meepleColors.value.eyes)  // ✅ Direkt eyes
+          mat.needsUpdate = true
+        }
+      })
     })
+
+    ;(state.value.scene as any).userData = {
+      ...userData,
+      colorsApplied: true
+    }
+  }
 
     // Animation Mixer einrichten
     if (state.value.animations && state.value.animations.length > 0) {
@@ -99,7 +129,7 @@ watchEffect(async () => {
       }
     }
   }
-})
+)
 
 // Animation updaten
 const clock = ref<any>(null)
@@ -124,12 +154,12 @@ const setRotation = (yRotation: number) => {
   characterRotation.value = yRotation
 }
 
-// Sprung-Animation 
+// Sprung-Animation
 const animateCustomJump = (
   height = defaultJumpHeight,
   upMs = defaultUpDuration,
   downMs = defaultFallDuration,
-  onComplete?: () => void
+  onComplete?: () => void,
 ) => {
   const startTime = performance.now()
 
@@ -143,18 +173,15 @@ const animateCustomJump = (
     const elapsed = now - startTime
 
     if (elapsed < upMs) {
-
       const progress = elapsed / upMs
       jumpOffset.value = height * easeOutCubic(progress)
     } else if (elapsed < total) {
-
       const progress = (elapsed - upMs) / downMs
       jumpOffset.value = height * (1 - easeInCubic(progress))
     } else {
-
       jumpOffset.value = 0
       isJumping.value = false
-      milefizStore.isJumping = false
+      milefizStore.gamedata.isJumping = false
       if (onComplete) onComplete()
       return
     }
@@ -166,10 +193,11 @@ const animateCustomJump = (
 }
 
 const jump = () => {
+  if (!isJumpAllowed.value) return //Nur dann Jump Animation starten, wenn Sprung auch erlaubt ist, also Spieler maxEnergy gesammelt hat
   if (isJumping.value) return
-
+  
   isJumping.value = true
-  milefizStore.isJumping = true
+  milefizStore.gamedata.isJumping = true
 
   // Spiele GLB-Animation ab (falls verfügbar)
   if (jumpAction.value) {
@@ -180,8 +208,6 @@ const jump = () => {
   // Führe immer Custom-Animation für Höhe aus
   animateCustomJump(defaultJumpHeight, defaultUpDuration, defaultFallDuration)
 }
-
-
 
 // Position für Animation
 const animatedPosition = ref<[number, number, number]>([...(props.position ?? [0, 0, 0])])
@@ -207,7 +233,7 @@ watch(
     _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
     animateTo(newPos)
   },
-  { deep: true }
+  { deep: true },
 )
 
 const speed = 0.08
@@ -215,15 +241,15 @@ let moveAnimationFrame: number | null = null
 
 /**
  * Animiert die Bewegung des Charakters zu einer Zielposition auf dem Spielfeld.
- * 
+ *
  * - inkl. Sprung und Drehung
- * 
+ *
  * Ablauf:
- * 1. Vorherige Bewegungsanimation (falls vorhanden) wird abgebrochen.  
- * 2. Charakter wird in Richtung des Ziels gedreht (`rotateToward`).  
- * 3. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.  
+ * 1. Vorherige Bewegungsanimation (falls vorhanden) wird abgebrochen.
+ * 2. Charakter wird in Richtung des Ziels gedreht (`rotateToward`).
+ * 3. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.
  * 4. Die Position wird frameweise geglättet interpoliert, bis das Ziel erreicht ist.
- * 
+ *
  * @param target - Zielkoordinaten im 3D-Raum [x, y, z], zu denen sich der Charakter bewegen soll
  */
 const animateTo = (target: [number, number, number]) => {
@@ -267,16 +293,16 @@ const animateTo = (target: [number, number, number]) => {
 
 /**
  * Dreht den Charakter sanft in Richtung einer Zielposition.
- * 
- * Berechnet den Winkel zwischen der aktuellen Position und der Zielposition 
- * und interpoliert die Y-Rotation über eine kurze Zeitspanne, um 
+ *
+ * Berechnet den Winkel zwischen der aktuellen Position und der Zielposition
+ * und interpoliert die Y-Rotation über eine kurze Zeitspanne, um
  * eine fließende Drehbewegung zu erzeugen.
- * 
+ *
  * - wählt immer den kürzesten Drehweg
- * - Verwendet `Math.atan2()` zur Winkelberechnung im XZ-Raum.  
- * - Normalisiert Winkel auf den Bereich [-π, π], um Sprünge zu vermeiden.  
- * - Führt die Drehung innerhalb von ~200 ms aus (Ease-in/Ease-out Kurve).  
- * 
+ * - Verwendet `Math.atan2()` zur Winkelberechnung im XZ-Raum.
+ * - Normalisiert Winkel auf den Bereich [-π, π], um Sprünge zu vermeiden.
+ * - Führt die Drehung innerhalb von ~200 ms aus (Ease-in/Ease-out Kurve).
+ *
  * @param target - Zielkoordinaten [x, y, z], in deren Richtung der Charakter schauen soll
  */
 const rotateToward = (target: [number, number, number]) => {
@@ -320,8 +346,39 @@ const rotateToward = (target: [number, number, number]) => {
   animate()
 }
 
-// Gibt Rotation und Position frei
-defineExpose({ setRotation, jump, characterPosition, meepleId: props.meepleId, getPosition: () => currentPosition.value, })
+/**
+ * Setzt die Position des Charakters
+ *
+ * Wird als Fallback verwendet, falls kein `animateTo` verfügbar ist
+ * oder wenn ein sofortiger Snap auf die Zielposition erwünscht ist.
+ *
+ * @param {[number, number, number]} pos - Zielposition [x, y, z]
+ */
+const setPositionImmediate = (pos: [number, number, number]) => {
+  animatedPosition.value = [pos[0], pos[1], pos[2]]
+}
+
+/**
+ * Gibt Methoden und reactive Refs für Elternkomponenten frei.
+ *
+ * - `setRotation(yRotation)` : setzt die Y-Rotation des Charakters
+ * - `jump()` : startet die Sprung-Animation
+ * - `characterPosition` : Ref auf das `TresGroup`-Referenzobjekt
+ * - `meepleId` : identifier des Meeple
+ * - `getPosition()` : liefert die aktuelle Weltposition (inkl. Jump-Offset)
+ * - `animateTo(target)` : animiert den Charakter zu `target` (smooth)
+ * - `setPositionImmediate(pos)` : setzt Position ohne Animation
+ */
+defineExpose({
+  setRotation,
+  jump,
+  characterPosition,
+  meepleId: props.meepleId,
+  getPosition: () => currentPosition.value,
+  // Expose animateTo so parent can trigger movement directly
+  animateTo,
+  setPositionImmediate,
+})
 
 //Debug: Logging wenn GameCharacter gemounted werden
 onMounted(() => {
@@ -330,7 +387,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <TresGroup ref="characterPosition" :position="currentPosition" :rotation="[0, characterRotation, 0]">
+  <TresGroup
+    ref="characterPosition"
+    :position="currentPosition"
+    :rotation="[0, characterRotation, 0]"
+  >
     <primitive v-if="state" :object="state?.scene" />
   </TresGroup>
 </template>

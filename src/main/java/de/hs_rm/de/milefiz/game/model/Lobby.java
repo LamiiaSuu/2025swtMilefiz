@@ -11,14 +11,18 @@ import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 public class Lobby {
 
     private UUID id;
+    private String lobbyName;
     private List<Player> players;
     private Board board;
     private int maxPlayers;
+    private boolean gameStarted;
 
     public Lobby() {
         id = UUID.randomUUID();
         players = new ArrayList<>();
+        lobbyName = "Neue Lobby";
         maxPlayers = Color.values().length;
+        gameStarted = false;
     }
 
     /**
@@ -35,7 +39,7 @@ public class Lobby {
     }
 
     public boolean isJoinable() {
-        return players.size() < maxPlayers;
+        return players.size() < maxPlayers && !gameStarted;
     }
 
     public UUID getId() {
@@ -55,11 +59,16 @@ public class Lobby {
         throw new LobbyJoinException("Die Lobby ist zurzeit nicht beitretbar!");
     }
 
+    public boolean isEmpty() {
+        return players == null || players.isEmpty();
+    }
+
     /**
-     * Diese Methode ändert das Board im MODEL. Um es an alle Clients zu schicken,
-     * muss {@link de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent}
+     * Diese Methode ändert das Board im MODEL. Um es an alle Clients zu
+     * schicken, muss
+     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent}
      * gesendet werden.
-     * 
+     *
      * @param board das neue Board
      */
     public void setBoard(Board board) {
@@ -83,6 +92,13 @@ public class Lobby {
     }
 
     public boolean leave(Player player) {
+        boolean wasLeader = player.isLeader();
+        // ggf. neuen Leader bestimmen
+        if (wasLeader) {
+            getPlayers().stream().filter(p -> !p.equals(player)).findAny().ifPresent(newLeader -> {
+                newLeader.setLeader(true);
+            });
+        }
         return players.remove(player);
     }
 
@@ -117,5 +133,21 @@ public class Lobby {
 
     public Board getBoard() {
         return board;
+    }
+
+    public String getLobbyName() {
+        return lobbyName;
+    }
+
+    public void setLobbyName(String lobbyName) {
+        this.lobbyName = lobbyName;
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        this.gameStarted = gameStarted;
     }
 }

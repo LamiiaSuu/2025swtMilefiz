@@ -29,7 +29,7 @@ import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
  * 
  * @author Elisabeth Gehdt
  */
-public record FrontendSaveEnergyEvent(String type, UUID playerId, int energy) implements FrontendEvent {
+public record FrontendSaveEnergyEvent(String type, UUID playerId, int energy, int maxEnergy, boolean hasFullEnergy) implements FrontendEvent {
 
     /**
      * Konstruktor der den Event-Typ automatisch setzt.
@@ -37,7 +37,7 @@ public record FrontendSaveEnergyEvent(String type, UUID playerId, int energy) im
      * @param playerId UUID des Spielers
      * @param energy Neuer Energie-Wert
      */
-    public FrontendSaveEnergyEvent(UUID playerId, int energy) {
-        this(EventType.SAVE_ENERGY.name(), playerId, energy);
+    public FrontendSaveEnergyEvent(UUID playerId, int energy, int maxEnergy, boolean hasFullEnergy) {
+        this(EventType.SAVE_ENERGY.name(), playerId, energy, maxEnergy, hasFullEnergy);
     }
 }

@@ -120,4 +120,21 @@ class PlayerTest {
         assertEquals(6, player.getEnergy(), "Energy should reach exactly MAX_ENERGY");
         assertTrue(player.hasFullEnergy(), "Player should have full energy");
     }
+
+    @Test
+    void testConsumeEnergy_DefaultCase(){
+        player.setEnergy(6);
+        player.consumeEnergy();
+
+        assertEquals(0, player.getEnergy(),  "Energy should be fully consumed and reset to 0");
+    }
+
+    @Test
+    void testConsumeEnergy_NotEnoughEnergy(){
+        player.setEnergy(2);
+        player.consumeEnergy();
+
+        assertEquals(false, player.hasFullEnergy(), "Energy can't be consumed, if MAX_ENERGY hasn't been reached.");
+        assertEquals(2, player.getEnergy(), "Energy should remain untouched if player has not enough energy.");
+    }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Header></Header>
+    <Header overlay></Header>
     <div class="button-container">
       <button class="menu-button" @click="newGameStart">Neues Spiel</button>
       <button class="menu-button" @click="goToJoinGame">Spiel beitreten</button>

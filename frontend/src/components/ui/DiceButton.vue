@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, ref, watch } from "vue";
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
 
 // Zugriff auf globalen PiniaStore
@@ -67,6 +67,13 @@ onMounted(() => {
     window.addEventListener("keydown", onKeypress)
 });
 
+/**
+ * Beim unmounten wird Listener removed
+ */
+onUnmounted(() => {
+  window.removeEventListener("keydown", onKeypress)
+})
+
 
 /* Würfeln Hotkey Mapping auf Key "R"*/
 const onKeypress = (e: KeyboardEvent) => {
@@ -91,24 +98,6 @@ function rollDice() {
     triggerPressAnimation();
 }
 
-/**
- * Started den lokalen Frontend-Countdown
- * @param seconds Sekundenanzahl, bei der der Countdown startet
- */
-function startLocalCountdown(seconds: number) {
-    localCountdown.value = seconds
-
-    if (interval) clearInterval(interval)
-
-    interval = window.setInterval(() => {
-        if (localCountdown.value > 0) {
-            localCountdown.value--
-        } else {
-            clearInterval(interval!)
-            interval = null
-        }
-    }, 1000)
-}
 
 /**
  * Bereinigung: Falls Komponente zerstört wird: Timer stoppen und Leaks vermeiden

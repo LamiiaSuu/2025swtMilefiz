@@ -11,6 +11,7 @@ import type { Direction } from "@/types/movement"
 import type { Object3D } from 'three'
 import { Raycaster, Vector3 } from 'three'
 import { watch } from 'vue'
+import { isAssertEntry } from 'typescript'
 
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
@@ -21,38 +22,48 @@ let started: boolean = false
 const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
 
 /**
- * Berechnet die aktuelle 3D-Position des Spielcharakters auf dem Spielfeld.
- * 
- * Nutzt die gespeicherte Meeple-Position aus dem BoardStore und 
- * wandelt sie in Three.js-Koordinaten um. 
- * Wenn mehrere Meeple auf einem Feld stehen werden sie auf einem Kreis platziert
- * Wird automatisch neu berechnet, wenn sich das Board oder die Meeple-Position ändert.
- * 
- * @returns {id, [x, y, z]} - Key: Id des Meeple, Value: Weltkoordinaten des Spielcharakters
+ * Liefert eine Liste aller bekannten MeepleIDs
+ *
+ * Diese Liste wird verwendet, um genau ein `GameCharacter`-Component
+ * pro Meeple zu rendern, sodass Komponenten nicht
+ * bei jeder Positionsänderung neu erstellt werden.
+ *
+ * @returns {string[]} Array mit allen Meeple-IDs aus dem Lobby-Objekt
  */
-const meepleEntries = computed(() => {
-  const out: { id: string; position: [number, number, number] }[] = []
+const allMeepleIds = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  if (!lobby) return [] as string[]
+  return lobby.players.flatMap(p => p.meeples.map(m => m.id))
+})
+
+/**
+ * Berechnet die 3D-Zielposition für jeden Meeple anhand von
+ * `boardStore.meeplePositions` und der aktuellen Board-Daten.
+ *
+ * Anstatt ein Array zu erzeugen (was bei Vue zu Neu-Rendern führen kann),
+ * liefert diese Compute-Funktion eine `Map<meepleId, [x,y,z]>`,
+ * damit die Komponenten pro Meeple stabil bleiben und Positionen
+ * gezielt auf die existierenden Instanzen angewendet werden können.
+ *
+ * @returns {Map<string, [number, number, number]>} Map von Meeple-ID → 3D-Position
+ */
+const meeplePositions3D = computed(() => {
+  const out = new Map<string, [number, number, number]>()
   const board = boardStore.board
 
-  //field -> meeple[]
   const groups = new Map<string, string[]>()
-
-  for (const [meepleID, posID] of Object.entries(boardStore.meeplePositions)) {
-    const fieldID = posID ?? ''
-    const meeples = groups.get(fieldID) || []
-    meeples.push(meepleID)
-    groups.set(fieldID, meeples)
-
+  for (const id of Object.keys(boardStore.meeplePositions)) {
+    const fieldID = boardStore.meeplePositions[id] ?? ''
+    const arr = groups.get(fieldID) || []
+    arr.push(id)
+    groups.set(fieldID, arr)
   }
 
   for (const [fieldID, meepleIDs] of groups.entries()) {
     let center: [number, number, number] = [0, 0, 0]
-
     if (board && fieldID) {
       const field = board.fields.find((f) => f.id === fieldID)
-      if (field) {
-        center = [field.position.x, 0, field.position.y]
-      }
+      if (field) center = [field.position.x, 0, field.position.y]
     }
 
     const count = meepleIDs.length
@@ -61,40 +72,91 @@ const meepleEntries = computed(() => {
 
     for (let i = 0; i < count; i++) {
       const meepleID = meepleIDs[i]
-
       if (!meepleID) continue
-
       if (count === 1) {
-        out.push({ id: meepleID, position: center })
+        out.set(meepleID, center)
       } else {
         const angle = (i / count) * Math.PI * 2
         const x = center[0] + radius * Math.cos(angle)
         const z = center[2] + radius * Math.sin(angle)
-        out.push({ id: meepleID, position: [x, center[1], z] })
+        out.set(meepleID, [x, center[1], z])
       }
     }
   }
-  console.log("Computed Meeple Entries", out)
+
   return out
 })
 
+/**
+ * Registriert die Ref einer `GameCharacter`-Instanz.
+ *
+ * Zweck:
+ * - Speichert eine `shallowRef` pro MeepleID in `gameCharRefs`.
+ * - Vermeidet wiederholte Neuzuweisungen desselben Objekts, um
+ *   unnötige Logs und Nebenwirkungen zu verhindern.
+ *
+ * @param {string} id - Die Meeple-ID
+ * @param {TresObject | null} el - Die Komponenteninstanz oder `null`
+ */
 function registerGameCharRef(id: string, el: TresObject | null) {
   if (!gameCharRefs[id]) {
     gameCharRefs[id] = shallowRef<TresObject | null>(null)
   }
-  gameCharRefs[id].value = el
-  if (el) {
-    console.log('GameCharacter created:', id, el)
+
+  const prev = gameCharRefs[id].value
+  if (prev !== el) {
+    gameCharRefs[id].value = el
+    if (el) {
+      console.log('GameCharacter created:', id, el)
+    }
   }
 }
 
-watch(meepleEntries, (val) => {
-  console.log('meepleEntries changed:', val)
+
+/**
+ * Überträgt die berechneten 3D-Positionen auf die existierenden
+ * `GameCharacter`-Instanzen.
+ *
+ * Anstatt Positionen per Prop zu übergeben (was zu Re-Renders führen
+ * kann), ruft der Watcher die Methoden `animateTo`
+ * oder `setPositionImmediate` des GameCharacters auf.
+ * Dadurch bleiben die Komponenten erhalten und nur die Three.js-Objekte
+ * werden bewegt.
+ *
+ * @param {Map<string,[number,number,number]>} map - Map von MeepleID → Position
+ */
+
+// Vorherige Positionen merken, um nur geänderte Positionen zu animieren
+const _prevMeeplePositions = new Map<string, [number, number, number]>()
+watch(meeplePositions3D, (map) => {
+  // map is a Map<string, [number,number,number]>
+  for (const [id, pos] of map.entries()) {
+    const prev = _prevMeeplePositions.get(id)
+    const changed = !prev || Math.abs(prev[0] - pos[0]) > 1e-6 || Math.abs(prev[1] - pos[1]) > 1e-6 || Math.abs(prev[2] - pos[2]) > 1e-6
+    if (!changed) continue
+
+    const ref = gameCharRefs[id]
+    const inst: any = ref?.value
+    if (inst && typeof inst.animateTo === 'function') {
+      inst.animateTo(pos)
+    } else if (inst && typeof inst.setPositionImmediate === 'function') {
+      // fallback: snap into position if animateTo not present
+      inst.setPositionImmediate(pos)
+    }
+
+    _prevMeeplePositions.set(id, [pos[0], pos[1], pos[2]])
+  }
 }, { deep: true })
 
 watch(() => boardStore.meeplePositions, (val) => {
   console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
 }, { deep: true })
+
+watchEffect(() => {
+  if (milefizStore.gameFinished) {
+    useFirstPerson.value = false
+  }
+})
 
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
   // Cast the template ref value to TresObject | null in a type-safe place
@@ -168,6 +230,7 @@ watch(ownMeepleIds, (ids) => {
     }
   }
 })
+
 
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
@@ -338,9 +401,28 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
+// Computed Property für Meeple → PlayerColor Mapping
+const meepleColorMap = computed(() => {
+  const lobby = milefizStore.gamedata.lobby
+  if (!lobby) return new Map<string, string>()
+  
+  const map = new Map<string, string>()
+  
+  // Iteriere über alle Spieler
+  for (const player of lobby.players) {
+    // Alle Meeples dieses Spielers bekommen seine Farbe
+    for (const meeple of player.meeples) {
+      map.set(meeple.id, player.color) // player.color = "RED" | "GREEN" | "YELLOW" | "BLUE"
+    }
+  }
+  
+  return map
+})
+
 </script>
 
 <template>
+
   <!-- 3D-Canvas Element das den ganzen Bildschirm ausfüllt-->
   <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB">
     <!-- Kameraposition und Kamerasteuerung via OrbitControls -->
@@ -362,16 +444,19 @@ onUnmounted(() => {
     <!-- Grundbeleuchtung der Szene (75% Intensität) -->
     <TresAmbientLight :intensity=".75" />
 
+    <!-- Himmel- und Bodenlicht der Szene (75% Intensität)-->
+    <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
+
     <!-- Directional Licht von "vorne rechts" 200%-->
     <TresDirectionalLight :position="[10, 15, 10]" :intensity="2"/>
 
-    <!-- Himmel + Bodenlicht für GLTF 75%-->
-    <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
+    <!--Spawnen der Meeple (one persistent component per meeple id) -->
+    <GameCharacter v-for="id in allMeepleIds" :key="id"
+      :ref="el => registerGameCharRefFromTemplate(id, el)"
+      :meepleId="id"
+      :playerColor="meepleColorMap.get(id)"/>
 
-    <GameCharacter v-for="entry in meepleEntries" :key="entry.id"
-      :ref="el => registerGameCharRefFromTemplate(entry.id, el)" :position="entry.position" :meepleId="entry.id"
-      bodyColor="pink" eyeColor="white" />
-
+    <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
