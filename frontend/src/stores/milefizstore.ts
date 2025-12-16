@@ -6,6 +6,7 @@ import type { EnergyCommand } from '@/types/energy'
 import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdate";
 import { useBoardStore } from "./boardStore"
 import { generateUUID } from 'three/src/math/MathUtils.js';
+import { useErrorHandler } from '@/composables/useErrorHandler';
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
@@ -38,6 +39,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
   })
+
+  const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
+
 
   function startMilefizLiveUpdate() {
     console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
@@ -128,6 +132,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
           console.warn('Energy save rejected:', event.msg)
+          showWarning(`Energie speichern fehlgeschlagen: ${event.msg}`)
           return
         }        if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)

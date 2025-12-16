@@ -6,6 +6,7 @@ import DiceButton from './DiceButton.vue'
 import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
 import SaveEnergyButton from './SaveEnergyButton.vue'
+import ErrorMessage from './ErrorMessage.vue';
 </script>
 
 
@@ -14,6 +15,10 @@ import SaveEnergyButton from './SaveEnergyButton.vue'
     <!-- Würfelergebnis -->
     <div class="dice-counter-container">
       <DiceCounter />
+    </div>
+
+    <div class="error-message-container">
+        <ErrorMessage />
     </div>
 
     <!-- Button Bar -->
@@ -44,6 +49,12 @@ import SaveEnergyButton from './SaveEnergyButton.vue'
   top: 20px;           /* Abstand von oben */
   left: 50%;           /* Mittig horizontal */
   transform: translateX(-50%);  /* Zentriert das Element */
+}
+
+.error-message-container {
+  position: absolute;
+  top: 2vh;            /* Abstand von oben */
+  left: 2vw;          /* Abstand von rechts */
 }
 
 .button-bar {
