@@ -26,9 +26,9 @@ import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
 import de.hs_rm.de.milefiz.messaging.commands.UpdateLobbySettingsCommand;
+import de.hs_rm.de.milefiz.messaging.commands.UpdatePlayerNameCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendConsumeEnergyEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendConsumeEnergyRejectedEvent;
-import de.hs_rm.de.milefiz.messaging.commands.UpdatePlayerNameCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
@@ -430,7 +430,7 @@ public class FrontendReceiverController {
                     player.hasFullEnergy());
         }
 
-        return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy");
+        return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy", player.getId());
     }
 
     /**
