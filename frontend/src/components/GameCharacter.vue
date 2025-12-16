@@ -88,12 +88,12 @@ watchEffect(async () => {
 
         // Body
         if (mat.name === 'body' || child.name?.includes('body')) {
-          mat.color.set(meepleColors.value.body)  // ✅ Direkt body
+          mat.color.set(meepleColors.value.body)
           mat.needsUpdate = true
         }
         // Eyes
         else if (mat.name === 'eye_color' || child.name?.includes('eye')) {
-          mat.color.set(meepleColors.value.eyes)  // ✅ Direkt eyes
+          mat.color.set(meepleColors.value.eyes) 
           mat.needsUpdate = true
         }
       })

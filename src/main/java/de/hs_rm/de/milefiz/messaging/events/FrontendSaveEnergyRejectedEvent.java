@@ -1,5 +1,7 @@
 package de.hs_rm.de.milefiz.messaging.events;
 
+import java.util.UUID;
+
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
 
@@ -21,10 +23,12 @@ import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
  * <ul>
  *   <li>{@code type}: Event-Typ {@code "SAVE_ENERGY_ERROR"}</li>
  *   <li>{@code msg}: Fehlermeldung mit Ablehnungsgrund</li>
+ *   <li>{@code playerID}: UUID des betroffenen Spielers</li>
  * </ul>
  * 
  * @param type Event-Typ, automatisch auf {@code "SAVE_ENERGY_ERROR"} gesetzt
  * @param msg Fehlermeldung die den Ablehnungsgrund beschreibt
+ * @param playerID UUID des Spielers dessen Anfrage abgelehnt wurde
  * 
  * @see FrontendReceiverController#handleSaveEnergy
  * @see Player#hasFullEnergy()
@@ -32,14 +36,14 @@ import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
  * 
  * @author Elisabeth Gehdt
  */
-public record FrontendSaveEnergyRejectedEvent(String type, String msg) implements FrontendEvent {
+public record FrontendSaveEnergyRejectedEvent(String type, String msg, UUID playerID) implements FrontendEvent {
 
     /**
      * Konstruktor der den Event-Typ automatisch setzt.
      * 
      * @param msg Fehlermeldung mit Ablehnungsgrund
      */
-    public FrontendSaveEnergyRejectedEvent(String msg) {
-        this(EventType.SAVE_ENERGY_ERROR.name(), msg);
+    public FrontendSaveEnergyRejectedEvent(String msg, UUID playerID) {
+        this(EventType.SAVE_ENERGY_ERROR.name(), msg, playerID);
     }
 }
