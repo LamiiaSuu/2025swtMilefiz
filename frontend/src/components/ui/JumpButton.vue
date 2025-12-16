@@ -45,7 +45,7 @@ const onKeypress = (e: KeyboardEvent) => {
 function jump() {
     if (disabled.value) {
         console.log("Hüpfen nicht erlaubt!")
-        return
+        triggerErrorAnimation()
     }
     
     console.log("Hüpfen Request gesendet.")
@@ -65,9 +65,19 @@ function triggerPressAnimation() {
     setTimeout(() => (isPressed.value = false), 150)
 }
 
+/**
+ * Error Animation für ungültige Aktionen
+ */
+const isError = ref(false)
+
+function triggerErrorAnimation() {
+    isError.value = true
+    setTimeout(() => (isError.value = false), 600)
+}
+
 </script>
 <template>
-    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled}">
+    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled, error: isError}">
         <img src="@/assets/hud/JumpingMeeple.png" class="action-icon" />
         <img src="@/assets/hud/spacebar_icon_light.png" class="hotkey-space" />
     </div>
