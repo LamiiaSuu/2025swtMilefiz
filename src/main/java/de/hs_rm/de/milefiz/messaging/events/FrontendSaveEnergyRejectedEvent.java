@@ -36,14 +36,14 @@ import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
  * 
  * @author Elisabeth Gehdt
  */
-public record FrontendSaveEnergyRejectedEvent(String type, String msg, UUID playerID) implements FrontendEvent {
+public record FrontendSaveEnergyRejectedEvent(String type, String msg, UUID playerId) implements FrontendEvent {
 
     /**
      * Konstruktor der den Event-Typ automatisch setzt.
      * 
      * @param msg Fehlermeldung mit Ablehnungsgrund
      */
-    public FrontendSaveEnergyRejectedEvent(String msg, UUID playerID) {
-        this(EventType.SAVE_ENERGY_ERROR.name(), msg, playerID);
+    public FrontendSaveEnergyRejectedEvent(String msg, UUID playerId) {
+        this(EventType.SAVE_ENERGY_ERROR.name(), msg, playerId);
     }
 }
