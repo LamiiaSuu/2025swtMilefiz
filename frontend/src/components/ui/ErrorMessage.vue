@@ -29,9 +29,9 @@ const { errorState, hideError } = useErrorHandler()
 
 function getErrorTitle() {
   switch (errorState.type) {
-    case 'error': return 'Fehler'
-    case 'warning': return 'Warnung'
     case 'info': return 'Information'
+    case 'error': return 'Fehler'
+    case 'critical': return 'Kritisch'
     default: return 'Nachricht'
   }
 }
@@ -60,7 +60,8 @@ function getErrorTitle() {
   color: white;
 }
 
-.error-header.error-error {
+.error-header.error-error,
+.error-header.error-critical {
   background: linear-gradient(45deg, #d32f2f, #c62828);
 }
 .error-header.error-info {
@@ -91,17 +92,23 @@ function getErrorTitle() {
   z-index: 1000;
   pointer-events: none;
   
+  background: rgba(0, 0, 0, 0.7);           
+  border: 2px solid rgba(255, 255, 255, 0.8); 
+  border-radius: 12px;                     
+  padding: 2vh 3vw;                        
+  
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.5),        
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  
+  /* Text Styling: */
   color: #f57c00;
   font-family: "MainFont", sans-serif;
-  font-size: 4vh;
+  font-size: 3.5vh;                      
   font-weight: bold;
   text-align: center;
-  
--webkit-text-stroke: 1px rgba(0, 0, 0, 0.8);
-
-
-  
-  max-width: 80vw;
+    
+  max-width: 70vw;                    
   word-wrap: break-word;
   
   animation: warningPulse 2s ease-in-out infinite;

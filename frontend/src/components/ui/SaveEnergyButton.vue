@@ -49,8 +49,8 @@ const onKeypress = (e: KeyboardEvent) => {
 
 /**
  * Versucht das Speichern der Energie im Backend auszulösen
- * - wenn disabled: Abbruch
- * - sonst Anfrage ans Backend senden
+ * - wenn disabled: Triggert die ErrorAnimation
+ * - Anfrage ans Backend senden
  */
 function saveEnergy() {
     if (disabled.value) {
