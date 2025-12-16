@@ -28,7 +28,7 @@ import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
  * 
  * @param type Event-Typ, automatisch auf {@code "SAVE_ENERGY_ERROR"} gesetzt
  * @param msg Fehlermeldung die den Ablehnungsgrund beschreibt
- * @param playerID UUID des Spielers dessen Anfrage abgelehnt wurde
+ * @param playerId UUID des Spielers dessen Anfrage abgelehnt wurde
  * 
  * @see FrontendReceiverController#handleSaveEnergy
  * @see Player#hasFullEnergy()

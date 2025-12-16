@@ -62,32 +62,21 @@ public class FrontendReceiverController {
     }
 
     /**
-     * Empfängt einen Bewegungsbefehl
-     * ({@link de.hs_rm.de.milefiz.messaging.commands.MovementCommand}) vom
-     * Frontend über WebSocket und leitet ihn an den GameService zur
-     * Verarbeitung weiter.
+     * Empfängt ein Meeple-Bewegungskommando vom Frontend über WebSocket
+     * und leitet es an den {@link GameService} weiter.
+     * 
+     * Das vom {@link GameService} zurückgegebene {@link FrontendEvent}
+     * wird automatisch an alle Clients der entsprechenden Lobby gesendet.
      *
-     * Diese Methode fungiert als Bindeglied zwischen der
-     * WebSocket-Kommunikation und der serverseitigen Spiellogik. Sie wird
-     * aufgerufen, wenn ein Spieler im Frontend eine Bewegung für eine seiner
-     * Spielfiguren (Meeples) ausführt.
+     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
+     * @param moveCmd das Bewegungskommando mit Meeple-ID und Bewegungsrichtung
+     * @param player  der Spieler, der den Zug ausgelöst hat
      *
-     * Ablauf: - Empfang der Nachricht über den Endpunkt
-     * {@code /milefiz/lobby/{lobbyId}/move} - Logging des Befehls mit
-     * relevanten Daten (Lobby, Spieler, Meeple-ID, Richtung) - Weiterleitung an
-     * - Rückgabe des vom Service erzeugten
-     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent} - Automatische
-     * Weiterleitung des Ergebnisses an alle Clients der betroffenen Lobby über
-     * {@code /topic/milefiz/lobby/{lobbyId}}
+     * @return ein {@link FrontendEvent}, das den Ausgang des Zuges beschreibt
      *
-     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt
-     *                wird
-     * @param moveCmd der empfangene Bewegungsbefehl mit Meeple-ID und direction
-     * @param player  der authentifizierte Benutzer, der die Nachricht gesendet
-     *                hat
-     * @return ein {@link FrontendEvent}, das entweder den erfolgreichen Zug
-     *         ({@link FrontendMoveEvent}) oder einen Fehler
-     *         ({@link FrontendMoveRejectedEvent}) an die Clients sendet
+     * @see GameService#moveMeeple(UUID, MovementCommand, Player)
+     *
+     * @author Maximilian Ressel
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/move")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -104,34 +93,23 @@ public class FrontendReceiverController {
     }
 
     /**
-     * Empfängt einen Barrierenbewegungsbefehl
-     * ({@link de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand}) vom
-     * Frontend über WebSocket und leitet ihn an den GameService zur
-     * Verarbeitung weiter.
+     * Empfängt ein Barrieren-Bewegungskommando vom Frontend über WebSocket
+     * und leitet es an den {@link GameService} weiter.
      *
-     * Diese Methode wird aufgerufen, wenn ein Spieler im Frontend eine Barriere
-     * verschiebt, nachdem einer seiner Meeples direkt auf dieser Barriere
-     * gelandet ist.
+     * Das vom {@link GameService} erzeugte {@link FrontendEvent} wird an
+     * alle Clients der Lobby verteilt.
      *
-     * Ablauf: - Empfang der Nachricht über den Endpunkt
-     * {@code /milefiz/lobby/{lobbyId}/movebarrier} - Logging des Befehls
-     * (Lobby, Spieler, Barrieren-ID, Ziel-Feld-ID) - Weiterleitung an -
-     * Rückgabe des vom Service erzeugten
-     * {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent} - Automatische
-     * Weiterleitung des Ergebnisses an alle Clients der betroffenen Lobby über
-     * {@code /topic/milefiz/lobby/{lobbyId}}
+     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere bewegt
+     *                    wird
+     * @param moveBarrCmd das Kommando mit Barrieren-ID und Ziel-Feld-ID
+     * @param player      der Spieler, der die Aktion ausgelöst hat
      *
-     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere
-     *                    verschoben wird
-     * @param moveBarrCmd der vom Frontend übermittelte Befehl mit Barrieren-ID
-     *                    und Ziel-Feld-ID
-     * @param player      der Spieler (bzw. dessen Benutzerkontext), der die
-     *                    Barriere
-     *                    verschiebt
-     * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent},
-     *         das das Ergebnis der Barrierenbewegung beschreibt
+     * @return ein {@link FrontendEvent}, das den Ausgang der Barrierenbewegung
+     *         beschreibt
      *
-     *         Author: Maximilian Ressel
+     * @see GameService#moveBarrier(UUID, MoveBarrierCommand, Player)
+     *
+     * @author Maximilian Ressel
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/movebarrier")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -434,78 +412,83 @@ public class FrontendReceiverController {
     }
 
     /**
- * WebSocket Message Handler für Energie-Verbrauchsaktionen in einer Lobby.
- *
- * <p>
- * Diese Methode verarbeitet eingehende Anfragen zum Verbrauchen von Energie,
- * z. B. für eine Sprungaktion eines Spielers.
- * </p>
- *
- * <p>
- * Ablauf:
- * </p>
- * <ol>
- *   <li>Client sendet einen {@link EnergyCommand} an den WebSocket-Endpunkt</li>
- *   <li>Die Anfrage wird mit Spieler-ID und Lobby-ID protokolliert</li>
- *   <li>Validierung: Der Spieler muss genügend Energie besitzen
- *       ({@link Player#hasFullEnergy()} muss {@code true} liefern)</li>
- *   <li>Bei erfolgreicher Validierung wird {@link Player#consumeEnergy()} ausgeführt,
- *       wodurch die Energie des Spielers reduziert wird</li>
- *   <li>Ein {@link FrontendConsumeEnergyEvent} mit dem neuen Energiewert wird
- *       an alle Clients der Lobby gesendet</li>
- *   <li>Bei fehlender Energie wird ein {@link FrontendConsumeEnergyRejectedEvent}
- *       mit einer Fehlermeldung gesendet</li>
- * </ol>
- *
- * <p>
- * <strong>Validierungsregeln:</strong>
- * </p>
- * <ul>
- *   <li>{@link Player#hasFullEnergy()} muss {@code true} sein</li>
- * </ul>
- *
- * <p>
- * <strong>Erfolgsfall:</strong>
- * </p>
- * <ul>
- *   <li>Die Energie des Spielers wird um die für die Aktion definierte Menge reduziert</li>
- *   <li>Ein {@link FrontendConsumeEnergyEvent} mit dem aktuellen Energiewert
- *       und dem Status {@code hasFullEnergy} wird gesendet</li>
- * </ul>
- *
- * <p>
- * <strong>Fehlerfall:</strong>
- * </p>
- * <ul>
- *   <li>Der Spieler besitzt nicht genügend Energie für die Aktion</li>
- *   <li>Ein {@link FrontendConsumeEnergyRejectedEvent} mit einer Fehlermeldung
- *       wird gesendet</li>
- * </ul>
- *
- * <p>
- * <strong>WebSocket-Mapping:</strong>
- * </p>
- * <ul>
- *   <li><strong>Eingang:</strong> {@code /milefiz/lobby/{lobbyId}/consumeEnergy}</li>
- *   <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
- *   <li><strong>Protokoll:</strong> STOMP über WebSocket</li>
- * </ul>
- *
- * @param lobbyId die eindeutige UUID der Lobby, in der die Aktion ausgeführt wird
- * @param command der Energie-Befehl vom Client, enthält die Spieler-ID
- * @param player  der authentifizierte Spieler, der Energie verbrauchen möchte
- *
- * @return {@link FrontendConsumeEnergyEvent} bei erfolgreichem Energieverbrauch
- *         oder {@link FrontendConsumeEnergyRejectedEvent} bei ungültiger Anfrage
- *
- * @see Player#consumeEnergy()
- * @see Player#hasFullEnergy()
- * @see FrontendConsumeEnergyEvent
- * @see FrontendConsumeEnergyRejectedEvent
- * @see EnergyCommand
- *
- * @author Kevin Tran
- */
+     * WebSocket Message Handler für Energie-Verbrauchsaktionen in einer Lobby.
+     *
+     * <p>
+     * Diese Methode verarbeitet eingehende Anfragen zum Verbrauchen von Energie,
+     * z. B. für eine Sprungaktion eines Spielers.
+     * </p>
+     *
+     * <p>
+     * Ablauf:
+     * </p>
+     * <ol>
+     * <li>Client sendet einen {@link EnergyCommand} an den WebSocket-Endpunkt</li>
+     * <li>Die Anfrage wird mit Spieler-ID und Lobby-ID protokolliert</li>
+     * <li>Validierung: Der Spieler muss genügend Energie besitzen
+     * ({@link Player#hasFullEnergy()} muss {@code true} liefern)</li>
+     * <li>Bei erfolgreicher Validierung wird {@link Player#consumeEnergy()}
+     * ausgeführt,
+     * wodurch die Energie des Spielers reduziert wird</li>
+     * <li>Ein {@link FrontendConsumeEnergyEvent} mit dem neuen Energiewert wird
+     * an alle Clients der Lobby gesendet</li>
+     * <li>Bei fehlender Energie wird ein {@link FrontendConsumeEnergyRejectedEvent}
+     * mit einer Fehlermeldung gesendet</li>
+     * </ol>
+     *
+     * <p>
+     * <strong>Validierungsregeln:</strong>
+     * </p>
+     * <ul>
+     * <li>{@link Player#hasFullEnergy()} muss {@code true} sein</li>
+     * </ul>
+     *
+     * <p>
+     * <strong>Erfolgsfall:</strong>
+     * </p>
+     * <ul>
+     * <li>Die Energie des Spielers wird um die für die Aktion definierte Menge
+     * reduziert</li>
+     * <li>Ein {@link FrontendConsumeEnergyEvent} mit dem aktuellen Energiewert
+     * und dem Status {@code hasFullEnergy} wird gesendet</li>
+     * </ul>
+     *
+     * <p>
+     * <strong>Fehlerfall:</strong>
+     * </p>
+     * <ul>
+     * <li>Der Spieler besitzt nicht genügend Energie für die Aktion</li>
+     * <li>Ein {@link FrontendConsumeEnergyRejectedEvent} mit einer Fehlermeldung
+     * wird gesendet</li>
+     * </ul>
+     *
+     * <p>
+     * <strong>WebSocket-Mapping:</strong>
+     * </p>
+     * <ul>
+     * <li><strong>Eingang:</strong>
+     * {@code /milefiz/lobby/{lobbyId}/consumeEnergy}</li>
+     * <li><strong>Ausgang:</strong> {@code /topic/milefiz/lobby/{lobbyId}}</li>
+     * <li><strong>Protokoll:</strong> STOMP über WebSocket</li>
+     * </ul>
+     *
+     * @param lobbyId die eindeutige UUID der Lobby, in der die Aktion ausgeführt
+     *                wird
+     * @param command der Energie-Befehl vom Client, enthält die Spieler-ID
+     * @param player  der authentifizierte Spieler, der Energie verbrauchen möchte
+     *
+     * @return {@link FrontendConsumeEnergyEvent} bei erfolgreichem Energieverbrauch
+     *         oder {@link FrontendConsumeEnergyRejectedEvent} bei ungültiger
+     *         Anfrage
+     *
+     * @see Player#consumeEnergy()
+     * @see Player#hasFullEnergy()
+     * @see FrontendConsumeEnergyEvent
+     * @see FrontendConsumeEnergyRejectedEvent
+     * @see EnergyCommand
+     *
+     * @author Kevin Tran
+     */
 
     @MessageMapping("/milefiz/lobby/{lobbyId}/consumeEnergy")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -579,9 +562,10 @@ public class FrontendReceiverController {
      * Verarbeitet Anfragen zu Änderungen des Usernamen/Playernamen.
      * Update wird an alle Clients der Lobby gesendet.
      * 
-     * @param lobbyId die UUID der zu aktualisierenden Lobby
+     * @param lobbyId                 die UUID der zu aktualisierenden Lobby
      * @param updatePlayerNameCommand Command mit newPlayerName
-     * @param player der authentifizierte Spieler, der seinen Namen ändern möchte
+     * @param player                  der authentifizierte Spieler, der seinen Namen
+     *                                ändern möchte
      * @return FrontendLobbyUpdateEvent mit aktualisiertem Lobby-DTO
      * @see FrontendLobbyUpdateEvent
      * @see LobbyMapper
@@ -591,13 +575,13 @@ public class FrontendReceiverController {
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/updatePlayerName")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handlePlayerNameChange(@DestinationVariable("lobbyId") UUID lobbyId, UpdatePlayerNameCommand updatePlayerNameCommand, Player player) {
+    public FrontendEvent handlePlayerNameChange(@DestinationVariable("lobbyId") UUID lobbyId,
+            UpdatePlayerNameCommand updatePlayerNameCommand, Player player) {
         logger.info(
-            "Recieved UpdatePlayerNameCommand in lobby {} from player '{}': PlayerName {}' ",
-            lobbyId,
-            player.getName(),
-            updatePlayerNameCommand.newPlayerName()
-        );
+                "Recieved UpdatePlayerNameCommand in lobby {} from player '{}': PlayerName {}' ",
+                lobbyId,
+                player.getName(),
+                updatePlayerNameCommand.newPlayerName());
 
         player.setPlayerName(updatePlayerNameCommand.newPlayerName());
 
