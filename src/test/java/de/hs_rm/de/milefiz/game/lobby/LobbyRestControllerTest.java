@@ -73,7 +73,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobbies()).thenReturn(lobbies);
         when(lobbyMapper.toDTOSet(lobbies)).thenReturn(lobbyDTOs);
         
-        Set<LobbyDTO> result = lobbyRestController.getLobbyList();
+        Set<LobbyDTO> result = lobbyRestController.getLobbyList("");
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -90,7 +90,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobbies()).thenReturn(emptyLobbies);
         when(lobbyMapper.toDTOSet(emptyLobbies)).thenReturn(emptyLobbyDTOs);
 
-        Set<LobbyDTO> result = lobbyRestController.getLobbyList();
+        Set<LobbyDTO> result = lobbyRestController.getLobbyList("");
 
         assertNotNull(result);
         assertEquals(0, result.size());

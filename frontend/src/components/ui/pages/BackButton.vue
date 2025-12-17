@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useMilefizStore } from '@/stores/milefizstore'
+
+const milefizStore = useMilefizStore()
+const { disconnectAndReset } = milefizStore
 
 const props = defineProps<{ to: string | { name: string } }>()
 const router = useRouter()
@@ -7,6 +11,7 @@ const router = useRouter()
 const goBack = () => {
   if (props.to) {
     router.push(props.to)
+    disconnectAndReset() // disconnect current lobby
   }
 }
 </script>
@@ -14,7 +19,7 @@ const goBack = () => {
 
 <template>
   <button class="back-button" @click="goBack">
-    &lt; zurück
+    <slot>&lt; zurück</slot>
   </button>
 </template>
 
@@ -23,7 +28,7 @@ const goBack = () => {
   background: none;
   border: none;
   color: white;
-  font-size: 1.8rem;
+  font-size: 4vh;
   font-weight: bold;
   cursor: pointer;
   font-family: "AcmeFont", sans-serif;

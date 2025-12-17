@@ -83,6 +83,10 @@ public class Player implements Principal {
         this.energy = energy;
     }
 
+    public int getMaxEnergy() {
+        return MAX_ENERGY;
+    }
+
     public boolean hasMoved() {
         return moved;
     }
@@ -277,6 +281,30 @@ public class Player implements Principal {
             energy = MAX_ENERGY;
         }
         remainingMoves = 0;
+    }
+
+    /**
+     * Setzt die gesammelte Energie auf 0 zurück.
+     *
+     * <p>
+     * Ein Spieler hat genügend Sprungenergie, wenn sein aktueller Energiewert
+     * ({@code energy}) gleich der fest definierten maximalen Energie
+     * ({@code MAX_ENERGY}) ist.
+     * </p>
+     *
+     * <p>
+     * Diese Methode wird verwendet, wenn ein Spieler einen Sprung ausführt. Dazu
+     * muss er ausreichend Energie gesammelt haben ({@code hasFullEnergy == true})
+     * </p>
+     * ß
+     * 
+     * @see #hasFullEnergy()
+     * @see #MAX_ENERGY
+     * 
+     * @author Kevin Tran
+     */
+    public void consumeEnergy() {
+        if (hasFullEnergy()) energy = 0;
     }
 
     @Override

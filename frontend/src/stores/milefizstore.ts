@@ -1,4 +1,5 @@
 import { reactive, readonly, computed, ref } from 'vue'
+import router from '@/router'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
 import type { Direction, MoveBarrierCommand, MovementCommand } from "@/types/movement";
@@ -6,6 +7,8 @@ import type { EnergyCommand } from '@/types/energy'
 import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdate";
 import { useBoardStore } from "./boardStore"
 import { generateUUID } from 'three/src/math/MathUtils.js';
+import { useErrorHandler } from '@/composables/useErrorHandler';
+import { startingbaseColors, playerColors } from '@/types/colorsAssets';
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
@@ -24,11 +27,39 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     remainingSeconds: 0,
     active: false,
   })
+
+  /**
+   * Energy State für das Energiesystem
+   * @prop {number} maxEnergy - Maximal speicherbare Energie, wird aus dem Backend gesetzt
+   * @prop {boolean} isEnergyFull - True, genau dann, wenn gespeicherte Energie maxEnergy entspricht
+   * @prop {boolean} isEnergyFresh - gibt an, ob es sich um "frische Energie" handelt, d.h. Würfelergebnis kann nur gespeichert werden, wenn der Spieler noch keine Moves mit dem Würfelergebnis getätigt hat
+   */
+  const energy = reactive<{
+    maxEnergy: number,
+    isEnergyFull: boolean,
+    isEnergyFresh: boolean,
+  }>({
+    maxEnergy: 0,
+    isEnergyFull: false,
+    isEnergyFresh: false,
+  })
+
+  /** 
+   * Gewinndialog
+   * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
+   * @prop {string} winnerName    - Name des gewinnenden Spielers.
+   * @prop {string} winnerColor   - Farbe des Gewinners
+  */
+  const gameFinished = ref(false)
+  const winnerName = ref<string | null>(null)
+  const winnerColor = ref<string | null>(null)
+
   // Beispiele für Daten
   const gamedata = reactive<{
     playerId: string
     playerToken: string
     energy: number
+    isJumping: boolean
     currentDiceRoll?: number
     lobby: Lobby | null
     moved: boolean
@@ -36,10 +67,18 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
     energy: 0, //Energy des Spielers
+    isJumping: false, //Flag, ob sich der Spieler in einer Sprungaktion befindet
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
     moved: false
   })
+
+  const isJoined = computed(() => {
+    return Boolean(gamedata.lobby)
+  })
+
+  const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
+
 
   function startMilefizLiveUpdate() {
     console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
@@ -78,11 +117,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
 
+        // Wenn der Spieler erfolgreich gewürfelt hat, wird hier die die Nachricht abgefangen und die entsprechenden Daten werden aktualisiert
         if (event.type === 'ROLL_DICE' && event.playerId === gamedata.playerId) {
           console.log(`Player ${event.playerId} rolled: ${event.number}`)
           gamedata.currentDiceRoll = event.number
           cooldown.active = true
           cooldown.remainingSeconds = event.cooldown
+          energy.isEnergyFresh = true
         }
 
         // Wenn der Spieler im Moment noch nicht Würfeln darf, weil er noch aktiven Cooldown hat, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
@@ -99,7 +140,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           event.playerId === gamedata.playerId
         ) {
           console.log(
-            `Player ${event.playerId} still has ${event.moves} moves left and therefor can't roll their dice yet!`,
+            `Player ${event.playerId} still has ${event.moves} moves left and therefore can't roll their dice yet!`,
           )
           gamedata.currentDiceRoll = event.moves
         }
@@ -114,8 +155,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           return
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
-          if(event.playerId === gamedata.playerId){
-            gamedata.currentDiceRoll = event.remainingMoves 
+          energy.isEnergyFresh = false;
+          if (event.playerId === gamedata.playerId) {
+            gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = event.moved
           }
         }
@@ -124,17 +166,38 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           const lobbyUpdate = event as LobbyUpdateEvent
           handleLobbyUpdate(lobbyUpdate)
 
-        //Wenn Energy erfolgreich gesaved wurde wird Frontendseitig der Würfelwurf ebenfalls auf 0 gesetzt und die gamedata.energy geupdated
+          //Wenn Energy erfolgreich gesaved wurde wird Frontendseitig der Würfelwurf ebenfalls auf 0 gesetzt und die gamedata.energy geupdated
         } else if (event.type === 'SAVE_ENERGY') {
-          gamedata.currentDiceRoll = 0
-          gamedata.energy = event.energy
+          energy.maxEnergy = event.maxEnergy
+          if (event.playerId === gamedata.playerId) {
+            gamedata.currentDiceRoll = 0
+            gamedata.energy = event.energy
+            energy.isEnergyFresh = false;
+            if (event.hasFullEnergy) {
+              energy.isEnergyFull = true
+            }
+          }
           return
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
-          console.warn('Energy save rejected:', event.msg)
+          if (event.playerId == gamedata.playerId) {
+            console.warn('Energy save rejected:', event.msg)
+            showWarning(`Energie speichern fehlgeschlagen: ${event.msg}`)
+          }
           return
-        }        if (event.type === "MOVE_WITH_LOSS") {
+        }
+        // Wenn energy erfolgreich konsumiert wurde, wird die energy auch frontendseitig resettet
+        else if (event.type === 'CONSUME_ENERGY') {
+          if (event.playerId == gamedata.playerId) {
+            gamedata.energy = event.energy
+            energy.isEnergyFull = event.hasFullEnergy
+          }
+        } else if (event.type === 'CONSUME_ENERGY_ERROR') {
+          if (event.playerId == gamedata.playerId) {
+            console.warn('Consume energy rejected:', event.msg)
+          }
+        } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = event.moved
           //TODO moveloss animieren
@@ -147,10 +210,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           //aktuell einfach random platzhalter uuid
           moveBarrier(event.barrierId, crypto.randomUUID())
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
-          
+
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
@@ -159,29 +222,35 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
           console.warn("u ran into barrieeer oh no")
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
         }
         if (event.type === "DUEL") {
           boardStore.updateMeeplePosition(event.firstMeepleId, event.targetField)
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
           //TODO duel zwischen zwei meeples einleiten
         }
-        if (event.type === "WIN"){
+        if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0
-          //TODO meeple bei spieler und von board entfernen
+          gameFinished.value = true
+          winnerName.value = event.playerName
+          winnerColor.value = event.playerColor
         }
-         if (event.type === "BARRIER_MOVE_ERROR"){
+        if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
         }
 
         // SPIEL STARTET
         else if (event.type === 'GAME_START') {
+          const event = JSON.parse(message.body)
+          console.log('FULL EVENT:', event)
+
           console.log('Spiel startet')
+          router.push({ name: 'game' })
         }
       })
     }
@@ -191,6 +260,51 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
     // Verbindung zum Broker aufbauen
     stompclient.activate()
+  }
+
+  /**
+ * Synchronisiert energiebezogene Zustände des eigenen Spielers aus dem aktuellen Lobby-State.
+ *
+ * <p>
+ * Diese Funktion extrahiert den eigenen Spieler aus der übergebenen {@link Lobby}
+ * anhand der {@code playerId} und übernimmt dessen energierelevante Werte in den
+ * lokalen Pinia-Store.
+ * </p>
+ *
+ * <p>
+ * Konkret werden:
+ * <ul>
+ *   <li>die maximale Energie ({@code maxEnergy}) einmalig aus dem Backend übernommen</li>
+ *   <li>der Status {@code isEnergyFull} basierend auf aktueller und maximaler Energie berechnet</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Die Funktion wird sowohl beim initialen Lobby-Join als auch bei jedem
+ * {@code LOBBY_UPDATE}-Event aufgerufen, um sicherzustellen, dass der Frontend-State
+ * stets konsistent mit dem Backend bleibt.
+ * </p>
+ *
+ * <p>
+ * Falls der eigene Spieler noch nicht in der Lobby vorhanden ist (z. B. während
+ * früher Initialisierungsphasen), wird die Funktion ohne Seiteneffekte beendet.
+ * </p>
+ *
+ * @param lobby Aktueller Lobby-Zustand vom Backend
+ */
+  function syncOwnPlayerEnergy(lobby: Lobby) {
+    const ownPlayer = lobby.players.find(
+      p => p.id === gamedata.playerId
+    )
+
+    if (!ownPlayer) return
+
+    console.log('Own player:', ownPlayer)
+    if (ownPlayer.maxEnergy !== undefined) {
+      energy.maxEnergy = ownPlayer.maxEnergy
+    }
+
+    energy.isEnergyFull = gamedata.energy >= energy.maxEnergy
   }
 
   /**
@@ -211,6 +325,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       gamedata.lobby = responseMsg.lobby as Lobby
       gamedata.playerId = responseMsg.playerId
       gamedata.playerToken = responseMsg.playerToken
+
+      syncOwnPlayerEnergy(gamedata.lobby)
+
       startMilefizLiveUpdate()
     } catch (error_) {
       console.log(error_)
@@ -222,6 +339,44 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
     gamedata.lobby = lobbyUpdate.lobby
   }
+
+  /**
+   * Sendet einen "Spiel starten"-Befehl an den Server.
+   * 
+   * Diese Funktion wird aufgerufen, wenn der Lobby-Leader im Frontend den "Spiel starten" Button klickt.
+   * 
+   * Ablauf:
+   *  1. Prüft, ob der STOMP Client verbunden ist
+   *  2. Prüft nach einer gültigen Lobby ID
+   *  3. Sende einen StartGameCommand mit eigener PlayerID an den Server-Endpunkt `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`
+   * 
+   * WS empfängt Serverantwort und verarbeitet diese als `GAME_START` Event weiter (--> Weiterleitung an GameView)
+   * @returns void
+   */
+  function startGameCommand() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot start game commnand: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id) {
+      console.error('Cannot start game command.')
+      return
+    }
+
+    try {
+      stompclient.publish({
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/startGame`,
+        body: JSON.stringify({
+          playerId: gamedata.playerId,
+        })
+      })
+      console.log('Start game command sent for all players in lobby:', gamedata.lobby?.id)
+    } catch (err) {
+      console.error('Error sending start game command:', err)
+    }
+  }
+
 
   /**
    * Sendet eine Bewegungsaktion (Move) an den Spielserver.
@@ -263,13 +418,34 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function sendLobbyMessage(destination: string, payload: any) {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot update lobby settings: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id) {
+      console.error('Cannot send lobby message: Missing lobbyId')
+      return
+    }
+    try {
+      stompclient.publish({
+        destination: destination,
+        body: JSON.stringify(payload),
+      })
+      console.log('Lobby message sent:', payload)
+    } catch (err) {
+      console.error('Error sending lobby message:', err)
+
+    }
+  }
   //TODO tatsächliches moven der Barrier implementieren
   function moveBarrier(barrierId: string, targetFieldId: string) {
     if (!stompclient || !stompclient.connected) {
       console.error("Cannot send move: STOMP client not connected.")
       return
     }
-    const moveBarrCmd: MoveBarrierCommand = { barrierId, targetFieldId};
+    const moveBarrCmd: MoveBarrierCommand = { barrierId, targetFieldId };
     const body = JSON.stringify(moveBarrCmd)
     const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
 
@@ -310,23 +486,42 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+
+
   /**
-   * Sendeteinen Energie-Speichern-Befehl an den Spielserver
+   * Prüft, ob der eigene Spieler Leader der aktuellen Lobby ist
    *
-   * Wird aufgerufen, wenn der Spieler im Fronten die gewürfelte Zahl als Energie speichern möchte.
+   * Nutzt die in der Lobby vorhandene Spielerliste und vergleicht
+   * die eigene playerId mit dem entsprechenden Eintrag.
+   */
+  function isOwnLeader(): boolean {
+    return getOwnPlayer()?.leader ?? false
+  }
+
+  function getOwnPlayer(): Player | undefined {
+    if (!gamedata.lobby || !gamedata.playerId) return
+
+    // Spieler abgleichen mit eigenen Daten
+    const me = gamedata.lobby.players?.find((p: Player) => p.id === gamedata.playerId) as Player
+    return me
+  }
+
+  /* Sendeteinen Energie - Speichern - Befehl an den Spielserver
    *
-   * Erstellt ein EnergyCommand-Objekt mit der Spieler-ID und veröffentlicht es über den STOMP-Endpunkt `/app/milefiz/lobby/{lobbyId}/saveEnergy`.
+  * Wird aufgerufen, wenn der Spieler im Fronten die gewürfelte Zahl als Energie speichern möchte.
+  *
+  * Erstellt ein EnergyCommand - Objekt mit der Spieler - ID und veröffentlicht es über den STOMP - Endpunkt`/app/milefiz/lobby/{lobbyId}/saveEnergy`.
+  *
+  * Ablauf:
+  * 1. Verbindung prüfen – Abbruch, falls STOMP - Client nicht verbunden ist.
+  * 2. Lobby - ID und Spieler - ID validieren – Abbruch bei fehlenden Daten.
+  * 3. Energy - Command serialisieren(`JSON.stringify`).
+  * 4. Nachricht an den Server senden.
+  *
+  * @returns void
+  * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
    *
-   * Ablauf:
-   * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.
-   * 2. Lobby-ID und Spieler-ID validieren – Abbruch bei fehlenden Daten.
-   * 3. Energy-Command serialisieren (`JSON.stringify`).
-   * 4. Nachricht an den Server senden.
-   *
-   * @returns void
-   * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
-   * 
-   * @author Elisabeth Gehdt
+  * @author Elisabeth Gehdt
    */
   function sendEnergySave() {
     if (!stompclient || !stompclient.connected) {
@@ -356,24 +551,127 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
-  /**
+  /* Sendet eine Energie-Verbrauchen-Anfrage an den Spielserver.
+  *
+  * Wird aufgerufen, wenn der Spieler springen möchte.
+  *
+  * Erstellt ein EnergyCommand-Objekt mit der Spieler-ID und veröffentlicht es über den STOMP-Endpunkt `/app/milefiz/lobby/{lobbyId}/consumeEnergy`.
+  *
+  * Ablauf:
+  * 1. Verbindung prüfen – Abbruch, falls STOMP-Client nicht verbunden ist.
+  * 2. Lobby-ID und Spieler-ID validieren – Abbruch bei fehlenden Daten.
+  * 3. Energy-Command serialisieren(`JSON.stringify`).
+  * 4. Nachricht an den Server senden.
+  *
+  * @returns void
+  * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
    *
+  * @author Kevin Tran
    */
-  const isJumping = ref(false)
+  function sendEnergyConsume() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot save energy: STOMP client not connected.')
+      return
+    }
 
-  /* function requestJump() {
-    isJumping.value = true
-  } */
+    if (!gamedata.lobby?.id || !gamedata.playerId) {
+      console.error('Cannot save energy: Missing lobbyId or playerId')
+      return
+    }
+    const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId }
+    const body = JSON.stringify(energyConsumeCommand)
+
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
+
+    try {
+      stompclient.publish({
+        destination: DEST_APP + '/consumeEnergy',
+        body,
+      })
+      console.log('Energy consume:', body)
+    } catch (err) {
+      console.error('Error consuming energy:', err)
+    }
+  }
+
+  /**
+   * Prueft welche Farbe der Gewinner hat und gibt die entsprechende Koerper und Augenfarbe des Meeples zuruek
+   * @returns Koerper und Augenfarbe des Meeples vom Gewinner
+   */
+  function getWinnerColor() {
+    if (winnerColor.value == 'RED') {
+      return playerColors.RED
+    }
+
+    if (winnerColor.value == 'GREEN') {
+      return playerColors.GREEN
+    }
+    
+    if (winnerColor.value == 'BLUE') {
+      return playerColors.BLUE
+    }
+
+    if (winnerColor.value == 'YELLOW') {
+      return playerColors.YELLOW
+    }
+  }
+
+  /**
+   * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
+   */
+  function disconnectAndReset() {
+    // WebSocket-Verbindung trennen
+    if (stompclient && stompclient.connected) {
+      stompclient.deactivate()
+      stompclient = null
+    }
+
+    // Store-State zurücksetzen
+    gamedata.playerId = ''
+    gamedata.playerToken = ''
+    gamedata.energy = 0
+    gamedata.currentDiceRoll = undefined
+    gamedata.lobby = null
+
+    cooldown.remainingSeconds = 0
+    cooldown.active = false
+
+    energy.maxEnergy = 0
+    energy.isEnergyFull = false
+    energy.isEnergyFresh = false
+
+    gameFinished.value = false
+    winnerName.value = ''
+    winnerColor.value = ''
+
+    const boardStore = useBoardStore()
+
+    boardStore.resetBoardStore()
+
+
+    console.log('Store reset complete')
+  }
+
+
 
   return {
     gamedata,
+    isJoined,
     startMilefizLiveUpdate,
     sendRollDice,
+    sendLobbyMessage,
     joinLobby,
     cooldown,
+    energy,
     sendMove,
     sendEnergySave,
-    isJumping,
-    /* requestJump */
+    sendEnergyConsume,
+    startGameCommand,
+    getOwnPlayer,
+    isOwnLeader,
+    disconnectAndReset,
+    winnerName,
+    gameFinished,
+    getWinnerColor,
   }
 })

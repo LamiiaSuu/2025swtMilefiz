@@ -120,36 +120,18 @@ public class GameServiceImpl implements GameService {
     }
 
     /**
-     * Verarbeitet einen Bewegungsbefehl
-     * ({@link de.hs_rm.de.milefiz.messaging.commands.MovementCommand})
-     * innerhalb einer bestimmten Lobby und delegiert die Spiellogik an den
-     * {@link de.hs_rm.de.milefiz.game.service.MovementService}.
+     * Verarbeitet ein Meeple-Bewegungskommando und delegiert die
+     * Ausführung an den {@link MovementService}.
      *
-     * Diese Methode dient als zentrale Schnittstelle des GameService für
-     * Figurenbewegungen (Meeples). Sie protokolliert den empfangenen
-     * Befehl, übergibt ihn an den MovementService und gibt das dort erzeugte
-     * Ergebnis-Event an den Aufrufer zurück.
+     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
+     * @param moveCmd das Bewegungskommando mit Meeple-ID und Bewegungsrichtung
+     * @param player  der Spieler, der den Zug ausführt
      *
-     * Ablauf:
-     * - Logging des Bewegungsbefehls mit Lobby, Spieler, Meeple-ID, Richtung und
-     * Session-ID
-     * - Delegation an
-     * - Rückgabe des {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent},
-     * das das Ergebnis beschreibt
+     * @return ein {@link FrontendEvent}, das den Ausgang des Zuges beschreibt
      *
-     * Diese Methode enthält selbst keine Spiellogik, sondern fungiert als
-     * Vermittler zwischen Controllerebene (z. B.
-     * und der tatsächlichen Spiellogik im MovementService.
+     * @see MovementService#moveMeeple(UUID, MovementCommand, Player)
      *
-     * @param lobbyId   die eindeutige ID der Lobby, in der die Bewegung ausgeführt
-     *                  wird
-     * @param moveCmd   der Bewegungsbefehl mit Meeple-ID und Bewegungsrichtung
-     * @param player    der Spieler (bzw. dessen Benutzerkontext), der den Zug
-     *                  ausgelöst hat
-     * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
-     *         das Ergebnis der Bewegung enthält
-     *
-     *         Author: Maximilian Ressel
+     * @author Maximilian Ressel
      */
     @Override
     public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Player player) {
@@ -164,40 +146,20 @@ public class GameServiceImpl implements GameService {
     }
 
     /**
-     * Verarbeitet einen Barrierenbewegungsbefehl
-     * ({@link de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand})
-     * innerhalb einer bestimmten Lobby und delegiert die Spiellogik an den
-     * {@link de.hs_rm.de.milefiz.game.service.MovementService}.
+     * Verarbeitet ein Kommando zur Verschiebung einer Barriere und
+     * delegiert die Spiellogik an den {@link MovementService}.
      *
-     * Diese Methode wird aufgerufen, wenn ein Spieler im Frontend eine Barriere
-     * verschieben möchte (typischerweise nachdem ein Meeple direkt auf einer
-     * Barriere gelandet ist). Sie führt Logging durch und übergibt die Anfrage an
-     * den MovementService, der die Spielregeln prüft und die Bewegung ggf.
-     * ausführt.
+     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere bewegt
+     *                    wird
+     * @param moveBarrCmd das Kommando mit Barrieren-ID und Ziel-Feld-ID
+     * @param player      der Spieler, der die Aktion ausführt
      *
-     * Ablauf:
-     * - Logging des Befehls mit Lobby, Spieler, Barrieren-ID, Ziel-Feld-ID und
-     * Session-ID
-     * - Delegation an
-     * - Rückgabe des {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent},
-     * das das Ergebnis beschreibt
+     * @return ein {@link FrontendEvent}, das den Ausgang der Barrierenbewegung
+     *         beschreibt
      *
-     * Wie
-     * enthält
-     * auch diese Methode keine Spiellogik, sondern dient der Weiterleitung an die
-     * zuständige
-     * Spiellogik-Komponente.
+     * @see MovementService#moveBarrier(UUID, MoveBarrierCommand, Player)
      *
-     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere
-     *                    verschoben wird
-     * @param moveBarrCmd der Barrierenbewegungsbefehl mit Barrieren-ID und
-     *                    Ziel-Feld-ID
-     * @param player      der Spieler (bzw. dessen Benutzerkontext), der die Aktion
-     *                    ausgelöst hat
-     * @return ein {@link de.hs_rm.de.milefiz.messaging.events.FrontendEvent}, das
-     *         das Ergebnis der Barrierenbewegung enthält
-     *
-     *         Author: Maximilian Ressel
+     * @author Maximilian Ressel
      */
     @Override
     public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Player player) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, ref, watch } from "vue";
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
 
 // Zugriff auf globalen PiniaStore
@@ -67,6 +67,13 @@ onMounted(() => {
     window.addEventListener("keydown", onKeypress)
 });
 
+/**
+ * Beim unmounten wird Listener removed
+ */
+onUnmounted(() => {
+    window.removeEventListener("keydown", onKeypress)
+})
+
 
 /* Würfeln Hotkey Mapping auf Key "R"*/
 const onKeypress = (e: KeyboardEvent) => {
@@ -85,30 +92,12 @@ const onKeypress = (e: KeyboardEvent) => {
  */
 function rollDice() {
     if (disabled.value) {
-        return
+        triggerErrorAnimation()
     }
     milefizStore.sendRollDice();
     triggerPressAnimation();
 }
 
-/**
- * Started den lokalen Frontend-Countdown
- * @param seconds Sekundenanzahl, bei der der Countdown startet
- */
-function startLocalCountdown(seconds: number) {
-    localCountdown.value = seconds
-
-    if (interval) clearInterval(interval)
-
-    interval = window.setInterval(() => {
-        if (localCountdown.value > 0) {
-            localCountdown.value--
-        } else {
-            clearInterval(interval!)
-            interval = null
-        }
-    }, 1000)
-}
 
 /**
  * Bereinigung: Falls Komponente zerstört wird: Timer stoppen und Leaks vermeiden
@@ -127,9 +116,18 @@ function triggerPressAnimation() {
     setTimeout(() => (isPressed.value = false), 150)
 }
 
+/**
+ * Error Animation für ungültige Aktionen
+ */
+const isError = ref(false)
+
+function triggerErrorAnimation() {
+    isError.value = true
+    setTimeout(() => (isError.value = false), 600)
+}
 </script>
 <template>
-    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled }">
+    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled, error: isError }">
         <img src="@/assets/hud/dice.png" class="action-icon" />
         <div v-if="localCountdown > 0" class="cooldown-overlay">
             {{ localCountdown }}

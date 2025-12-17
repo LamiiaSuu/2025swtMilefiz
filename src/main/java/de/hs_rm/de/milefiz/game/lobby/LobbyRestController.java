@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.hs_rm.de.milefiz.game.model.Lobby;
@@ -44,8 +45,28 @@ public class LobbyRestController {
      * @return
      */
     @GetMapping(path = "/list")
-    public Set<LobbyDTO> getLobbyList() {
-        return lobbyMapper.toDTOSet(lobbyManager.getLobbies());
+    public Set<LobbyDTO> getLobbyList(
+        @RequestParam(required = false) String filter 
+    ) {
+        if ("joinable".equals(filter)) {
+            return lobbyMapper.toDTOSet(
+                lobbyManager.getJoinableLobbies()
+            );
+        }
+
+        return lobbyMapper.toDTOSet(
+            lobbyManager.getLobbies()
+        );
+    }
+
+    /**
+     * Erstellt eine Lobby und joint dieser direkt
+     */
+    @GetMapping(path = "/create")
+    public ResponseEntity<LobbyJoinEvent> joinCreateLobby() throws LobbyNotFoundException {
+        // Join Random lobby
+        Lobby lobby = lobbyManager.createLobby();
+        return joinLobby(lobby.getId());
     }
 
     /**

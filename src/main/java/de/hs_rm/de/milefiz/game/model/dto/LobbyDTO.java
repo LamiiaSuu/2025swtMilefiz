@@ -9,6 +9,7 @@ import java.util.UUID;
 public class LobbyDTO {
 
     private UUID id;
+    private String lobbyName;
     private List<PlayerDTO> players;
     private int maxPlayers;
 
@@ -43,5 +44,13 @@ public class LobbyDTO {
 
     public void setMaxPlayers(int maxPlayers) {
         this.maxPlayers = maxPlayers;
+    }
+
+    public String getLobbyName() {
+        return lobbyName;
+    }
+
+    public void setLobbyName(String lobbyName) {
+        this.lobbyName = lobbyName;
     }
 }

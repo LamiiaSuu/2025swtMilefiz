@@ -19,6 +19,7 @@ public class PlayerDTO {
     private MeepleDTO activeMeeple;
     private int remainingMoves;
     private boolean moved;
+    private int maxEnergy;
 
     public PlayerDTO() {
     }
@@ -85,6 +86,15 @@ public class PlayerDTO {
 
     public void setMoved(boolean moved) {
         this.moved = moved;
+    }
+    
+
+    public int getMaxEnergy() {
+        return maxEnergy;
+    }
+
+    public void setMaxEnergy(int maxEnergy) {
+        this.maxEnergy = maxEnergy;
     }
     
 }
