@@ -163,7 +163,7 @@ function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPubl
   registerGameCharRef(id, el as unknown as TresObject | null)
 
   if (!started) {
-    cycleSelection(1)
+    cycleSelection(0)
     started = true
   }
 }
@@ -246,6 +246,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   toggleCamera(e)
   handleJump(e)
   handleMoveKeys(e)
+  handleMeepleSelectionKeydown(e)
 }
 
 /**
@@ -271,6 +272,42 @@ function cycleSelection(offset: number = 1) {
     me.activeMeeple = nextMeeple
     console.log('Cycled activeMeeple ->', nextMeeple.id)
   }
+}
+
+/**
+ * Verwaltet die Tastatureingabe zum Wechseln zwischen den eigenen Meeplen
+ * @param e Zahlentasten 1 bis 5
+ */
+function handleMeepleSelectionKeydown(e: KeyboardEvent) {
+  if (e.key < '1' || e.key > '5') return
+
+  e.preventDefault()
+  const index = Number(e.key) - 1
+  selectMeepleByIndex(index)
+}
+
+/**
+ * Versetzt den Spieler in den gewählten Meeple als den aktiven, steuerbaren Meeple
+ * @param index Index und Id des gewählten Meeples
+ */
+function selectMeepleByIndex(index: number) {
+  const ids = ownMeepleIds.value
+
+  if (!ids.length) return
+  if (!ids[0]) return
+
+  const lobby = milefizStore.gamedata.lobby
+  const myId = milefizStore.gamedata.playerId
+  if (!lobby || !myId) return
+
+  const me = lobby.players.find((p) => p.id === myId)
+  if (!me) return
+
+  const meeple = me.meeples.find(m => m.id === ids[index])
+  if (!meeple) return
+
+  me.activeMeeple = meeple
+  console.log('Selected meeple ->', meeple.id)
 }
 
 const handleJump = (e: KeyboardEvent) => {
