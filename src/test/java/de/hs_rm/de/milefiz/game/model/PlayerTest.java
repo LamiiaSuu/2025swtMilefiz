@@ -64,4 +64,77 @@ class PlayerTest {
         assertEquals(0, player.getRemainingMoves());
         assertFalse(player.canMove());
     }
+
+    @Test
+    void testSaveEnergy_NormalCase() {
+        player.setRemainingMoves(3);
+        player.setEnergy(2);
+
+        player.saveEnergy();
+
+        assertEquals(5, player.getEnergy(), "Energy should be sum of previous energy and remaining moves");
+        assertEquals(0, player.getRemainingMoves(), "Remaining moves should be 0 after saving");
+    }
+
+    @Test
+    void testSaveEnergy_CapsAtMaxEnergy() {
+        player.setRemainingMoves(4);
+        player.setEnergy(5); // 5 + 4 = 9, aber MAX = 6
+
+        player.saveEnergy();
+
+        assertEquals(6, player.getEnergy(), "Energy should be capped at MAX_ENERGY (6)");
+        assertEquals(0, player.getRemainingMoves(), "Remaining moves should be 0");
+    }
+
+    @Test
+    void testSaveEnergy_WithZeroMoves() {
+        player.setRemainingMoves(0);
+        player.setEnergy(3);
+
+        player.saveEnergy();
+
+        assertEquals(3, player.getEnergy(), "Energy should remain unchanged when no moves to save");
+        assertEquals(0, player.getRemainingMoves(), "Remaining moves should still be 0");
+    }
+
+    @Test
+    void testHasFullEnergy() {
+        player.setEnergy(5);
+        assertFalse(player.hasFullEnergy(), "Player should not have full energy below MAX");
+
+        player.setEnergy(6);
+        assertTrue(player.hasFullEnergy(), "Player should have full energy at MAX_ENERGY");
+
+        player.setEnergy(0);
+        assertFalse(player.hasFullEnergy(), "Player should not have full energy with 0");
+    }
+
+    @Test
+    void testSaveEnergy_ReachesExactlyMax() {
+        player.setRemainingMoves(3);
+        player.setEnergy(3); // 3 + 3 = 6
+
+        player.saveEnergy();
+
+        assertEquals(6, player.getEnergy(), "Energy should reach exactly MAX_ENERGY");
+        assertTrue(player.hasFullEnergy(), "Player should have full energy");
+    }
+
+    @Test
+    void testConsumeEnergy_DefaultCase(){
+        player.setEnergy(6);
+        player.consumeEnergy();
+
+        assertEquals(0, player.getEnergy(),  "Energy should be fully consumed and reset to 0");
+    }
+
+    @Test
+    void testConsumeEnergy_NotEnoughEnergy(){
+        player.setEnergy(2);
+        player.consumeEnergy();
+
+        assertEquals(false, player.hasFullEnergy(), "Energy can't be consumed, if MAX_ENERGY hasn't been reached.");
+        assertEquals(2, player.getEnergy(), "Energy should remain untouched if player has not enough energy.");
+    }
 }

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.hs_rm.de.milefiz.game.model.Lobby;
@@ -29,7 +30,8 @@ public class LobbyRestController {
     private LobbyMapper lobbyMapper;
     private FrontendMessagingService messagingService;
 
-    public LobbyRestController(LobbyManager lobbyManager, GameService gameService, LobbyMapper lobbyMapper, FrontendMessagingServiceImpl messagingService) {
+    public LobbyRestController(LobbyManager lobbyManager, GameService gameService, LobbyMapper lobbyMapper,
+            FrontendMessagingServiceImpl messagingService) {
         this.lobbyManager = lobbyManager;
         this.gameService = gameService;
         this.lobbyMapper = lobbyMapper;
@@ -43,8 +45,28 @@ public class LobbyRestController {
      * @return
      */
     @GetMapping(path = "/list")
-    public Set<LobbyDTO> getLobbyList() {
-        return lobbyMapper.toDTOSet(lobbyManager.getLobbies());
+    public Set<LobbyDTO> getLobbyList(
+        @RequestParam(required = false) String filter 
+    ) {
+        if ("joinable".equals(filter)) {
+            return lobbyMapper.toDTOSet(
+                lobbyManager.getJoinableLobbies()
+            );
+        }
+
+        return lobbyMapper.toDTOSet(
+            lobbyManager.getLobbies()
+        );
+    }
+
+    /**
+     * Erstellt eine Lobby und joint dieser direkt
+     */
+    @GetMapping(path = "/create")
+    public ResponseEntity<LobbyJoinEvent> joinCreateLobby() throws LobbyNotFoundException {
+        // Join Random lobby
+        Lobby lobby = lobbyManager.createLobby();
+        return joinLobby(lobby.getId());
     }
 
     /**
@@ -69,6 +91,7 @@ public class LobbyRestController {
             throws LobbyNotFoundException {
         Lobby lobby = lobbyManager.getLobby(lobbyId);
 
+        // FIXME
         if (lobby.getBoard() == null) {
             lobby.setBoard(gameService.getTestBoard());
         }
@@ -83,16 +106,23 @@ public class LobbyRestController {
         try {
             lobby.join(player);
         } catch (LobbyJoinException ex) {
-            // FrontendEvent lobbyUpdate = new FrontendLobbyUpdateEvent(null, null, null, ex.getMessage());
             LobbyJoinEvent joinEvent = new LobbyJoinEvent(null, null, null, ex.getMessage());
             return new ResponseEntity<>(joinEvent, HttpStatus.CONFLICT);
 
         }
+
+        // Wenn es keinen Leader gibt, wird der gejointe Spieler der Leader
+        if (lobby.getLeader() == null) {
+            player.setLeader(true);
+        }
+
         // Sende per STOMP allen bereits in der Lobby vorhandenen Spielern ein Update
-        messagingService.sendEvent(new LobbyMessage(lobby, new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler ist gejoint")));
+        messagingService.sendEvent(new LobbyMessage(lobby,
+                new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Ein Spieler ist gejoint")));
 
         // Return als Response
-        LobbyJoinEvent joinEvent = new LobbyJoinEvent(player.getId(), playerToken, lobbyMapper.toDTO(lobby), "Erfolgreich gejoint");
+        LobbyJoinEvent joinEvent = new LobbyJoinEvent(player.getId(), playerToken, lobbyMapper.toDTO(lobby),
+                "Erfolgreich gejoint");
         return new ResponseEntity<>(joinEvent, HttpStatus.OK);
     }
 }
