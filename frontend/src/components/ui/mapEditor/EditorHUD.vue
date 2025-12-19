@@ -74,14 +74,14 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
         <div style="padding-left: 50px;">
           <div
           class="icon-with-text"
-        >
-          <div
-            class="editor-icon-wrapper delete-button"
           >
-            <DeleteButton />
+            <div
+              class="editor-icon-wrapper delete-button"
+            >
+              <DeleteButton />
+            </div>
+            <p>Löschen (Z)</p>
           </div>
-          <p>Löschen (Z)</p>
-        </div>
         </div>
         
       </div>

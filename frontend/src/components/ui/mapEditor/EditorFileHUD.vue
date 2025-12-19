@@ -12,8 +12,26 @@ import SaveButton from './buttons/SaveButton.vue';
     <!-- Button Bar -->
     <div style="position: absolute;bottom: 2vw; left: 0px;">
       <div class="button-bar-left">
-        <div class="icon-with-text"><SaveButton /> <p>Speichern (S)</p></div>
-        <div class="icon-with-text"><ImportButton /> <p>Öffnen (O)</p></div>
+        <div
+        class="icon-with-text"
+        >
+          <div
+            class="editor-icon-wrapper save-button"
+          >
+            <SaveButton />
+          </div>
+          <p>Speichern (S)</p>
+        </div>
+        <div
+        class="icon-with-text"
+        >
+          <div
+            class="editor-icon-wrapper save-button"
+          >
+            <ImportButton />
+          </div>
+          <p>Öffnen (O)</p>
+        </div>
       </div>
     </div>
 
@@ -52,5 +70,42 @@ import SaveButton from './buttons/SaveButton.vue';
   left: 0px;
   box-shadow: 7.5px 7.5px 15px rgba(0,0,0,0.5);
 }
+
+.save-button:hover {
+  outline: 10px solid #ffd36a;
+  outline-offset: -5px; 
+  box-shadow: 0 0 25px rgba(255, 211, 106, 0.6);
+}
+
+.editor-icon-wrapper {
+  border-radius: 8px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, outline 0.15s ease;
+}
+
+.editor-icon-wrapper.selected {
+  outline: 5px solid #ffd36a;
+  outline-offset: -2px; 
+  box-shadow: 0 0 25px rgba(255, 211, 106, 0.6);
+}
+
+.icon-with-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon-with-text.selected {
+  border: 2px solid #ffd36a;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(255, 211, 106, 0.6);
+}
+
+.icon-with-text p {
+  margin-top: 8px;
+  color: #FFFFFF;
+  font-family: 'Acme', sans-serif;
+  text-align: center;
+}
+
 
 </style>
