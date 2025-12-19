@@ -7,9 +7,11 @@ const props = defineProps<{
   selected: boolean
 }>()
 
+type Direction = 'up' | 'down' | 'left' | 'right'
+
 const emit = defineEmits<{
+  (e: 'add', dir: Direction): void
   (e: 'select'): void
-  (e: 'add', dir: 'up' | 'down' | 'left' | 'right'): void
 }>()
 
 const TILE_SIZE = 80

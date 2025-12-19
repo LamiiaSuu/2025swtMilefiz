@@ -9,7 +9,13 @@ import TileButton from './buttons/TileButton.vue';
 import GoalButton from './buttons/GoalButton.vue';
 import HouseButton from './buttons/HouseButton.vue';
 
-const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile')
+const props = defineProps<{
+  selectedTool: 'start' | 'goal' | 'tile' | 'barrier'
+}>()
+
+const emit = defineEmits<{
+  (e: 'toolSelected', tool: 'start' | 'goal' | 'tile' | 'barrier'): void
+}>()
 </script>
 
 
@@ -25,11 +31,11 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
       <div class="button-bar">
         <div
           class="icon-with-text"
-          @click="selectedTool = 'start'"
+          @click="emit('toolSelected', 'start')"
         >
           <div
             class="editor-icon-wrapper"
-            :class="{ selected: selectedTool === 'start' }"
+            :class="{ selected: props.selectedTool === 'start' }"
           >
             <HouseButton />
           </div>
@@ -37,11 +43,11 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
         </div>
         <div
           class="icon-with-text"
-          @click="selectedTool = 'goal'"
+          @click="emit('toolSelected', 'goal')"
         >
           <div
             class="editor-icon-wrapper"
-            :class="{ selected: selectedTool === 'goal' }"
+            :class="{ selected: props.selectedTool === 'goal' }"
           >
             <GoalButton />
           </div>
@@ -49,11 +55,11 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
         </div>
         <div
           class="icon-with-text"
-          @click="selectedTool = 'tile'"
+          @click="emit('toolSelected', 'tile')"
         >
           <div
             class="editor-icon-wrapper"
-            :class="{ selected: selectedTool === 'tile' }"
+            :class="{ selected: props.selectedTool === 'tile' }"
           >
             <TileButton />
           </div>
@@ -61,11 +67,11 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
         </div>
         <div
           class="icon-with-text"
-          @click="selectedTool = 'barrier'"
+          @click="emit('toolSelected', 'barrier')"
         >
           <div
             class="editor-icon-wrapper"
-            :class="{ selected: selectedTool === 'barrier' }"
+            :class="{ selected: props.selectedTool === 'barrier' }"
           >
             <BarrierButton />
           </div>

@@ -6,6 +6,9 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import StandardTile from '@/components/ui/mapEditor/tiles/StandardTile.vue';
 
 type Direction = 'up' | 'down' | 'left' | 'right'
+type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
+
+const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier'>('tile')
 
 type Connections = {
   up: boolean
@@ -15,10 +18,15 @@ type Connections = {
 }
 
 type TileData = {
-  type: 'start' | 'goal' | 'tile' | 'barrier'
+  type: ToolType
   x: number
   y: number
-  connections: Connections
+  connections: {
+    up: boolean
+    down: boolean
+    left: boolean
+    right: boolean
+  }
 }
 
 const tiles = reactive<TileData[]>([
@@ -76,6 +84,55 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateViewport)
 })
 
+function addTile(fromTile: TileData, dir: Direction) {
+  const offset = {
+    up:    { x: 0, y: -2 },
+    down:  { x: 0, y:  2 },
+    left:  { x: -2, y: 0 },
+    right: { x:  2, y: 0 }
+  }[dir]
+
+  const newX = fromTile.x + offset.x
+  const newY = fromTile.y + offset.y
+
+  
+  const existing = tiles.find(t => t.x === newX && t.y === newY)
+  if (existing) {
+    
+    connectTiles(fromTile, existing, dir)
+    return
+  }
+
+  const newTile: TileData = {
+    type: selectedTool.value, 
+    x: newX,
+    y: newY,
+    connections: { up: false, down: false, left: false, right: false }
+  }
+
+  tiles.push(newTile)
+
+  connectTiles(fromTile, newTile, dir)
+
+  selectedKey.value = key(newX, newY)
+}
+
+const OPPOSITE: Record<Direction, Direction> = {
+  up: 'down',
+  down: 'up',
+  left: 'right',
+  right: 'left',
+}
+
+function opposite(dir: Direction): Direction {
+  return OPPOSITE[dir]
+}
+
+function connectTiles(a: TileData, b: TileData, dir: Direction) {
+  a.connections[dir] = true
+  b.connections[opposite(dir)] = true
+}
+
 </script>
 
 <template>
@@ -100,10 +157,11 @@ onUnmounted(() => {
               :y="tile.y"
               :selected="selectedKey === key(tile.x, tile.y)"
               @select="selectedKey = key(tile.x, tile.y)"
+              @add="(dir: Direction) => addTile(tile, dir)"
             />
           </div>
         </div>
-        <EditorHUD style="bottom: 20px;"/>
+        <EditorHUD style="bottom: 20px;" :selectedTool="selectedTool" @toolSelected="selectedTool = $event"/>
         <EditorFileHUD style="bottom: 20px;"/>
         <div class="form-row">
             <div class="button-container">
