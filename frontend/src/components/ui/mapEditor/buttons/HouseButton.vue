@@ -2,7 +2,7 @@
 
 </script>
 <template>
-    <button class="action-button">
+    <button class="action-button" >
         <img src="/mapEditorIcons/base.png" class="action-icon invert-color" />
     </button>
 </template>
