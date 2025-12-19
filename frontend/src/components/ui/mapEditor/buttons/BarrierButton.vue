@@ -3,7 +3,7 @@
 </script>
 <template>
     <button class="action-button">
-        <img src="@/assets/hud/JumpingMeeple.png" class="action-icon" />
+        <img src="/mapEditorIcons/barrier.png" class="action-icon invert-color" />
     </button>
 </template>
 
@@ -21,6 +21,10 @@
     cursor: pointer;
     background: #234420;
     transition: filter 120ms ease-out, transform 120ms ease-out;
+}
+
+.invert-color {
+    filter: invert(1);
 }
 
 .action-button:hover {
