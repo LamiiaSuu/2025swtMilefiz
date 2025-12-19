@@ -55,20 +55,20 @@ const style = computed(() => ({
 /* Plus Buttons */
 .plus {
   position: absolute;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   background: #00552d;
   border-radius: 50%;
   color: white;
-  font-size: 14px;
-  line-height: 18px;
+  font-size: 18px;
+  line-height: 25px;
   text-align: center;
   cursor: pointer;
   user-select: none;
 }
 
-.plus.up    { top: -30px; left: 50%; transform: translateX(-50%); }
-.plus.down  { bottom: -30px; left: 50%; transform: translateX(-50%); }
-.plus.left  { left: -30px; top: 50%; transform: translateY(-50%); }
-.plus.right { right: -30px; top: 50%; transform: translateY(-50%); }
+.plus.up    { top: -35px; left: 50%; transform: translateX(-50%); }
+.plus.down  { bottom: -35px; left: 50%; transform: translateX(-50%); }
+.plus.left  { left: -35px; top: 50%; transform: translateY(-50%); }
+.plus.right { right: -35px; top: 50%; transform: translateY(-50%); }
 </style>
