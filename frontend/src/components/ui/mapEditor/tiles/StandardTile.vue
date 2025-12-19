@@ -44,6 +44,7 @@ const style = computed(() => ({
   border: 2px solid #777;
   box-sizing: border-box;
   cursor: pointer;
+  border-radius: 50%;
 }
 
 .tile.selected {
