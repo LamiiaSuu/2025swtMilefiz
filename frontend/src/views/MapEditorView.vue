@@ -137,6 +137,8 @@ onUnmounted(() => {
 
 .map {
   position: relative;
+  bottom: 5vw;
+  right: 5vh;
 }
 
 form {
