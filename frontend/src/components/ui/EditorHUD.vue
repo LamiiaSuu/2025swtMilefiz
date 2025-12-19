@@ -5,7 +5,7 @@
 import ErrorMessage from './ErrorMessage.vue';
 import BarrierButton from './BarrierButton.vue';
 import DeleteButton from './DeleteButton.vue';
-import FieldButton from './FieldButton.vue';
+import TileButton from './TileButton.vue';
 import GoalButton from './GoalButton.vue';
 import HouseButton from './HouseButton.vue';
 </script>
@@ -23,7 +23,7 @@ import HouseButton from './HouseButton.vue';
       <div class="button-bar">
         <HouseButton />
         <GoalButton />
-        <FieldButton />
+        <TileButton />
         <BarrierButton />
         <div style="padding-left: 50px;">
             <DeleteButton />
