@@ -156,7 +156,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'CHEATED') {
           if (event.playerId === gamedata.playerId) {
             showWarning("Du kleiner Cheater")
-            window.setTimeout(cheatRedirect, 2500)            
+            window.setTimeout(cheatRedirect, 2500)
           }
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
@@ -205,7 +205,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = event.moved
-          //TODO moveloss animieren
+            //TODO moveloss animieren
             console.warn("lost remaining moves")
           }
 
@@ -268,9 +268,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
 
+  /**
+   * redirected den Spieler zur Wikipedia Seite von Cheat
+   */
   function cheatRedirect() {
     window.location.replace('https://de.wikipedia.org/wiki/Cheat_(Computerspiele)')
   }
+
   /**
  * Synchronisiert energiebezogene Zustände des eigenen Spielers aus dem aktuellen Lobby-State.
  *
@@ -615,7 +619,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (winnerColor.value == 'GREEN') {
       return playerColors.GREEN
     }
-    
+
     if (winnerColor.value == 'BLUE') {
       return playerColors.BLUE
     }

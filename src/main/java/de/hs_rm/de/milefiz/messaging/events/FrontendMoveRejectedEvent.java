@@ -19,10 +19,12 @@ import java.util.UUID;
  * Das Frontend kann dieses Event nutzen, um dem Spieler eine
  * entsprechende Fehlermeldung anzuzeigen.
  *
- * @param type Typ des Events (MOVE_ERROR)
- * @param msg  Beschreibung der Ursache, warum die Bewegung abgelehnt wurde
+ * @param playerId id des Players, damit das Event im Client korrekt zugeordnet
+ *                 werden kann
+ * @param type     Typ des Events (MOVE_ERROR)
+ * @param msg      Beschreibung der Ursache, warum die Bewegung abgelehnt wurde
  *
- *             Author: Maximilian Ressel
+ *                 Author: Maximilian Ressel
  */
 public record FrontendMoveRejectedEvent(UUID playerId, String type, String msg) implements FrontendEvent {
 
