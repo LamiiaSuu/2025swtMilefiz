@@ -5,14 +5,29 @@ import BackButton from '@/components/ui/pages/BackButton.vue'
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import StandardTile from '@/components/ui/mapEditor/tiles/StandardTile.vue';
 
+type Direction = 'up' | 'down' | 'left' | 'right'
+
+type Connections = {
+  up: boolean
+  down: boolean
+  left: boolean
+  right: boolean
+}
+
 type TileData = {
-  type: string
+  type: 'start' | 'goal' | 'tile' | 'barrier'
   x: number
   y: number
+  connections: Connections
 }
 
 const tiles = reactive<TileData[]>([
-  { type: "standard", x: 0, y: 0 } // Start-Tile
+  {
+    type: 'tile',
+    x: 0,
+    y: 0,
+    connections: { up: false, down: false, left: false, right: false }
+  }
 ])
 
 const selectedKey = ref<string>('0,0')
