@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import EditorHUD from '@/components/ui/EditorHUD.vue';
+import EditorFileHUD from '@/components/ui/EditorFileHUD.vue';
 import BackButton from '@/components/ui/pages/BackButton.vue'
 
 
@@ -8,6 +9,7 @@ import BackButton from '@/components/ui/pages/BackButton.vue'
 <template>
     <div class="mapeditor">
         <EditorHUD style="bottom: 20px;"/>
+        <EditorFileHUD style="bottom: 20px;"/>
         <div class="form-row">
             <div class="button-container">
                 <BackButton :to="{ name: 'Homepage' }" />
@@ -73,7 +75,7 @@ form {
 
 .button-container {
   position: absolute;
-  bottom: 20px;
+  bottom: 10px;
   left: 30px;
 
   display: flex;
