@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import EditorHUD from '@/components/ui/EditorHUD.vue';
 import BackButton from '@/components/ui/pages/BackButton.vue'
 
 
@@ -6,6 +7,7 @@ import BackButton from '@/components/ui/pages/BackButton.vue'
 
 <template>
     <div class="mapeditor">
+        <EditorHUD style="bottom: 20px;"/>
         <div class="form-row">
             <div class="button-container">
                 <BackButton :to="{ name: 'Homepage' }" />
