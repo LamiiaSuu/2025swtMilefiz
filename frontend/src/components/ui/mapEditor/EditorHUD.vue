@@ -1,20 +1,33 @@
 <!-- Globales Heads-up Display (HUD), das über dem Map-Editor als Overlay gerendert wird. Die Button-Bar befindet sich unten rechts. -->
 
 <script setup lang="ts">
-import ImportButton from './ImportButton.vue';
-import SaveButton from './SaveButton.vue';
+
+import ErrorMessage from '../ErrorMessage.vue';
+import BarrierButton from './buttons/BarrierButton.vue';
+import DeleteButton from './buttons/DeleteButton.vue';
+import TileButton from './buttons/TileButton.vue';
+import GoalButton from './buttons/GoalButton.vue';
+import HouseButton from './buttons/HouseButton.vue';
 </script>
 
 
 <template>
   <div class="hud-container">
 
-    <!-- Button Bar -->
-    <div style="position: absolute;bottom: 2vw; left: 0px;">
-      <div class="button-bar">
-        <SaveButton/>
-        <ImportButton/>
+    <div class="error-message-container">
+        <ErrorMessage />
+    </div>
 
+    <!-- Button Bar -->
+    <div style="position: absolute;bottom: 2vw; right: 0px;">
+      <div class="button-bar">
+        <HouseButton />
+        <GoalButton />
+        <TileButton />
+        <BarrierButton />
+        <div style="padding-left: 50px;">
+            <DeleteButton />
+        </div>
         
       </div>
     </div>
@@ -46,12 +59,12 @@ import SaveButton from './SaveButton.vue';
   padding-left: 25px;
   padding-right: 25px;
   background: #00552d;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
   width: 100%;
   box-sizing: border-box;
   pointer-events: auto;
-  left: 0px;
+  right: 0px;
 
 }
 

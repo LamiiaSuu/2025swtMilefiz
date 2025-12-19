@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import EditorHUD from '@/components/ui/EditorHUD.vue';
-import EditorFileHUD from '@/components/ui/EditorFileHUD.vue';
+import EditorHUD from '@/components/ui/mapEditor/EditorHUD.vue';
+import EditorFileHUD from '@/components/ui/mapEditor/EditorFileHUD.vue';
 import BackButton from '@/components/ui/pages/BackButton.vue'
 
 
