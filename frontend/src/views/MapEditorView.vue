@@ -158,6 +158,7 @@ function connectTiles(a: TileData, b: TileData, dir: Direction) {
               :selected="selectedKey === key(tile.x, tile.y)"
               @select="selectedKey = key(tile.x, tile.y)"
               @add="(dir: Direction) => addTile(tile, dir)"
+              :connections="tile.connections"
             />
           </div>
         </div>
