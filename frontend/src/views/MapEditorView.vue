@@ -2,12 +2,92 @@
 import EditorHUD from '@/components/ui/mapEditor/EditorHUD.vue';
 import EditorFileHUD from '@/components/ui/mapEditor/EditorFileHUD.vue';
 import BackButton from '@/components/ui/pages/BackButton.vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import StandardTile from '@/components/ui/mapEditor/tiles/StandardTile.vue';
 
+type TileData = {
+  type: string
+  x: number
+  y: number
+}
+
+const tiles = reactive<TileData[]>([
+  { type: "standard", x: 0, y: 0 } // Start-Tile
+])
+
+const selectedKey = ref<string>('0,0')
+
+/* Kamera */
+const offset = reactive({ x: 0, y: 0 })
+let dragging = false
+let lastMouse = { x: 0, y: 0 }
+
+function onMouseDown(e: MouseEvent) {
+  dragging = true
+  lastMouse = { x: e.clientX, y: e.clientY }
+}
+
+function onMouseMove(e: MouseEvent) {
+  if (!dragging) return
+  offset.x += e.clientX - lastMouse.x
+  offset.y += e.clientY - lastMouse.y
+  lastMouse = { x: e.clientX, y: e.clientY }
+}
+
+function onMouseUp() {
+  dragging = false
+}
+
+function key(x: number, y: number) {
+  return `${x},${y}`
+}
+
+const viewport = ref({
+  width: 0,
+  height: 0,
+})
+
+function updateViewport() {
+  viewport.value.width = window.innerWidth
+  viewport.value.height = window.innerHeight
+}
+
+onMounted(() => {
+  updateViewport()
+  window.addEventListener('resize', updateViewport)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateViewport)
+})
 
 </script>
 
 <template>
     <div class="mapeditor">
+        <div
+          class="editor"
+          @mousedown.left="onMouseDown"
+          @mousemove="onMouseMove"
+          @mouseup="onMouseUp"
+          @mouseleave="onMouseUp"
+        >
+          <div
+            class="map"
+            :style="{
+              transform: `translate(${offset.x + viewport.width / 2}px, ${offset.y + viewport.height / 2}px)`
+            }"
+          >
+            <StandardTile
+              v-for="tile in tiles"
+              :key="key(tile.x, tile.y)"
+              :x="tile.x"
+              :y="tile.y"
+              :selected="selectedKey === key(tile.x, tile.y)"
+              @select="selectedKey = key(tile.x, tile.y)"
+            />
+          </div>
+        </div>
         <EditorHUD style="bottom: 20px;"/>
         <EditorFileHUD style="bottom: 20px;"/>
         <div class="form-row">
@@ -44,6 +124,19 @@ import BackButton from '@/components/ui/pages/BackButton.vue'
   background-position: center;
   filter: blur(4px);
   z-index: -1;
+}
+
+.editor {
+  top: 3vh;
+  width: 97vw;
+  height: 95vh;
+  overflow: hidden;
+  background: #1a1a1a;
+  position: relative;
+}
+
+.map {
+  position: relative;
 }
 
 form {
