@@ -153,6 +153,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'MOVE_ERROR') {
           console.warn('Move rejected:', event.msg)
           return
+        } else if (event.type === 'CHEATED') {
+          if (event.playerId === gamedata.playerId) {
+            showWarning("Du kleiner Cheater")
+            window.setTimeout(cheatRedirect, 2500)            
+          }
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           energy.isEnergyFresh = false;
@@ -262,6 +267,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     stompclient.activate()
   }
 
+
+  function cheatRedirect() {
+    window.location.replace('https://de.wikipedia.org/wiki/Cheat_(Computerspiele)')
+  }
   /**
  * Synchronisiert energiebezogene Zustände des eigenen Spielers aus dem aktuellen Lobby-State.
  *

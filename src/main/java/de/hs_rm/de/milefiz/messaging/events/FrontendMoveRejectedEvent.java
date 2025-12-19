@@ -1,5 +1,7 @@
 package de.hs_rm.de.milefiz.messaging.events;
 
+import java.util.UUID;
+
 /**
  * Frontend-Event, das ausgelöst wird, wenn eine geplante Bewegung
  * eines Meeples nicht ausgeführt werden kann.
@@ -20,11 +22,11 @@ package de.hs_rm.de.milefiz.messaging.events;
  * @param type Typ des Events (MOVE_ERROR)
  * @param msg  Beschreibung der Ursache, warum die Bewegung abgelehnt wurde
  *
- * Author: Maximilian Ressel
+ *             Author: Maximilian Ressel
  */
-public record FrontendMoveRejectedEvent(String type, String msg) implements FrontendEvent {
+public record FrontendMoveRejectedEvent(UUID playerId, String type, String msg) implements FrontendEvent {
 
-        public FrontendMoveRejectedEvent(String msg) {
-        this(EventType.MOVE_ERROR.name(), msg);
+    public FrontendMoveRejectedEvent(UUID playerId, String msg) {
+        this(playerId, EventType.MOVE_ERROR.name(), msg);
     }
 }
