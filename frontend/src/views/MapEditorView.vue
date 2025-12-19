@@ -10,6 +10,13 @@ type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
 
 const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier'>('tile')
 
+const DIR_OFFSET: Record<Direction, { x: number; y: number }> = {
+  up:    { x: 0, y: -2 },
+  down:  { x: 0, y:  2 },
+  left:  { x: -2, y: 0 },
+  right: { x:  2, y: 0 },
+}
+
 type Connections = {
   up: boolean
   down: boolean
@@ -39,6 +46,7 @@ const tiles = reactive<TileData[]>([
 ])
 
 const selectedKey = ref<string>('0,0')
+  
 
 /* Kamera */
 const offset = reactive({ x: 0, y: 0 })
@@ -133,6 +141,42 @@ function connectTiles(a: TileData, b: TileData, dir: Direction) {
   b.connections[opposite(dir)] = true
 }
 
+function deleteTile(tile: TileData) {
+
+  if (tile.x === 0 && tile.y === 0) return
+  
+  (Object.keys(tile.connections) as Direction[]).forEach(dir => {
+    if (!tile.connections[dir]) return
+
+    const offset = DIR_OFFSET[dir]
+    const nx = tile.x + offset.x
+    const ny = tile.y + offset.y
+
+    const neighbor = tiles.find(t => t.x === nx && t.y === ny)
+    if (!neighbor) return
+
+    neighbor.connections[opposite(dir)] = false
+  })
+
+  const index = tiles.indexOf(tile)
+  if (index !== -1) {
+    tiles.splice(index, 1)
+  }
+
+  if (selectedKey.value === key(tile.x, tile.y) && tiles[0] != null) {
+    selectedKey.value = tiles.length
+      ? key(tiles[0].x, tiles[0].y)
+      : ''
+  }
+}
+
+function deleteSelectedTile() {
+  const tile = tiles.find(t => key(t.x, t.y) === selectedKey.value);
+  if (tile) {
+    deleteTile(tile);
+  }
+}
+
 </script>
 
 <template>
@@ -162,7 +206,7 @@ function connectTiles(a: TileData, b: TileData, dir: Direction) {
             />
           </div>
         </div>
-        <EditorHUD style="bottom: 20px;" :selectedTool="selectedTool" @toolSelected="selectedTool = $event"/>
+        <EditorHUD style="bottom: 20px;" :selectedTool="selectedTool" @toolSelected="selectedTool = $event" @deleteSelected="deleteSelectedTile"/>
         <EditorFileHUD style="bottom: 20px;"/>
         <div class="form-row">
             <div class="button-container">

@@ -15,6 +15,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'toolSelected', tool: 'start' | 'goal' | 'tile' | 'barrier'): void
+  (e: 'deleteSelected'): void
 }>()
 </script>
 
@@ -82,7 +83,7 @@ const emit = defineEmits<{
           class="icon-with-text"
           >
             <div
-              class="editor-icon-wrapper delete-button"
+              class="editor-icon-wrapper delete-button" @click="emit('deleteSelected')"
             >
               <DeleteButton />
             </div>
