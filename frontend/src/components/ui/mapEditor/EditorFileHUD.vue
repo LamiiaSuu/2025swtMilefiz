@@ -11,7 +11,7 @@ import SaveButton from './buttons/SaveButton.vue';
 
     <!-- Button Bar -->
     <div style="position: absolute;bottom: 2vw; left: 0px;">
-      <div class="button-bar">
+      <div class="button-bar-left">
         <SaveButton/>
         <ImportButton/>
 
@@ -38,7 +38,7 @@ import SaveButton from './buttons/SaveButton.vue';
   left: 2vw;          /* Abstand von rechts */
 }
 
-.button-bar {
+.button-bar-left {
   display: flex;
   gap: 30px;
   padding-top: 20px;
@@ -52,7 +52,7 @@ import SaveButton from './buttons/SaveButton.vue';
   box-sizing: border-box;
   pointer-events: auto;
   left: 0px;
-
+  box-shadow: 7.5px 7.5px 15px rgba(0,0,0,0.5);
 }
 
 </style>

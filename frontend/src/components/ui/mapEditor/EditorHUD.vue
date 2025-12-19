@@ -65,7 +65,7 @@ import HouseButton from './buttons/HouseButton.vue';
   box-sizing: border-box;
   pointer-events: auto;
   right: 0px;
-
+  box-shadow: -7.5px 7.5px 15px rgba(0,0,0,0.5);
 }
 
 </style>

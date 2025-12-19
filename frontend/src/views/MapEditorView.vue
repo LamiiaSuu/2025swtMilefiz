@@ -108,7 +108,7 @@ onUnmounted(() => {
 
   align-items: center;
   overflow: hidden;
-  padding-bottom: 4rem;
+  padding-bottom: 6vh;
 }
 
 .mapeditor::before {
@@ -129,10 +129,12 @@ onUnmounted(() => {
 .editor {
   top: 3vh;
   width: 97vw;
-  height: 95vh;
+  height: 98vh;
   overflow: hidden;
   background: #1a1a1ae1;
   position: relative;
+  border-radius: 8px;
+  box-shadow: 7.5px 7.5px 15px rgba(0,0,0,0.5), -7.5px -7.5px 15px rgba(0,0,0,0.5);
 }
 
 .map {
