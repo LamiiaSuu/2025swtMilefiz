@@ -21,12 +21,12 @@ import HouseButton from './buttons/HouseButton.vue';
     <!-- Button Bar -->
     <div style="position: absolute;bottom: 2vw; right: 0px;">
       <div class="button-bar">
-        <HouseButton />
-        <GoalButton />
-        <TileButton />
-        <BarrierButton />
+        <div class="icon-with-text"><HouseButton /> <p>Start (Q)</p></div>
+        <div class="icon-with-text"><GoalButton /> <p>Ziel (W)</p></div>
+        <div class="icon-with-text"><TileButton /> <p>Standard (E)</p></div>
+        <div class="icon-with-text"><BarrierButton /> <p>Sperre (R)</p></div>
         <div style="padding-left: 50px;">
-            <DeleteButton />
+          <div class="icon-with-text"><DeleteButton /> <p>Löschen (Z)</p></div>
         </div>
         
       </div>
@@ -55,7 +55,7 @@ import HouseButton from './buttons/HouseButton.vue';
   display: flex;
   gap: 30px;
   padding-top: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 15px;
   padding-left: 25px;
   padding-right: 25px;
   background: #00552d;
@@ -66,6 +66,19 @@ import HouseButton from './buttons/HouseButton.vue';
   pointer-events: auto;
   right: 0px;
   box-shadow: -7.5px 7.5px 15px rgba(0,0,0,0.5);
+}
+
+.icon-with-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon-with-text p {
+  margin-top: 4px;
+  color: #FFFFFF;
+  font-family: 'Acme', sans-serif;
+  text-align: center;
 }
 
 </style>

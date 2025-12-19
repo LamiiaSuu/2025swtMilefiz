@@ -12,10 +12,8 @@ import SaveButton from './buttons/SaveButton.vue';
     <!-- Button Bar -->
     <div style="position: absolute;bottom: 2vw; left: 0px;">
       <div class="button-bar-left">
-        <SaveButton/>
-        <ImportButton/>
-
-        
+        <div class="icon-with-text"><SaveButton /> <p>Speichern (S)</p></div>
+        <div class="icon-with-text"><ImportButton /> <p>Öffnen (O)</p></div>
       </div>
     </div>
 
@@ -42,7 +40,7 @@ import SaveButton from './buttons/SaveButton.vue';
   display: flex;
   gap: 30px;
   padding-top: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 15px;
   padding-left: 25px;
   padding-right: 25px;
   background: #00552d;
