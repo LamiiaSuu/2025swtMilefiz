@@ -4,7 +4,7 @@
     <div class="button-container">
       <button class="menu-button" @click="newGameStart">Neues Spiel</button>
       <button class="menu-button" @click="goToJoinGame">Spiel beitreten</button>
-      <button class="menu-button" @click="goToMapEditor">Map erstellen</button>
+      <button class="menu-button" @click="goToMapEditor">Map Editor</button>
       <button class="menu-button" @click="goToSettings">Einstellungen</button>
     </div>
   </div>
