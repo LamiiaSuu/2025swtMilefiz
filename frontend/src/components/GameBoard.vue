@@ -236,6 +236,12 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    milefizStore.popUpMenuOpen = !milefizStore.popUpMenuOpen
+    return
+  }
+
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
     e.preventDefault()
@@ -402,7 +408,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   }
 
   //initial setzen für responiveness, wird beim empfangen des Move Events aus dem Backend auf den wahren Wert gesetzt
-  if(milefizStore.gamedata.currentDiceRoll && milefizStore.gamedata.currentDiceRoll > 0) {
+  if (milefizStore.gamedata.currentDiceRoll && milefizStore.gamedata.currentDiceRoll > 0) {
     milefizStore.gamedata.moved = true
   }
 
@@ -450,9 +456,9 @@ onUnmounted(() => {
 const meepleColorMap = computed(() => {
   const lobby = milefizStore.gamedata.lobby
   if (!lobby) return new Map<string, string>()
-  
+
   const map = new Map<string, string>()
-  
+
   // Iteriere über alle Spieler
   for (const player of lobby.players) {
     // Alle Meeples dieses Spielers bekommen seine Farbe
@@ -460,7 +466,7 @@ const meepleColorMap = computed(() => {
       map.set(meeple.id, player.color) // player.color = "RED" | "GREEN" | "YELLOW" | "BLUE"
     }
   }
-  
+
   return map
 })
 
@@ -493,13 +499,11 @@ const meepleColorMap = computed(() => {
     <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
-    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2"/>
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" />
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
-    <GameCharacter v-for="id in allMeepleIds" :key="id"
-      :ref="el => registerGameCharRefFromTemplate(id, el)"
-      :meepleId="id"
-      :playerColor="meepleColorMap.get(id)"/>
+    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="el => registerGameCharRefFromTemplate(id, el)"
+      :meepleId="id" :playerColor="meepleColorMap.get(id)" />
 
     <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
