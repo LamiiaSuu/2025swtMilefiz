@@ -14,17 +14,17 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
 
 
 <template>
-  <div class="hud-container">
+  <div class="editor-hud-container">
 
-    <div class="error-message-container">
+    <div class="editor-error-message-container">
         <ErrorMessage />
     </div>
 
     <!-- Button Bar -->
     <div style="position: absolute;bottom: 2vw; right: 0px;">
-      <div class="button-bar">
+      <div class="editor-button-bar">
         <div
-          class="icon-with-text"
+          class="editor-icon-with-text"
           @click="selectedTool = 'start'"
         >
           <div
@@ -36,7 +36,7 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
           <p>Start (Q)</p>
         </div>
         <div
-          class="icon-with-text"
+          class="editor-icon-with-text"
           @click="selectedTool = 'goal'"
         >
           <div
@@ -48,7 +48,7 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
           <p>Ziel (W)</p>
         </div>
         <div
-          class="icon-with-text"
+          class="editor-icon-with-text"
           @click="selectedTool = 'tile'"
         >
           <div
@@ -60,7 +60,7 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
           <p>Standard (E)</p>
         </div>
         <div
-          class="icon-with-text"
+          class="editor-icon-with-text"
           @click="selectedTool = 'barrier'"
         >
           <div
@@ -73,10 +73,10 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
         </div>
         <div style="padding-left: 50px;">
           <div
-          class="icon-with-text"
+          class="editor-icon-with-text"
           >
             <div
-              class="editor-icon-wrapper delete-button"
+              class="editor-icon-wrapper editor-delete-button"
             >
               <DeleteButton />
             </div>
@@ -93,20 +93,20 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
 </template>
 
 <style>
-.hud-container {
+.editor-hud-container {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 99999
 }
 
-.error-message-container {
+.editor-error-message-container {
   position: absolute;
   top: 2vh;            /* Abstand von oben */
   left: 2vw;          /* Abstand von rechts */
 }
 
-.button-bar {
+.editor-button-bar {
   display: flex;
   gap: 30px;
   padding-top: 20px;
@@ -123,19 +123,19 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
   box-shadow: -7.5px 7.5px 15px rgba(0,0,0,0.5);
 }
 
-.icon-with-text {
+.editor-icon-with-text {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.icon-with-text.selected {
+.editor-icon-with-text.selected {
   border: 2px solid #ffd36a;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(255, 211, 106, 0.6);
 }
 
-.icon-with-text p {
+.editor-icon-with-text p {
   margin-top: 4px;
   color: #FFFFFF;
   font-family: 'Acme', sans-serif;
@@ -153,7 +153,7 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
   box-shadow: 0 0 25px rgba(255, 211, 106, 0.6);
 }
 
-.delete-button:hover {
+.editor-delete-button:hover {
   outline: 10px solid #ffd36a;
   outline-offset: -5px; 
   box-shadow: 0 0 25px rgba(255, 211, 106, 0.6);
