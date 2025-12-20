@@ -15,5 +15,5 @@ export interface FrontendMoveEvent {
   meepleId: string;
   targetField: string;
   remainingMoves?: number; 
-
+  moved: boolean;
 }
