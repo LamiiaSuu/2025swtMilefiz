@@ -2,7 +2,7 @@
 import EditorHUD from '@/components/ui/mapEditor/EditorHUD.vue';
 import EditorFileHUD from '@/components/ui/mapEditor/EditorFileHUD.vue';
 import BackButton from '@/components/ui/pages/BackButton.vue'
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import StandardTile from '@/components/ui/mapEditor/tiles/StandardTile.vue';
 
 type Direction = 'up' | 'down' | 'left' | 'right'
@@ -16,6 +16,10 @@ const DIR_OFFSET: Record<Direction, { x: number; y: number }> = {
   left:  { x: -2, y: 0 },
   right: { x:  2, y: 0 },
 }
+
+const selectedTile = computed<TileData | null>(() =>
+  tiles.find(t => key(t.x, t.y) === selectedKey.value) ?? null
+)
 
 type Connections = {
   up: boolean
@@ -137,6 +141,11 @@ function addTile(fromTile: TileData, dir: Direction) {
 function findNeighbor(tile: TileData, dir: Direction): TileData | null {
   const off = DIR_OFFSET[dir]
   return tiles.find(t => t.x === tile.x + off.x && t.y === tile.y + off.y) ?? null
+}
+
+function onHudToolSelected(tool: ToolType) {
+  if (!selectedTile.value) return
+  selectedTile.value.type = tool
 }
 
 type BackendTile = {
@@ -282,7 +291,10 @@ function deleteSelectedTile() {
             />
           </div>
         </div>
-        <EditorHUD style="bottom: 20px;" :selectedTool="selectedTool" @toolSelected="selectedTool = $event" @deleteSelected="deleteSelectedTile"/>
+        <EditorHUD   style="bottom: 20px;"
+          :selectedTool="selectedTile?.type ?? 'tile'"
+          @toolSelected="onHudToolSelected"
+          @deleteSelected="deleteSelectedTile"/>
         <EditorFileHUD style="bottom: 20px;" @click="debugExport()"/>
         <div class="editor-form-row">
             <div class="editor-button-container">

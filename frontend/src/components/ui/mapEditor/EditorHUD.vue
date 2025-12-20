@@ -9,12 +9,14 @@ import TileButton from './buttons/TileButton.vue';
 import GoalButton from './buttons/GoalButton.vue';
 import HouseButton from './buttons/HouseButton.vue';
 
+type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
+
 const props = defineProps<{
-  selectedTool: 'start' | 'goal' | 'tile' | 'barrier'
+  selectedTool: ToolType
 }>()
 
 const emit = defineEmits<{
-  (e: 'toolSelected', tool: 'start' | 'goal' | 'tile' | 'barrier'): void
+  (e: 'toolSelected', tool: ToolType): void
   (e: 'deleteSelected'): void
 }>()
 </script>
