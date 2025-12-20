@@ -1,7 +1,7 @@
 <!-- Globales Heads-up Display (HUD), das über dem Map-Editor als Overlay gerendert wird. Die Button-Bar befindet sich unten rechts. -->
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import ErrorMessage from '../ErrorMessage.vue';
 import BarrierButton from './buttons/BarrierButton.vue';
 import DeleteButton from './buttons/DeleteButton.vue';
@@ -19,6 +19,34 @@ const emit = defineEmits<{
   (e: 'toolSelected', tool: ToolType): void
   (e: 'deleteSelected'): void
 }>()
+
+function handleKeydown(e: KeyboardEvent) {
+  switch (e.key.toLowerCase()) {
+    case 'q':
+      emit('toolSelected', 'start')
+      break
+    case 'w':
+      emit('toolSelected', 'goal')
+      break
+    case 'e':
+      emit('toolSelected', 'tile')
+      break
+    case 'r':
+      emit('toolSelected', 'barrier')
+      break
+    case 'z':
+      emit('deleteSelected')
+      break
+  }
+}
+
+onMounted(() => {
+  globalThis.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  globalThis.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 
