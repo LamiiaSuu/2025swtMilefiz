@@ -203,6 +203,7 @@ function deleteSelectedTile() {
               @select="selectedKey = key(tile.x, tile.y)"
               @add="(dir: Direction) => addTile(tile, dir)"
               :connections="tile.connections"
+              :type="tile.type"
             />
           </div>
         </div>

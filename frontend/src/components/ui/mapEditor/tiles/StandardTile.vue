@@ -11,6 +11,7 @@ type Connections = {
 const props = defineProps<{
   x: number
   y: number
+  type: 'start' | 'goal' | 'tile' | 'barrier'
   selected: boolean
   connections: Connections
 }>()
@@ -37,6 +38,12 @@ const style = computed(() => ({
     :style="style"
     @click.stop="emit('select')"
   >
+    <div class="tile-icon">
+      <img v-if="type === 'start'" src="/mapEditorIcons/base.png" class="tile-icon-img" />
+      <img v-else-if="type === 'goal'" src="/mapEditorIcons/goal.png" class="tile-icon-img" />
+      <img v-else-if="type === 'barrier'" src="/mapEditorIcons/barrier.png" class="tile-icon-img" />
+    </div>
+
     <!-- Plus Buttons -->
     <div v-if="!connections.up"    class="plus up"    @click.stop="emit('add', 'up')">+</div>
     <div v-if="!connections.down"  class="plus down"  @click.stop="emit('add', 'down')">+</div>
@@ -66,6 +73,22 @@ const style = computed(() => ({
 .tile.selected {
   border-color: #ffd36a;
   box-shadow: 0 0 10px rgba(255, 211, 106, 0.6);
+}
+
+.tile-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.tile-icon-img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+  filter: invert(1);
 }
 
 /* Plus Buttons */
