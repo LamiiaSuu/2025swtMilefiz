@@ -54,6 +54,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const winnerName = ref<string | null>(null)
   const winnerColor = ref<string | null>(null)
 
+    /**
+   * PopUp-Menü
+   * @prop {boolean} popUpMenuOpen - True, wenn das PopUp-Menü geöffnet ist
+   */
+  const popUpMenuOpen = ref(false)
+
   // Beispiele für Daten
   const gamedata = reactive<{
     playerId: string
@@ -629,6 +635,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  function togglePopUpMenu() {
+    popUpMenuOpen.value = !popUpMenuOpen.value
+  }
+
+
   /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
@@ -686,5 +697,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName,
     gameFinished,
     getWinnerColor,
+    popUpMenuOpen,
+    togglePopUpMenu,
   }
 })
