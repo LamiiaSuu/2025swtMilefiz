@@ -15,7 +15,8 @@
 
 :root {
   --button-color: #234420;
-  --button-gradient-green: linear-gradient(to top, var(--button-color), #57AA51);
+  --button-light-green: #57AA51;
+  --button-gradient-green: linear-gradient(to top, var(--button-color), var(--button-light-green));
   --button-gradient-red: linear-gradient(to top, #691515, #b52326);
   --button-color-inactive: #737373;
 
