@@ -5,6 +5,7 @@ import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
 import { useBoardStore } from '@/stores/boardStore'
 import Tile from './Tile.vue'
+import Path from './Path.vue'
 import Camera from './Camera.vue'
 import { useMilefizStore } from "@/stores/milefizstore"
 import type { Direction } from "@/types/movement"
@@ -542,11 +543,11 @@ const connectionSegments = computed(() => {
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
-    <!-- Verbindungspfade zwischen verbundenen Tiles (visible 3D boxes) -->
-    <TresMesh v-for="seg in connectionSegments" :key="seg.key" :position="[seg.x, -0.28, seg.z]" :rotation="[0, seg.rotY, 0]">
-      <TresBoxGeometry :args="[seg.length, 0.59, 0.08]" />
-      <TresMeshStandardMaterial :color="0x3F8200" :roughness="1" :metalness="0" />
-    </TresMesh>
+    <!-- Verbindungspfade zwischen verbundenen Tiles -->
+    <Path v-for="seg in connectionSegments" :key="seg.key"
+      :position="[seg.x, 0, seg.z]"
+      :rotationY="seg.rotY"
+      :length="seg.length" />
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
