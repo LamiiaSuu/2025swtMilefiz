@@ -156,6 +156,7 @@ watchEffect(() => {
   if (milefizStore.gameFinished) {
     useFirstPerson.value = false
   }
+  // TODO Kamera bei Minispiel in OrbitView, danach wieder FirstPerson
 })
 
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
