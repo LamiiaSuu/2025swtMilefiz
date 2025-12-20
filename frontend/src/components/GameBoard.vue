@@ -282,6 +282,8 @@ function cycleSelection(offset: number = 1) {
 function handleMeepleSelectionKeydown(e: KeyboardEvent) {
   if (e.key < '1' || e.key > '5') return
 
+  if (milefizStore.gamedata.moved) return
+
   e.preventDefault()
   const index = Number(e.key) - 1
   selectMeepleByIndex(index)
