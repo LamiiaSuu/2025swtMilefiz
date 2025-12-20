@@ -15,6 +15,6 @@ public enum EventType {
     REJECTED_BY_BARRIER,
     MOVE_WITH_LOSS,
     MEEPLE_REACHED_END,
-    WIN
-
+    WIN,
+    CHEATED
 }
