@@ -180,7 +180,7 @@ function deleteSelectedTile() {
 </script>
 
 <template>
-    <div class="mapeditor">
+    <div class="editor-mapeditor">
         <div
           class="editor"
           @mousedown.left="onMouseDown"
@@ -189,7 +189,7 @@ function deleteSelectedTile() {
           @mouseleave="onMouseUp"
         >
           <div
-            class="map"
+            class="editor-map"
             :style="{
               transform: `translate(${offset.x + viewport.width / 2}px, ${offset.y + viewport.height / 2}px)`
             }"
@@ -209,8 +209,8 @@ function deleteSelectedTile() {
         </div>
         <EditorHUD style="bottom: 20px;" :selectedTool="selectedTool" @toolSelected="selectedTool = $event" @deleteSelected="deleteSelectedTile"/>
         <EditorFileHUD style="bottom: 20px;"/>
-        <div class="form-row">
-            <div class="button-container">
+        <div class="editor-form-row">
+            <div class="editor-button-container">
                 <BackButton :to="{ name: 'Homepage' }" />
             </div>
         </div>
@@ -218,7 +218,7 @@ function deleteSelectedTile() {
 </template>
 
 <style scoped>
-.mapeditor {
+.editor-mapeditor {
   position: relative;
   height: 100vh;
   width: 100vw;
@@ -230,7 +230,7 @@ function deleteSelectedTile() {
   padding-bottom: 6vh;
 }
 
-.mapeditor::before {
+.editor-mapeditor::before {
   content: "";
   position: absolute;
   top: 0;
@@ -256,7 +256,7 @@ function deleteSelectedTile() {
   box-shadow: 7.5px 7.5px 15px rgba(0,0,0,0.5), -7.5px -7.5px 15px rgba(0,0,0,0.5);
 }
 
-.map {
+.editor-map {
   position: relative;
   bottom: 5vw;
   right: 8.5vh;
@@ -271,13 +271,13 @@ form {
     margin-top: -5vh;
 }
 
-.form-column {
+.editor-form-column {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.form-row {
+.editor-form-row {
     display: grid;
     grid-template-columns: 150px 1fr;
     align-items: center;
@@ -285,11 +285,11 @@ form {
     z-index: 20;
 }
 
-.form-row label {
+.editor-form-row label {
     text-align: right;
 }
 
-.button-container {
+.editor-button-container {
   position: absolute;
   bottom: 10px;
   left: 30px;
@@ -299,7 +299,7 @@ form {
   gap: 2vh;
 }
 
-.menu-button:hover {
+.editor-menu-button:hover {
   transform: scale(1.05);
   transition: transform 0.2s ease;
 }
