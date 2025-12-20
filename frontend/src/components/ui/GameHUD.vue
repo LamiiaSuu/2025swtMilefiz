@@ -9,6 +9,7 @@ import EnergyBar from './EnergyBar.vue';
 import SaveEnergyButton from './SaveEnergyButton.vue';
 import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
+import MenuPopUp from './popups/MenuPopUp.vue';
 
 const milefizStore = useMilefizStore()
 
@@ -21,6 +22,11 @@ import ErrorMessage from './ErrorMessage.vue';
     <!-- Win Popup -->
     <transition name="fade">
       <WinPopUp v-if="milefizStore.gameFinished"/>
+    </transition>
+
+    <!-- Menu Popup -->
+    <transition name="fade">
+      <MenuPopUp v-if="milefizStore.popUpMenuOpen"/>
     </transition>
 
     <!-- Würfelergebnis -->
