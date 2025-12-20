@@ -291,8 +291,8 @@ form {
 
 .editor-button-container {
   position: absolute;
-  bottom: 10px;
-  left: 30px;
+  top: 38px;
+  left: 43px;
 
   display: flex;
   flex-direction: column;
