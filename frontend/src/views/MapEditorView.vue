@@ -25,6 +25,7 @@ type Connections = {
 }
 
 type TileData = {
+  id: string
   type: ToolType
   x: number
   y: number
@@ -36,8 +37,15 @@ type TileData = {
   }
 }
 
+type BoardExport = {
+  id: string
+  name: string
+  fields: BackendTile[]
+}
+
 const tiles = reactive<TileData[]>([
   {
+    id: crypto.randomUUID(),
     type: 'tile',
     x: 0,
     y: 0,
@@ -112,6 +120,7 @@ function addTile(fromTile: TileData, dir: Direction) {
   }
 
   const newTile: TileData = {
+    id: crypto.randomUUID(),
     type: selectedTool.value, 
     x: newX,
     y: newY,
@@ -123,6 +132,72 @@ function addTile(fromTile: TileData, dir: Direction) {
   connectTiles(fromTile, newTile, dir)
 
   selectedKey.value = key(newX, newY)
+}
+
+function findNeighbor(tile: TileData, dir: Direction): TileData | null {
+  const off = DIR_OFFSET[dir]
+  return tiles.find(t => t.x === tile.x + off.x && t.y === tile.y + off.y) ?? null
+}
+
+type BackendTile = {
+  id: string
+  north: string | null
+  east: string | null
+  south: string | null
+  west: string | null
+  type: 'NORMAL' | 'START' | 'GOAL'
+  position: { x: number; y: number }
+  barrier: boolean
+}
+
+function exportTiles(): BackendTile[] {
+  return tiles.map(tile => {
+    const north = tile.connections.up
+      ? findNeighbor(tile, 'up')?.id ?? null
+      : null
+
+    const south = tile.connections.down
+      ? findNeighbor(tile, 'down')?.id ?? null
+      : null
+
+    const west = tile.connections.left
+      ? findNeighbor(tile, 'left')?.id ?? null
+      : null
+
+    const east = tile.connections.right
+      ? findNeighbor(tile, 'right')?.id ?? null
+      : null
+
+    return {
+      id: tile.id,
+      north,
+      east,
+      south,
+      west,
+      type:
+        tile.type === 'start' ? 'START' :
+        tile.type === 'goal'  ? 'GOAL'  :
+        'NORMAL',
+      position: {
+        x: tile.x,
+        y: tile.y
+      },
+      barrier: tile.type === 'barrier'
+    }
+  })
+}
+
+function exportBoard(fields: BackendTile[]): BoardExport {
+  return {
+    id: crypto.randomUUID(),
+    name: 'Custom Board',
+    fields
+  }
+}
+
+function debugExport() {
+  const board = exportBoard(exportTiles())
+  console.log(board)
 }
 
 const OPPOSITE: Record<Direction, Direction> = {
@@ -208,7 +283,7 @@ function deleteSelectedTile() {
           </div>
         </div>
         <EditorHUD style="bottom: 20px;" :selectedTool="selectedTool" @toolSelected="selectedTool = $event" @deleteSelected="deleteSelectedTile"/>
-        <EditorFileHUD style="bottom: 20px;"/>
+        <EditorFileHUD style="bottom: 20px;" @click="debugExport()"/>
         <div class="editor-form-row">
             <div class="editor-button-container">
                 <BackButton :to="{ name: 'Homepage' }" />
