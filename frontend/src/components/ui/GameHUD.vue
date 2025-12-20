@@ -9,6 +9,7 @@ import EnergyBar from './EnergyBar.vue';
 import SaveEnergyButton from './SaveEnergyButton.vue';
 import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
+import MinigamesView from './popups/minigames/MinigamesView.vue';
 
 const milefizStore = useMilefizStore()
 
@@ -20,7 +21,12 @@ import ErrorMessage from './ErrorMessage.vue';
   <div class="hud-container">
     <!-- Win Popup -->
     <transition name="fade">
-      <WinPopUp v-if="milefizStore.gameFinished"/>
+      <WinPopUp v-if="milefizStore.gameFinished" />
+    </transition>
+
+
+    <transition name="fade">
+      <MinigamesView />
     </transition>
 
     <!-- Würfelergebnis -->
@@ -29,7 +35,7 @@ import ErrorMessage from './ErrorMessage.vue';
     </div>
 
     <div class="error-message-container">
-        <ErrorMessage />
+      <ErrorMessage />
     </div>
 
     <!-- Button Bar -->
@@ -70,8 +76,10 @@ import ErrorMessage from './ErrorMessage.vue';
 
 .error-message-container {
   position: absolute;
-  top: 2vh;            /* Abstand von oben */
-  left: 2vw;          /* Abstand von rechts */
+  top: 2vh;
+  /* Abstand von oben */
+  left: 2vw;
+  /* Abstand von rechts */
 }
 
 .button-bar {
@@ -105,6 +113,7 @@ import ErrorMessage from './ErrorMessage.vue';
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
