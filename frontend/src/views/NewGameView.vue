@@ -347,5 +347,6 @@ select {
 
 .start-game-button:hover:enabled {
     background-color: rgba(180, 40, 40, 0.95);
+    cursor: pointer;
 }
 </style>
