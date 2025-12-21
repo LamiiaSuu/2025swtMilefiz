@@ -6,6 +6,7 @@ import DiceButton from './DiceButton.vue'
 import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
 import EnergyBar from './EnergyBar.vue';
+import MeepleBar from './MeepleBar.vue';
 import SaveEnergyButton from './SaveEnergyButton.vue';
 import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
@@ -22,6 +23,10 @@ import ErrorMessage from './ErrorMessage.vue';
     <transition name="fade">
       <WinPopUp v-if="milefizStore.gameFinished"/>
     </transition>
+
+    <div style="position: absolute; top: 2vw; right: 0px;" class="meeple-icon-bar">
+      <MeepleBar />
+    </div>
 
     <!-- Würfelergebnis -->
     <div class="dice-counter-container">

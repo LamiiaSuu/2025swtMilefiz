@@ -62,6 +62,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     isJumping: boolean
     currentDiceRoll?: number
     lobby: Lobby | null
+    moved: boolean
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
@@ -69,6 +70,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     isJumping: false, //Flag, ob sich der Spieler in einer Sprungaktion befindet
     currentDiceRoll: undefined, //Würfel ergebnis
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
+    moved: false
   })
 
   const isJoined = computed(() => {
@@ -151,11 +153,17 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'MOVE_ERROR') {
           console.warn('Move rejected:', event.msg)
           return
+        } else if (event.type === 'CHEATED') {
+          if (event.playerId === gamedata.playerId) {
+            showWarning("Du kleiner Cheater")
+            window.setTimeout(cheatRedirect, 2500)
+          }
         } else if (event.type === 'MOVE') {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           energy.isEnergyFresh = false;
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = event.moved
           }
         }
         // LOBBY_UPDATE wird immer ausgerufen, wenn sich Werte der Lobby (außer das Board) geupdatet haben. Dazu zählt auch, wenn neue Spieler gejoint sind
@@ -196,6 +204,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = event.moved
             //TODO moveloss animieren
             console.warn("lost remaining moves")
           }
@@ -256,6 +265,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
     // Verbindung zum Broker aufbauen
     stompclient.activate()
+  }
+
+
+  /**
+   * redirected den Spieler zur Wikipedia Seite von Cheat
+   */
+  function cheatRedirect() {
+    window.location.replace('https://de.wikipedia.org/wiki/Cheat_(Computerspiele)')
   }
 
   /**
@@ -602,7 +619,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (winnerColor.value == 'GREEN') {
       return playerColors.GREEN
     }
-    
+
     if (winnerColor.value == 'BLUE') {
       return playerColors.BLUE
     }
