@@ -1,0 +1,311 @@
+package de.hs_rm.de.milefiz.game.service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import de.hs_rm.de.milefiz.game.model.PositionFloat;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
+
+public class PlantingServiceImpl implements PlantingService {
+
+    @Override
+    public BoardDTO plantTrees(BoardDTO boardDTO, float density) {
+
+        int[] boundingBox = getBoundingBoxFromBoard(boardDTO);
+        boundingBox[0] *= 5;
+        boundingBox[1] *= 5;
+
+        int[][] blueNoise = generateBlueNoiseVoidCluster(0.035f, boundingBox[0] + 4, boundingBox[1] + 4);
+
+        for (int i = 0; i < blueNoise.length; i++) {
+            for (int j = 0; j < blueNoise[0].length; j++) {
+                if (blueNoise[i][j] == 1) {
+                    boardDTO.addTree(new PositionFloat((i / 5f) + 2, (j / 5f) + 2f));
+                }
+            }
+        }
+
+        return boardDTO;
+    }
+
+    private int[] getBoundingBoxFromBoard(BoardDTO boardDTO) {
+        int x = 0;
+        int y = 0;
+        for (FieldDTO field : boardDTO.getFields()) {
+            x = field.getPosition().getX() > x ? field.getPosition().getX() : x;
+            y = field.getPosition().getY() > y ? field.getPosition().getY() : y;
+        }
+        int[] res = new int[2];
+        res[0] = x;
+        res[1] = y;
+        return res;
+    }
+
+    /**
+     * wenn man nur densitiy, breite und höhe setzen möchte
+     * 
+     * @param density gewünschter Anteil an gesetzten Pixeln in [0,1]
+     * @param width   Bildbreite > 0
+     * @param height  Bildhöhe > 0
+     * @return int[height][width] mit 0/1 Blue-Noise-Muster
+     * 
+     */
+    public int[][] generateBlueNoiseVoidCluster(float density, int width, int height) {
+        return generateBlueNoiseVoidCluster(density, width, height, 0, System.nanoTime());
+    }
+
+    /**
+     * full control version
+     *
+     * @param density      gewünschter Anteil an gesetzten Pixeln in [0,1]
+     * @param width        Bildbreite > 0
+     * @param height       Bildhöhe > 0
+     * @param kernelRadius Nachbarschaftsradius; falls <= 0 wird eine Heuristik
+     *                     genutzt
+     * @param seed         RNG-Seed (für reproduzierbare Ergebnisse)
+     * @return int[height][width] mit 0/1 Blue-Noise-Muster
+     */
+    public int[][] generateBlueNoiseVoidCluster(float density, int width, int height, int kernelRadius,
+            long seed) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Invalid dimensions");
+        }
+        if (Float.isNaN(density) || Float.isInfinite(density)) {
+            throw new IllegalArgumentException("Invalid density");
+        }
+        density = Math.max(0f, Math.min(1f, density));
+        final int n = width * height;
+
+        // Triviale Fälle
+        if (density == 0f) {
+            return new int[height][width];
+        }
+        if (density == 1f) {
+            int[][] ones = new int[height][width];
+            for (int y = 0; y < height; y++) {
+                Arrays.fill(ones[y], 1);
+            }
+            return ones;
+        }
+
+        // Zufallszahlengenerator
+        final Random rng = new Random(seed);
+
+        // Kernel
+        final int radius = (kernelRadius > 0) ? kernelRadius : Math.max(2, Math.min(width, height) / 8);
+
+        // kann man auch noch anpassen. Bestimmt, wie stark "gruppiert" das Rauschen ist
+        final double sigma = Math.max(0.75, radius / 2.0);
+        final List<Offset> kernel = buildGaussianKernel(radius, sigma);
+
+        // Status-Arrays
+        final boolean[][] occ = new boolean[height][width]; // belegt (true) vs frei (false)
+        final int[][] order = new int[height][width]; // Rangordnung
+        final double[][] energyMap = new double[height][width];
+
+        // Initialisierung
+        for (int y = 0; y < height; y++) {
+            Arrays.fill(order[y], -1);
+        }
+        seedHalf(occ, rng);
+
+        // Initiale energy map erstellen
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (occ[y][x]) {
+                    addKernelAt(energyMap, x, y, kernel, +1.0, width, height);
+                }
+            }
+        }
+
+        // Rangordnung durch abwechselndes Entfernen von Clustern und Einfügen von voids
+        int low = 0, high = n - 1;
+        while (low <= high) {
+            boolean progressed = false;
+
+            // Cluster-Schritt: Entferne das am stärksten gebündelte belegte, nicht
+            // zugewiesene Pixel
+            int[] pCluster = argmaxOccupiedUnassigned(energyMap, occ, order);
+            if (pCluster != null) {
+                int cx = pCluster[0], cy = pCluster[1];
+                occ[cy][cx] = false;
+                order[cy][cx] = high--;
+                addKernelAt(energyMap, cx, cy, kernel, -1.0, width, height);
+                progressed = true;
+            }
+
+            // void-Schritt: Füge am leersten, nicht zugewiesenen Pixel hinzu
+            if (low <= high) {
+                int[] pVoid = argminEmptyUnassigned(energyMap, occ, order);
+                if (pVoid != null) {
+                    int vx = pVoid[0], vy = pVoid[1];
+                    occ[vy][vx] = true;
+                    order[vy][vx] = low++;
+                    addKernelAt(energyMap, vx, vy, kernel, +1.0, width, height);
+                    progressed = true;
+                }
+            }
+
+            // Falls kein Schritt Fortschritt, abbrechen
+            if (!progressed)
+                break;
+        }
+
+        // Fallback: Falls noch etwas nicht zugewiesen ist (sollte nicht vorkommen), in
+        // Scan-Reihenfolge zuweisen
+        AtomicBoolean foundUnassigned = new AtomicBoolean(false);
+        forEachPixel(width, height, (x, y) -> {
+            if (order[y][x] == -1)
+                foundUnassigned.set(true);
+        });
+        if (foundUnassigned.get()) {
+            int i = 0;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (order[y][x] == -1) {
+                        order[y][x] = i++;
+                    }
+                }
+            }
+        }
+
+        // Rangordnung nach angeforderter Dichte threshholden
+        final int thresholdCount = Math.round(density * n);
+        final int[][] out = new int[height][width];
+        forEachPixel(width, height, (x, y) -> {
+            out[y][x] = (order[y][x] < thresholdCount) ? 1 : 0;
+        });
+        return out;
+    }
+
+    // Erzeuge Gaußschen Kernel mit summe 1 und normierten Gewichten
+    private List<Offset> buildGaussianKernel(int r, double sigma) {
+        List<Offset> list = new ArrayList<>();
+        double twoSigma2 = 2.0 * sigma * sigma;
+        double sum = 0.0;
+        for (int dy = -r; dy <= r; dy++) {
+            for (int dx = -r; dx <= r; dx++) {
+                if (dx == 0 && dy == 0)
+                    continue; // exclude self
+                double w = Math.exp(-(dx * dx + dy * dy) / twoSigma2);
+                if (w > 1e-12) {
+                    list.add(new Offset(dx, dy, w));
+                    sum += w;
+                }
+            }
+        }
+        // normalisieren
+        if (sum > 0) {
+            for (Offset o : list)
+                o.w /= sum;
+        }
+        return list;
+    }
+
+    // Aktualisiert die energy map, indem der Kernel (sign=+1) addiert oder
+    // (sign=-1) subtrahiert wird, zentriert bei (x,y)
+    private void addKernelAt(double[][] E, int x, int y, List<Offset> kernel, double sign, int W, int H) {
+        for (Offset o : kernel) {
+            int nx = wrap(x + o.dx, W);
+            int ny = wrap(y + o.dy, H);
+            E[ny][nx] += sign * o.w;
+        }
+    }
+
+    // Finde das belegte, nicht zugewiesene Pixel mit maximaler Energie
+    private int[] argmaxOccupiedUnassigned(double[][] E, boolean[][] occ, int[][] order) {
+        double best = -Double.MAX_VALUE;
+        int bx = -1, by = -1;
+        int H = E.length, W = E[0].length;
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                if (occ[y][x] && order[y][x] == -1) {
+                    double v = E[y][x];
+                    if (v > best) {
+                        best = v;
+                        bx = x;
+                        by = y;
+                    }
+                }
+            }
+        }
+        return (bx < 0) ? null : new int[] { bx, by };
+    }
+
+    // Finde das freie, nicht zugewiesene Pixel mit minimaler Energie
+    private int[] argminEmptyUnassigned(double[][] E, boolean[][] occ, int[][] order) {
+        double best = Double.MAX_VALUE;
+        int bx = -1, by = -1;
+        int H = E.length, W = E[0].length;
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                if (!occ[y][x] && order[y][x] == -1) {
+                    double v = E[y][x];
+                    if (v < best) {
+                        best = v;
+                        bx = x;
+                        by = y;
+                    }
+                }
+            }
+        }
+        return (bx < 0) ? null : new int[] { bx, by };
+    }
+
+    private int wrap(int v, int n) {
+        int m = v % n;
+        return (m < 0) ? m + n : m;
+    }
+
+    private void seedHalf(boolean[][] occ, Random rng) {
+        int H = occ.length, W = occ[0].length;
+        int target = (W * H) / 2;
+        int[] idx = new int[W * H];
+        for (int i = 0; i < idx.length; i++)
+            idx[i] = i;
+        shuffle(idx, rng);
+        for (int k = 0; k < target; k++) {
+            int i = idx[k];
+            int y = i / W;
+            int x = i % W;
+            occ[y][x] = true;
+        }
+    }
+
+    private void shuffle(int[] a, Random rng) {
+        for (int i = a.length - 1; i > 0; i--) {
+            int j = rng.nextInt(i + 1);
+            int t = a[i];
+            a[i] = a[j];
+            a[j] = t;
+        }
+    }
+
+    private void forEachPixel(int W, int H, PixelConsumer pc) {
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                pc.accept(x, y);
+            }
+        }
+    }
+
+    private interface PixelConsumer {
+        void accept(int x, int y);
+    }
+
+    private final class Offset {
+        final int dx, dy;
+        double w;
+
+        Offset(int dx, int dy, double w) {
+            this.dx = dx;
+            this.dy = dy;
+            this.w = w;
+        }
+    }
+
+}

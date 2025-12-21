@@ -1,8 +1,12 @@
-package de.hs_rm.de.milefiz.game.model;
+package de.hs_rm.de.milefiz.game.model.dto;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import de.hs_rm.de.milefiz.game.model.FieldType;
+import de.hs_rm.de.milefiz.game.model.Position;
+import de.hs_rm.de.milefiz.game.model.PositionFloat;
 
 /**
  * DTO des Spielbretts zur Übertragung an das Frontend
@@ -10,20 +14,21 @@ import java.util.UUID;
 public class BoardDTO {
     private UUID id;
     private String name;
+    private List<FieldDTO> fields = new ArrayList<>();
+    private List<TreeDTO> trees = new ArrayList<>();
 
-    public BoardDTO() {}
+    public BoardDTO() {
+    }
 
     public BoardDTO(UUID id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    private List<FieldDTO> fields = new ArrayList<>();
-
     public List<FieldDTO> getFields() {
         return fields;
     }
-    
+
     public UUID getId() {
         return id;
     }
@@ -40,23 +45,51 @@ public class BoardDTO {
         this.name = name;
     }
 
-    public void addField(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
+    public void addField(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south,
+            UUID west) {
         this.fields.add(new FieldDTO(id, type, position, barrier, north, east, south, west));
     }
-    
+
+    public List<TreeDTO> getTrees() {
+        return trees;
+    }
+
+    public void addTree(PositionFloat treePosition) {
+        trees.add(new TreeDTO(treePosition));
+    }
+
+    public static class TreeDTO {
+        private PositionFloat treePosition;
+
+        public TreeDTO(PositionFloat treePosition) {
+            this.treePosition = treePosition;
+        }
+
+        public PositionFloat getTreePosition() {
+            return treePosition;
+        }
+
+        public void setTreePosition(PositionFloat positionF) {
+            this.treePosition = positionF;
+        }
+
+    }
+
     public static class FieldDTO {
         private UUID id;
         private UUID north;
-        private UUID east; 
+        private UUID east;
         private UUID south;
-        private UUID west; 
+        private UUID west;
         private FieldType type;
         private boolean barrier;
         private Position position;
 
-        public FieldDTO() {}
+        public FieldDTO() {
+        }
 
-        public FieldDTO(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
+        public FieldDTO(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south,
+                UUID west) {
             this.id = id;
             this.type = type;
             this.position = position;
@@ -130,10 +163,7 @@ public class BoardDTO {
         public void setPosition(Position position) {
             this.position = position;
         }
-        
-        
+
     }
-
-
 
 }

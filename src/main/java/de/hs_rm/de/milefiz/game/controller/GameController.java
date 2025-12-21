@@ -5,15 +5,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.hs_rm.de.milefiz.game.model.Board;
-import de.hs_rm.de.milefiz.game.model.BoardDTO;
-import de.hs_rm.de.milefiz.game.model.BoardMapper;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.game.service.GameService;
 
 /**
  * REST Controller für Spiel-bezogene Operationen.
  * 
- * <p>Stellt HTTP-Endpoints für das Frontend bereit und delegiert
- * Business Logic an den {@link GameService}.</p>
+ * <p>
+ * Stellt HTTP-Endpoints für das Frontend bereit und delegiert
+ * Business Logic an den {@link GameService}.
+ * </p>
  * 
  * @author Leon Schäfer / Thilo Wittmer
  */
@@ -28,15 +30,17 @@ public class GameController {
      * 
      * @param gameService Service für Spieloperationen
      */
-    public GameController(GameService gameService){
+    public GameController(GameService gameService) {
         this.gameService = gameService;
     }
 
     /**
      * Gibt das aktuelle Test-Board als DTO zurück.
      * 
-     * <p>Diese Methode lädt das Test-Board vom GameService und konvertiert
-     * es zu einem BoardDTO für die Frontend-Kommunikation.</p>
+     * <p>
+     * Diese Methode lädt das Test-Board vom GameService und konvertiert
+     * es zu einem BoardDTO für die Frontend-Kommunikation.
+     * </p>
      * 
      * @return BoardDTO mit allen Board-Informationen einschließlich Fields,
      *         Connections, Positionen und Field-Types
