@@ -1,28 +1,17 @@
 
 
 <script setup>
-import { reactive } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useAudioStore } from '@/stores/audioStore'
 
-const audioSettings = reactive([
-  {
-    key: 'music',
-    label: 'Musik',
-    volume: 80,
-    muted: false
-  },
-  {
-    key: 'ambient',
-    label: 'Ambient',
-    volume: 70,
-    muted: false
-  },
-  {
-    key: 'sfx',
-    label: 'Soundeffekte',
-    volume: 90,
-    muted: false
-  }
-])
+const audioStore = useAudioStore()
+const { channels } = storeToRefs(audioStore)
+
+const audioSettings = [
+  { key: 'music', label: 'Musik' },
+  { key: 'ambient', label: 'Ambient' },
+  { key: 'sfx', label: 'Soundeffekte' },
+]
 
 </script>
 
@@ -31,29 +20,28 @@ const audioSettings = reactive([
     <!-- AUDIO SETTINGS -->
     <div class="settings-panel">
 
-      <div class="audio-setting" v-for="setting in audioSettings" :key="setting.key">
-        <div class="audio-header">
-            <span class="audio-title">{{ setting.label }}</span>
+        <div class="audio-setting" v-for="setting in audioSettings" :key="setting.key">
+            <div class="audio-header">
+                <span class="audio-title">{{ setting.label }}</span>
 
-            <button
+                <button
                 class="mute-button"
-                :class="{ muted: setting.muted }"
-                @click="setting.muted = !setting.muted"
+                :class="{ muted: channels[setting.key].muted }"
+                @click="audioStore.toggleMute(setting.key)"
                 >
                 🔈
-            </button>  
-            
-        </div>
+                </button>
+            </div>
 
-        <input
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          :disabled="setting.muted"
-          v-model="setting.volume"
-        />
-      </div>
+            <input
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                :disabled="channels[setting.key].muted"
+                v-model="channels[setting.key].volume"
+            />
+        </div>
 
     </div>
 </template>
