@@ -2,20 +2,63 @@
 import EditorHUD from '@/components/ui/mapEditor/EditorHUD.vue';
 import EditorFileHUD from '@/components/ui/mapEditor/EditorFileHUD.vue';
 import BackButton from '@/components/ui/pages/BackButton.vue'
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import StandardTile from '@/components/ui/mapEditor/tiles/StandardTile.vue';
 
+type Direction = 'up' | 'down' | 'left' | 'right'
+type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
+
+const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier'>('tile')
+
+const DIR_OFFSET: Record<Direction, { x: number; y: number }> = {
+  up:    { x: 0, y: -2 },
+  down:  { x: 0, y:  2 },
+  left:  { x: -2, y: 0 },
+  right: { x:  2, y: 0 },
+}
+
+const selectedTile = computed<TileData | null>(() =>
+  tiles.find(t => key(t.x, t.y) === selectedKey.value) ?? null
+)
+
+type Connections = {
+  up: boolean
+  down: boolean
+  left: boolean
+  right: boolean
+}
+
 type TileData = {
-  type: string
+  id: string
+  type: ToolType
   x: number
   y: number
+  connections: {
+    up: boolean
+    down: boolean
+    left: boolean
+    right: boolean
+  }
+}
+
+type BoardExport = {
+  id: string
+  name: string
+  fields: BackendTile[]
 }
 
 const tiles = reactive<TileData[]>([
-  { type: "standard", x: 0, y: 0 } // Start-Tile
+  {
+    id: crypto.randomUUID(),
+    type: 'tile',
+    x: 0,
+    y: 0,
+    connections: { up: false, down: false, left: false, right: false }
+  }
 ])
 
 const selectedKey = ref<string>('0,0')
+  
 
 /* Kamera */
 const offset = reactive({ x: 0, y: 0 })
@@ -61,6 +104,163 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateViewport)
 })
 
+function addTile(fromTile: TileData, dir: Direction) {
+  const offset = {
+    up:    { x: 0, y: -2 },
+    down:  { x: 0, y:  2 },
+    left:  { x: -2, y: 0 },
+    right: { x:  2, y: 0 }
+  }[dir]
+
+  const newX = fromTile.x + offset.x
+  const newY = fromTile.y + offset.y
+
+  
+  const existing = tiles.find(t => t.x === newX && t.y === newY)
+  if (existing) {
+    
+    connectTiles(fromTile, existing, dir)
+    return
+  }
+
+  const newTile: TileData = {
+    id: crypto.randomUUID(),
+    type: selectedTool.value, 
+    x: newX,
+    y: newY,
+    connections: { up: false, down: false, left: false, right: false }
+  }
+
+  tiles.push(newTile)
+
+  connectTiles(fromTile, newTile, dir)
+
+  selectedKey.value = key(newX, newY)
+}
+
+function findNeighbor(tile: TileData, dir: Direction): TileData | null {
+  const off = DIR_OFFSET[dir]
+  return tiles.find(t => t.x === tile.x + off.x && t.y === tile.y + off.y) ?? null
+}
+
+function onHudToolSelected(tool: ToolType) {
+  if (!selectedTile.value) return
+  selectedTile.value.type = tool
+}
+
+type BackendTile = {
+  id: string
+  north: string | null
+  east: string | null
+  south: string | null
+  west: string | null
+  type: 'NORMAL' | 'START' | 'GOAL'
+  position: { x: number; y: number }
+  barrier: boolean
+}
+
+function exportTiles(): BackendTile[] {
+  return tiles.map(tile => {
+    const north = tile.connections.up
+      ? findNeighbor(tile, 'up')?.id ?? null
+      : null
+
+    const south = tile.connections.down
+      ? findNeighbor(tile, 'down')?.id ?? null
+      : null
+
+    const west = tile.connections.left
+      ? findNeighbor(tile, 'left')?.id ?? null
+      : null
+
+    const east = tile.connections.right
+      ? findNeighbor(tile, 'right')?.id ?? null
+      : null
+
+    return {
+      id: tile.id,
+      north,
+      east,
+      south,
+      west,
+      type:
+        tile.type === 'start' ? 'START' :
+        tile.type === 'goal'  ? 'GOAL'  :
+        'NORMAL',
+      position: {
+        x: tile.x,
+        y: tile.y
+      },
+      barrier: tile.type === 'barrier'
+    }
+  })
+}
+
+function exportBoard(fields: BackendTile[]): BoardExport {
+  return {
+    id: crypto.randomUUID(),
+    name: 'Custom Board',
+    fields
+  }
+}
+
+function debugExport() {
+  const board = exportBoard(exportTiles())
+  console.log(board)
+}
+
+const OPPOSITE: Record<Direction, Direction> = {
+  up: 'down',
+  down: 'up',
+  left: 'right',
+  right: 'left',
+}
+
+function opposite(dir: Direction): Direction {
+  return OPPOSITE[dir]
+}
+
+function connectTiles(a: TileData, b: TileData, dir: Direction) {
+  a.connections[dir] = true
+  b.connections[opposite(dir)] = true
+}
+
+function deleteTile(tile: TileData) {
+
+  if (tile.x === 0 && tile.y === 0) return
+  
+  (Object.keys(tile.connections) as Direction[]).forEach(dir => {
+    if (!tile.connections[dir]) return
+
+    const offset = DIR_OFFSET[dir]
+    const nx = tile.x + offset.x
+    const ny = tile.y + offset.y
+
+    const neighbor = tiles.find(t => t.x === nx && t.y === ny)
+    if (!neighbor) return
+
+    neighbor.connections[opposite(dir)] = false
+  })
+
+  const index = tiles.indexOf(tile)
+  if (index !== -1) {
+    tiles.splice(index, 1)
+  }
+
+  if (selectedKey.value === key(tile.x, tile.y) && tiles[0] != null) {
+    selectedKey.value = tiles.length
+      ? key(tiles[0].x, tiles[0].y)
+      : ''
+  }
+}
+
+function deleteSelectedTile() {
+  const tile = tiles.find(t => key(t.x, t.y) === selectedKey.value);
+  if (tile) {
+    deleteTile(tile);
+  }
+}
+
 </script>
 
 <template>
@@ -85,11 +285,17 @@ onUnmounted(() => {
               :y="tile.y"
               :selected="selectedKey === key(tile.x, tile.y)"
               @select="selectedKey = key(tile.x, tile.y)"
+              @add="(dir: Direction) => addTile(tile, dir)"
+              :connections="tile.connections"
+              :type="tile.type"
             />
           </div>
         </div>
-        <EditorHUD style="bottom: 20px;"/>
-        <EditorFileHUD style="bottom: 20px;"/>
+        <EditorHUD   style="bottom: 20px;"
+          :selectedTool="selectedTile?.type ?? 'tile'"
+          @toolSelected="onHudToolSelected"
+          @deleteSelected="deleteSelectedTile"/>
+        <EditorFileHUD style="bottom: 20px;" @click="debugExport()"/>
         <div class="editor-form-row">
             <div class="editor-button-container">
                 <BackButton :to="{ name: 'Homepage' }" />
