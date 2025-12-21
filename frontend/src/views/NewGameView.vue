@@ -96,27 +96,29 @@ const handleFileChange = (event: Event) => {
                             :disabled="!isOwnLeader">
                     </div>
 
-                    <!-- Map Buttons -->
-                    <div class="form-row">
-                        <label>Map</label>
-                        <div class="map-buttons">
-                            <button type="button" class="map-button" :class="{ active: mapMode === 'standard' }"
-                                @click="mapMode = 'standard'">
-                                Standardmap
-                            </button>
-                            <button type="button" class="map-button" :class="{ active: mapMode === 'import' }"
-                                @click="mapMode = 'import'">
-                                Importieren
-                            </button>
+                    <!-- Map Buttons (Nur bei Lobby-Ersteller)-->
+                    <template v-if="isOwnLeader">
+                        <div class="form-row">
+                            <label>Map</label>
+                            <div class="map-buttons">
+                                <button type="button" class="map-button" :class="{ active: mapMode === 'standard' }"
+                                    @click="mapMode = 'standard'">
+                                    Standardmap
+                                </button>
+                                <button type="button" class="map-button" :class="{ active: mapMode === 'import' }"
+                                    @click="mapMode = 'import'">
+                                    Importieren
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Datei importieren -->
-                    <div class="form-row">
-                        <label>Datei</label>
-                        <input type="file" @change="handleFileChange" class="file-input"
-                            :disabled="mapMode === 'standard'" accept=".json,.map">
-                    </div>
+                        <!-- Datei importieren -->
+                        <div class="form-row">
+                            <label>Datei</label>
+                            <input type="file" @change="handleFileChange" class="file-input"
+                                :disabled="mapMode === 'standard'" accept=".json,.map">
+                        </div>
+                    </template>
 
                 </div>
 
@@ -144,7 +146,7 @@ const handleFileChange = (event: Event) => {
                                     @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }) }"
                                     :disabled="!isOwnLeader"
                                     :class="{ active: isOwnLeader }">
-                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Leader...' }}
+                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Spielersteller...' }}
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />
                         </div>
@@ -331,22 +333,19 @@ select {
 
 .start-game-button {
     padding: 15px 30px;
-    background-image: var(--button-gradient-gray);
+    background-image: var(--button-gradient-red);
     color: white;
     font-size: 1.3rem;
-    cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.start-game-button.active {
-    background-image: var(--button-gradient-red);
+.start-game-button:disabled {
+    background-image: unset;
+    background-color: var(--button-color-inactive);
+    cursor: default;
 }
 
-.start-game-button:hover {
-    background-image: var(--button-gradient-gray);
-}
-
-.start-game-button:hover.active {
+.start-game-button:hover:enabled {
     background-color: rgba(180, 40, 40, 0.95);
 }
 </style>
