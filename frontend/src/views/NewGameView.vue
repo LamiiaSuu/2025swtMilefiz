@@ -146,7 +146,7 @@ const handleFileChange = (event: Event) => {
                                     @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }) }"
                                     :disabled="!isOwnLeader"
                                     :class="{ active: isOwnLeader }">
-                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Leader...' }}
+                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Spielersteller...' }}
                             </button>
                             <BackButton :to="{ name: 'Homepage' }" />
                         </div>
@@ -333,22 +333,19 @@ select {
 
 .start-game-button {
     padding: 15px 30px;
-    background-image: var(--button-gradient-gray);
+    background-image: var(--button-gradient-red);
     color: white;
     font-size: 1.3rem;
-    cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.start-game-button.active {
-    background-image: var(--button-gradient-red);
+.start-game-button:disabled {
+    background-image: unset;
+    background-color: var(--button-color-inactive);
+    cursor: default;
 }
 
-.start-game-button:hover {
-    background-image: var(--button-gradient-gray);
-}
-
-.start-game-button:hover.active {
+.start-game-button:hover:enabled {
     background-color: rgba(180, 40, 40, 0.95);
 }
 </style>
