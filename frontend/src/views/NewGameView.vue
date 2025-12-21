@@ -96,27 +96,29 @@ const handleFileChange = (event: Event) => {
                             :disabled="!isOwnLeader">
                     </div>
 
-                    <!-- Map Buttons -->
-                    <div class="form-row">
-                        <label>Map</label>
-                        <div class="map-buttons">
-                            <button type="button" class="map-button" :class="{ active: mapMode === 'standard' }"
-                                @click="mapMode = 'standard'">
-                                Standardmap
-                            </button>
-                            <button type="button" class="map-button" :class="{ active: mapMode === 'import' }"
-                                @click="mapMode = 'import'">
-                                Importieren
-                            </button>
+                    <!-- Map Buttons (Nur bei Lobby-Ersteller)-->
+                    <template v-if="isOwnLeader">
+                        <div class="form-row">
+                            <label>Map</label>
+                            <div class="map-buttons">
+                                <button type="button" class="map-button" :class="{ active: mapMode === 'standard' }"
+                                    @click="mapMode = 'standard'">
+                                    Standardmap
+                                </button>
+                                <button type="button" class="map-button" :class="{ active: mapMode === 'import' }"
+                                    @click="mapMode = 'import'">
+                                    Importieren
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Datei importieren -->
-                    <div class="form-row">
-                        <label>Datei</label>
-                        <input type="file" @change="handleFileChange" class="file-input"
-                            :disabled="mapMode === 'standard'" accept=".json,.map">
-                    </div>
+                        <!-- Datei importieren -->
+                        <div class="form-row">
+                            <label>Datei</label>
+                            <input type="file" @change="handleFileChange" class="file-input"
+                                :disabled="mapMode === 'standard'" accept=".json,.map">
+                        </div>
+                    </template>
 
                 </div>
 
