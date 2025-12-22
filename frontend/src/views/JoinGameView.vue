@@ -66,7 +66,7 @@ onUnmounted(() => {
         <LobbyList v-model:lobbyid="selectedLobby" :lobbies="filteredLobbies" label="Lobbys" />
         <div class="game-container">
           <div class="button-container">
-          <button class="start-game-button game-content" :disabled="!selectedLobby" @click="$router.push({ name: 'game' })">
+          <button class="start-game-button game-content" :disabled="!selectedLobby" @click="$router.push(`/join/${selectedLobby}`)">
             Spiel Starten
           </button>
           <BackButton :to="{ name: 'Homepage' }" />
