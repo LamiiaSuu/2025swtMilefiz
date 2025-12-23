@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
+import { useAudioStore } from "@/stores/audioStore";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
+const audio = useAudioStore()
 
 /** Zugriff auf Cooldown-State
  * remainingSceonds: Wert vom Server
@@ -79,6 +81,7 @@ onUnmounted(() => {
 const onKeypress = (e: KeyboardEvent) => {
     if (e.key.toLocaleLowerCase() === "r") {
         console.log("Würfeln angestoßen")
+        audio.playSfx('gameHUD')
         rollDice()
     }
 }

@@ -32,6 +32,7 @@ export const useAudioStore = defineStore('audio', () => {
     click: '/audio/ui/ClickSound.mp3',
     win: '/audio/ui/WinSound.wav',
     copyLobby: '/audio/ui/CopyLobby.mp3',
+    gameHUD: '/audio/ui/GameHUD.mp3',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
