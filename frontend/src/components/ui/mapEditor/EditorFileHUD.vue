@@ -40,7 +40,7 @@ import SaveButton from './buttons/SaveButton.vue';
   </div>
 </template>
 
-<style>
+<style scoped>
 .editor-hud-container {
   position: fixed;
   inset: 0;

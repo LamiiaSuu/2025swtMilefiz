@@ -7,7 +7,7 @@
     </button>
 </template>
 
-<style>
+<style scoped>
 
 
 .editor-action-button {
