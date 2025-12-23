@@ -45,6 +45,10 @@ class AudioEngine {
     panner.positionY.value = position.y
     panner.positionZ.value = position.z
 
+    panner.coneInnerAngle = 360
+    panner.coneOuterAngle = 360
+    panner.coneOuterGain = 1
+
     source.connect(gain)
     gain.connect(panner)
     panner.connect(this.context.destination)

@@ -55,6 +55,10 @@ watchEffect(() => {
   l.forwardX.value = dirX
   l.forwardY.value = dirY
   l.forwardZ.value = dirZ
+
+  l.upX.value = 0
+  l.upY.value = 1
+  l.upZ.value = 0
 })
 
 // Berechnete Rotation der Kamera neu, wenn sie sich ändert
