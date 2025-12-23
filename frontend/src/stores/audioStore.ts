@@ -40,7 +40,7 @@ export const useAudioStore = defineStore('audio', () => {
 
     meepleJump: '/audio/meeple/Jump.wav',
     meepleLand: '/audio/meeple/Land.wav',
-    meepleMove: '/audio/meeple/Move.wav',
+    meepleMove: '/audio/meeple/WalkOnGrass.mp3',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
