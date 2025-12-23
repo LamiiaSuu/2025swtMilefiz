@@ -4,9 +4,13 @@ import { useGLTF } from '@tresjs/cientos'
 import { watchEffect, watch, ref, computed, onMounted } from 'vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { getPlayerColors } from '@/types/colorsAssets';
+import { audioEngine } from '@/composables/audioEngine'
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
+
+// Für Move-Sound am Anfang des Spiels
+const hasInitializedMoved = ref(false)
 
 //Definierte Props für Augen, Körperfarbe und Position
 const props = defineProps<{
@@ -195,7 +199,11 @@ const animateCustomJump = (
 const jump = () => {
   if (!isJumpAllowed.value) return //Nur dann Jump Animation starten, wenn Sprung auch erlaubt ist, also Spieler maxEnergy gesammelt hat
   if (isJumping.value) return
-  
+  audioEngine.play3D('meepleJump', {
+    x: currentPosition.value[0],
+    y: currentPosition.value[1],
+    z: currentPosition.value[2]
+  })
   isJumping.value = true
   milefizStore.gamedata.isJumping = true
 
@@ -259,6 +267,17 @@ const animateTo = (target: [number, number, number]) => {
 
   if (!isJumping.value) {
     isJumping.value = true
+    if(hasInitializedMoved.value) {
+      setTimeout(() => {
+        audioEngine.play3D('meepleMove', {
+          x: target[0],
+          y: target[1],
+          z: target[2]
+        })
+      }, 200)
+      }else{
+        hasInitializedMoved.value = true
+      }
     // starte kleinen Sprung und binde Bewegungsende an das Sprungende
     animateCustomJump(smallJumpHeight, smallUpDuration, smallFallDuration, () => {
       // Nach der Landung Position fixieren

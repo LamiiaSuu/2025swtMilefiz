@@ -32,13 +32,21 @@ export const useAudioStore = defineStore('audio', () => {
   //OpenGameArt.org
   //pixabay.com/sound-effects/
   const sfxMap: Record<string, string> = {
+    //UI Sounds
     click: '/audio/ui/ClickSound.mp3',
     hover: '/audio/ui/HoverSound.mp3',
     joinGame: '/audio/ui/JoinGame.mp3',
-    win: '/audio/ui/WinSound.wav',
     copyLobby: '/audio/ui/CopyLobby.mp3',
     gameHUD: '/audio/ui/GameHUD.mp3',
     errorMessage: '/audio/ui/ErrorMessage.mp3',
+
+    //Event Sounds
+    win: '/audio/ui/WinSound.wav',
+
+    //Movement Sounds
+    meepleJump: '/audio/meeple/CartoonJump.mp3',
+    meepleMove: '/audio/meeple/WalkOnGrass.mp3',
+    impactBarrier: '/audio/meeple/ImpactBarrier2.mp3',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
@@ -56,5 +64,6 @@ export const useAudioStore = defineStore('audio', () => {
     toggleMute,
     setMute,
     playSfx,
+    sfxMap,
   }
 })

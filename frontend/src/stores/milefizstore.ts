@@ -9,6 +9,7 @@ import { useBoardStore } from "./boardStore"
 import { generateUUID } from 'three/src/math/MathUtils.js';
 import { useErrorHandler } from '@/composables/useErrorHandler';
 import { startingbaseColors, playerColors } from '@/types/colorsAssets';
+import { useAudioStore } from '@/stores/audioStore'
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
@@ -17,6 +18,8 @@ const DEST = '/topic/milefiz/lobby/'
 let stompclient: Client | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
+  const audioStore = useAudioStore()
+  
   /**
    * Cooldown für das Würfelsystem
    * cooldown
@@ -78,7 +81,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   })
 
   const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
-
 
   function startMilefizLiveUpdate() {
     console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
@@ -226,8 +228,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
-          console.warn("u ran into barrieeer oh no")
+          console.log("u ran into barrieeer oh no")
           if (event.playerId === gamedata.playerId) {
+            audioStore.playSfx('impactBarrier')
             gamedata.currentDiceRoll = event.remainingMoves
           }
         }
@@ -655,6 +658,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return playerColors.YELLOW
     }
   }
+  
 
   /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück

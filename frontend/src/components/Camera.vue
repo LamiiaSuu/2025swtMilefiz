@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed, watchEffect } from 'vue'
 import type { TresObject } from '@tresjs/core'
 import type { PerspectiveCamera, Vector3 } from 'three'
+import { audioEngine } from '@/composables/audioEngine'
 import { useMilefizStore } from '@/stores/milefizstore';
 
 const milefizStore = useMilefizStore()
@@ -25,27 +26,39 @@ const horizontalRotation = ref(0) // Links + Rechts Rotation
 const mouseSensitivity = 0.002
 const maxVerticalAngle = Math.PI / 3 // Limitiert Hoch/Runter
 
-
-
 // Berechnete Kamera Position neu, wenn sie sich ändert
 // Kamera Position = Charakter Position + Offset
 const cameraPosition = computed((): [number, number, number] => {
-  if (!props.gameCharRef || !props.useFirstPerson) {
-    return [0, 1, 0]
+
+  if (cameraRef.value && (props.useFirstPerson || !props.useFirstPerson)) {
+    const p = cameraRef.value.position
+    return [p.x, p.y, p.z]
   }
 
-  const char = props.gameCharRef as any
-  const offset = props.offset || { x: 0, y: 1, z: 0 }
+  return [0, 1, 0]
+})
 
-  // Position wird vom Charakter abgefragt
-  const charPos = char?.characterPosition?.position || [0, 0, 0]
+watchEffect(() => {
+  const l = audioEngine.context.listener
 
-  // Rückgabe von Kamera Position (Charakter Position + Offset)
-  return [
-    charPos.x + offset.x,
-    charPos.y + offset.y,
-    charPos.z + offset.z
-  ]
+  // Position setzen
+  l.positionX.value = cameraPosition.value[0]
+  l.positionY.value = cameraPosition.value[1]
+  l.positionZ.value = cameraPosition.value[2]
+
+  // Forward / Blickrichtung setzen
+  // z.B. berechne aus horizontalRotation + verticalRotation
+  const dirX = Math.sin(horizontalRotation.value) * Math.cos(verticalRotation.value)
+  const dirY = Math.sin(verticalRotation.value)
+  const dirZ = Math.cos(horizontalRotation.value) * Math.cos(verticalRotation.value)
+
+  l.forwardX.value = dirX
+  l.forwardY.value = dirY
+  l.forwardZ.value = dirZ
+
+  l.upX.value = 0
+  l.upY.value = 1
+  l.upZ.value = 0
 })
 
 // Berechnete Rotation der Kamera neu, wenn sie sich ändert
