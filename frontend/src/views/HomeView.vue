@@ -2,10 +2,10 @@
   <div class="home">
     <Header overlay></Header>
     <div class="button-container">
-      <button class="menu-button" @click="newGameStart">Neues Spiel</button>
-      <button class="menu-button" @click="goToJoinGame">Spiel beitreten</button>
-      <button class="menu-button" @click="goToMapEditor">Map Editor</button>
-      <button class="menu-button" @click="goToSettings">Einstellungen</button>
+      <button class="menu-button" @mouseenter="onHover" @click="newGameStart">Neues Spiel</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToJoinGame">Spiel beitreten</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToMapEditor">Map Editor</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToSettings">Einstellungen</button>
     </div>
   </div>
 </template>
@@ -36,6 +36,10 @@ const goToMapEditor = () => {
 const goToSettings = () => {
   audio.playSfx('click')
   router.push('/settings')
+}
+
+function onHover() {
+  audio.playSfx('hover')
 }
 </script>
 

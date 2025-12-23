@@ -34,6 +34,8 @@ export const useAudioStore = defineStore('audio', () => {
   const sfxMap: Record<string, string> = {
     //UI Sounds
     click: '/audio/ui/ClickSound.mp3',
+    hover: '/audio/ui/HoverSound.mp3',
+    joinGame: '/audio/ui/JoinGame.mp3',
     copyLobby: '/audio/ui/CopyLobby.mp3',
     gameHUD: '/audio/ui/GameHUD.mp3',
     errorMessage: '/audio/ui/ErrorMessage.mp3',

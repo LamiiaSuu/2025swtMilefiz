@@ -4,11 +4,14 @@ import EditorFileHUD from '@/components/ui/mapEditor/EditorFileHUD.vue';
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import StandardTile from '@/components/ui/mapEditor/tiles/StandardTile.vue';
+import { useAudioStore } from '@/stores/audioStore';
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
 
 const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier'>('tile')
+const audio = useAudioStore()
+
 
 const DIR_OFFSET: Record<Direction, { x: number; y: number }> = {
   up:    { x: 0, y: -2 },
@@ -146,6 +149,10 @@ function findNeighbor(tile: TileData, dir: Direction): TileData | null {
 function onHudToolSelected(tool: ToolType) {
   if (!selectedTile.value) return
   selectedTile.value.type = tool
+}
+
+function onHover() {
+  audio.playSfx('hover')
 }
 
 type BackendTile = {
@@ -298,7 +305,7 @@ function deleteSelectedTile() {
         <EditorFileHUD style="bottom: 20px;" @click="debugExport()"/>
         <div class="editor-form-row">
             <div class="editor-button-container">
-                <BackButton :to="{ name: 'Homepage' }" />
+                <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
             </div>
         </div>
     </div>

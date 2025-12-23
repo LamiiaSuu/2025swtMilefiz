@@ -22,6 +22,10 @@ onMounted(() => {
 
 })
 
+function onHover() {
+  audio.playSfx('hover')
+}
+
 // Reaktive Leader-Prüfung
 const isOwnLeader = computed(() => storeIsOwnLeader())
 
@@ -103,11 +107,11 @@ const handleFileChange = (event: Event) => {
                         <div class="form-row">
                             <label>Map</label>
                             <div class="map-buttons">
-                                <button type="button" class="map-button" :class="{ active: mapMode === 'standard' }"
+                                <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'standard' }"
                                     @click="mapMode = 'standard'">
                                     Standardmap
                                 </button>
-                                <button type="button" class="map-button" :class="{ active: mapMode === 'import' }"
+                                <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'import' }"
                                     @click="mapMode = 'import'">
                                     Importieren
                                 </button>
@@ -117,7 +121,7 @@ const handleFileChange = (event: Event) => {
                         <!-- Datei importieren -->
                         <div class="form-row">
                             <label>Datei</label>
-                            <input type="file" @change="handleFileChange" class="file-input"
+                            <input type="file" @mouseenter="onHover" @change="handleFileChange" class="file-input"
                                 :disabled="mapMode === 'standard'" accept=".json,.map">
                         </div>
                     </template>
@@ -150,11 +154,11 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <div class="button-container">
                             <button type="button" class="start-game-button"
-                                @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('click') }"
+                                @mouseenter="onHover" @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('joinGame') }"
                                 :disabled="!isOwnLeader" :class="{ active: isOwnLeader }">
                                 {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Spielersteller...' }}
                             </button>
-                            <BackButton :to="{ name: 'Homepage' }" />
+                            <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
                         </div>
                     </div>
                 </div>
