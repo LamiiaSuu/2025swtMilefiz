@@ -38,8 +38,7 @@ export const useAudioStore = defineStore('audio', () => {
     gameHUD: '/audio/ui/GameHUD.mp3',
     errorMessage: '/audio/ui/ErrorMessage.mp3',
 
-    meepleJump: '/audio/meeple/Jump.wav',
-    meepleLand: '/audio/meeple/Land.wav',
+    meepleJump: '/audio/meeple/CartoonJump.mp3',
     meepleMove: '/audio/meeple/WalkOnGrass.mp3',
   }
 
