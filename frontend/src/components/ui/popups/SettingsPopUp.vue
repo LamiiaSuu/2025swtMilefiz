@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
+import AudioSettings from '../AudioSettings.vue'
 
 const store = useMilefizStore()
 const router = useRouter()
@@ -16,10 +17,13 @@ const router = useRouter()
                 <h1 class="title">Menu</h1>
             </div>
 
+
+            <!-- AUDIO SETTINGS -->
+            <AudioSettings></AudioSettings>
+
             <div class="button-container">
                 <button class="popup-menu-button" @click="store.togglePopUpMenu()">Weiter</button>
                 <button class="popup-menu-button">Einstellungen</button>
-                <BackButton class="back-button" :to="{ name: 'Homepage' }">&lt; Spiel verlassen</BackButton>
             </div>
 
         </div>
@@ -44,8 +48,8 @@ const router = useRouter()
     flex-direction: column;
     background-color: var(--background-color-forms);
     border-radius: 15px;
-    width: 25vw;
-    height: 50vh;
+    width: 100vw;
+    height: 100vh;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     border: 7px solid #57AA51;
