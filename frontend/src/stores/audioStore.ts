@@ -28,6 +28,9 @@ export const useAudioStore = defineStore('audio', () => {
     channels[channel].muted = muted
   }
 
+  //Urheberfreie Soundeffekte von:
+  //OpenGameArt.org
+  //pixabay.com/sound-effects/
   const sfxMap: Record<string, string> = {
     click: '/audio/ui/ClickSound.mp3',
     win: '/audio/ui/WinSound.wav',
