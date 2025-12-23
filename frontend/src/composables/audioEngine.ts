@@ -38,8 +38,8 @@ class AudioEngine {
     panner.panningModel = 'HRTF'
     panner.distanceModel = 'inverse'
     panner.refDistance = 2
-    panner.maxDistance = 25
-    panner.rolloffFactor = 1
+    panner.maxDistance = 14
+    panner.rolloffFactor = 0.75
 
     panner.positionX.value = position.x
     panner.positionY.value = position.y
