@@ -31,6 +31,7 @@ export const useAudioStore = defineStore('audio', () => {
   const sfxMap: Record<string, string> = {
     click: '/audio/ui/ClickSound.mp3',
     win: '/audio/ui/WinSound.wav',
+    copyLobby: '/audio/ui/CopyLobby.mp3',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
