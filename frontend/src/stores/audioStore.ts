@@ -29,10 +29,7 @@ export const useAudioStore = defineStore('audio', () => {
   }
 
   const sfxMap: Record<string, string> = {
-    click: '/audio/ui/click.wav',
-    hover: '/audio/ui/hover.wav',
-    confirm: '/audio/ui/confirm.wav',
-    error: '/audio/ui/error.wav',
+    click: '/audio/ui/MenuSelectionClick.wav',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
