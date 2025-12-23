@@ -4,9 +4,17 @@ import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import WinCharacter from './WinCharacter.vue'
 import { TresCanvas } from '@tresjs/core'
+import { onMounted } from 'vue'
+import { useAudioStore } from '@/stores/audioStore'
 
 const store = useMilefizStore()
 const router = useRouter()
+
+onMounted(() => {
+  // Play win sound effect when the popup is shown
+  const audioStore = useAudioStore()
+  audioStore.playSfx('win')
+})
 
 </script>
 

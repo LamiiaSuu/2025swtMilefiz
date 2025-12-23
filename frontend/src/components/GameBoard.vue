@@ -5,13 +5,12 @@ import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
 import { useBoardStore } from '@/stores/boardStore'
 import Tile from './Tile.vue'
+import Path from './Path.vue'
 import Camera from './Camera.vue'
 import { useMilefizStore } from "@/stores/milefizstore"
 import type { Direction } from "@/types/movement"
-import type { Object3D } from 'three'
-import { Raycaster, Vector3 } from 'three'
+import { Vector3 } from 'three'
 import { watch } from 'vue'
-import { isAssertEntry } from 'typescript'
 
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
@@ -442,14 +441,14 @@ onMounted(() => {
       requestAnimationFrame(waitForCamera)
       return
     }
-    window.addEventListener("keydown", handleKeydown)
+    globalThis.addEventListener("keydown", handleKeydown)
   }
 
   waitForCamera()
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
+  globalThis.removeEventListener('keydown', handleKeydown)
 })
 
 // Computed Property für Meeple → PlayerColor Mapping
@@ -468,6 +467,45 @@ const meepleColorMap = computed(() => {
   }
 
   return map
+})
+
+
+const connectionSegments = computed(() => {
+  const board = boardStore.board
+  if (!board) return [] as Array<{ x: number; y: number; z: number; length: number; rotY: number; key: string }>
+
+  const out: Array<{ x: number; y: number; z: number; length: number; rotY: number; key: string }> = []
+  const seen = new Set<string>()
+
+  for (const f of board.fields) {
+    for (const dir of ['east', 'north']) {
+      const neighborId = (f as any)[dir] as string | undefined
+      if (!neighborId) continue
+      const n = board.fields.find((ff) => ff.id === neighborId)
+      if (!n) continue
+
+      const key = [f.id, n.id].sort().join('-')
+      if (seen.has(key)) continue
+      seen.add(key)
+
+      const x1 = f.position.x
+      const z1 = f.position.y
+      const x2 = n.position.x
+      const z2 = n.position.y
+
+      const dx = x2 - x1
+      const dz = z2 - z1
+      const length = Math.hypot(dx, dz)
+      const midX = (x1 + x2) / 2
+      const midZ = (z1 + z2) / 2
+
+      const rotY = Math.atan2(dz, dx)
+
+      out.push({ x: midX, y: 0, z: midZ, length, rotY, key })
+    }
+  }
+
+  return out
 })
 
 </script>
@@ -508,6 +546,12 @@ const meepleColorMap = computed(() => {
     <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
+
+    <!-- Verbindungspfade zwischen verbundenen Tiles -->
+    <Path v-for="seg in connectionSegments" :key="seg.key"
+      :position="[seg.x, 0, seg.z]"
+      :rotationY="seg.rotY"
+      :length="seg.length" />
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"

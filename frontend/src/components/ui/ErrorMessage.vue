@@ -24,8 +24,11 @@
 
 <script setup>
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { onMounted, watch } from 'vue'
+import { useAudioStore } from '@/stores/audioStore';
 
 const { errorState, hideError } = useErrorHandler()
+const audio = useAudioStore()
 
 function getErrorTitle() {
   switch (errorState.type) {
@@ -35,6 +38,12 @@ function getErrorTitle() {
     default: return 'Nachricht'
   }
 }
+
+watch(() => errorState.show, (newVal) => {
+  if (newVal) {
+    audio.playSfx('errorMessage')
+  }
+})
 </script>
 
 <style scoped>

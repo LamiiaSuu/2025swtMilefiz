@@ -13,22 +13,28 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
+import { useAudioStore } from '@/stores/audioStore'
 
 const router = useRouter()
+const audio = useAudioStore()
 
 const newGameStart = () => {
+  audio.playSfx('click')
   router.push({ name: 'game-start' })
 }
 
 const goToJoinGame = () => {
+  audio.playSfx('click')
   router.push('/join-game')
 }
 
 const goToMapEditor = () => {
+  audio.playSfx('click')
   router.push('map-editor')
 }
 
 const goToSettings = () => {
+  audio.playSfx('click')
   router.push('/settings')
 }
 </script>

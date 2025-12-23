@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useMilefizStore } from '@/stores/milefizstore'
+import { useAudioStore } from '@/stores/audioStore';
 
 const milefizStore = useMilefizStore()
 const { disconnectAndReset } = milefizStore
 
 const props = defineProps<{ to: string | { name: string } }>()
 const router = useRouter()
+const audio = useAudioStore()
 
 const goBack = () => {
   if (props.to) {
+    audio.playSfx('click')
     router.push(props.to)
     disconnectAndReset() // disconnect current lobby
   }

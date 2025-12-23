@@ -340,6 +340,33 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         throw new Error(resp.statusText)
       }
       const responseMsg = await resp.json()
+      handleLobbyJoin(responseMsg);
+    } catch (error_) {
+      console.log(error_)
+    }
+  }
+
+  /**
+   * Erstellt eine neue Lobby und joint dieser direkt
+   */
+  async function createJoinLobby() {
+    console.log('Start receiving Gameboard Data...')
+    try {
+      const resp = await fetch('/api/lobby/create')
+      if (!resp.ok) {
+        console.error('Error while recieving Data:\n', resp.statusText)
+        throw new Error(resp.statusText)
+      }
+      const responseMsg = await resp.json()
+      handleLobbyJoin(responseMsg);
+    } catch (error_) {
+      console.log(error_)
+    }
+  }
+
+
+  function handleLobbyJoin(responseMsg: any) {
+    try {
       console.log(responseMsg.msg)
       gamedata.lobby = responseMsg.lobby as Lobby
       gamedata.playerId = responseMsg.playerId
@@ -685,6 +712,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     sendRollDice,
     sendLobbyMessage,
     joinLobby,
+    createJoinLobby,
     cooldown,
     energy,
     sendMove,

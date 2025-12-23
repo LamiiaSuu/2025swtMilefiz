@@ -1,7 +1,7 @@
 <!-- Globales Heads-up Display (HUD), das über dem Map-Editor als Overlay gerendert wird. Die Button-Bar befindet sich unten rechts. -->
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import ErrorMessage from '../ErrorMessage.vue';
 import BarrierButton from './buttons/BarrierButton.vue';
 import DeleteButton from './buttons/DeleteButton.vue';
@@ -9,7 +9,44 @@ import TileButton from './buttons/TileButton.vue';
 import GoalButton from './buttons/GoalButton.vue';
 import HouseButton from './buttons/HouseButton.vue';
 
-const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile')
+type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
+
+const props = defineProps<{
+  selectedTool: ToolType
+}>()
+
+const emit = defineEmits<{
+  (e: 'toolSelected', tool: ToolType): void
+  (e: 'deleteSelected'): void
+}>()
+
+function handleKeydown(e: KeyboardEvent) {
+  switch (e.key.toLowerCase()) {
+    case 'q':
+      emit('toolSelected', 'start')
+      break
+    case 'w':
+      emit('toolSelected', 'goal')
+      break
+    case 'e':
+      emit('toolSelected', 'tile')
+      break
+    case 'r':
+      emit('toolSelected', 'barrier')
+      break
+    case 'z':
+      emit('deleteSelected')
+      break
+  }
+}
+
+onMounted(() => {
+  globalThis.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  globalThis.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 
@@ -25,11 +62,11 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
       <div class="editor-button-bar">
         <div
           class="editor-icon-with-text"
-          @click="selectedTool = 'start'"
+          @click="emit('toolSelected', 'start')"
         >
           <div
             class="editor-icon-wrapper"
-            :class="{ selected: selectedTool === 'start' }"
+            :class="{ selected: props.selectedTool === 'start' }"
           >
             <HouseButton />
           </div>
@@ -37,11 +74,11 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
         </div>
         <div
           class="editor-icon-with-text"
-          @click="selectedTool = 'goal'"
+          @click="emit('toolSelected', 'goal')"
         >
           <div
             class="editor-icon-wrapper"
-            :class="{ selected: selectedTool === 'goal' }"
+            :class="{ selected: props.selectedTool === 'goal' }"
           >
             <GoalButton />
           </div>
@@ -49,11 +86,11 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
         </div>
         <div
           class="editor-icon-with-text"
-          @click="selectedTool = 'tile'"
+          @click="emit('toolSelected', 'tile')"
         >
           <div
             class="editor-icon-wrapper"
-            :class="{ selected: selectedTool === 'tile' }"
+            :class="{ selected: props.selectedTool === 'tile' }"
           >
             <TileButton />
           </div>
@@ -61,11 +98,11 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
         </div>
         <div
           class="editor-icon-with-text"
-          @click="selectedTool = 'barrier'"
+          @click="emit('toolSelected', 'barrier')"
         >
           <div
             class="editor-icon-wrapper"
-            :class="{ selected: selectedTool === 'barrier' }"
+            :class="{ selected: props.selectedTool === 'barrier' }"
           >
             <BarrierButton />
           </div>
@@ -76,7 +113,7 @@ const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier' | 'delete'>('tile
           class="editor-icon-with-text"
           >
             <div
-              class="editor-icon-wrapper editor-delete-button"
+              class="editor-icon-wrapper editor-delete-button" @click="emit('deleteSelected')"
             >
               <DeleteButton />
             </div>
