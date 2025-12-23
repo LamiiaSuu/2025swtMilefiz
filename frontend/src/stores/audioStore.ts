@@ -37,6 +37,10 @@ export const useAudioStore = defineStore('audio', () => {
     copyLobby: '/audio/ui/CopyLobby.mp3',
     gameHUD: '/audio/ui/GameHUD.mp3',
     errorMessage: '/audio/ui/ErrorMessage.mp3',
+
+    meepleJump: '/audio/meeple/Jump.wav',
+    meepleLand: '/audio/meeple/Land.wav',
+    meepleMove: '/audio/meeple/Move.wav',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
@@ -54,5 +58,6 @@ export const useAudioStore = defineStore('audio', () => {
     toggleMute,
     setMute,
     playSfx,
+    sfxMap,
   }
 })
