@@ -4,6 +4,7 @@ import { useGLTF } from '@tresjs/cientos'
 import { watchEffect, watch, ref, computed, onMounted } from 'vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { getPlayerColors } from '@/types/colorsAssets';
+import { audioEngine } from '@/composables/audioEngine'
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -260,6 +261,14 @@ const animateTo = (target: [number, number, number]) => {
   if (!isJumping.value) {
     isJumping.value = true
     // starte kleinen Sprung und binde Bewegungsende an das Sprungende
+    audioEngine.play3D(
+      'meepleMove',
+        {
+          x: animatedPosition.value[0],
+          y: animatedPosition.value[1],
+          z: animatedPosition.value[2]
+        }
+    )
     animateCustomJump(smallJumpHeight, smallUpDuration, smallFallDuration, () => {
       // Nach der Landung Position fixieren
       animatedPosition.value = target
