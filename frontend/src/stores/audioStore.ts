@@ -40,7 +40,7 @@ export const useAudioStore = defineStore('audio', () => {
 
     meepleJump: '/audio/meeple/CartoonJump.mp3',
     meepleMove: '/audio/meeple/WalkOnGrass.mp3',
-    impactBarrier: '/audio/meeple/ImpactBarrier.mp3',
+    impactBarrier: '/audio/meeple/ImpactBarrier2.mp3',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
