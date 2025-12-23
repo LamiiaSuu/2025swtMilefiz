@@ -4,6 +4,7 @@ import ComponentList from '@/components/ui/pages/ComponentList.vue'
 import LobbyList, { type Lobby } from '@/components/ui/pages/LobbyList.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useAudioStore } from '@/stores/audioStore'
 
 const lobbies = ref<Lobby[]>([])
 const lobbyid = ref<string>('')
@@ -12,6 +13,7 @@ let interval: number
 
 const username = ref<string>('')
 const selectedLobby = ref<string>('')
+const audio = useAudioStore()
 
 const fetchLobbies = async () => {
   try {
@@ -66,7 +68,7 @@ onUnmounted(() => {
         <LobbyList v-model:lobbyid="selectedLobby" :lobbies="filteredLobbies" label="Lobbys" />
         <div class="game-container">
           <div class="button-container">
-          <button class="start-game-button game-content" :disabled="!selectedLobby" @click="$router.push(`/join/${selectedLobby}`)">
+          <button class="start-game-button game-content" :disabled="!selectedLobby" @click="() => {$router.push(`/join/${selectedLobby}`); audio.playSfx('click')}">
             Spiel Starten
           </button>
           <BackButton :to="{ name: 'Homepage' }" />

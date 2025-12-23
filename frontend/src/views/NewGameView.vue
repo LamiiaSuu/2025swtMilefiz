@@ -7,10 +7,12 @@ import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { storeToRefs } from 'pinia'
+import { useAudioStore } from '@/stores/audioStore'
 
 const { startGameCommand } = useMilefizStore()
 const milefizStore = useMilefizStore()
 const { isJoined, joinLobby, createJoinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
+const audio = useAudioStore()
 
 onMounted(() => {
     if (!isJoined) {
@@ -148,7 +150,7 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <div class="button-container">
                             <button type="button" class="start-game-button"
-                                @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }) }"
+                                @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('click') }"
                                 :disabled="!isOwnLeader" :class="{ active: isOwnLeader }">
                                 {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Spielersteller...' }}
                             </button>
