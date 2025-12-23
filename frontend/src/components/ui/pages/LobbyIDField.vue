@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useAudioStore } from '@/stores/audioStore';
 import { useMilefizStore } from '@/stores/milefizstore';
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -9,7 +10,7 @@ const router = useRouter()
 const base = globalThis.location.origin
 
 const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
-
+const audio = useAudioStore()
 /**
  * copyToClipboard()
  * Diese Funktion kopiert den Join-Link mit der Lobby-ID ins Clipboard.
@@ -17,6 +18,7 @@ const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
 const copyToClipboard = async () => {
     try {
         await navigator.clipboard.writeText(`${base}/join/${lobbyId.value}`)
+        audio.playSfx('copyLobby')
     } catch (err) {
         console.error('Fehler beim Kopieren der Lobby-ID:', err)
     }

@@ -11,9 +11,9 @@ type AudioChannel = {
 export const useAudioStore = defineStore('audio', () => {
 
   const channels = reactive<Record<AudioChannelKey, AudioChannel>>({
-    music:  { volume: 80, muted: false },
+    music:  { volume: 50, muted: false },
     ambient:{ volume: 70, muted: false },
-    sfx:    { volume: 90, muted: false },
+    sfx:    { volume: 50, muted: false },
   })
 
   function setVolume(channel: AudioChannelKey, volume: number) {
@@ -28,10 +28,28 @@ export const useAudioStore = defineStore('audio', () => {
     channels[channel].muted = muted
   }
 
+  const sfxMap: Record<string, string> = {
+    click: '/audio/ui/ClickSound.mp3',
+    win: '/audio/ui/WinSound.wav',
+    copyLobby: '/audio/ui/CopyLobby.mp3',
+    gameHUD: '/audio/ui/GameHUD.mp3',
+    errorMessage: '/audio/ui/ErrorMessage.mp3',
+  }
+
+  function playSfx(key: keyof typeof sfxMap) {
+    const channel = channels.sfx
+    if (channel.muted) return
+
+    const audio = new Audio(sfxMap[key])
+    audio.volume = channel.volume / 100
+    audio.play()
+  }
+
   return {
     channels,
     setVolume,
     toggleMute,
     setMute,
+    playSfx,
   }
 })
