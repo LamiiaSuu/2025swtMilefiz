@@ -33,20 +33,20 @@ export const useAudioStore = defineStore('audio', () => {
   //pixabay.com/sound-effects/
   const sfxMap: Record<string, string> = {
     //UI Sounds
-    click: '/audio/ui/ClickSound.mp3',
-    hover: '/audio/ui/HoverSound.mp3',
-    joinGame: '/audio/ui/JoinGame.mp3',
-    copyLobby: '/audio/ui/CopyLobby.mp3',
-    gameHUD: '/audio/ui/GameHUD.mp3',
-    errorMessage: '/audio/ui/ErrorMessage.mp3',
+    click: '/audio/ui/ClickSound.mp3?v=2',
+    hover: '/audio/ui/HoverSound.mp3?v=2',
+    joinGame: '/audio/ui/JoinGame.mp3?v=2',
+    copyLobby: '/audio/ui/CopyLobby.mp3?v=2',
+    gameHUD: '/audio/ui/GameHUD.mp3?v=2',
+    errorMessage: '/audio/ui/ErrorMessage.mp3?v=2',
 
     //Event Sounds
-    win: '/audio/ui/WinSound.wav',
+    win: '/audio/ui/WinSound.wav?v=2',
 
     //Movement Sounds
-    meepleJump: '/audio/meeple/CartoonJump.mp3',
-    meepleMove: '/audio/meeple/WalkOnGrass.mp3',
-    impactBarrier: '/audio/meeple/ImpactBarrier2.mp3',
+    meepleJump: '/audio/meeple/CartoonJump.mp3?v=2',
+    meepleMove: '/audio/meeple/WalkOnGrass.mp3?v=2',
+    impactBarrier: '/audio/meeple/ImpactBarrier2.mp3?v=2',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
