@@ -29,7 +29,7 @@ export const useAudioStore = defineStore('audio', () => {
   }
 
   const sfxMap: Record<string, string> = {
-    click: '/audio/ui/MenuSelectionClick.wav',
+    click: '/audio/ui/ClickSound.mp3',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
