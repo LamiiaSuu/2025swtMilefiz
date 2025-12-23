@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed, watchEffect } from 'vue'
 import type { TresObject } from '@tresjs/core'
 import type { PerspectiveCamera, Vector3 } from 'three'
+import { audioEngine } from '@/composables/audioEngine'
 import { useMilefizStore } from '@/stores/milefizstore';
 
 const milefizStore = useMilefizStore()
@@ -25,8 +26,6 @@ const horizontalRotation = ref(0) // Links + Rechts Rotation
 const mouseSensitivity = 0.002
 const maxVerticalAngle = Math.PI / 3 // Limitiert Hoch/Runter
 
-
-
 // Berechnete Kamera Position neu, wenn sie sich ändert
 // Kamera Position = Charakter Position + Offset
 const cameraPosition = computed((): [number, number, number] => {
@@ -46,6 +45,14 @@ const cameraPosition = computed((): [number, number, number] => {
     charPos.y + offset.y,
     charPos.z + offset.z
   ]
+})
+
+watchEffect(() => {
+  audioEngine.setListenerPosition(
+    cameraPosition.value[0],
+    cameraPosition.value[1],
+    cameraPosition.value[2]
+  )
 })
 
 // Berechnete Rotation der Kamera neu, wenn sie sich ändert
