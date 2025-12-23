@@ -125,4 +125,9 @@ public class LobbyRestController {
                 "Erfolgreich gejoint");
         return new ResponseEntity<>(joinEvent, HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/{path:[^\\.]*}")
+    public String redirect() {
+        return "forward:/index.html";
+    }
 }
