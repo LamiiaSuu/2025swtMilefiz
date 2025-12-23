@@ -9,6 +9,9 @@ import { audioEngine } from '@/composables/audioEngine'
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
 
+// Für Move-Sound am Anfang des Spiels
+const hasInitializedMoved = ref(false)
+
 //Definierte Props für Augen, Körperfarbe und Position
 const props = defineProps<{
   bodyColor?: string | number
@@ -260,13 +263,17 @@ const animateTo = (target: [number, number, number]) => {
 
   if (!isJumping.value) {
     isJumping.value = true
-    setTimeout(() => {
-      audioEngine.play3D('meepleMove', {
-        x: target[0],
-        y: target[1],
-        z: target[2]
-      })
-    }, 200)
+    if(hasInitializedMoved.value) {
+      setTimeout(() => {
+        audioEngine.play3D('meepleMove', {
+          x: target[0],
+          y: target[1],
+          z: target[2]
+        })
+      }, 200)
+      }else{
+        hasInitializedMoved.value = true
+      }
     // starte kleinen Sprung und binde Bewegungsende an das Sprungende
     animateCustomJump(smallJumpHeight, smallUpDuration, smallFallDuration, () => {
       // Nach der Landung Position fixieren
