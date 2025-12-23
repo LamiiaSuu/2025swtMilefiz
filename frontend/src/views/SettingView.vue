@@ -4,6 +4,13 @@
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import AudioSettings from '@/components/ui/AudioSettings.vue';
+import { useAudioStore } from '@/stores/audioStore';
+
+const audio = useAudioStore()
+
+function onHover() {
+  audio.playSfx('hover')
+}
 
 </script>
 
@@ -16,7 +23,7 @@ import AudioSettings from '@/components/ui/AudioSettings.vue';
 
     <!-- BACK -->
     <div class="settings-button-container">
-      <BackButton :to="{ name: 'Homepage' }" />
+      <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
     </div>
   </div>
 </template>

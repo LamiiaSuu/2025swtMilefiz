@@ -2,9 +2,14 @@
 import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
+import { useAudioStore } from '@/stores/audioStore'
 
 const router = useRouter()
+const audio = useAudioStore()
 
+function onHover() {
+  audio.playSfx('hover')
+}
 </script>
 
 <template>
@@ -20,7 +25,7 @@ const router = useRouter()
 
       <div class="button-container">
 
-        <BackButton :to="{ name: 'Homepage' }" />
+        <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
       </div>
     </div>
   </div>

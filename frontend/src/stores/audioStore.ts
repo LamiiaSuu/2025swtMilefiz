@@ -33,6 +33,8 @@ export const useAudioStore = defineStore('audio', () => {
   //pixabay.com/sound-effects/
   const sfxMap: Record<string, string> = {
     click: '/audio/ui/ClickSound.mp3',
+    hover: '/audio/ui/HoverSound.mp3',
+    joinGame: '/audio/ui/JoinGame.mp3',
     win: '/audio/ui/WinSound.wav',
     copyLobby: '/audio/ui/CopyLobby.mp3',
     gameHUD: '/audio/ui/GameHUD.mp3',

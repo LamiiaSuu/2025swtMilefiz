@@ -24,7 +24,9 @@ const copyToClipboard = async () => {
     }
 }
 
-
+function onHover() {
+  audio.playSfx('hover')
+}
 </script>
 
 <template>
@@ -34,7 +36,7 @@ const copyToClipboard = async () => {
 
         <div class="input-with-button">
             <input type="text" v-model="lobbyId" disabled class="form-input">
-            <button type="button" @click="copyToClipboard" class="copy-button" title="In Zwischenablage kopieren">
+            <button type="button" @mouseenter="onHover" @click="copyToClipboard" class="copy-button" title="In Zwischenablage kopieren">
                 <img src="@/assets/buttons/copy-clipboard-icon.png" alt="Copy" width="20" height="20">
             </button>
         </div>

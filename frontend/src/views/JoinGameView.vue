@@ -47,6 +47,10 @@ onUnmounted(() => {
   selectedLobby.value = ''
 })
 
+
+function onHover() {
+  audio.playSfx('hover')
+}
 </script>
 
 <template>
@@ -68,10 +72,10 @@ onUnmounted(() => {
         <LobbyList v-model:lobbyid="selectedLobby" :lobbies="filteredLobbies" label="Lobbys" />
         <div class="game-container">
           <div class="button-container">
-          <button class="start-game-button game-content" :disabled="!selectedLobby" @click="() => {$router.push(`/join/${selectedLobby}`); audio.playSfx('click')}">
+          <button class="start-game-button game-content" :disabled="!selectedLobby" @mouseenter="onHover" @click="() => {$router.push(`/join/${selectedLobby}`); audio.playSfx('joinGame')}">
             Spiel Starten
           </button>
-          <BackButton :to="{ name: 'Homepage' }" />
+          <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
         </div>
         </div>
       </ComponentList>
