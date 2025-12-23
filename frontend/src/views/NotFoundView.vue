@@ -5,14 +5,11 @@ import BackButton from '@/components/ui/pages/BackButton.vue'
 
 const router = useRouter()
 
-const goHome = () => {
-  router.push({ name: 'Homepage' })
-}
 </script>
 
 <template>
   <div class="not-found">
-    <Header overlay>404 - Seite nicht gefunden</Header>
+    <Header overlay>Seite nicht gefunden</Header>
 
     <div class="content">
       <h1>404</h1>
@@ -54,7 +51,6 @@ const goHome = () => {
 }
 
 .content {
-  margin-top: 10vh;
   text-align: center;
   color: var(--ui-text, #f0f0f0);
 }
@@ -62,13 +58,17 @@ const goHome = () => {
 .content h1 {
   font-size: 6rem;
   margin-bottom: 0.5rem;
-  text-shadow: 0 0 12px rgba(0,0,0,0.6);
+  text-shadow: 0 0 32px rgba(0, 0, 0, 1);
 }
 
 .content p {
-  font-size: 1.2rem;
-  opacity: 0.9;
+  font-size: 2.2rem;
   margin-bottom: 3vh;
+  text-shadow:
+  0 0 8px rgba(0,0,0,0.9),
+  0 0 20px rgba(0,0,0,0.8),
+  0 0 40px rgba(0,0,0,0.5);
+  
 }
 
 .button-container {
