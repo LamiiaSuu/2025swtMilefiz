@@ -29,22 +29,13 @@ const maxVerticalAngle = Math.PI / 3 // Limitiert Hoch/Runter
 // Berechnete Kamera Position neu, wenn sie sich ändert
 // Kamera Position = Charakter Position + Offset
 const cameraPosition = computed((): [number, number, number] => {
-  if (!props.gameCharRef || !props.useFirstPerson) {
-    return [0, 1, 0]
+
+  if (cameraRef.value && (props.useFirstPerson || !props.useFirstPerson)) {
+    const p = cameraRef.value.position
+    return [p.x, p.y, p.z]
   }
 
-  const char = props.gameCharRef as any
-  const offset = props.offset || { x: 0, y: 1, z: 0 }
-
-  // Position wird vom Charakter abgefragt
-  const charPos = char?.characterPosition?.position || [0, 0, 0]
-
-  // Rückgabe von Kamera Position (Charakter Position + Offset)
-  return [
-    charPos.x + offset.x,
-    charPos.y + offset.y,
-    charPos.z + offset.z
-  ]
+  return [0, 1, 0]
 })
 
 watchEffect(() => {
