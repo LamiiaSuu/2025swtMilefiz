@@ -28,10 +28,27 @@ export const useAudioStore = defineStore('audio', () => {
     channels[channel].muted = muted
   }
 
+  const sfxMap: Record<string, string> = {
+    click: '/audio/ui/click.wav',
+    hover: '/audio/ui/hover.wav',
+    confirm: '/audio/ui/confirm.wav',
+    error: '/audio/ui/error.wav',
+  }
+
+  function playSfx(key: keyof typeof sfxMap) {
+    const channel = channels.sfx
+    if (channel.muted) return
+
+    const audio = new Audio(sfxMap[key])
+    audio.volume = channel.volume / 100
+    audio.play()
+  }
+
   return {
     channels,
     setVolume,
     toggleMute,
     setMute,
+    playSfx,
   }
 })
