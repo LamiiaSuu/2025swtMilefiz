@@ -258,16 +258,14 @@ const animateTo = (target: [number, number, number]) => {
 
   rotateToward(target)
 
-  setTimeout(() => {
-    audioEngine.play3D('meepleMove', {
-      x: currentPosition.value[0],
-      y: currentPosition.value[1],
-      z: currentPosition.value[2]
-    })
-  }, 50)
-
   if (!isJumping.value) {
     isJumping.value = true
+    console.log(target)
+    audioEngine.play3D('meepleMove', {
+      x: target[0],
+      y: target[1],
+      z: target[2]
+    })
     // starte kleinen Sprung und binde Bewegungsende an das Sprungende
     animateCustomJump(smallJumpHeight, smallUpDuration, smallFallDuration, () => {
       // Nach der Landung Position fixieren

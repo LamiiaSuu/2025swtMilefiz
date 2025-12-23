@@ -3,7 +3,7 @@ import { useAudioStore } from '@/stores/audioStore'
 type Vec3 = { x: number; y: number; z: number }
 
 class AudioEngine {
-  private context = new AudioContext()
+  public context = new AudioContext()
 
   setListenerPosition(x: number, y: number, z: number) {
     const l = this.context.listener
