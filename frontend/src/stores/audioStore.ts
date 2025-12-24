@@ -12,7 +12,7 @@ type AudioChannel = {
 export const useAudioStore = defineStore('audio', () => {
 
   const channels = reactive<Record<AudioChannelKey, AudioChannel>>({
-    music:  { volume: 35, muted: false },
+    music:  { volume: 5, muted: false },
     ambient:{ volume: 15, muted: false },
     sfx:    { volume: 65, muted: false },
   })
@@ -66,7 +66,7 @@ export const useAudioStore = defineStore('audio', () => {
     impactBarrier: '/audio/meeple/ImpactBarrier2.mp3?v=2',
 
     //Music
-
+    zambolinoCuckoo: '/audio/music/ZambolinoCuckoo.mp3',
 
     //Ambient
     ambientForest05: '/audio/ambient/ForestAmbient05.mp3',

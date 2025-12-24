@@ -7,10 +7,12 @@ import { audioEngine } from '@/composables/audioEngine'
 
 onMounted(() => {
   audioEngine.playAmbient('ambientForest05')
+  audioEngine.playMusic('zambolinoCuckoo')
 })
 
 onBeforeUnmount(() => {
   if (audioEngine.ambientSource) audioEngine.ambientSource.stop()
+  if (audioEngine.musicSource) audioEngine.musicSource.stop()
 })
 
 </script>
