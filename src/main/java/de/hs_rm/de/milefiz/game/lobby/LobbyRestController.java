@@ -82,6 +82,9 @@ public class LobbyRestController {
 
     /**
      * Joint die Lobby, welche angegeben wurde
+     * 
+     * @param loobyId  Id der lobby
+     * @param username Name des Spielers
      */
     @GetMapping(path = "/join/{lobbyId}")
     public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId,

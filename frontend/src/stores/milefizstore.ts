@@ -326,6 +326,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   /**
    * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
+   * @param username String des username des Spielers
    */
   async function joinLobby(lobbyId: string = 'random', username: string = 'Anonymer Kek') {
     console.log('Start receiving Gameboard Data...')
