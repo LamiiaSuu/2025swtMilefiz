@@ -113,7 +113,7 @@ class AudioEngine {
     src.loop = true
     src.connect(this.ambientGain)
 
-    this.ambientGain.gain.value = ambient.volume / 100 * 0.25
+    this.ambientGain.gain.value = ambient.volume / 100
 
     await this.context.resume()
     src.start()
