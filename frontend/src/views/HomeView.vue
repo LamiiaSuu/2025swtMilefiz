@@ -3,7 +3,7 @@
     <Header overlay></Header>
     <div class="button-container">
       <button class="menu-button" @mouseenter="onHover" @click="newGameStart">Neues Spiel</button>
-      <button class="menu-button" @mouseenter="onHover" @click="goToJoinGame">Spiel beitreten</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToJoinGame">Spiel Beitreten</button>
       <button class="menu-button" @mouseenter="onHover" @click="goToMapEditor">Map Editor</button>
       <button class="menu-button" @mouseenter="onHover" @click="goToSettings">Einstellungen</button>
     </div>

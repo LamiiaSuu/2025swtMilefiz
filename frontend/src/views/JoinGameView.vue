@@ -73,7 +73,7 @@ function onHover() {
         <div class="game-container">
           <div class="button-container">
           <button class="start-game-button game-content" :disabled="!selectedLobby" @mouseenter="onHover" @click="() => {$router.push({ path: `/join/${selectedLobby}`, query: { username } }); audio.playSfx('joinGame')}">
-            Spiel Starten
+            Spiel Beitreten
           </button>
           <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
         </div>
