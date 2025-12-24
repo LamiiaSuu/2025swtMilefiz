@@ -1,5 +1,7 @@
 package de.hs_rm.de.milefiz.messaging.events;
 
+import java.util.UUID;
+
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
 
@@ -34,13 +36,13 @@ import de.hs_rm.de.milefiz.messaging.FrontendReceiverController;
  * @see FrontendReceiverController#handleConsumeEnergy
  * @see Player#hasFullEnergy()
  */
-public record FrontendConsumeEnergyRejectedEvent(String type, String msg) implements FrontendEvent {
+public record FrontendConsumeEnergyRejectedEvent(String type, UUID playerId, String msg) implements FrontendEvent {
     /**
      * Convenience-Konstruktor, der den Event-Type automatisch setzt
      * 
      * @param msg Fehlermeldung mit Ablehnungsgrund
      */
-    public FrontendConsumeEnergyRejectedEvent(String msg) {
-        this(EventType.CONSUME_ENERGY_ERROR.name(), msg);
+    public FrontendConsumeEnergyRejectedEvent(UUID playerId, String msg) {
+        this(EventType.CONSUME_ENERGY_ERROR.name(), playerId, msg);
     }
 }
