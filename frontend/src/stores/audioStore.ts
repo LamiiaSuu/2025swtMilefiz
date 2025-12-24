@@ -57,6 +57,7 @@ export const useAudioStore = defineStore('audio', () => {
     gameHUD: '/audio/ui/GameHUD.mp3?v=2',
     errorMessage: '/audio/ui/ErrorMessage.mp3?v=2',
     eventError: '/audio/ui/EventError.mp3',
+    eventEnergySave: '/audio/ui/SaveEnergy.mp3',
 
     //Event Sounds
     win: '/audio/ui/WinSound.wav?v=2',

@@ -181,7 +181,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId === gamedata.playerId) {
             if(gamedata.currentDiceRoll == 0) {
               audioStore.playSfx('eventError')
+              return
             }
+            audioStore.playSfx('eventEnergySave')
             gamedata.currentDiceRoll = 0
             gamedata.energy = event.energy
             energy.isEnergyFresh = false;
