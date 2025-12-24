@@ -5,6 +5,17 @@ type Vec3 = { x: number; y: number; z: number }
 class AudioEngine {
   public context = new AudioContext()
 
+  public musicGain = this.context.createGain()
+  public ambientGain = this.context.createGain()
+
+  public musicSource: AudioBufferSourceNode | null = null
+  public ambientSource: AudioBufferSourceNode | null = null
+
+  constructor() {
+    this.musicGain.connect(this.context.destination)
+    this.ambientGain.connect(this.context.destination)
+  }
+
   setListenerPosition(x: number, y: number, z: number) {
     const l = this.context.listener
     l.positionX.value = x
@@ -55,6 +66,61 @@ class AudioEngine {
 
     source.start()
   }
+  
+  async playMusic(key: string) {
+    const audioStore = useAudioStore()
+    const music = audioStore.channels.music
+    if (music.muted) return
+
+    const url = audioStore.sfxMap[key]  
+    if (!url) return console.warn(`[AudioEngine] Unknown music key: ${key}`)
+
+    if (this.musicSource) this.musicSource.stop()
+
+    const res = await fetch(url)
+    const array = await res.arrayBuffer()
+    const buffer = await this.context.decodeAudioData(array)
+
+    const src = this.context.createBufferSource()
+    src.buffer = buffer
+    src.loop = true
+    src.connect(this.musicGain)
+
+    this.musicGain.gain.value = music.volume / 100
+
+    await this.context.resume()
+    src.start()
+
+    this.musicSource = src
+  }
+
+  async playAmbient(key: string) {
+    const audioStore = useAudioStore()
+    const ambient = audioStore.channels.ambient
+    if (ambient.muted) return
+
+    const url = audioStore.sfxMap[key]  
+    if (!url) return console.warn(`[AudioEngine] Unknown ambient key: ${key}`)
+
+    if (this.ambientSource) this.ambientSource.stop()
+
+    const res = await fetch(url)
+    const array = await res.arrayBuffer()
+    const buffer = await this.context.decodeAudioData(array)
+
+    const src = this.context.createBufferSource()
+    src.buffer = buffer
+    src.loop = true
+    src.connect(this.ambientGain)
+
+    this.ambientGain.gain.value = ambient.volume / 100 * 0.25
+
+    await this.context.resume()
+    src.start()
+
+    this.ambientSource = src
+  }
+  
 
 }
 
