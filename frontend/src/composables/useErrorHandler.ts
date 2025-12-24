@@ -46,20 +46,20 @@ export function useErrorHandler() {
     errorState.autoHide = autoHide
 
     if (autoHide) {
-      let timeout = 5000 // Default 5 Sekunden
+      let timeout = 2500 // Default 2.5 extra Sekunden
       //Verschiedene Timings je nach Type:
       switch (type) {
         case 'info':
-          timeout = 4000 // Success: 4 Sekunden
+          timeout = 1000 // Success: 1 extra Sekunden
           break
         case 'warning':
-          timeout = 2000 // Warning: 2 Sekunden
+          timeout = 500 // Warning: .5 extra Sekunden
           break
         case 'error':
-          timeout = 4000 // Error: 4 Sekunden
+          timeout = 500 // Error: .5 extra Sekunden
           break
         case 'critical':
-          timeout = 8000 // Critical: 8 Sekunden
+          timeout = 2000 // Critical: 2 extra Sekunden
       }
       autoHideTimer = setTimeout(() => {
         if (errorState.show) hideError()
