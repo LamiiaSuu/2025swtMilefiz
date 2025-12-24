@@ -271,7 +271,7 @@ function deleteSelectedTile() {
 </script>
 
 <template>
-    <div class="editor-mapeditor">
+    <div class="editor-mapeditor no-select">
         <div
           class="editor"
           @mousedown.left="onMouseDown"
@@ -312,6 +312,12 @@ function deleteSelectedTile() {
 </template>
 
 <style scoped>
+
+.no-select {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .editor-mapeditor {
   position: relative;
   height: 100vh;
