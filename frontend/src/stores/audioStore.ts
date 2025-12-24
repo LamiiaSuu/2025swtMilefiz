@@ -13,7 +13,7 @@ export const useAudioStore = defineStore('audio', () => {
 
   const channels = reactive<Record<AudioChannelKey, AudioChannel>>({
     music:  { volume: 35, muted: false },
-    ambient:{ volume: 50, muted: false },
+    ambient:{ volume: 15, muted: false },
     sfx:    { volume: 65, muted: false },
   })
 
