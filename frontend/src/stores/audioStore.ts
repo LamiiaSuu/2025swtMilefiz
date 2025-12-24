@@ -70,6 +70,7 @@ export const useAudioStore = defineStore('audio', () => {
 
     //Ambient
     ambientForest05: '/audio/ambient/ForestAmbient05.mp3',
+    ambientForest04: '/audio/ambient/ForestAmbient04.mp3',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
