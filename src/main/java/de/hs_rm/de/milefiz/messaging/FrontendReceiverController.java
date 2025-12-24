@@ -507,7 +507,7 @@ public class FrontendReceiverController {
             return new FrontendConsumeEnergyEvent(player.getId(), player.getEnergy(), player.hasFullEnergy());
         }
 
-        return new FrontendConsumeEnergyRejectedEvent("Player does not have enough energy saved.");
+        return new FrontendConsumeEnergyRejectedEvent(player.getId(), "Player does not have enough energy saved.");
     }
 
     /**

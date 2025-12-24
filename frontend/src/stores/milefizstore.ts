@@ -133,6 +133,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           console.log(
             `Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`,
           )
+          audioStore.playSfx('eventError')
           cooldown.remainingSeconds = event.seconds
         }
 
@@ -145,6 +146,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             `Player ${event.playerId} still has ${event.moves} moves left and therefore can't roll their dice yet!`,
           )
           gamedata.currentDiceRoll = event.moves
+          audioStore.playSfx('eventError')
         }
 
         // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
@@ -177,6 +179,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY') {
           energy.maxEnergy = event.maxEnergy
           if (event.playerId === gamedata.playerId) {
+            if(gamedata.currentDiceRoll == 0) {
+              audioStore.playSfx('eventError')
+            }
             gamedata.currentDiceRoll = 0
             gamedata.energy = event.energy
             energy.isEnergyFresh = false;
@@ -201,6 +206,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'CONSUME_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Consume energy rejected:', event.msg)
+            audioStore.playSfx('eventError')
           }
         } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
