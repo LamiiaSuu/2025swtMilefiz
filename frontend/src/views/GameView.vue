@@ -6,13 +6,19 @@ import GameHUD from '@/components/ui/GameHUD.vue'
 import { audioEngine } from '@/composables/audioEngine'
 
 onMounted(() => {
-  audioEngine.playAmbient('ambientForest05')
-  audioEngine.playMusic('zambolinoCuckoo')
+  audioEngine.playAmbientPlaylist([
+    'ambientForest04',
+    'ambientForest05',
+  ], true)
+  audioEngine.playMusicPlaylist([
+    'ariaMath',
+    'zambolinoCuckoo',
+  ], true)
 })
 
 onBeforeUnmount(() => {
-  if (audioEngine.ambientSource) audioEngine.ambientSource.stop()
-  if (audioEngine.musicSource) audioEngine.musicSource.stop()
+  audioEngine.stopAmbient()
+  audioEngine.stopMusic()
 })
 
 </script>

@@ -67,6 +67,7 @@ export const useAudioStore = defineStore('audio', () => {
 
     //Music
     zambolinoCuckoo: '/audio/music/ZambolinoCuckoo.mp3',
+    ariaMath: '/audio/music/AriaMath.mp3',
 
     //Ambient
     ambientForest05: '/audio/ambient/ForestAmbient05.mp3',
