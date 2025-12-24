@@ -46,17 +46,14 @@ public class LobbyRestController {
      */
     @GetMapping(path = "/list")
     public Set<LobbyDTO> getLobbyList(
-        @RequestParam(required = false) String filter 
-    ) {
+            @RequestParam(required = false) String filter) {
         if ("joinable".equals(filter)) {
             return lobbyMapper.toDTOSet(
-                lobbyManager.getJoinableLobbies()
-            );
+                    lobbyManager.getJoinableLobbies());
         }
 
         return lobbyMapper.toDTOSet(
-            lobbyManager.getLobbies()
-        );
+                lobbyManager.getLobbies());
     }
 
     /**
@@ -66,7 +63,7 @@ public class LobbyRestController {
     public ResponseEntity<LobbyJoinEvent> joinCreateLobby() throws LobbyNotFoundException {
         // Join Random lobby
         Lobby lobby = lobbyManager.createLobby();
-        return joinLobby(lobby.getId());
+        return joinLobby(lobby.getId(), "Anonymer Kek");
     }
 
     /**
@@ -74,20 +71,21 @@ public class LobbyRestController {
      * volle Lobby), wird eine neue Lobby erstellt und gejoint.
      */
     @GetMapping(path = "/join/random")
-    public ResponseEntity<LobbyJoinEvent> joinRandomLobby() throws LobbyNotFoundException {
+    public ResponseEntity<LobbyJoinEvent> joinRandomLobby(@RequestParam String username) throws LobbyNotFoundException {
         // Join Random lobby
         Lobby lobby = lobbyManager.getLobbies().stream().filter(lob -> lob.isJoinable()).findAny().orElse(null);
         if (lobby == null) { // keine joinable Lobby gefunden
             lobby = lobbyManager.createLobby();
         }
-        return joinLobby(lobby.getId());
+        return joinLobby(lobby.getId(), username);
     }
 
     /**
      * Joint die Lobby, welche angegeben wurde
      */
     @GetMapping(path = "/join/{lobbyId}")
-    public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId)
+    public ResponseEntity<LobbyJoinEvent> joinLobby(@PathVariable("lobbyId") UUID lobbyId,
+            @RequestParam String username)
             throws LobbyNotFoundException {
         Lobby lobby = lobbyManager.getLobby(lobbyId);
 
@@ -98,6 +96,8 @@ public class LobbyRestController {
 
         // Zuweisung eines Players
         Player player = new Player(lobby.getAvailableColor());
+
+        player.setPlayerName(username);
 
         // Player Token
         String playerToken = UUID.randomUUID().toString();

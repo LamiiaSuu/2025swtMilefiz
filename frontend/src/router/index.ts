@@ -54,16 +54,17 @@ const router = createRouter({
 
         // warten bis lobby gejoint
         if (id) {
-          console.log(`joine mit ${id}`);
-          await joinLobby(id)
+          const username = (to.query.username as string | undefined) ?? 'Anonymer Kek'
+          console.log(`joine mit ${id} (username=${username})`);
+          await joinLobby(id, username)
         }
         return { name: 'game-start', replace: true }
       },
     },
     {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFoundView',
-    component: NotFoundView,
+      path: '/:pathMatch(.*)*',
+      name: 'NotFoundView',
+      component: NotFoundView,
     },
   ],
 })

@@ -19,7 +19,7 @@ let stompclient: Client | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
   const audioStore = useAudioStore()
-  
+
   /**
    * Cooldown für das Würfelsystem
    * cooldown
@@ -327,11 +327,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
    */
-  async function joinLobby(lobbyId: string = 'random') {
+  async function joinLobby(lobbyId: string = 'random', username: string = 'Anonymer Kek') {
     console.log('Start receiving Gameboard Data...')
     try {
       if (lobbyId == null) lobbyId = 'random'
-      const resp = await fetch('/api/lobby/join/' + lobbyId)
+      const url = '/api/lobby/join/' + lobbyId + '?username=' + encodeURIComponent(username ?? '')
+      const resp = await fetch(url)
       if (!resp.ok) {
         console.error('Error while recieving Data:\n', resp.statusText)
         throw new Error(resp.statusText)
@@ -658,7 +659,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return playerColors.YELLOW
     }
   }
-  
+
 
   /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
