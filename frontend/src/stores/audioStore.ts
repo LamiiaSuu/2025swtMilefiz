@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
+import { audioEngine } from '@/composables/audioEngine'
 
 export type AudioChannelKey = 'music' | 'ambient' | 'sfx'
 
@@ -11,9 +12,9 @@ type AudioChannel = {
 export const useAudioStore = defineStore('audio', () => {
 
   const channels = reactive<Record<AudioChannelKey, AudioChannel>>({
-    music:  { volume: 50, muted: false },
-    ambient:{ volume: 70, muted: false },
-    sfx:    { volume: 50, muted: false },
+    music:  { volume: 5, muted: false },
+    ambient:{ volume: 15, muted: false },
+    sfx:    { volume: 65, muted: false },
   })
 
   function setVolume(channel: AudioChannelKey, volume: number) {
@@ -27,6 +28,22 @@ export const useAudioStore = defineStore('audio', () => {
   function setMute(channel: AudioChannelKey, muted: boolean) {
     channels[channel].muted = muted
   }
+
+  watch(() => channels.music.volume, (v) => {
+    audioEngine.musicGain.gain.value = channels.music.muted ? 0 : v / 100
+  })
+
+  watch(() => channels.music.muted, (m) => {
+    audioEngine.musicGain.gain.value = m ? 0 : channels.music.volume / 100
+  })
+
+  watch(() => channels.ambient.volume, (v) => {
+    audioEngine.ambientGain.gain.value = channels.ambient.muted ? 0 : v / 100
+  })
+
+  watch(() => channels.ambient.muted, (m) => {
+    audioEngine.ambientGain.gain.value = m ? 0 : channels.ambient.volume / 100
+  })
 
   //Urheberfreie Soundeffekte von:
   //OpenGameArt.org
@@ -48,6 +65,14 @@ export const useAudioStore = defineStore('audio', () => {
     meepleJump: '/audio/meeple/CartoonJump.mp3?v=2',
     meepleMove: '/audio/meeple/WalkOnGrass.mp3?v=2',
     impactBarrier: '/audio/meeple/ImpactBarrier2.mp3?v=2',
+
+    //Music
+    zambolinoCuckoo: '/audio/music/ZambolinoCuckoo.mp3',
+    ariaMath: '/audio/music/AriaMath.mp3',
+
+    //Ambient
+    ambientForest05: '/audio/ambient/ForestAmbient05.mp3',
+    ambientForest04: '/audio/ambient/ForestAmbient04.mp3',
   }
 
   function playSfx(key: keyof typeof sfxMap) {
