@@ -408,7 +408,7 @@ public class FrontendReceiverController {
                     player.hasFullEnergy());
         }
 
-        return new FrontendSaveEnergyRejectedEvent("Maximale Energie oder bereits bewegt!", player.getId());
+        return new FrontendSaveEnergyRejectedEvent("Maximale Energie oder Meeple bereits bewegt!", player.getId());
     }
 
     /**

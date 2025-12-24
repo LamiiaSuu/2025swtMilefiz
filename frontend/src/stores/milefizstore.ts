@@ -217,6 +217,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = event.moved
+            showWarning(`Kein Zug mehr möglich - Verbleibende Züge verloren!`)
             //TODO moveloss animieren
             console.warn("lost remaining moves")
           }
@@ -241,6 +242,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           console.log("u ran into barrieeer oh no")
           if (event.playerId === gamedata.playerId) {
             audioStore.playSfx('impactBarrier')
+            showWarning('Autsch! Das sah schmerzhaft aus - verbleibende Züge verloren!')
             gamedata.currentDiceRoll = event.remainingMoves
           }
         }
