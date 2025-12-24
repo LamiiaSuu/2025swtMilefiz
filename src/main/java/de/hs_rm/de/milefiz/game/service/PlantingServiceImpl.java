@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import de.hs_rm.de.milefiz.game.model.Position;
 import de.hs_rm.de.milefiz.game.model.PositionFloat;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
@@ -16,20 +17,54 @@ public class PlantingServiceImpl implements PlantingService {
     public BoardDTO plantTrees(BoardDTO boardDTO, float density) {
 
         int[] boundingBox = getBoundingBoxFromBoard(boardDTO);
+        int[][] blockedByPath = getBlockedPositions(boardDTO, boundingBox);
         boundingBox[0] *= 5;
         boundingBox[1] *= 5;
-
         int[][] blueNoise = generateBlueNoiseVoidCluster(0.035f, boundingBox[0] + 4, boundingBox[1] + 4);
 
         for (int i = 0; i < blueNoise.length; i++) {
             for (int j = 0; j < blueNoise[0].length; j++) {
                 if (blueNoise[i][j] == 1) {
-                    boardDTO.addTree(new PositionFloat((i / 5f) + 2, (j / 5f) + 2f));
+                    float x = i / 5f;
+                    float y = j / 5f;
+                    int xFloor = (int) Math.floor(x);
+                    int xCeil = (int) Math.ceil(x);
+                    int yFloor = (int) Math.floor(y);
+                    int yCeil = (int) Math.ceil(y);
+
+                    int isBlocked = blockedByPath[xFloor][yFloor] + blockedByPath[xFloor][yCeil]
+                            + blockedByPath[xCeil][yFloor] + blockedByPath[xCeil][yCeil];
+                    if (isBlocked > 0) {
+                        continue;
+                    }
+                    boardDTO.addTree(new PositionFloat(x + 2f, y + 2f));
                 }
             }
         }
 
         return boardDTO;
+    }
+
+    private int[][] getBlockedPositions(BoardDTO boardDTO, int[] boundingBox) {
+        int[][] res = new int[boundingBox[0]][boundingBox[1]];
+
+        for (FieldDTO field : boardDTO.getFields()) {
+            Position pos = field.getPosition();
+            int x = pos.getX();
+            int y = pos.getY();
+            for (int i = -1; i < 2; i++) {
+                for (int j = -1; j < 2; j++) {
+                    if ((x + i) >= res.length || (y + j) >= res[0].length) {
+                        continue;
+                    }
+                    if ((x == 0 && i == -1) || (y == 0 && j == -1)) {
+                        continue;
+                    }
+                    res[x + i][y + j] = 1;
+                }
+            }
+        }
+        return res;
     }
 
     private int[] getBoundingBoxFromBoard(BoardDTO boardDTO) {
