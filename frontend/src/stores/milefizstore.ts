@@ -195,7 +195,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Energy save rejected:', event.msg)
-            showWarning(`Energie speichern fehlgeschlagen: ${event.msg}`)
+            showWarning(`${event.msg}`)
           }
           return
         }
