@@ -146,7 +146,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             `Player ${event.playerId} still has ${event.moves} moves left and therefore can't roll their dice yet!`,
           )
           gamedata.currentDiceRoll = event.moves
-          audioStore.playSfx('eventError')
+          showWarning(`Noch Züge offen - Würfeln nicht erlaubt.`)
         }
 
         // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
@@ -156,6 +156,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           cooldown.remainingSeconds = 0
         } else if (event.type === 'MOVE_ERROR') {
           console.warn('Move rejected:', event.msg)
+          showWarning(`${event.msg}`)
           return
         } else if (event.type === 'CHEATED') {
           if (event.playerId === gamedata.playerId) {
@@ -208,7 +209,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'CONSUME_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Consume energy rejected:', event.msg)
-            audioStore.playSfx('eventError')
+            //audioStore.playSfx('eventError')
+            showWarning(`${event.msg}`)
           }
         } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
@@ -258,6 +260,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
+          showWarning(`${event.msg}`)
         }
 
         // SPIEL STARTET
