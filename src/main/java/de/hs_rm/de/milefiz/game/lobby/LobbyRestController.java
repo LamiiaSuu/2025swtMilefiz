@@ -99,8 +99,12 @@ public class LobbyRestController {
 
         // Zuweisung eines Players
         Player player = new Player(lobby.getAvailableColor());
-
-        player.setPlayerName(username);
+        if(!username.isBlank()){
+            player.setPlayerName(username);
+        }else{
+            player.setPlayerName("Anonymer Kek");
+        }
+        
 
         // Player Token
         String playerToken = UUID.randomUUID().toString();
