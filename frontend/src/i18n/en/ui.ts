@@ -14,7 +14,7 @@ export const UI_EN: Record<UIKey, string> = {
     STANDARD_MAP: 'Standard Map',
     IMPORT: 'Import',
     FILE: 'File',
-    LEADER: 'Game Master',
+    LEADER: 'Leader',
     USERNAME: 'Username',
     CHOOSE_FILE: 'Choose File',
     NO_FILE_CHOSEN: 'No File Chosen',
@@ -23,7 +23,7 @@ export const UI_EN: Record<UIKey, string> = {
     LOBBIES: 'Lobbies',
     EDITOR_SAVE: 'Save',
     EDITOR_IMPORT: 'Open',
-    BASE: 'Start',
+    BASE: 'Base',
     GOAL: 'Goal',
     STANDARD_TILE: 'Standard',
     BARRIER: 'Barrier',
@@ -38,5 +38,6 @@ export const UI_EN: Record<UIKey, string> = {
     UNKNOWN_PLAYER: 'UNKNOWN PLAYER',
     YOU_CAN_GO_BACK_TO_MAIN_MENU: 'You can now go back to the main menu.',
     BACK_TO_MAIN_MENU: 'Back to Main Menu',
-    ROLL_DICE: 'Roll'
+    ROLL_DICE: 'Roll',
+    WAITING_FOR_LEADER: 'Waiting for Leader...'
 }

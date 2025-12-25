@@ -1,6 +1,10 @@
 <template>
   <div class="home">
     <Header overlay></Header>
+    <div class="language-switch">
+      <img src="/flags/Flag_of_Germany.svg" alt="Deutsch" @mouseenter="onHover" @click="setLocale('de'), audio.playSfx('click')" class="flag" />
+      <img src="/flags/flagge-grossbritannien.jpg" alt="English" @mouseenter="onHover" @click="setLocale('en'), audio.playSfx('click')" class="flag" />
+    </div>
     <div class="button-container">
       <button class="menu-button" @mouseenter="onHover" @click="newGameStart">{{ tUI('NEW_GAME') }}</button>
       <button class="menu-button" @mouseenter="onHover" @click="goToJoinGame">{{ tUI('JOIN_GAME') }}</button>
@@ -14,7 +18,7 @@
 import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
 import { useAudioStore } from '@/stores/audioStore'
-import { tUI } from '@/i18n'
+import { tUI, setLocale } from '@/i18n'
 
 const router = useRouter()
 const audio = useAudioStore()
@@ -83,4 +87,25 @@ function onHover() {
   transform: scale(1.05);
   transition: transform 0.2s ease;
 }
+
+.language-switch {
+  position: absolute;
+  top: 1rem; 
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem; 
+}
+
+.language-switch .flag {
+  width: 32px; 
+  height: 20px; 
+  cursor: pointer;
+  border-radius: 3px;
+  transition: transform 0.2s ease;
+}
+
+.language-switch .flag:hover {
+  transform: scale(1.2);
+}
+
 </style>

@@ -38,5 +38,7 @@ export const UI_DE: Record<UIKey, string> = {
     UNKNOWN_PLAYER: 'UNBEKANNTER SPIELER',
     YOU_CAN_GO_BACK_TO_MAIN_MENU: 'Du kannst jetzt zurück ins Hauptmenü gehen.',
     BACK_TO_MAIN_MENU: 'Zurück zum Hauptmenü',
-    ROLL_DICE: 'Würfle'
+    ROLL_DICE: 'Würfle',
+    WAITING_FOR_LEADER: 'Warten auf Spielleiter...'
+
 }

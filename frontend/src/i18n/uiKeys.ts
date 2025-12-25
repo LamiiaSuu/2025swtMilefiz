@@ -37,3 +37,4 @@ export type UIKey =
   | 'YOU_CAN_GO_BACK_TO_MAIN_MENU'
   | 'BACK_TO_MAIN_MENU'
   | 'ROLL_DICE'
+  | 'WAITING_FOR_LEADER'

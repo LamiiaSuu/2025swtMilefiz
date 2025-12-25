@@ -157,7 +157,7 @@ const handleFileChange = (event: Event) => {
                             <button type="button" class="start-game-button"
                                 @mouseenter="onHover" @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('joinGame') }"
                                 :disabled="!isOwnLeader" :class="{ active: isOwnLeader }">
-                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Spielersteller...' }}
+                                {{ isOwnLeader ? tUI('START_GAME')  : tUI('WAITING_FOR_LEADER') }}
                             </button>
                             <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
                         </div>
