@@ -68,8 +68,19 @@ export const useAudioStore = defineStore('audio', () => {
     impactBarrier: '/audio/meeple/ImpactBarrier2.mp3?v=2',
 
     //Music
-    zambolinoCuckoo: '/audio/music/ZambolinoCuckoo.mp3',
     ariaMath: '/audio/music/AriaMath.mp3',
+    cuddleClouds: '/audio/music/CuddleClouds.mp3',
+    driftingMemories: '/audio/music/DriftingMemories.mp3',
+    eveningHarmony: '/audio/music/EveningHarmony.mp3',
+    floatingDream: '/audio/music/FloatingDream.mp3',
+    forgottenBiomes: '/audio/music/ForgottenBiomes.mp3',
+    gentleBreeze: '/audio/music/GentleBreeze.mp3',
+    goldenGleam: '/audio/music/GoldenGleam.mp3',
+    polarLights: '/audio/music/PolarLights.mp3',
+    strangeWorlds: '/audio/music/StrangeWorlds.mp3',
+    sunlightThroughLeaves: '/audio/music/SunlightThroughLeaves.mp3',
+    wanderersTale: '/audio/music/WanderersTale.mp3',
+    whisperingWoods: '/audio/music/WhisperingWoods.mp3',
 
     //Ambient
     ambientForest05: '/audio/ambient/ForestAmbient05.mp3',

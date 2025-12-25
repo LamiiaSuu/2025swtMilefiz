@@ -12,7 +12,18 @@ onMounted(() => {
   ], true)
   audioEngine.playMusicPlaylist([
     'ariaMath',
-    'zambolinoCuckoo',
+    'cuddleClouds',
+    'driftingMemories',
+    'eveningHarmony',
+    'floatingDream',
+    'forgottenBiomes',
+    'gentleBreeze',
+    'goldenGleam',
+    'polarLights',
+    'strangeWorlds',
+    'sunlightThroughLeaves',
+    'wanderersTale',
+    'whisperingWoods',
   ], true)
 })
 
