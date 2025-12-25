@@ -5,6 +5,7 @@ import BackButton from '@/components/ui/pages/BackButton.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import AudioSettings from '@/components/ui/AudioSettings.vue';
 import { useAudioStore } from '@/stores/audioStore';
+import { tUI } from '@/i18n'
 
 const audio = useAudioStore()
 
@@ -16,7 +17,7 @@ function onHover() {
 
 <template>
   <div class="settings">
-    <Header overlay>Einstellungen</Header>
+    <Header overlay>{{ tUI('SETTINGS') }}</Header>
 
     <!-- AUDIO SETTINGS -->
     <AudioSettings></AudioSettings>

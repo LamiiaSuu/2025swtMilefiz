@@ -1,4 +1,7 @@
 import { reactive, readonly } from 'vue'
+import { tError } from '@/i18n'
+import type { ErrorCode } from '@/errors/errorCodes'
+
 
 /**
  * Globaler reaktiver State für Error-Anzeige
@@ -46,20 +49,20 @@ export function useErrorHandler() {
     errorState.autoHide = autoHide
 
     if (autoHide) {
-      let timeout = 5000 // Default 5 Sekunden
+      let timeout = 2500 // Default 2.5 extra Sekunden
       //Verschiedene Timings je nach Type:
       switch (type) {
         case 'info':
-          timeout = 4000 // Success: 4 Sekunden
+          timeout = 1000 // Success: 1 extra Sekunden
           break
         case 'warning':
-          timeout = 2000 // Warning: 2 Sekunden
+          timeout = 500 // Warning: .5 extra Sekunden
           break
         case 'error':
-          timeout = 4000 // Error: 4 Sekunden
+          timeout = 500 // Error: .5 extra Sekunden
           break
         case 'critical':
-          timeout = 8000 // Critical: 8 Sekunden
+          timeout = 2000 // Critical: 2 extra Sekunden
       }
       autoHideTimer = setTimeout(() => {
         if (errorState.show) hideError()
@@ -81,23 +84,23 @@ export function useErrorHandler() {
    * Zeigt eine Erfolgs-Message als blaues Info-Popup
    * @param message - Der Erfolgstext
    */
-  function showSuccess(message: string) {
-    showError(message, 'info', true)
+  function showSuccess(code: ErrorCode) {
+    showError(tError(code), 'info', true)
   }
   /**
    * Zeigt eine Warnung als zentriertes Orange-Overlay
    * @param message - Der Warnungstext
    */
-  function showWarning(message: string) {
-    showError(message, 'warning', true)
+  function showWarning(code: ErrorCode) {
+    showError(tError(code), 'warning', true)
   }
 
   /**
    * Zeigt einen kritischen Fehler als rotes Popup (8s Auto-Hide)
    * @param message - Der kritische Fehlertext
    */
-  function showCriticalError(message: string) {
-    showError(message, 'critical', true)
+  function showCriticalError(code: ErrorCode) {
+    showError(tError(code), 'critical', true)
   }
   return {
     errorState: readonly(errorState),

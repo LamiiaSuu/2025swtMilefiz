@@ -1,6 +1,7 @@
 <!-- Globales Heads-up Display (HUD), das über dem Map-Editor als Overlay gerendert wird. Die Button-Bar befindet sich unten rechts. -->
 
 <script setup lang="ts">
+import { tUI } from '@/i18n';
 import ImportButton from './buttons/ImportButton.vue';
 import SaveButton from './buttons/SaveButton.vue';
 </script>
@@ -20,7 +21,7 @@ import SaveButton from './buttons/SaveButton.vue';
           >
             <SaveButton />
           </div>
-          <p>Speichern (S)</p>
+          <p>{{ tUI('EDITOR_SAVE') }} (S)</p>
         </div>
         <div
         class="editor-icon-with-text"
@@ -30,7 +31,7 @@ import SaveButton from './buttons/SaveButton.vue';
           >
             <ImportButton />
           </div>
-          <p>Öffnen (O)</p>
+          <p>{{ tUI('EDITOR_IMPORT') }} (O)</p>
         </div>
       </div>
     </div>

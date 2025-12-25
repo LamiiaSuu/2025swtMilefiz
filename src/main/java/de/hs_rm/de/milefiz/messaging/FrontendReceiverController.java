@@ -408,7 +408,7 @@ public class FrontendReceiverController {
                     player.hasFullEnergy());
         }
 
-        return new FrontendSaveEnergyRejectedEvent("Player moved or has full energy", player.getId());
+        return new FrontendSaveEnergyRejectedEvent("Maximale Energie oder Meeple bereits bewegt!", player.getId());
     }
 
     /**
@@ -507,7 +507,7 @@ public class FrontendReceiverController {
             return new FrontendConsumeEnergyEvent(player.getId(), player.getEnergy(), player.hasFullEnergy());
         }
 
-        return new FrontendConsumeEnergyRejectedEvent(player.getId(), "Player does not have enough energy saved.");
+        return new FrontendConsumeEnergyRejectedEvent(player.getId(), "Nicht genug Energie für einen Sprung!");
     }
 
     /**

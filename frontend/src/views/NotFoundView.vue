@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
 
 const router = useRouter()
 const audio = useAudioStore()
@@ -14,13 +15,14 @@ function onHover() {
 
 <template>
   <div class="not-found">
-    <Header overlay>Seite nicht gefunden</Header>
+    <Header overlay>{{ tUI('PAGE_NOT_FOUND') }}</Header>
 
     <div class="content">
       <h1>404</h1>
       <p>
-        Diese Seite existiert nicht.<br />
-        Vielleicht haben wir sie auch noch nicht implementiert.
+        {{ tUI('PAGE_NOT_FOUND_FLAVOR_TEXT_UPPER') }}
+        <br />
+        {{ tUI('PAGE_NOT_FOUND_FLAVOR_TEXT_LOWER') }}
       </p>
 
       <div class="button-container">

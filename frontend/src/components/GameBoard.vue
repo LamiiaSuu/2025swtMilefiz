@@ -11,11 +11,14 @@ import { useMilefizStore } from "@/stores/milefizstore"
 import type { Direction } from "@/types/movement"
 import { Vector3 } from 'three'
 import { watch } from 'vue'
+import { useErrorHandler } from '@/composables/useErrorHandler';
 
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
 let started: boolean = false
+
+const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
 
 // record: meepleID -> gameCharRef
 const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
@@ -238,7 +241,10 @@ const handleKeydown = (e: KeyboardEvent) => {
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
     e.preventDefault()
-    if (milefizStore.gamedata.moved) return
+    if (milefizStore.gamedata.moved){
+      showWarning('MEEPLE_SELECTION_REJECTED')
+      return
+    } 
     cycleSelection(e.shiftKey ? -1 : 1)
     return
   }
@@ -281,7 +287,10 @@ function cycleSelection(offset: number = 1) {
 function handleMeepleSelectionKeydown(e: KeyboardEvent) {
   if (e.key < '1' || e.key > '5') return
 
-  if (milefizStore.gamedata.moved) return
+  if (milefizStore.gamedata.moved){
+    showWarning('MEEPLE_SELECTION_REJECTED')
+    return
+  } 
 
   e.preventDefault()
   const index = Number(e.key) - 1
@@ -398,11 +407,6 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     direction = moveDir.x > 0 ? "EAST" : "WEST"
   } else {
     direction = moveDir.z > 0 ? "SOUTH" : "NORTH"
-  }
-
-  //initial setzen für responiveness, wird beim empfangen des Move Events aus dem Backend auf den wahren Wert gesetzt
-  if(milefizStore.gamedata.currentDiceRoll && milefizStore.gamedata.currentDiceRoll > 0) {
-    milefizStore.gamedata.moved = true
   }
 
   milefizStore.sendMove(meepleId, direction)

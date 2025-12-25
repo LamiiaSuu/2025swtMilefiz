@@ -13,12 +13,13 @@ const audio = useAudioStore()
  */
 const remainingSeconds = computed(() => milefizStore.cooldown.remainingSeconds)
 const isCooldownActive = computed(() => milefizStore.cooldown.active)
+const isMovesLeft = computed(() => (milefizStore.gamedata?.currentDiceRoll ?? 0) > 0)
 /**
  * steuert, ob der Würfelbutton deaktiviert wird/bleibt
  * → true, solange Cooldown aktiv ist
  */
 const disabled = computed(() =>
-    isCooldownActive.value
+    isCooldownActive.value || isMovesLeft.value
 )
 
 /**

@@ -146,7 +146,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             `Player ${event.playerId} still has ${event.moves} moves left and therefore can't roll their dice yet!`,
           )
           gamedata.currentDiceRoll = event.moves
-          audioStore.playSfx('eventError')
+          showWarning(`ROLL_DICE_ERROR_MOVES_LEFT`)
         }
 
         // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
@@ -156,10 +156,28 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           cooldown.remainingSeconds = 0
         } else if (event.type === 'MOVE_ERROR') {
           console.warn('Move rejected:', event.msg)
+          if( event.msg === "MOVE_ERROR_INTO_START"){
+            showWarning("MOVE_ERROR_INTO_START")
+          }
+          else if( event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION"){
+            showWarning("MOVE_ERROR_NO_FIELD_IN_DIRECTION")
+          }
+          else if( event.msg === "MOVE_ERROR_NO_MOVES_LEFT"){
+            showWarning("MOVE_ERROR_NO_MOVES_LEFT")
+          }
+          else if( event.msg === "MOVE_ERROR_CANT_CHANGE_DIRECTION"){
+            showWarning("MOVE_ERROR_CANT_CHANGE_DIRECTION")
+          }
+          else if( event.msg === "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL"){
+            showWarning("MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL")
+          }
+          else if( event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE"){
+            showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
+          }
           return
         } else if (event.type === 'CHEATED') {
           if (event.playerId === gamedata.playerId) {
-            showWarning("Du kleiner Cheater")
+            showWarning("CHEATED")
             window.setTimeout(cheatRedirect, 2500)
           }
         } else if (event.type === 'MOVE') {
@@ -195,7 +213,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Energy save rejected:', event.msg)
-            showWarning(`Energie speichern fehlgeschlagen: ${event.msg}`)
+            showWarning(`SAVE_ENERGY_ERROR`)
           }
           return
         }
@@ -208,13 +226,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'CONSUME_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Consume energy rejected:', event.msg)
-            audioStore.playSfx('eventError')
+            //audioStore.playSfx('eventError')
+            showWarning(`CONSUME_ENERGY_ERROR`)
           }
         } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = event.moved
+            showWarning(`REMAINING_MOVES_LOST`)
             //TODO moveloss animieren
             console.warn("lost remaining moves")
           }
@@ -239,6 +259,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           console.log("u ran into barrieeer oh no")
           if (event.playerId === gamedata.playerId) {
             audioStore.playSfx('impactBarrier')
+            showWarning('REJECTED_BY_BARRIER')
+            gamedata.moved = false
             gamedata.currentDiceRoll = event.remainingMoves
           }
         }
@@ -258,6 +280,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
+          if( event.msg === "MOVE_BARRIER_REJECTED_START_OR_END"){
+            showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
+          }
+          else if( event.msg === "MOVE_BARRIER_OCCUPIED"){
+            showWarning("MOVE_BARRIER_OCCUPIED")
+          }
         }
 
         // SPIEL STARTET
