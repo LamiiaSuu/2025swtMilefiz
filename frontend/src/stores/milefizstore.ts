@@ -233,7 +233,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
-            gamedata.moved = event.moved
+            gamedata.moved = false
             showWarning(`REMAINING_MOVES_LOST`)
             //TODO moveloss animieren
             console.warn("lost remaining moves")
@@ -260,6 +260,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId === gamedata.playerId) {
             audioStore.playSfx('impactBarrier')
             showWarning('REJECTED_BY_BARRIER')
+            gamedata.moved = false
             gamedata.currentDiceRoll = event.remainingMoves
           }
         }
