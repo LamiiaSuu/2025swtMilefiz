@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { tUI } from '@/i18n';
 import { useAudioStore } from '@/stores/audioStore';
 import { useMilefizStore } from '@/stores/milefizstore';
 import { computed, ref } from 'vue'
@@ -32,7 +33,7 @@ function onHover() {
 <template>
     <!-- Lobby-ID -->
     <div class="form-row">
-        <label>Lobby-ID</label>
+        <label>{{ tUI('LOBBY_ID') }}</label>
 
         <div class="input-with-button">
             <input type="text" v-model="lobbyId" disabled class="form-input">

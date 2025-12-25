@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMilefizStore } from '@/stores/milefizstore'
 import type { Player } from "@/types/lobbyupdate"
+import { tUI } from '@/i18n'
 const router = useRouter()
 const milefizStore = useMilefizStore();
 const { gamedata, sendLobbyMessage} = milefizStore
@@ -50,8 +51,8 @@ function getPlayerFromLobby(): Player | null {
 <template>
     <!-- Username -->
     <div class="form-row">
-        <label>Username</label>
-        <input type="text" v-model="username" class="form-input" placeholder="Username" maxlength="16">
+        <label>{{ tUI('USERNAME') }}</label>
+        <input type="text" v-model="username" class="form-input" :placeholder=" tUI('USERNAME') " maxlength="16">
     </div>
 </template>
 

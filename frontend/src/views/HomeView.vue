@@ -2,10 +2,10 @@
   <div class="home">
     <Header overlay></Header>
     <div class="button-container">
-      <button class="menu-button" @mouseenter="onHover" @click="newGameStart">Neues Spiel</button>
-      <button class="menu-button" @mouseenter="onHover" @click="goToJoinGame">Spiel Beitreten</button>
-      <button class="menu-button" @mouseenter="onHover" @click="goToMapEditor">Map Editor</button>
-      <button class="menu-button" @mouseenter="onHover" @click="goToSettings">Einstellungen</button>
+      <button class="menu-button" @mouseenter="onHover" @click="newGameStart">{{ tUI('NEW_GAME') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToJoinGame">{{ tUI('JOIN_GAME') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToMapEditor">{{ tUI('MAP_EDITOR') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToSettings">{{ tUI('SETTINGS') }}</button>
     </div>
   </div>
 </template>
@@ -14,6 +14,7 @@
 import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
 import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
 
 const router = useRouter()
 const audio = useAudioStore()

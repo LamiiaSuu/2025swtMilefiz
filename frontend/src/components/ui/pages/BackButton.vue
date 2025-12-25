@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { useAudioStore } from '@/stores/audioStore';
+import { tUI } from '@/i18n';
 
 const milefizStore = useMilefizStore()
 const { disconnectAndReset } = milefizStore
@@ -22,7 +23,7 @@ const goBack = () => {
 
 <template>
   <button class="back-button" @click="goBack">
-    <slot>&lt; zurück</slot>
+    <slot>&lt; {{ tUI('BACK') }}</slot>
   </button>
 </template>
 

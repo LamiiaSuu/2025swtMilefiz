@@ -3,14 +3,15 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
 
 const audioStore = useAudioStore()
 const { channels } = storeToRefs(audioStore)
 
 const audioSettings = [
-  { key: 'music', label: 'Musik' },
-  { key: 'ambient', label: 'Ambient' },
-  { key: 'sfx', label: 'Soundeffekte' },
+  { key: 'music', label: tUI('MUSIC') },
+  { key: 'ambient', label: tUI('AMBIENCE') },
+  { key: 'sfx', label: tUI('SFX') },
 ]
 
 </script>
