@@ -143,7 +143,7 @@ public class MovementServiceImpl implements MovementService {
         if (!player.canMove()) {
             logger.info("No more moves left");
             if (player.hasMoved()) player.setMoved(false);
-            return new FrontendMoveRejectedEvent(player.getId(), "Keine verbleindenden Züge!");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_MOVES_LEFT");
         }
 
         // Ziel-Feld anhand der Bewegungsrichtung bestimmen
@@ -158,7 +158,7 @@ public class MovementServiceImpl implements MovementService {
         // Fehler, wenn in der angegeben Richtung kein Feld ist
         if (nextField == null) {
             logger.info("No Field in this Direction");
-            return new FrontendMoveRejectedEvent(player.getId(), "Kein Feld in diese Richtung!");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_FIELD_IN_DIRECTION");
         }
 
         // RICHTUNGSWECHSEL
@@ -166,7 +166,7 @@ public class MovementServiceImpl implements MovementService {
         // (Richtungswechsel ist verboten)
         if (lastField != null && nextField.equals(lastField)) {
             logger.info("Cant change direction!");
-            return new FrontendMoveRejectedEvent(player.getId(), "Richtungswechsel nicht erlaubt!");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_CANT_CHANGE_DIRECTION");
         }
 
         // START
@@ -174,7 +174,7 @@ public class MovementServiceImpl implements MovementService {
         // kann man auch nicht die der anderen betreten)
         if (nextField.getType().isStart()) {
             logger.info("Cant go back to a starting field!");
-            return new FrontendMoveRejectedEvent(player.getId(), "Startfelder können nicht betreten werden!");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_INTO_START");
         }
 
         // ZIEL
@@ -188,7 +188,7 @@ public class MovementServiceImpl implements MovementService {
                         nextField.getId());
             }
             logger.info("Cant enter End with remaining moves");
-            return new FrontendMoveRejectedEvent(player.getId(), "Ziel kann nur mit dem letzten Zug betreten werden!");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
         }
 
         // SACKGASSE DURCH BARRIEREN
@@ -244,7 +244,7 @@ public class MovementServiceImpl implements MovementService {
         // Ueberpruefen, ob das Zielfeld durch einen eigenen Meeple blockiert ist
         if (player.getRemainingMoves() == LAST_MOVE && ownMeepleFields.contains(nextField)) {
             logger.info("Attempt to occupy a field with multiple meeple failed");
-            return new FrontendMoveRejectedEvent(player.getId(), "Feld bereits durch eigenen Meeple besetzt!");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE");
         }
 
         // SACKGASSE DURCH EIGENE MEEPLE
@@ -458,13 +458,13 @@ public class MovementServiceImpl implements MovementService {
         // Fehler, wenn es sich um ein Startfeld oder das Ende handelt
         if (targetField.getType().isEnd() || targetField.getType().isStart()) {
             logger.info("Cant place a barrier on Start or End");
-            return new FrontendMoveBarrierRejectedEvent("Barriere kann nicht auf Start- oder Zielfeld gesetzt werden");
+            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_REJECTED_START_OR_END");
         }
 
         // Fehler wenn das Feld besetzt ist
         if (isOccupied(lobby, board, targetField)) {
             logger.info("Cant place a barrier on an occupied Field");
-            return new FrontendMoveBarrierRejectedEvent("Barriere kann nicht auf besetztes Feld gesetzt werden");
+            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_OCCUPIED");
         }
 
         barrier.setCurrentField(targetField);

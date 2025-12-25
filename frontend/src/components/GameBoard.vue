@@ -242,7 +242,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Tab') {
     e.preventDefault()
     if (milefizStore.gamedata.moved){
-      showWarning('Meeple wurde bereits bewegt, Wechsel nicht möglich.')
+      showWarning('MEEPLE_SELECTION_REJECTED')
       return
     } 
     cycleSelection(e.shiftKey ? -1 : 1)
@@ -288,7 +288,7 @@ function handleMeepleSelectionKeydown(e: KeyboardEvent) {
   if (e.key < '1' || e.key > '5') return
 
   if (milefizStore.gamedata.moved){
-    showWarning('Meeple wurde bereits bewegt, Wechsel nicht möglich.')
+    showWarning('MEEPLE_SELECTION_REJECTED')
     return
   } 
 

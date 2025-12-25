@@ -1,4 +1,7 @@
 import { reactive, readonly } from 'vue'
+import { tError } from '@/i18n'
+import type { ErrorCode } from '@/errors/errorCodes'
+
 
 /**
  * Globaler reaktiver State für Error-Anzeige
@@ -81,23 +84,23 @@ export function useErrorHandler() {
    * Zeigt eine Erfolgs-Message als blaues Info-Popup
    * @param message - Der Erfolgstext
    */
-  function showSuccess(message: string) {
-    showError(message, 'info', true)
+  function showSuccess(code: ErrorCode) {
+    showError(tError(code), 'info', true)
   }
   /**
    * Zeigt eine Warnung als zentriertes Orange-Overlay
    * @param message - Der Warnungstext
    */
-  function showWarning(message: string) {
-    showError(message, 'warning', true)
+  function showWarning(code: ErrorCode) {
+    showError(tError(code), 'warning', true)
   }
 
   /**
    * Zeigt einen kritischen Fehler als rotes Popup (8s Auto-Hide)
    * @param message - Der kritische Fehlertext
    */
-  function showCriticalError(message: string) {
-    showError(message, 'critical', true)
+  function showCriticalError(code: ErrorCode) {
+    showError(tError(code), 'critical', true)
   }
   return {
     errorState: readonly(errorState),
