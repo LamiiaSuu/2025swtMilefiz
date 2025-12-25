@@ -4,6 +4,7 @@
     <div class="language-switch">
       <img src="/flags/Flag_of_Germany.svg" alt="Deutsch" @mouseenter="onHover" @click="setLocale('de'), audio.playSfx('click')" class="flag" />
       <img src="/flags/flagge-grossbritannien.jpg" alt="English" @mouseenter="onHover" @click="setLocale('en'), audio.playSfx('click')" class="flag" />
+      <img src="/flags/Flag_of_the_Netherlands.svg.png" alt="Netherlands" @mouseenter="onHover" @click="setLocale('nl'), audio.playSfx('click')" class="flag" />
     </div>
     <div class="button-container">
       <button class="menu-button" @mouseenter="onHover" @click="newGameStart">{{ tUI('NEW_GAME') }}</button>
