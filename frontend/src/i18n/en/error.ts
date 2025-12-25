@@ -5,7 +5,7 @@ export const ERRORS_EN: Record<ErrorCode, string> = {
     REMAINING_MOVES_LOST: 'No possible moves left - remaining moves lost!',
     CHEATED: 'You little cheater!',
     MEEPLE_SELECTION_REJECTED: 'Meeple already moved - switching not allowed!',
-    MOVE_ERROR_INTO_START: 'Start spaces cannot be entered!',
+    MOVE_ERROR_INTO_START: 'Bases cannot be entered!',
     MOVE_ERROR_NO_FIELD_IN_DIRECTION: 'No space in that direction!',
     MOVE_ERROR_NO_MOVES_LEFT: 'No moves remaining!',
     MOVE_ERROR_CANT_CHANGE_DIRECTION: 'Changing direction not allowed!',
