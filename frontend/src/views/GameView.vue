@@ -11,7 +11,6 @@ onMounted(() => {
     'ambientForest05',
   ], true)
   audioEngine.playMusicPlaylist([
-    'ariaMath',
     'cuddleClouds',
     'driftingMemories',
     'eveningHarmony',
