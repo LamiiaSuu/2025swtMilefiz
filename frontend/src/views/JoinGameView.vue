@@ -5,7 +5,8 @@ import LobbyList, { type Lobby } from '@/components/ui/pages/LobbyList.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useAudioStore } from '@/stores/audioStore'
-import { tUI, setLocale } from '@/i18n'
+import { tUI } from '@/i18n'
+import LanguageSelection from '@/components/ui/LanguageSelection.vue'
 
 const lobbies = ref<Lobby[]>([])
 const lobbyid = ref<string>('')
@@ -57,11 +58,7 @@ function onHover() {
 <template>
   <div class="lobbylist">
     <Header>{{ tUI('JOIN_GAME') }}</Header>
-    <div class="language-switch">
-      <img src="/flags/Flag_of_Germany.svg" alt="Deutsch" @mouseenter="onHover" @click="setLocale('de'), audio.playSfx('click')" class="flag" />
-      <img src="/flags/flagge-grossbritannien.jpg" alt="English" @mouseenter="onHover" @click="setLocale('en'), audio.playSfx('click')" class="flag" />
-      <img src="/flags/Flag_of_the_Netherlands.svg.png" alt="Netherlands" @mouseenter="onHover" @click="setLocale('nl'), audio.playSfx('click')" class="flag" />
-    </div>
+    <LanguageSelection></LanguageSelection>
       <ComponentList>
         <div class="game-container">
           <div class="game-label">{{ tUI('USERNAME') }}</div>
@@ -205,25 +202,5 @@ fill: var(--text-color-input-focus);
   background-color: var(--background-color-input-focus);
   border-color: var(--border-color-input-focus);
   color: var(--text-color-input-focus);
-}
-
-.language-switch {
-  position: absolute;
-  top: 1rem; 
-  right: 1rem;
-  display: flex;
-  gap: 0.5rem; 
-}
-
-.language-switch .flag {
-  width: 32px; 
-  height: 20px; 
-  cursor: pointer;
-  border-radius: 3px;
-  transition: transform 0.2s ease;
-}
-
-.language-switch .flag:hover {
-  transform: scale(1.2);
 }
 </style>
