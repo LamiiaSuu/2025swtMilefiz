@@ -11,16 +11,38 @@ import de.hs_rm.de.milefiz.game.model.PositionFloat;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
 
+/**
+ * Implementation des {@link PlantingService}
+ * 
+ * Diese Klasse stellt in erster Linie die Methode
+ * {@link #plantTrees(BoardDTO, float)} bereit, die zum Pflanzen von Bäumen
+ * genutzt werden kann.
+ * 
+ * Außerdem enthält sie alle dafür notwendigen Methoden.
+ * 
+ * <p>
+ * Zum Pflanzen der Bäume wird ein blaues Rauschen verwendet, welches mit dem
+ * void & cluster Algorithmus erstellt wird.
+ * 
+ * @author Thilo Wittmer
+ */
 public class PlantingServiceImpl implements PlantingService {
 
+    /**
+     * pflanzt bäume auf das BoardDTO mit der angegebene density.
+     * 
+     * @param boardDTO das BoardDTO, wo Bäume gepflanzt werden sollen
+     * @param density  die Dichte mit der Bäume gepflanzt werden sollen
+     * 
+     * @return das BoardDTO mit den gepflanzten Bäumen
+     */
     @Override
     public BoardDTO plantTrees(BoardDTO boardDTO, float density) {
-
         int[] boundingBox = getBoundingBoxFromBoard(boardDTO);
         int[][] blockedByPath = getBlockedPositions(boardDTO, boundingBox);
         boundingBox[0] *= 5;
         boundingBox[1] *= 5;
-        int[][] blueNoise = generateBlueNoiseVoidCluster(0.035f, boundingBox[0] + 4, boundingBox[1] + 4);
+        int[][] blueNoise = generateBlueNoiseVoidCluster(density, boundingBox[0] + 4, boundingBox[1] + 4);
 
         for (int i = 0; i < blueNoise.length; i++) {
             for (int j = 0; j < blueNoise[0].length; j++) {
@@ -32,6 +54,10 @@ public class PlantingServiceImpl implements PlantingService {
                     int yFloor = (int) Math.floor(y);
                     int yCeil = (int) Math.ceil(y);
 
+                    if (blockedByPath.length <= xCeil || blockedByPath.length <= xFloor
+                            || blockedByPath[0].length <= yCeil || blockedByPath[0].length <= yFloor) {
+                        continue;
+                    }
                     int isBlocked = blockedByPath[xFloor][yFloor] + blockedByPath[xFloor][yCeil]
                             + blockedByPath[xCeil][yFloor] + blockedByPath[xCeil][yCeil];
                     if (isBlocked > 0) {
@@ -45,28 +71,49 @@ public class PlantingServiceImpl implements PlantingService {
         return boardDTO;
     }
 
+    /**
+     * ermittelt die Positionen, die durch den Weg für das Bäumepflanzen blockiert
+     * sein sollen
+     * 
+     * @param boardDTO    das board
+     * @param boundingBox die boundingbox der felder
+     *                    <p>
+     *                    siehe {@link #getBoundingBoxFromBoard(BoardDTO)}
+     * @return array, wo die die indizes der blockierten positionen auf 1 gesetzt
+     *         sind
+     */
     private int[][] getBlockedPositions(BoardDTO boardDTO, int[] boundingBox) {
-        int[][] res = new int[boundingBox[0]][boundingBox[1]];
+        int[][] res = new int[boundingBox[0] + 1][boundingBox[1] + 1];
 
         for (FieldDTO field : boardDTO.getFields()) {
-            Position pos = field.getPosition();
-            int x = pos.getX();
-            int y = pos.getY();
-            for (int i = -1; i < 2; i++) {
-                for (int j = -1; j < 2; j++) {
-                    if ((x + i) >= res.length || (y + j) >= res[0].length) {
-                        continue;
-                    }
-                    if ((x == 0 && i == -1) || (y == 0 && j == -1)) {
-                        continue;
-                    }
-                    res[x + i][y + j] = 1;
-                }
+            Position p = field.getPosition();
+            int x = p.getX();
+            int y = p.getY();
+            res[x][y] = 1;
+
+            if (field.getNorth() != null && res[x].length <= (y)) {
+                res[x][y + 1] = 1;
+            }
+            if (field.getEast() != null && res.length <= (x)) {
+                res[x + 1][y] = 1;
+            }
+            if (field.getSouth() != null && y > 0) {
+                res[x][y - 1] = 1;
+            }
+            if (field.getWest() != null && x > 0) {
+                res[x - 1][y] = 1;
             }
         }
+
         return res;
     }
 
+    /**
+     * ermittelt bounding box für die Felder des boards
+     * 
+     * @param boardDTO board für das die bounding box ermittelt werden soll
+     * @return int[] wo int[0] x wert und int[1] der y wert der bounding box ist
+     */
     private int[] getBoundingBoxFromBoard(BoardDTO boardDTO) {
         int x = 0;
         int y = 0;
