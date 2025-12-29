@@ -167,19 +167,19 @@ function exportTiles(): BackendTile[] {
   const usedStartColors = new Set<string>()
 
   return tiles.map(tile => {
-    const north = tile.connections.up
+    let north = tile.connections.up
       ? findNeighbor(tile, 'up')?.id ?? undefined
       : undefined
 
-    const south = tile.connections.down
+    let south = tile.connections.down
       ? findNeighbor(tile, 'down')?.id ?? undefined
       : undefined
 
-    const west = tile.connections.left
+    let west = tile.connections.left
       ? findNeighbor(tile, 'left')?.id ?? undefined
       : undefined
 
-    const east = tile.connections.right
+    let east = tile.connections.right
       ? findNeighbor(tile, 'right')?.id ?? undefined
       : undefined
 
@@ -188,6 +188,16 @@ function exportTiles(): BackendTile[] {
       : tile.type === 'goal'
         ? 'END'
         : 'NORMAL'
+
+    const northTemp = north
+    const eastTemp = east
+    const southTemp = south
+    const westTemp = west
+
+    north = southTemp
+    south = northTemp
+    east = westTemp
+    west = eastTemp
 
     if (fieldType.startsWith("START_")) {
       usedStartColors.add(fieldType)
@@ -331,10 +341,10 @@ function handleImport(file: File) {
             x: field.position.x,
             y: field.position.y,
             connections: {
-              up: Boolean(field.north),
-              down: Boolean(field.south),
-              left: Boolean(field.west),
-              right: Boolean(field.east)
+              up: Boolean(field.south),
+              down: Boolean(field.north),
+              left: Boolean(field.east),
+              right: Boolean(field.west)
             }
           }
         })
