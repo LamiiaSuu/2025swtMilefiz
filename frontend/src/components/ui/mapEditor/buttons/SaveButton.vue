@@ -1,15 +1,36 @@
 <script setup lang="ts">
+import { inject, onMounted, onUnmounted } from 'vue'
 
+const emitSave = inject<() => Promise<void> | void>('emitSave')
+
+async function handleSave() {
+    if (emitSave) {
+        await emitSave()
+    }
+}
+
+onMounted(() => {
+    window.addEventListener("keydown", onKeypress)
+});
+
+onUnmounted(() => {
+    window.removeEventListener("keydown", onKeypress)
+})
+
+// Hotkey S
+const onKeypress = (e: KeyboardEvent) => {
+    if (e.key.toLocaleLowerCase() === "s") {
+        handleSave()
+    }
+}
 </script>
 <template>
-    <button class="editor-action-button">
+    <button class="editor-action-button" @click="handleSave">
         <img src="/mapEditorIcons/save.png" class="action-icon editor-invert-color" />
     </button>
 </template>
 
 <style scoped>
-
-
 .editor-action-button {
     position: relative;
     padding: 5px;
@@ -29,7 +50,6 @@
 
 
 .editor-action-button:hover {
-  transform: scale(1.05);
+    transform: scale(1.05);
 }
-
 </style>
