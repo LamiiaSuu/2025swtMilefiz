@@ -155,26 +155,28 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           cooldown.active = false
           cooldown.remainingSeconds = 0
         } else if (event.type === 'MOVE_ERROR') {
-          console.warn('Move rejected:', event.msg)
-          if( event.msg === "MOVE_ERROR_INTO_START"){
-            showWarning("MOVE_ERROR_INTO_START")
-          }
-          else if( event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION"){
-            showWarning("MOVE_ERROR_NO_FIELD_IN_DIRECTION")
-          }
-          else if( event.msg === "MOVE_ERROR_NO_MOVES_LEFT"){
-            showWarning("MOVE_ERROR_NO_MOVES_LEFT")
-          }
-          else if( event.msg === "MOVE_ERROR_CANT_CHANGE_DIRECTION"){
-            showWarning("MOVE_ERROR_CANT_CHANGE_DIRECTION")
-          }
-          else if( event.msg === "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL"){
-            showWarning("MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL")
-          }
-          else if( event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE"){
-            showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
-          }
-          return
+          if(event.playerId === gamedata.playerId){
+            console.warn('Move rejected:', event.msg)
+            if( event.msg === "MOVE_ERROR_INTO_START"){
+              showWarning("MOVE_ERROR_INTO_START")
+            }
+            else if( event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION"){
+              showWarning("MOVE_ERROR_NO_FIELD_IN_DIRECTION")
+            }
+            else if( event.msg === "MOVE_ERROR_NO_MOVES_LEFT"){
+              showWarning("MOVE_ERROR_NO_MOVES_LEFT")
+            }
+            else if( event.msg === "MOVE_ERROR_CANT_CHANGE_DIRECTION"){
+              showWarning("MOVE_ERROR_CANT_CHANGE_DIRECTION")
+            }
+            else if( event.msg === "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL"){
+              showWarning("MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL")
+            }
+            else if( event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE"){
+              showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
+            }
+            return
+        }
         } else if (event.type === 'CHEATED') {
           if (event.playerId === gamedata.playerId) {
             showWarning("CHEATED")
