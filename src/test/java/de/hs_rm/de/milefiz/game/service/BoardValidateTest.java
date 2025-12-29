@@ -85,6 +85,8 @@ public class BoardValidateTest {
 
         Field startRed = new Field(FieldType.START_RED, null);
         Field startBlue = new Field(FieldType.START_BLUE, null);
+        Field startYellow = new Field(FieldType.START_YELLOW, null);
+        Field startGreen = new Field(FieldType.START_GREEN, null);
         Field field1 = new Field(FieldType.NORMAL, null);
         Field field2 = new Field(FieldType.NORMAL, null);
         Field end = new Field(FieldType.END, null);
@@ -96,6 +98,12 @@ public class BoardValidateTest {
         startBlue.getNeighbours().put(null, field1);
         field1.getNeighbours().put(null, startBlue);
 
+        startYellow.getNeighbours().put(null, field1);
+        field1.getNeighbours().put(null, startRed);
+
+        startGreen.getNeighbours().put(null, field1);
+        field1.getNeighbours().put(null, startRed);
+
         field1.getNeighbours().put(null, field2);
         field2.getNeighbours().put(null, field1);
 
@@ -104,6 +112,8 @@ public class BoardValidateTest {
 
         board.setStartRed(startRed);
         board.setStartBlue(startBlue);
+        board.setStartGreen(startGreen);
+        board.setStartYellow(startYellow);
 
         // darf keine Exception werfen
         assertDoesNotThrow(() -> boardService.validateBoard(board));

@@ -19,7 +19,7 @@ public class BoardServiceImpl implements BoardService {
      * Validiert ein Board nach folgenden Kriterien:
      *
      * <ul>
-     * <li>Es müssen mindestens 2 Startfelder existieren</li>
+     * <li>Es müssen mindestens 4 Startfelder existieren</li>
      * <li>Es muss mindestens 1 Ziel existieren</li>
      * <li>Das Ziel muss von überall aus erreichbar sein</li>
      * </ul>
@@ -46,8 +46,8 @@ public class BoardServiceImpl implements BoardService {
         }
 
         // Mehr als 2 Startfelder?
-        if (startFields.size() < 2) {
-            throw new BoardValidateException("Es müssen mindestens 2 Startfelder existieren");
+        if (startFields.size() < 4) {
+            throw new BoardValidateException("Es müssen mindestens 4 Startfelder existieren");
         }
 
         // Expandiere alle Startfelder und suche nach Zielen, ob diese erreichbar sind
