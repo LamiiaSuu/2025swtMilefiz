@@ -67,6 +67,8 @@ function onHover() {
   font-size: 6rem;
   margin-bottom: 0.5rem;
   text-shadow: 0 0 32px rgba(0, 0, 0, 1);
+  paint-order: stroke fill;
+  -webkit-text-stroke: 10px black;
 }
 
 .content p {
@@ -76,7 +78,8 @@ function onHover() {
   0 0 8px rgba(0,0,0,0.9),
   0 0 20px rgba(0,0,0,0.8),
   0 0 40px rgba(0,0,0,0.5);
-  
+  paint-order: stroke fill;
+  -webkit-text-stroke: 6px black;
 }
 
 .button-container {

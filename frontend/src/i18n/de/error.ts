@@ -5,7 +5,7 @@ export const ERRORS_DE: Record<ErrorCode, string> = {
     REMAINING_MOVES_LOST: 'Kein Zug mehr möglich - Verbleibende Züge verloren!',
     CHEATED: 'Du kleiner Cheater.',
     MEEPLE_SELECTION_REJECTED: 'Meeple bereits bewegt - Wechsel nicht möglich.',
-    MOVE_ERROR_INTO_START: '1Startfelder können nicht betreten werden!',
+    MOVE_ERROR_INTO_START: 'Startfelder können nicht betreten werden!',
     MOVE_ERROR_NO_FIELD_IN_DIRECTION: 'Kein Feld in diese Richtung!',
     MOVE_ERROR_NO_MOVES_LEFT: 'Keine verbleindenden Züge!',
     MOVE_ERROR_CANT_CHANGE_DIRECTION: 'Richtungswechsel nicht erlaubt!',
