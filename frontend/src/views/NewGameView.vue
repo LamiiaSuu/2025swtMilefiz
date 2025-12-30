@@ -7,18 +7,26 @@ import UsernameField from '@/components/ui/pages/UsernameField.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { storeToRefs } from 'pinia'
+import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
+import LanguageSelection from '@/components/ui/LanguageSelection.vue'
 
 const { startGameCommand } = useMilefizStore()
 const milefizStore = useMilefizStore()
-const { isJoined, joinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
+const { isJoined, joinLobby, createJoinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
+const audio = useAudioStore()
 
 onMounted(() => {
     if (!isJoined) {
-        console.log(`keiner lobby gejoint, joine random`)
-        milefizStore.joinLobby()
+        // wenn keiner Lobby bereits gejoint -> erstelle neue
+        milefizStore.createJoinLobby();
     }
-    
+
 })
+
+function onHover() {
+  audio.playSfx('hover')
+}
 
 // Reaktive Leader-Prüfung
 const isOwnLeader = computed(() => storeIsOwnLeader())
@@ -79,8 +87,8 @@ const handleFileChange = (event: Event) => {
 
     <div class="content">
         <!-- MI'lefiz Header -->
-        <Header>Neues Spiel</Header>
-
+        <Header>{{ tUI('NEW_GAME') }}</Header>
+        <LanguageSelection></LanguageSelection>
         <div class="new-game-form">
             <form>
                 <!-- Linke Spalte -->
@@ -91,32 +99,34 @@ const handleFileChange = (event: Event) => {
 
                     <!-- Lobby-Name -->
                     <div class="form-row">
-                        <label>Lobby-Name</label>
-                        <input type="text" v-model="lobbyName" class="form-input" placeholder="Lobby-Name"
+                        <label>{{ tUI('LOBBY_NAME') }}</label>
+                        <input type="text" v-model="lobbyName" class="form-input" :placeholder=" tUI('LOBBY_NAME') "
                             :disabled="!isOwnLeader">
                     </div>
 
-                    <!-- Map Buttons -->
-                    <div class="form-row">
-                        <label>Map</label>
-                        <div class="map-buttons">
-                            <button type="button" class="map-button" :class="{ active: mapMode === 'standard' }"
-                                @click="mapMode = 'standard'">
-                                Standardmap
-                            </button>
-                            <button type="button" class="map-button" :class="{ active: mapMode === 'import' }"
-                                @click="mapMode = 'import'">
-                                Importieren
-                            </button>
+                    <!-- Map Buttons (Nur bei Lobby-Ersteller)-->
+                    <template v-if="isOwnLeader">
+                        <div class="form-row">
+                            <label>{{ tUI('MAP') }}</label>
+                            <div class="map-buttons">
+                                <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'standard' }"
+                                    @click="mapMode = 'standard'">
+                                    {{ tUI('STANDARD_MAP') }}
+                                </button>
+                                <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'import' }"
+                                    @click="mapMode = 'import'">
+                                    {{ tUI('IMPORT') }}
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Datei importieren -->
-                    <div class="form-row">
-                        <label>Datei</label>
-                        <input type="file" @change="handleFileChange" class="file-input"
-                            :disabled="mapMode === 'standard'" accept=".json,.map">
-                    </div>
+                        <!-- Datei importieren -->
+                        <div class="form-row">
+                            <label>{{ tUI('FILE') }}</label>
+                            <input type="file" @mouseenter="onHover" @change="handleFileChange" class="file-input"
+                                :disabled="mapMode === 'standard'" accept=".json,.map">
+                        </div>
+                    </template>
 
                 </div>
 
@@ -128,11 +138,16 @@ const handleFileChange = (event: Event) => {
 
                     <!-- Spieler-Liste -->
                     <div class="form-row">
-                        <label>Spieler</label>
+                        <label>{{ tUI('PLAYERS') }}</label>
                         <div class="players-list">
                             <div v-for="(player, index) in lobby?.players" :key="index" class="player-item">
                                 <span class="player-color-dot" :style="{ backgroundColor: player.color }"></span>
-                                {{ player.playerName }}
+                                <span style="pointer-events: none">{{ player.playerName }}</span>
+                                <span v-if="player.leader" class="tooltip-wrapper">
+                                    <img src="@/assets/buttons/sword-icon.png" style="filter: brightness(0)"
+                                        alt="Leader" width="20" height="20"></img>
+                                    <span class="tooltip">{{ tUI('LEADER') }}</span>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -141,12 +156,11 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <div class="button-container">
                             <button type="button" class="start-game-button"
-                                    @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }) }"
-                                    :disabled="!isOwnLeader"
-                                    :class="{ active: isOwnLeader }">
-                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Leader...' }}
+                                @mouseenter="onHover" @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('joinGame') }"
+                                :disabled="!isOwnLeader" :class="{ active: isOwnLeader }">
+                                {{ isOwnLeader ? tUI('START_GAME')  : tUI('WAITING_FOR_LEADER') }}
                             </button>
-                            <BackButton :to="{ name: 'Homepage' }" />
+                            <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
                         </div>
                     </div>
                 </div>
@@ -312,7 +326,6 @@ select {
     gap: 10px;
     padding: 8px 0;
     font-size: 1.1rem;
-    pointer-events: none;
 }
 
 .player-color-dot {
@@ -331,22 +344,47 @@ select {
 
 .start-game-button {
     padding: 15px 30px;
-    background-image: var(--button-gradient-gray);
+    background-image: var(--button-gradient-red);
     color: white;
     font-size: 1.3rem;
-    cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.start-game-button.active {
-    background-image: var(--button-gradient-red);
+.start-game-button:disabled {
+    background-image: unset;
+    background-color: var(--button-color-inactive);
+    cursor: default;
 }
 
-.start-game-button:hover {
-    background-image: var(--button-gradient-gray);
-}
-
-.start-game-button:hover.active {
+.start-game-button:hover:enabled {
     background-color: rgba(180, 40, 40, 0.95);
+    cursor: pointer;
 }
+
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.tooltip-wrapper:hover .tooltip {
+    opacity: 1;
+}
+
 </style>

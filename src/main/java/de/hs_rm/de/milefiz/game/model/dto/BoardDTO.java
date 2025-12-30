@@ -12,6 +12,7 @@ import de.hs_rm.de.milefiz.game.model.PositionFloat;
  * DTO des Spielbretts zur Übertragung an das Frontend
  */
 public class BoardDTO {
+
     private UUID id;
     private String name;
     private List<FieldDTO> fields = new ArrayList<>();
@@ -50,6 +51,17 @@ public class BoardDTO {
         this.fields.add(new FieldDTO(id, type, position, barrier, north, east, south, west));
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("BoardDTO{");
+        sb.append("id=").append(id);
+        sb.append(", name=").append(name);
+        sb.append(", fields=").append(fields);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public List<TreeDTO> getTrees() {
         return trees;
     }
@@ -76,6 +88,7 @@ public class BoardDTO {
     }
 
     public static class FieldDTO {
+
         private UUID id;
         private UUID north;
         private UUID east;
@@ -164,6 +177,10 @@ public class BoardDTO {
             this.position = position;
         }
 
+        @Override
+        public String toString() {
+            return "FieldDTO [id=" + id + ", north=" + north + ", east=" + east + ", south=" + south + ", west=" + west
+                    + ", type=" + type + ", barrier=" + barrier + ", position=" + position + "]";
+        }
     }
-
 }

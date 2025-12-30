@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
+import { useAudioStore } from "@/stores/audioStore";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
+const audio = useAudioStore()
 
 /** Zugriff auf Cooldown-State
  * remainingSceonds: Wert vom Server
@@ -11,12 +13,13 @@ const milefizStore = useMilefizStore()
  */
 const remainingSeconds = computed(() => milefizStore.cooldown.remainingSeconds)
 const isCooldownActive = computed(() => milefizStore.cooldown.active)
+const isMovesLeft = computed(() => (milefizStore.gamedata?.currentDiceRoll ?? 0) > 0)
 /**
  * steuert, ob der Würfelbutton deaktiviert wird/bleibt
  * → true, solange Cooldown aktiv ist
  */
 const disabled = computed(() =>
-    isCooldownActive.value
+    isCooldownActive.value || isMovesLeft.value
 )
 
 /**
@@ -79,6 +82,7 @@ onUnmounted(() => {
 const onKeypress = (e: KeyboardEvent) => {
     if (e.key.toLocaleLowerCase() === "r") {
         console.log("Würfeln angestoßen")
+        audio.playSfx('gameHUD')
         rollDice()
     }
 }

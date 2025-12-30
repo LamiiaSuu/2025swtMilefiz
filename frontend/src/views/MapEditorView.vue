@@ -2,20 +2,58 @@
 import EditorHUD from '@/components/ui/mapEditor/EditorHUD.vue';
 import EditorFileHUD from '@/components/ui/mapEditor/EditorFileHUD.vue';
 import BackButton from '@/components/ui/pages/BackButton.vue'
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, provide } from 'vue'
 import StandardTile from '@/components/ui/mapEditor/tiles/StandardTile.vue';
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useAudioStore } from '@/stores/audioStore';
+import type { IBoardDTD } from '@/stores/IBoardDTD'
+import type { IFieldDTD } from '@/stores/IFieldDTD'
 
-type TileData = {
-  type: string
-  x: number
-  y: number
+type Direction = 'up' | 'down' | 'left' | 'right'
+type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
+
+const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier'>('tile')
+const audio = useAudioStore()
+const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
+
+const DIR_OFFSET: Record<Direction, { x: number; y: number }> = {
+  up: { x: 0, y: -2 },
+  down: { x: 0, y: 2 },
+  left: { x: -2, y: 0 },
+  right: { x: 2, y: 0 },
 }
 
+const selectedTile = computed<TileData | null>(() =>
+  tiles.find(t => key(t.x, t.y) === selectedKey.value) ?? null
+)
+
+type TileData = {
+  id: string
+  type: ToolType
+  x: number
+  y: number
+  connections: {
+    up: boolean
+    down: boolean
+    left: boolean
+    right: boolean
+  }
+}
+
+type BoardExport = IBoardDTD & { id: string; name: string }
+
 const tiles = reactive<TileData[]>([
-  { type: "standard", x: 0, y: 0 } // Start-Tile
+  {
+    id: crypto.randomUUID(),
+    type: 'tile',
+    x: 0,
+    y: 0,
+    connections: { up: false, down: false, left: false, right: false }
+  }
 ])
 
 const selectedKey = ref<string>('0,0')
+
 
 /* Kamera */
 const offset = reactive({ x: 0, y: 0 })
@@ -61,45 +99,306 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateViewport)
 })
 
+function addTile(fromTile: TileData, dir: Direction) {
+  const offset = {
+    up: { x: 0, y: -2 },
+    down: { x: 0, y: 2 },
+    left: { x: -2, y: 0 },
+    right: { x: 2, y: 0 }
+  }[dir]
+
+  const newX = fromTile.x + offset.x
+  const newY = fromTile.y + offset.y
+
+
+  const existing = tiles.find(t => t.x === newX && t.y === newY)
+  if (existing) {
+
+    connectTiles(fromTile, existing, dir)
+    return
+  }
+
+  const newTile: TileData = {
+    id: crypto.randomUUID(),
+    type: selectedTool.value,
+    x: newX,
+    y: newY,
+    connections: { up: false, down: false, left: false, right: false }
+  }
+
+  tiles.push(newTile)
+
+  connectTiles(fromTile, newTile, dir)
+
+  selectedKey.value = key(newX, newY)
+}
+
+function findNeighbor(tile: TileData, dir: Direction): TileData | null {
+  const off = DIR_OFFSET[dir]
+  return tiles.find(t => t.x === tile.x + off.x && t.y === tile.y + off.y) ?? null
+}
+
+function onHudToolSelected(tool: ToolType) {
+  if (!selectedTile.value) return
+  selectedTile.value.type = tool
+}
+
+function onHover() {
+  audio.playSfx('hover')
+}
+
+type BackendTile = IFieldDTD
+
+/**
+ * Findet die nächste verfügbare Startfarbe.
+ * Rückgabe: START_RED, START_YELLOW, START_BLUE, START_GREEN oder NORMAL falls alle belegt.
+ */
+function getNextAvailableStartColor(usedColors: Set<string>): string {
+  const colors = ["START_RED", "START_YELLOW", "START_BLUE", "START_GREEN"]
+  for (const color of colors) {
+    if (!usedColors.has(color)) {
+      return color
+    }
+  }
+  return "NORMAL"
+}
+
+function exportTiles(): BackendTile[] {
+  const usedStartColors = new Set<string>()
+
+  return tiles.map(tile => {
+    const north = tile.connections.up
+      ? findNeighbor(tile, 'up')?.id ?? undefined
+      : undefined
+
+    const south = tile.connections.down
+      ? findNeighbor(tile, 'down')?.id ?? undefined
+      : undefined
+
+    const west = tile.connections.left
+      ? findNeighbor(tile, 'left')?.id ?? undefined
+      : undefined
+
+    const east = tile.connections.right
+      ? findNeighbor(tile, 'right')?.id ?? undefined
+      : undefined
+
+    const fieldType = tile.type === 'start'
+      ? getNextAvailableStartColor(usedStartColors)
+      : tile.type === 'goal'
+        ? 'END'
+        : 'NORMAL'
+
+    if (fieldType.startsWith("START_")) {
+      usedStartColors.add(fieldType)
+    }
+
+    return {
+      id: tile.id,
+      north,
+      east,
+      south,
+      west,
+      type: fieldType,
+      position: {
+        x: tile.x,
+        y: tile.y
+      },
+      barrier: tile.type === 'barrier'
+    }
+  })
+}
+
+function exportBoard(fields: BackendTile[]): BoardExport {
+  return {
+    id: crypto.randomUUID(),
+    name: 'Board',
+    fields
+  }
+}
+
+const OPPOSITE: Record<Direction, Direction> = {
+  up: 'down',
+  down: 'up',
+  left: 'right',
+  right: 'left',
+}
+
+function opposite(dir: Direction): Direction {
+  return OPPOSITE[dir]
+}
+
+function connectTiles(a: TileData, b: TileData, dir: Direction) {
+  a.connections[dir] = true
+  b.connections[opposite(dir)] = true
+}
+
+function deleteTile(tile: TileData) {
+
+  if (tile.x === 0 && tile.y === 0) return
+
+  (Object.keys(tile.connections) as Direction[]).forEach(dir => {
+    if (!tile.connections[dir]) return
+
+    const offset = DIR_OFFSET[dir]
+    const nx = tile.x + offset.x
+    const ny = tile.y + offset.y
+
+    const neighbor = tiles.find(t => t.x === nx && t.y === ny)
+    if (!neighbor) return
+
+    neighbor.connections[opposite(dir)] = false
+  })
+
+  const index = tiles.indexOf(tile)
+  if (index !== -1) {
+    tiles.splice(index, 1)
+  }
+
+  if (selectedKey.value === key(tile.x, tile.y) && tiles[0] != null) {
+    selectedKey.value = tiles.length
+      ? key(tiles[0].x, tiles[0].y)
+      : ''
+  }
+}
+
+function deleteSelectedTile() {
+  const tile = tiles.find(t => key(t.x, t.y) === selectedKey.value);
+  if (tile) {
+    deleteTile(tile);
+  }
+}
+
+/**
+ * Speichert das Board. Vorher wird das Backend aufgerufen zur Validierung des Boards
+ */
+async function handleSave() {
+  const fields = exportTiles()
+  const board = exportBoard(fields)
+
+  // Validierung serverseitig
+  try {
+    const response = await fetch("/api/game/board/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(board),
+    })
+
+    if (!response.ok) {
+      const msg = await response.text()
+      console.error(msg || "Board ist nicht valide (Serverseitige Validierung fehlgeschlagen)")
+      showError(msg)
+      return
+    }
+  } catch (err) {
+    console.error("Fehler bei der Validierung: ", err)
+    showError("Fehler bei der Validierung: " + err)
+    return
+  }
+
+  const json = JSON.stringify(board, null, 2)
+  const blob = new Blob([json], { type: "application/json" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `${board.name}.json`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Liest eine importierte JSON-file ein und baut die Tiles im Editor nach
+ */
+function handleImport(file: File) {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const content = e.target?.result as string
+      const boardData = JSON.parse(content) as Partial<BoardExport>
+
+      // Tiles resetten
+      tiles.length = 0
+
+      // Tiles vom File holen
+      if (boardData.fields && Array.isArray(boardData.fields)) {
+        const importedTiles: TileData[] = boardData.fields.map((field: IFieldDTD) => {
+          const baseType = mapFieldTypeToTool(field.type)
+          const tileType: ToolType = field.barrier ? "barrier" : baseType
+
+          return {
+            id: field.id,
+            type: tileType,
+            x: field.position.x,
+            y: field.position.y,
+            connections: {
+              up: Boolean(field.north),
+              down: Boolean(field.south),
+              left: Boolean(field.west),
+              right: Boolean(field.east)
+            }
+          }
+        })
+
+        tiles.push(...importedTiles)
+
+        if (tiles.length > 0 && tiles[0]) {
+          selectedKey.value = key(tiles[0].x, tiles[0].y)
+        }
+        console.log("Board erfolgreich importiert!")
+      }
+    } catch (error) {
+      console.error("Fehler beim Import: ", error)
+    }
+  }
+  reader.readAsText(file)
+}
+
+/**
+ * Wandelt Field-DTO-Typen (START/GOAL/END/...) in Editor-Tooltypen um
+ */
+function mapFieldTypeToTool(fieldType: string): ToolType {
+  const fieldTypeUpper = fieldType.toUpperCase()
+  if (fieldTypeUpper.startsWith("START")) return "start"
+  else if (fieldTypeUpper === "GOAL" || fieldTypeUpper === "END") return "goal"
+  return "tile"
+}
+
+// Provide functions to child components
+provide("emitSave", handleSave)
+provide("emitImport", handleImport)
+
 </script>
 
 <template>
-    <div class="mapeditor">
-        <div
-          class="editor"
-          @mousedown.left="onMouseDown"
-          @mousemove="onMouseMove"
-          @mouseup="onMouseUp"
-          @mouseleave="onMouseUp"
-        >
-          <div
-            class="map"
-            :style="{
-              transform: `translate(${offset.x + viewport.width / 2}px, ${offset.y + viewport.height / 2}px)`
-            }"
-          >
-            <StandardTile
-              v-for="tile in tiles"
-              :key="key(tile.x, tile.y)"
-              :x="tile.x"
-              :y="tile.y"
-              :selected="selectedKey === key(tile.x, tile.y)"
-              @select="selectedKey = key(tile.x, tile.y)"
-            />
-          </div>
-        </div>
-        <EditorHUD style="bottom: 20px;"/>
-        <EditorFileHUD style="bottom: 20px;"/>
-        <div class="form-row">
-            <div class="button-container">
-                <BackButton :to="{ name: 'Homepage' }" />
-            </div>
-        </div>
+  <div class="editor-mapeditor no-select">
+    <div class="editor" @mousedown.left="onMouseDown" @mousemove="onMouseMove" @mouseup="onMouseUp"
+      @mouseleave="onMouseUp">
+      <div class="editor-map" :style="{
+        transform: `translate(${offset.x + viewport.width / 2}px, ${offset.y + viewport.height / 2}px)`
+      }">
+        <StandardTile v-for="tile in tiles" :key="key(tile.x, tile.y)" :x="tile.x" :y="tile.y"
+          :selected="selectedKey === key(tile.x, tile.y)" @select="selectedKey = key(tile.x, tile.y)"
+          @add="(dir: Direction) => addTile(tile, dir)" :connections="tile.connections" :type="tile.type" />
+      </div>
     </div>
+    <EditorHUD style="bottom: 20px;" :selectedTool="selectedTile?.type ?? 'tile'" @toolSelected="onHudToolSelected"
+      @deleteSelected="deleteSelectedTile" />
+    <EditorFileHUD style="bottom: 20px;" />
+    <div class="editor-form-row">
+      <div class="editor-button-container">
+        <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.mapeditor {
+.no-select {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.editor-mapeditor {
   position: relative;
   height: 100vh;
   width: 100vw;
@@ -111,7 +410,7 @@ onUnmounted(() => {
   padding-bottom: 6vh;
 }
 
-.mapeditor::before {
+.editor-mapeditor::before {
   content: "";
   position: absolute;
   top: 0;
@@ -134,53 +433,53 @@ onUnmounted(() => {
   background: #1a1a1ae1;
   position: relative;
   border-radius: 8px;
-  box-shadow: 7.5px 7.5px 15px rgba(0,0,0,0.5), -7.5px -7.5px 15px rgba(0,0,0,0.5);
+  box-shadow: 7.5px 7.5px 15px rgba(0, 0, 0, 0.5), -7.5px -7.5px 15px rgba(0, 0, 0, 0.5);
 }
 
-.map {
+.editor-map {
   position: relative;
   bottom: 5vw;
   right: 8.5vh;
 }
 
 form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    width: 100%;
-    justify-content: center;
-    margin-top: -5vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  width: 100%;
+  justify-content: center;
+  margin-top: -5vh;
 }
 
-.form-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.editor-form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 150px 1fr;
-    align-items: center;
-    gap: 15px;
-    z-index: 20;
+.editor-form-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: center;
+  gap: 15px;
+  z-index: 20;
 }
 
-.form-row label {
-    text-align: right;
+.editor-form-row label {
+  text-align: right;
 }
 
-.button-container {
+.editor-button-container {
   position: absolute;
-  bottom: 10px;
-  left: 30px;
+  top: 38px;
+  left: 43px;
 
   display: flex;
   flex-direction: column;
   gap: 2vh;
 }
 
-.menu-button:hover {
+.editor-menu-button:hover {
   transform: scale(1.05);
   transition: transform 0.2s ease;
 }

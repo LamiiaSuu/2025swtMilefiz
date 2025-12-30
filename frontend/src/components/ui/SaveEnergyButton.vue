@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { useMilefizStore } from '@/stores/milefizstore';
+import { useAudioStore } from '@/stores/audioStore';
 
 // Zugriff auf den globalen PiniaStore
 const milefizStore = useMilefizStore()
-
+const audio = useAudioStore()
 /**
  * Zugriff auf Energy-State
  *  isEnergyFresh: gibt an, ob es sich um "frisch gewürfelte" Energie handelt --> true, wenn sich Spieler noch nicht bewegt hat
@@ -43,6 +44,7 @@ onUnmounted(() => {
 
 const onKeypress = (e: KeyboardEvent) => {
     if (e.key.toLocaleLowerCase() === "e") {
+        audio.playSfx('gameHUD')
         saveEnergy()
     }
 }

@@ -88,6 +88,7 @@ public class LobbyManager {
     public Lobby getDummyLobby() {
         Lobby lobby = new Lobby();
         lobby.setId(UUID.fromString("271c95db-3737-496f-9081-ae920e8ebbf7")); // Test-ID
+        lobby.setLobbyName("Dummy-Lobby");
         return lobby;
     }
 

@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useMilefizStore } from '@/stores/milefizstore'
+import { useAudioStore } from '@/stores/audioStore';
+import { tUI } from '@/i18n';
 
 const milefizStore = useMilefizStore()
 const { disconnectAndReset } = milefizStore
 
 const props = defineProps<{ to: string | { name: string } }>()
 const router = useRouter()
+const audio = useAudioStore()
 
 const goBack = () => {
   if (props.to) {
+    audio.playSfx('click')
     router.push(props.to)
     disconnectAndReset() // disconnect current lobby
   }
@@ -19,7 +23,7 @@ const goBack = () => {
 
 <template>
   <button class="back-button" @click="goBack">
-    <slot>&lt; zurück</slot>
+    <slot>&lt; {{ tUI('BACK') }}</slot>
   </button>
 </template>
 
