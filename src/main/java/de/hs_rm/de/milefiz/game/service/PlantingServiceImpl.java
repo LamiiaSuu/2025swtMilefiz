@@ -38,17 +38,21 @@ public class PlantingServiceImpl implements PlantingService {
      */
     @Override
     public BoardDTO plantTrees(BoardDTO boardDTO, float density) {
+        for (FieldDTO field : boardDTO.getFields()) {
+            Position p = field.getPosition();
+            field.setPosition(new Position(p.getX() + 2, p.getY() + 2));
+        }
         int[] boundingBox = getBoundingBoxFromBoard(boardDTO);
         int[][] blockedByPath = getBlockedPositions(boardDTO, boundingBox);
         boundingBox[0] *= 5;
         boundingBox[1] *= 5;
-        int[][] blueNoise = generateBlueNoiseVoidCluster(density, boundingBox[0] + 4, boundingBox[1] + 4);
+        int[][] blueNoise = generateBlueNoiseVoidCluster(density, boundingBox[0] + 2, boundingBox[1] + 2);
 
         for (int i = 0; i < blueNoise.length; i++) {
             for (int j = 0; j < blueNoise[0].length; j++) {
                 if (blueNoise[i][j] == 1) {
-                    float x = i / 5f;
-                    float y = j / 5f;
+                    float x = (i / 5f);
+                    float y = (j / 5f);
                     int xFloor = (int) Math.floor(x);
                     int xCeil = (int) Math.ceil(x);
                     int yFloor = (int) Math.floor(y);
@@ -63,7 +67,8 @@ public class PlantingServiceImpl implements PlantingService {
                     if (isBlocked > 0) {
                         continue;
                     }
-                    boardDTO.addTree(new PositionFloat(x + 2f, y + 2f));
+
+                    boardDTO.addTree(new PositionFloat(x, y));
                 }
             }
         }
@@ -109,10 +114,10 @@ public class PlantingServiceImpl implements PlantingService {
     }
 
     /**
-     * ermittelt bounding box für die Felder des boards
+     * ermittelt oberste rechte ecke der bounding box für die Felder des boards
      * 
      * @param boardDTO board für das die bounding box ermittelt werden soll
-     * @return int[] wo int[0] x wert und int[1] der y wert der bounding box ist
+     * @return int[] wo int[0] x wert und int[1] der y wert der ecke ist
      */
     private int[] getBoundingBoxFromBoard(BoardDTO boardDTO) {
         int x = 0;
