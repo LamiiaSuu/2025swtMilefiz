@@ -1,5 +1,5 @@
 {
-  "id": "b94479ce-6294-432b-b9c8-21b78ccf7db2",
+  "id": "6c5c98de-d567-42dc-a595-048815b0fafe",
   "name": "Board",
   "fields": [
     {
@@ -74,6 +74,7 @@
     {
       "id": "7526277d-02f3-4cb3-8d46-2f4c5f4d911e",
       "east": "fbfaea39-b05c-4f87-a75f-dcd902e042b7",
+      "south": "073b073b-892b-450e-bb4d-2f50a6ac57a4",
       "west": "d8bbcc53-a45e-4896-add8-c72ed3a97682",
       "type": "NORMAL",
       "position": {
@@ -237,6 +238,7 @@
     },
     {
       "id": "b70aa66a-6f1a-41f1-835f-0ee96dc9d360",
+      "north": "073b073b-892b-450e-bb4d-2f50a6ac57a4",
       "east": "cfd0edea-bf82-4b8b-8688-50dcfc6ced14",
       "west": "601e4f52-f3cc-4d27-806c-c0f61a160ae9",
       "type": "NORMAL",
@@ -289,6 +291,17 @@
         "y": 4
       },
       "barrier": true
+    },
+    {
+      "id": "073b073b-892b-450e-bb4d-2f50a6ac57a4",
+      "north": "7526277d-02f3-4cb3-8d46-2f4c5f4d911e",
+      "south": "b70aa66a-6f1a-41f1-835f-0ee96dc9d360",
+      "type": "NORMAL",
+      "position": {
+        "x": 10,
+        "y": 4
+      },
+      "barrier": false
     }
   ]
 }
