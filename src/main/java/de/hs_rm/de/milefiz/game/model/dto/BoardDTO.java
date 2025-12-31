@@ -7,6 +7,7 @@ import java.util.UUID;
 import de.hs_rm.de.milefiz.game.model.FieldType;
 import de.hs_rm.de.milefiz.game.model.Position;
 import de.hs_rm.de.milefiz.game.model.PositionFloat;
+import de.hs_rm.de.milefiz.game.model.TreeType;
 
 /**
  * DTO des Spielbretts zur Übertragung an das Frontend
@@ -66,15 +67,21 @@ public class BoardDTO {
         return trees;
     }
 
-    public void addTree(PositionFloat treePosition) {
-        trees.add(new TreeDTO(treePosition));
+    public void addTree(PositionFloat treePosition, TreeType treeType) {
+        trees.add(new TreeDTO(treePosition, treeType));
+    }
+
+    public void deleteAllTrees() {
+        trees.clear();
     }
 
     public static class TreeDTO {
         private PositionFloat treePosition;
+        private TreeType treeType;
 
-        public TreeDTO(PositionFloat treePosition) {
+        public TreeDTO(PositionFloat treePosition, TreeType treeType) {
             this.treePosition = treePosition;
+            this.treeType = treeType;
         }
 
         public PositionFloat getTreePosition() {
@@ -83,6 +90,14 @@ public class BoardDTO {
 
         public void setTreePosition(PositionFloat positionF) {
             this.treePosition = positionF;
+        }
+
+        public TreeType getTreeType() {
+            return treeType;
+        }
+
+        public void setTreeType(TreeType treeType) {
+            this.treeType = treeType;
         }
 
     }

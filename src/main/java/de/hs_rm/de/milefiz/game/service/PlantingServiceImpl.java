@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.hs_rm.de.milefiz.game.model.Position;
 import de.hs_rm.de.milefiz.game.model.PositionFloat;
+import de.hs_rm.de.milefiz.game.model.TreeType;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
 
@@ -38,6 +39,8 @@ public class PlantingServiceImpl implements PlantingService {
      */
     @Override
     public BoardDTO plantTrees(BoardDTO boardDTO, float density) {
+        boardDTO.deleteAllTrees();
+
         int[] minPos = getMinPos(boardDTO);
 
         // ursprung des koordinatensystems auf 0 und lässt einen rand von 2 um die
@@ -73,7 +76,16 @@ public class PlantingServiceImpl implements PlantingService {
                         continue;
                     }
 
-                    boardDTO.addTree(new PositionFloat(x, y));
+                    double rand = Math.random();
+                    TreeType treeType;
+                    if (rand < (1d / 3d)) {
+                        treeType = TreeType.SMALL;
+                    } else if (rand < (2d / 3d)) {
+                        treeType = TreeType.MEDIUM;
+                    } else {
+                        treeType = TreeType.LARGE;
+                    }
+                    boardDTO.addTree(new PositionFloat(x, y), treeType);
                 }
             }
         }
