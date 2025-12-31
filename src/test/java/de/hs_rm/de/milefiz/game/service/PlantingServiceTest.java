@@ -52,6 +52,7 @@ public class PlantingServiceTest {
             Position pos = field.getPosition();
             fieldPositions.add(pos);
 
+            // wenn es nachbarn gibt positionen zwischen den feldern auffüllen
             if (field.getNorth() != null) {
                 fieldPositions.add(new Position(pos.getX(), pos.getY() + 1));
             }

@@ -38,15 +38,20 @@ public class PlantingServiceImpl implements PlantingService {
      */
     @Override
     public BoardDTO plantTrees(BoardDTO boardDTO, float density) {
+        int[] minPos = getMinPos(boardDTO);
+
+        // ursprung des koordinatensystems auf 0 und lässt einen rand von 2 um die
+        // felder
         for (FieldDTO field : boardDTO.getFields()) {
             Position p = field.getPosition();
-            field.setPosition(new Position(p.getX() + 2, p.getY() + 2));
+            field.setPosition(new Position(p.getX() + 2 - minPos[0], p.getY() + 2 - minPos[1]));
+
         }
-        int[] boundingBox = getBoundingBoxFromBoard(boardDTO);
-        int[][] blockedByPath = getBlockedPositions(boardDTO, boundingBox);
-        boundingBox[0] *= 5;
-        boundingBox[1] *= 5;
-        int[][] blueNoise = generateBlueNoiseVoidCluster(density, boundingBox[0] + 2, boundingBox[1] + 2);
+        int[] maxPos = getMaxPos(boardDTO);
+        int[][] blockedByPath = getBlockedPositions(boardDTO, maxPos);
+        maxPos[0] *= 5;
+        maxPos[1] *= 5;
+        int[][] blueNoise = generateBlueNoiseVoidCluster(density, maxPos[0] + 2, maxPos[1] + 2);
 
         for (int i = 0; i < blueNoise.length; i++) {
             for (int j = 0; j < blueNoise[0].length; j++) {
@@ -83,7 +88,7 @@ public class PlantingServiceImpl implements PlantingService {
      * @param boardDTO    das board
      * @param boundingBox die boundingbox der felder
      *                    <p>
-     *                    siehe {@link #getBoundingBoxFromBoard(BoardDTO)}
+     *                    siehe {@link #getMaxPos(BoardDTO)}
      * @return array, wo die die indizes der blockierten positionen auf 1 gesetzt
      *         sind
      */
@@ -96,10 +101,10 @@ public class PlantingServiceImpl implements PlantingService {
             int y = p.getY();
             res[x][y] = 1;
 
-            if (field.getNorth() != null && res[x].length <= (y)) {
+            if (field.getNorth() != null && res[x].length > (y + 1)) {
                 res[x][y + 1] = 1;
             }
-            if (field.getEast() != null && res.length <= (x)) {
+            if (field.getEast() != null && res.length > (x + 1)) {
                 res[x + 1][y] = 1;
             }
             if (field.getSouth() != null && y > 0) {
@@ -119,12 +124,31 @@ public class PlantingServiceImpl implements PlantingService {
      * @param boardDTO board für das die bounding box ermittelt werden soll
      * @return int[] wo int[0] x wert und int[1] der y wert der ecke ist
      */
-    private int[] getBoundingBoxFromBoard(BoardDTO boardDTO) {
+    private int[] getMaxPos(BoardDTO boardDTO) {
         int x = 0;
         int y = 0;
         for (FieldDTO field : boardDTO.getFields()) {
             x = field.getPosition().getX() > x ? field.getPosition().getX() : x;
             y = field.getPosition().getY() > y ? field.getPosition().getY() : y;
+        }
+        int[] res = new int[2];
+        res[0] = x;
+        res[1] = y;
+        return res;
+    }
+
+    /**
+     * ermittelt unterste linke ecke der bounding box für die Felder des boards
+     * 
+     * @param boardDTO board für das die bounding box ermittelt werden soll
+     * @return int[] wo int[0] x wert und int[1] der y wert der ecke ist
+     */
+    private int[] getMinPos(BoardDTO boardDTO) {
+        int x = Integer.MAX_VALUE;
+        int y = Integer.MAX_VALUE;
+        for (FieldDTO field : boardDTO.getFields()) {
+            x = field.getPosition().getX() < x ? field.getPosition().getX() : x;
+            y = field.getPosition().getY() < y ? field.getPosition().getY() : y;
         }
         int[] res = new int[2];
         res[0] = x;
