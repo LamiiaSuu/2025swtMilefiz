@@ -16,6 +16,9 @@ const milefizStore = useMilefizStore()
 const { isJoined, joinLobby, createJoinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
 const audio = useAudioStore()
 
+const importedBoardActive = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
 onMounted(() => {
     if (!isJoined) {
         // wenn keiner Lobby bereits gejoint -> erstelle neue
@@ -66,6 +69,14 @@ const lobbyName = computed({
 const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
 
+const canStartGame = computed(() => {
+  if (!isOwnLeader.value) return false
+
+  if (mapMode.value === 'standard') return true
+
+  return importedBoardActive.value
+})
+
 // Importierte Map Datei
 const selectedFile = ref<File | null>(null)
 
@@ -79,6 +90,15 @@ const handleFileChange = (event: Event) => {
     if (target.files && target.files[0]) {
         selectedFile.value = target.files[0]
     }
+}
+
+function resetImport() {
+  selectedFile.value = null
+  importedBoardActive.value = false
+
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ""
+  }
 }
 
 async function setDefaultBoard(lobbyId: string) {
@@ -121,6 +141,7 @@ async function importAndSetBoard() {
         console.error(err);
         alert("Fehler beim Import: " + err);
     }
+    importedBoardActive.value = true;
 }
 
 
@@ -153,7 +174,7 @@ async function importAndSetBoard() {
                             <label>{{ tUI('MAP') }}</label>
                             <div class="map-buttons">
                                 <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'standard' }"
-                                    @click="mapMode = 'standard', setDefaultBoard(lobby?.id!)">
+                                    @click="mapMode = 'standard'; setDefaultBoard(lobby?.id!); resetImport()">
                                     {{ tUI('STANDARD_MAP') }}
                                 </button>
                                 <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'import' }"
@@ -170,6 +191,7 @@ async function importAndSetBoard() {
                             <div style="display: flex; gap: 10px;">
                                 <input
                                     type="file"
+                                    ref="fileInputRef"
                                     @mouseenter="onHover"
                                     @change="handleFileChange"
                                     class="file-input"
@@ -220,7 +242,7 @@ async function importAndSetBoard() {
                         <div class="button-container">
                             <button type="button" class="start-game-button"
                                 @mouseenter="onHover" @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('joinGame') }"
-                                :disabled="!isOwnLeader" :class="{ active: isOwnLeader }">
+                                :disabled="!canStartGame" :class="{ active: canStartGame }">
                                 {{ isOwnLeader ? tUI('START_GAME')  : tUI('WAITING_FOR_LEADER') }}
                             </button>
                             <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
