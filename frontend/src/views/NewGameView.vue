@@ -81,6 +81,43 @@ const handleFileChange = (event: Event) => {
     }
 }
 
+async function importAndSetBoard() {
+    if (!selectedFile.value) {
+        alert("Keine Datei ausgewählt");
+        return;
+    }
+
+    try {
+        const text = await selectedFile.value.text();
+        const board = JSON.parse(text);
+
+        const lobbyId = lobby.value?.id;
+        if (!lobbyId) {
+            alert("Keine Lobby gefunden");
+            return;
+        }
+
+        // --- Backend: validieren & aktivieren ---
+        const res = await fetch(`/api/lobby/${lobbyId}/board/set`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(board),
+        });
+
+        if (!res.ok) {
+            const msg = await res.text();
+            alert(msg || "Board ist ungültig");
+            return;
+        }
+
+        alert("Board erfolgreich importiert");
+    } catch (err) {
+        console.error(err);
+        alert("Fehler beim Import: " + err);
+    }
+}
+
+
 </script>
 
 <template>
@@ -123,9 +160,29 @@ const handleFileChange = (event: Event) => {
                         <!-- Datei importieren -->
                         <div class="form-row">
                             <label>{{ tUI('FILE') }}</label>
-                            <input type="file" @mouseenter="onHover" @change="handleFileChange" class="file-input"
-                                :disabled="mapMode === 'standard'" accept=".json,.map">
+
+                            <div style="display: flex; gap: 10px;">
+                                <input
+                                    type="file"
+                                    @mouseenter="onHover"
+                                    @change="handleFileChange"
+                                    class="file-input"
+                                    :disabled="mapMode === 'standard'"
+                                    accept=".json"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="map-button"
+                                    :disabled="mapMode === 'standard' || !selectedFile"
+                                    @mouseenter="onHover"
+                                    @click="importAndSetBoard"
+                                >
+                                    {{ tUI('IMPORT') }}
+                                </button>
+                            </div>
                         </div>
+
                     </template>
 
                 </div>

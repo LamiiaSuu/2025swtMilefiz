@@ -1,8 +1,10 @@
+import type { IBoardDTD } from "@/stores/IBoardDTD"
 export interface Lobby {
   id: string
   lobbyName: string
   players: Player[]
   maxPlayers: number
+  board?: IBoardDTD | null
 }
 
 export interface Player {
