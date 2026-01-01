@@ -8,13 +8,16 @@ import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { storeToRefs } from 'pinia'
 import { useAudioStore } from '@/stores/audioStore'
-import { tUI } from '@/i18n'
+import { tUI, tError } from '@/i18n'
 import LanguageSelection from '@/components/ui/LanguageSelection.vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import ErrorMessage from '@/components/ui/ErrorMessage.vue';
 
 const { startGameCommand } = useMilefizStore()
 const milefizStore = useMilefizStore()
 const { isJoined, joinLobby, createJoinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
 const audio = useAudioStore()
+const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
 
 const importedBoardActive = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -109,7 +112,7 @@ async function setDefaultBoard(lobbyId: string) {
 
 async function importAndSetBoard() {
     if (!selectedFile.value) {
-        alert("Keine Datei ausgewählt");
+        showError(tError('NO_FILE_CHOSEN'));
         return;
     }
 
@@ -119,7 +122,7 @@ async function importAndSetBoard() {
 
         const lobbyId = lobby.value?.id;
         if (!lobbyId) {
-            alert("Keine Lobby gefunden");
+            showError(tError('NO_LOBBY_FOUND'));
             return;
         }
 
@@ -131,15 +134,14 @@ async function importAndSetBoard() {
         });
 
         if (!res.ok) {
-            const msg = await res.text();
-            alert(msg || "Board ist ungültig");
+            showCriticalError(tError('BOARD_INVALID'));
             return;
         }
 
-        alert("Board erfolgreich importiert");
+        showSuccess(tError('BOARD_SUCCESSFULLY_IMPORTED'));
     } catch (err) {
         console.error(err);
-        alert("Fehler beim Import: " + err);
+        showError(tError('BOARD_COULD_NOT_BE_IMPORTED') + err);
     }
     importedBoardActive.value = true;
 }
@@ -153,6 +155,9 @@ async function importAndSetBoard() {
         <!-- MI'lefiz Header -->
         <Header>{{ tUI('NEW_GAME') }}</Header>
         <LanguageSelection></LanguageSelection>
+        <div class="error-message-container">
+            <ErrorMessage />
+        </div>
         <div class="new-game-form">
             <form>
                 <!-- Linke Spalte -->
@@ -202,7 +207,8 @@ async function importAndSetBoard() {
                                 <button
                                     type="button"
                                     class="map-button"
-                                    :disabled="mapMode === 'standard' || !selectedFile"
+                                    :disabled="mapMode === 'standard'"
+                                    :class="{ active: mapMode === 'import' }"
                                     @mouseenter="onHover"
                                     @click="importAndSetBoard"
                                 >

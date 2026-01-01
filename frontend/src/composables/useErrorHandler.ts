@@ -84,23 +84,23 @@ export function useErrorHandler() {
    * Zeigt eine Erfolgs-Message als blaues Info-Popup
    * @param message - Der Erfolgstext
    */
-  function showSuccess(code: ErrorCode) {
-    showError(tError(code), 'info', true)
+  function showSuccess(message: string) {
+    showError(message, 'info', true)
   }
   /**
    * Zeigt eine Warnung als zentriertes Orange-Overlay
    * @param message - Der Warnungstext
    */
-  function showWarning(code: ErrorCode) {
-    showError(tError(code), 'warning', true)
+  function showWarning(message: string) {
+    showError(message, 'warning', true)
   }
 
   /**
    * Zeigt einen kritischen Fehler als rotes Popup (8s Auto-Hide)
    * @param message - Der kritische Fehlertext
    */
-  function showCriticalError(code: ErrorCode) {
-    showError(tError(code), 'critical', true)
+  function showCriticalError(message: string) {
+    showError(message, 'critical', true)
   }
   return {
     errorState: readonly(errorState),

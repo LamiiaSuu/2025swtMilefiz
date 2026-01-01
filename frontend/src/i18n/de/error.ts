@@ -15,5 +15,10 @@ export const ERRORS_DE: Record<ErrorCode, string> = {
     MOVE_BARRIER_OCCUPIED: 'Barriere kann nicht auf besetztes Feld gesetzt werden',
     REJECTED_BY_BARRIER: 'Autsch! Das sah schmerzhaft aus - verbleibende Züge verloren!',
     SAVE_ENERGY_ERROR: 'Maximale Energie oder Meeple bereits bewegt!',
-    CONSUME_ENERGY_ERROR: 'Nicht genug Energie für einen Sprung!'
+    CONSUME_ENERGY_ERROR: 'Nicht genug Energie für einen Sprung!',
+    NO_LOBBY_FOUND: 'Lobby nicht gefunden!',
+    NO_FILE_CHOSEN: 'Keine Datei ausgewählt!',
+    BOARD_INVALID: 'Map Validierung fehlgeschlagen: Eine Map brauch 4 Startfelder verbunden mit mindestens einem Zielfeld.',
+    BOARD_SUCCESSFULLY_IMPORTED: 'Map erfolgreich importiert!',
+    BOARD_COULD_NOT_BE_IMPORTED: 'Map konnte nicht importiert werden: '
 }
