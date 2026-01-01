@@ -188,6 +188,43 @@ public class LobbyRestController {
         }
     }
 
+    @PostMapping("/{lobbyId}/board/setDefault")
+    public ResponseEntity<?> activateDefaultBoard(@PathVariable UUID lobbyId) {
+        try {
+            // Standardboard holen
+            Board board = gameService.getTestBoard();
+
+            // Lobby holen
+            Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+            // Board setzen
+            lobby.setBoard(board);
+
+            // Clients informieren
+            messagingService.sendEvent(
+                    new LobbyMessage(
+                            lobby,
+                            new FrontendLobbyUpdateEvent(
+                                    lobbyMapper.toDTO(lobby),
+                                    "Standard-Board wurde aktiviert"
+                            )
+                    )
+            );
+
+            return ResponseEntity.ok("Standard-Board aktiviert");
+        }
+        catch (LobbyNotFoundException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Lobby nicht gefunden");
+        }
+        catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Fehler beim Aktivieren des Standard-Boards");
+        }
+    }
+
         /**
      * Gibt das aktuelle Test-Board als DTO zurück.
      *

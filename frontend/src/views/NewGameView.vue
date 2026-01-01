@@ -81,6 +81,12 @@ const handleFileChange = (event: Event) => {
     }
 }
 
+async function setDefaultBoard(lobbyId: string) {
+  await fetch(`/api/lobby/${lobbyId}/board/setDefault`, {
+    method: "POST"
+  })
+}
+
 async function importAndSetBoard() {
     if (!selectedFile.value) {
         alert("Keine Datei ausgewählt");
@@ -147,7 +153,7 @@ async function importAndSetBoard() {
                             <label>{{ tUI('MAP') }}</label>
                             <div class="map-buttons">
                                 <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'standard' }"
-                                    @click="mapMode = 'standard'">
+                                    @click="mapMode = 'standard', setDefaultBoard(lobby?.id!)">
                                     {{ tUI('STANDARD_MAP') }}
                                 </button>
                                 <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'import' }"
