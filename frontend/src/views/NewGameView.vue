@@ -134,11 +134,11 @@ async function importAndSetBoard() {
         });
 
         if (!res.ok) {
-            showCriticalError(tError('BOARD_INVALID'));
+            showCriticalError('BOARD_INVALID');
             return;
         }
 
-        showSuccess(tError('BOARD_SUCCESSFULLY_IMPORTED'));
+        showSuccess('BOARD_SUCCESSFULLY_IMPORTED');
     } catch (err) {
         console.error(err);
         showError(tError('BOARD_COULD_NOT_BE_IMPORTED') + err);
