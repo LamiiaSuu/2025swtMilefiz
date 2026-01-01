@@ -1,29 +1,59 @@
 import { useAudioStore } from '@/stores/audioStore'
 
+/**
+ * 3D-Positionsvector für Audioquellen.
+ */
 type Vec3 = { x: number; y: number; z: number }
 
+/**
+ * Zentrale Engine für alle Audiofunktionen im Spiel.
+ *
+ * Verantwortlich für:
+ * - Musik-Playlisten
+ * - Ambient-Playlisten
+ * - Lautstärke / Gain-Kontrolle der Kanäle (Mit den zentralen Infos aus audioStore.ts)
+ * - 3D-Sound (positionsabhängig)
+ *
+ * Audio wird über die Web Audio API gesteuert.
+ */
 class AudioEngine {
   public context = new AudioContext()
 
+  /** Lautstärke-Regler für Musik */
   public musicGain = this.context.createGain()
+  /** Lautstärke-Regler für Ambient */
   public ambientGain = this.context.createGain()
 
+   /** Aktuelle Musikquelle */
   public musicSource: AudioBufferSourceNode | null = null
+
+  /** Aktuelle Ambientquelle */
   public ambientSource: AudioBufferSourceNode | null = null
 
+  /** Ambient Playlist und Status */
   public ambientPlaylist: string[] = []
   public ambientIndex = 0
   public ambientLoop = true
 
+  /** Musik Playlist und Status */
   public musicPlaylist: string[] = []
   public musicIndex = 0
   public musicLoop = true
 
+  /**
+   * Initialisiert Audio-Routing.
+   */
   constructor() {
     this.musicGain.connect(this.context.destination)
     this.ambientGain.connect(this.context.destination)
   }
 
+  /**
+   * Startet eine Ambient-Playlist.
+   *
+   * @param keys Liste der Audio-Keys
+   * @param loop Ob die Playlist wiederholt werden soll
+   */
   async playAmbientPlaylist(keys: string[], loop = true) {
     this.ambientPlaylist = keys
     this.ambientIndex = 0
@@ -31,6 +61,12 @@ class AudioEngine {
     this.playNextAmbientTrack()
   }
 
+  /**
+   * Startet eine Musik-Playlist.
+   *
+   * @param keys Liste der Audio-Keys
+   * @param loop Ob die Playlist wiederholt werden soll
+   */
   async playMusicPlaylist(keys: string[], loop = true) {
     this.musicPlaylist = keys
     this.musicIndex = 0
@@ -38,6 +74,9 @@ class AudioEngine {
     this.playNextMusicTrack()
   }
 
+  /**
+   * Setzt die Listener-Position für 3D-Audio.
+   */
   setListenerPosition(x: number, y: number, z: number) {
     const l = this.context.listener
     l.positionX.value = x
@@ -45,6 +84,12 @@ class AudioEngine {
     l.positionZ.value = z
   }
 
+  /**
+   * Spielt einen Sound positionsabhängig im Raum ab.
+   *
+   * @param key Sound-Key
+   * @param position Position im Raum
+   */
   async play3D(key: string, position: Vec3) {
     const audioStore = useAudioStore()
     const sfx = audioStore.channels.sfx
@@ -89,6 +134,10 @@ class AudioEngine {
     source.start()
   }
   
+  /**
+   * Spielt den nächsten Musiktitel in der Playlist.
+   * Wird intern verwendet.
+   */
   private async playNextMusicTrack() {
     if (this.musicPlaylist.length === 0) return
 
@@ -128,6 +177,10 @@ class AudioEngine {
     this.musicSource = src
   }
 
+  /**
+   * Spielt den nächsten Ambient-Titel in der Playlist.
+   * Wird intern verwendet.
+   */
   private async playNextAmbientTrack() {
     if (this.ambientPlaylist.length === 0) return
 
@@ -167,6 +220,9 @@ class AudioEngine {
     this.ambientSource = src
   }
 
+/**
+ * Stoppt alle Musik-Streams und leert die Playlist.
+ */
 stopMusic() {
   this.musicLoop = false
   this.musicPlaylist = []
@@ -177,6 +233,9 @@ stopMusic() {
   }
 }
 
+/**
+ * Stoppt alle Ambient-Streams und leert die Playlist.
+ */
 stopAmbient() {
   this.ambientLoop = false
   this.ambientPlaylist = []
