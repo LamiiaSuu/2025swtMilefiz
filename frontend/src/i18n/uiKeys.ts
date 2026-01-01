@@ -1,3 +1,7 @@
+/**
+ * Alle erlaubten Keys für UI-Übersetzungen.
+ * Neue Keys hier hinzufügen, bevor sie in Dictionaries verwendet werden.
+ */
 export type UIKey =
   | 'NEW_GAME'
   | 'JOIN_GAME'

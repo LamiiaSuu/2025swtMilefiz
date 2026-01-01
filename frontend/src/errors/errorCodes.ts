@@ -1,3 +1,11 @@
+/**
+ * Zentrale Liste aller Fehlercodes, die vom Backend gesendet
+ * und im Frontend übersetzt werden.
+ *
+ * Neue Fehler:
+ * 1. Hier hinzufügen
+ * 2. In allen Sprach-Dateien übersetzen
+ */
 export type ErrorCode =
     'ROLL_DICE_ERROR_MOVES_LEFT'
   | 'REMAINING_MOVES_LOST'
