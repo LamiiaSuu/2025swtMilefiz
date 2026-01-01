@@ -8,6 +8,7 @@ import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useAudioStore } from '@/stores/audioStore';
 import type { IBoardDTD } from '@/stores/IBoardDTD'
 import type { IFieldDTD } from '@/stores/IFieldDTD'
+import { tUI } from '@/i18n'
 
 /**
  * Richtungen im Editor (Grid bewegt sich in 2er-Schritten).
@@ -450,7 +451,12 @@ provide("emitImport", handleImport)
     <EditorFileHUD style="bottom: 20px;" />
     <div class="editor-form-row">
       <div class="editor-button-container">
-        <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
+        <BackButton
+          @mouseenter="onHover"
+          :to="{ name: 'Homepage' }"
+          :confirm="true"
+          :confirmText="tUI('BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR')"
+        />
       </div>
     </div>
   </div>

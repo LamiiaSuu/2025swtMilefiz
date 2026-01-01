@@ -39,5 +39,8 @@ export const UI_EN: Record<UIKey, string> = {
     YOU_CAN_GO_BACK_TO_MAIN_MENU: 'You can now go back to the main menu.',
     BACK_TO_MAIN_MENU: 'Back to Main Menu',
     ROLL_DICE: 'Roll',
-    WAITING_FOR_LEADER: 'Waiting for Leader...'
+    WAITING_FOR_LEADER: 'Waiting for Leader...',
+    BACK_TO_MAIN_MENU_CONFIRMATION: 'Do you really want to return to the main menu?',
+    BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR: 'Do you really want to return to the main menu? Unsaved changes will be lost.',
+    CANCEL: 'Cancel',
 }
