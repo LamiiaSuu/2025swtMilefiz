@@ -78,18 +78,6 @@ const onMouseMove = (e: MouseEvent) => {
     return
   }
 
-  // Pointer Lock versuchen (wenn kein PopUp offen ist)
-  if (props.useFirstPerson && !document.pointerLockElement) {
-    const requestLock = () => {
-      if (!document.pointerLockElement && props.useFirstPerson) {
-        document.body.requestPointerLock()
-      }
-    }
-
-    // Fallback: auf ersten Klick warten
-    document.addEventListener('click', requestLock, { once: true })
-  }
-
   // Horizontale Rotation - Dreht Charakter!
   horizontalRotation.value -= e.movementX * mouseSensitivity
   emit('rotateCharacter', horizontalRotation.value)
@@ -102,30 +90,11 @@ const onMouseMove = (e: MouseEvent) => {
   )
 }
 
-// PointerLock Management fuer PopUps
-watch([() => milefizStore.popUpMenuOpen, () => milefizStore.popUpSettingsOpen, () => milefizStore.gameFinished], 
-  ([popUpMenuOpen, popUpSettingsOpen, gameFinished]) => {
-
-    // PointerLock verlassen beim Aufruf eines PopUps
-    if ((popUpMenuOpen || popUpSettingsOpen || gameFinished) && document.pointerLockElement) {
-      document.exitPointerLock()
-    }
-
-    // Zurueck in PointerLock, wenn ein PopUp geschlossen wird und der User in FirstPerson ist
-    else if (!popUpMenuOpen && !popUpSettingsOpen && !gameFinished && !document.pointerLockElement && props.useFirstPerson) {
-      document.body.requestPointerLock()
-    }
-  }
-)
-
 // Lässt Mauszeiger in der First Person Kamera verschwinden 
 // Wenn man im First Person Mode esc drückt, 
 // taucht der Zeiger wieder auf und man kann sich noch umschauen
 watch(() => props.useFirstPerson, (isFirstPerson) => {
-  if (isFirstPerson) {
-    document.body.requestPointerLock()
-  }
-  else {
+  if (!isFirstPerson) {
     document.exitPointerLock() // Mauszeiger bei OrbitControl wieder an
   }
 })
@@ -136,7 +105,7 @@ onMounted(() => {
   // Direkt Pointer Lock versuchen
   if (props.useFirstPerson) {
     const requestLock = () => {
-      if (!document.pointerLockElement) {
+      if (!document.pointerLockElement && !milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.gameFinished && props.useFirstPerson && globalThis.location.pathname === '/game') {
         document.body.requestPointerLock()
       }
     }
@@ -200,9 +169,7 @@ watch(
 
 onUnmounted(() => {
   document.removeEventListener('mousemove', onMouseMove)
-  if (document.pointerLockElement) {
-    document.exitPointerLock()
-  }
+  document.exitPointerLock()
 })
 
 // Gibt Kamera frei
