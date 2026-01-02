@@ -4,6 +4,7 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import AudioSettings from '../AudioSettings.vue'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
+import { onBeforeUnmount } from 'vue'
 
 const milefizStore = useMilefizStore()
 const router = useRouter()
@@ -13,6 +14,9 @@ function onHover() {
   audio.playSfx('hover')
 }
 
+onBeforeUnmount(() => {
+    milefizStore.closePopUpSettings()
+})
 </script>
 
 <template>
@@ -27,7 +31,7 @@ function onHover() {
             <AudioSettings></AudioSettings>
 
             <div class="button-container">
-                <button class="back-button" @mouseenter="onHover" @click="milefizStore.closePopUpSettings()">{{ tUI('BACK') }}</button>
+                <button class="back-button" @mouseenter="onHover" @click="milefizStore.closePopUpSettings(), milefizStore.openPopUpMenu()">{{ tUI('BACK') }}</button>
             </div>
 
         </div>

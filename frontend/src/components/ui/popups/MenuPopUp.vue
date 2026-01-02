@@ -17,7 +17,6 @@ function onHover() {
 
 onBeforeUnmount(() => {
     milefizStore.closePopUpMenu()
-    milefizStore.closePopUpSettings()
 })
 
 </script>

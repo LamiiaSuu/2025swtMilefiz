@@ -720,7 +720,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   // Schließt PopUp Menu
   function closePopUpMenu() {
     popUpMenuOpen.value = false
-    popUpSettingsOpen.value = false
   }
 
   // Oeffnet PopUp Einstellungen
