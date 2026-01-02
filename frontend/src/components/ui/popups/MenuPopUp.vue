@@ -3,8 +3,16 @@ import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 
-const store = useMilefizStore()
+import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
+
+const milefizStore = useMilefizStore()
 const router = useRouter()
+const audio = useAudioStore()
+
+function onHover() {
+    audio.playSfx('hover')
+}
 
 </script>
 
@@ -12,14 +20,20 @@ const router = useRouter()
     <div class="overlay">
         <div class="popup">
 
-            <div class="text">
+            <!-- MENU -->
+            <div v-if="!milefizStore.popUpSettingsOpen">
                 <h1 class="title">Menu</h1>
-            </div>
 
-            <div class="button-container">
-                <button class="popup-menu-button" @click="store.togglePopUpMenu()">Weiter</button>
-                <button class="popup-menu-button">Einstellungen</button>
-                <BackButton class="back-button" :to="{ name: 'Homepage' }">&lt; Spiel verlassen</BackButton>
+                <div class="button-container">
+                    <button class="popup-menu-button" @mouseenter="onHover" @click="milefizStore.closePopUpMenu()">{{
+                        tUI('CONTINUE') }}</button>
+
+                    <button class="popup-menu-button" @mouseenter="onHover" @click="milefizStore.openPopUpSettings()">{{
+                        tUI('SETTINGS') }}</button>
+
+                    <BackButton class="back-button" @mouseenter="onHover" :to="{ name: 'Homepage' }">{{
+                        tUI('LEAVE_GAME') }}</BackButton>
+                </div>
             </div>
 
         </div>
@@ -45,11 +59,18 @@ const router = useRouter()
     background-color: var(--background-color-forms);
     border-radius: 15px;
     width: 25vw;
-    height: 50vh;
+    min-height: 50vh;
+    padding: 2vh;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     border: 7px solid #57AA51;
     animation: fadeIn 0.3s ease;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
 }
 
 .text {
@@ -63,6 +84,7 @@ const router = useRouter()
 .title {
     font-size: 7vh;
     color: #000000;
+    margin-bottom: 2vh;
 }
 
 .button-container {
@@ -90,7 +112,7 @@ const router = useRouter()
     font-weight: 400;
 }
 
-.back-button {
+.button-container :deep(.back-button) {
     background-image: var(--button-gradient-red);
 }
 
