@@ -39,5 +39,8 @@ export const UI_NL: Record<UIKey, string> = {
     YOU_CAN_GO_BACK_TO_MAIN_MENU: 'Je kunt nu terug naar het hoofdmenu gaan.',
     BACK_TO_MAIN_MENU: 'Terug naar Hoofdmenu',
     ROLL_DICE: 'Werp',
-    WAITING_FOR_LEADER: 'Wachten op Leider...'
+    WAITING_FOR_LEADER: 'Wachten op Leider...',
+    BACK_TO_MAIN_MENU_CONFIRMATION: 'Wil je echt terugkeren naar het hoofdmenu?',
+    BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR: 'Wil je echt terugkeren naar het hoofdmenu? Niet-opgeslagen wijzigingen gaan verloren.',
+    CANCEL: 'Annuleren',
 }

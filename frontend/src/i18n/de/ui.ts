@@ -39,6 +39,8 @@ export const UI_DE: Record<UIKey, string> = {
     YOU_CAN_GO_BACK_TO_MAIN_MENU: 'Du kannst jetzt zurück ins Hauptmenü gehen.',
     BACK_TO_MAIN_MENU: 'Zurück zum Hauptmenü',
     ROLL_DICE: 'Würfle',
-    WAITING_FOR_LEADER: 'Warten auf Spielleiter...'
-
+    WAITING_FOR_LEADER: 'Warten auf Spielleiter...',
+    BACK_TO_MAIN_MENU_CONFIRMATION: 'Willst du wirklich zum Hauptmenü zurück?',
+    BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR: 'Willst du wirklich zum Hauptmenü zurück? Nicht gespeicherte Änderungen gehen verloren.',
+    CANCEL: 'Abbrechen',
 }

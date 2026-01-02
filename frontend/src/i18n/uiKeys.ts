@@ -1,3 +1,7 @@
+/**
+ * Alle erlaubten Keys für UI-Übersetzungen.
+ * Neue Keys hier hinzufügen, bevor sie in Dictionaries verwendet werden.
+ */
 export type UIKey =
   | 'NEW_GAME'
   | 'JOIN_GAME'
@@ -38,3 +42,6 @@ export type UIKey =
   | 'BACK_TO_MAIN_MENU'
   | 'ROLL_DICE'
   | 'WAITING_FOR_LEADER'
+  | 'BACK_TO_MAIN_MENU_CONFIRMATION'
+  | 'BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR'
+  | 'CANCEL'

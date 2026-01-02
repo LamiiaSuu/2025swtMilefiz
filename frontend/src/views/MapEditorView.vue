@@ -8,14 +8,26 @@ import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useAudioStore } from '@/stores/audioStore';
 import type { IBoardDTD } from '@/stores/IBoardDTD'
 import type { IFieldDTD } from '@/stores/IFieldDTD'
+import { tUI } from '@/i18n'
 
+/**
+ * Richtungen im Editor (Grid bewegt sich in 2er-Schritten).
+ */
 type Direction = 'up' | 'down' | 'left' | 'right'
+
+/**
+ * Werkzeuge/Tile-Arten, die der Benutzer wählen kann.
+ */
 type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
 
+/** Aktuell ausgewähltes Tool */
 const selectedTool = ref<'start' | 'goal' | 'tile' | 'barrier'>('tile')
 const audio = useAudioStore()
 const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
 
+/**
+ * Offset für Nachbar-Felder je Richtung.
+ */
 const DIR_OFFSET: Record<Direction, { x: number; y: number }> = {
   up: { x: 0, y: -2 },
   down: { x: 0, y: 2 },
@@ -23,10 +35,14 @@ const DIR_OFFSET: Record<Direction, { x: number; y: number }> = {
   right: { x: 2, y: 0 },
 }
 
+/**
+ * Liefert das aktuell ausgewählte Tile oder null.
+ */
 const selectedTile = computed<TileData | null>(() =>
   tiles.find(t => key(t.x, t.y) === selectedKey.value) ?? null
 )
 
+/** Repräsentiert ein einzelnes Tile im Editor. */
 type TileData = {
   id: string
   type: ToolType
@@ -42,6 +58,9 @@ type TileData = {
 
 type BoardExport = IBoardDTD & { id: string; name: string }
 
+/**
+ * Alle Tiles auf dem Board (reaktiv).
+ */
 const tiles = reactive<TileData[]>([
   {
     id: crypto.randomUUID(),
@@ -52,19 +71,27 @@ const tiles = reactive<TileData[]>([
   }
 ])
 
+/** Key des aktuell ausgewählten Tiles */
 const selectedKey = ref<string>('0,0')
 
 
 /* Kamera */
+/** Position des Canvas relativ zum Viewport */
 const offset = reactive({ x: 0, y: 0 })
 let dragging = false
 let lastMouse = { x: 0, y: 0 }
 
+/**
+ * Startet Dragging.
+ */
 function onMouseDown(e: MouseEvent) {
   dragging = true
   lastMouse = { x: e.clientX, y: e.clientY }
 }
 
+/**
+ * Verschiebt den Editor während Dragging.
+ */
 function onMouseMove(e: MouseEvent) {
   if (!dragging) return
   offset.x += e.clientX - lastMouse.x
@@ -72,19 +99,29 @@ function onMouseMove(e: MouseEvent) {
   lastMouse = { x: e.clientX, y: e.clientY }
 }
 
+/**
+ * Stoppt Dragging.
+ */
 function onMouseUp() {
   dragging = false
 }
 
+/**
+ * Erstellt einen eindeutigen Key aus Koordinaten.
+ */
 function key(x: number, y: number) {
   return `${x},${y}`
 }
 
+/** Aktuelle Fenstergröße */
 const viewport = ref({
   width: 0,
   height: 0,
 })
 
+/**
+ * Aktualisiert die Viewport-Daten basierend auf Fenstergröße.
+ */
 function updateViewport() {
   viewport.value.width = window.innerWidth
   viewport.value.height = window.innerHeight
@@ -99,6 +136,14 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateViewport)
 })
 
+
+/**
+ * Fügt ein neues Tile in der angegebenen Richtung an ein bestehendes Tile an.
+ * Existiert dort bereits ein Tile, wird nur eine Verbindung hergestellt.
+ *
+ * @param fromTile Tile, von dem aus erweitert wird
+ * @param dir Richtung, in die das Tile platziert werden soll
+ */
 function addTile(fromTile: TileData, dir: Direction) {
   const offset = {
     up: { x: 0, y: -2 },
@@ -133,6 +178,13 @@ function addTile(fromTile: TileData, dir: Direction) {
   selectedKey.value = key(newX, newY)
 }
 
+/**
+ * Sucht das Nachbar-Tile in der gewünschten Richtung.
+ *
+ * @param tile Ausgangs-Tile
+ * @param dir Richtung, in der gesucht werden soll
+ * @returns Gefundenes Tile oder null, falls keines existiert
+ */
 function findNeighbor(tile: TileData, dir: Direction): TileData | null {
   const off = DIR_OFFSET[dir]
   return tiles.find(t => t.x === tile.x + off.x && t.y === tile.y + off.y) ?? null
@@ -163,6 +215,12 @@ function getNextAvailableStartColor(usedColors: Set<string>): string {
   return "NORMAL"
 }
 
+/**
+ * Konvertiert alle Editor-Tiles in das Backend-Format.
+ * Dabei werden Verbindungen und Feldtypen korrekt abgebildet.
+ *
+ * @returns Liste von BackendTile-Objekten
+ */
 function exportTiles(): BackendTile[] {
   const usedStartColors = new Set<string>()
 
@@ -233,6 +291,13 @@ function connectTiles(a: TileData, b: TileData, dir: Direction) {
   b.connections[opposite(dir)] = true
 }
 
+
+/**
+ * Löscht ein Tile und entfernt alle bestehenden Verbindungen
+ * zu angrenzenden Tiles. Das Startfeld (0,0) kann nicht gelöscht werden.
+ *
+ * @param tile Tile, das gelöscht werden soll
+ */
 function deleteTile(tile: TileData) {
 
   if (tile.x === 0 && tile.y === 0) return
@@ -386,7 +451,12 @@ provide("emitImport", handleImport)
     <EditorFileHUD style="bottom: 20px;" />
     <div class="editor-form-row">
       <div class="editor-button-container">
-        <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
+        <BackButton
+          @mouseenter="onHover"
+          :to="{ name: 'Homepage' }"
+          :confirm="true"
+          :confirmText="tUI('BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR')"
+        />
       </div>
     </div>
   </div>

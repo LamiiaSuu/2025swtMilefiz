@@ -2,52 +2,97 @@ import { defineStore } from 'pinia'
 import { reactive, watch } from 'vue'
 import { audioEngine } from '@/composables/audioEngine'
 
+/**
+ * Verfügbare Audio-Kanäle.
+ */
 export type AudioChannelKey = 'music' | 'ambient' | 'sfx'
 
+/**
+ * Zustand eines einzelnen Audio-Kanals.
+ */
 type AudioChannel = {
   volume: number    // 0–100
   muted: boolean    //true = muted, false = unmuted
 }
 
+/**
+ * Globaler Audio-Store.
+ *
+ * Verantwortlich für:
+ * - Lautstärke pro Kanal
+ * - Mute pro Kanal
+ * - Synchronisierung mit AudioEngine
+ * - Verwaltung aller Audio-Ressourcen (sfxMap)
+ */
 export const useAudioStore = defineStore('audio', () => {
 
+  /**
+   * Reaktiver Zustand aller Kanäle.
+   */
   const channels = reactive<Record<AudioChannelKey, AudioChannel>>({
     music:  { volume: 50, muted: false },
     ambient:{ volume: 25, muted: false },
     sfx:    { volume: 65, muted: false },
   })
 
+  /**
+   * Setzt die Lautstärke eines Kanals.
+   */
   function setVolume(channel: AudioChannelKey, volume: number) {
     channels[channel].volume = volume
   }
 
+  /**
+   * Wechselt Mute-Zustand eines Kanals.
+   */
   function toggleMute(channel: AudioChannelKey) {
     channels[channel].muted = !channels[channel].muted
   }
 
+  /**
+   * Setzt Mute explizit.
+   */
   function setMute(channel: AudioChannelKey, muted: boolean) {
     channels[channel].muted = muted
   }
 
+  /**
+   * Reagiert auf Musik-Lautstärkeänderung.
+   */
   watch(() => channels.music.volume, (v) => {
     audioEngine.musicGain.gain.value = channels.music.muted ? 0 : v / 100
   })
 
+  /**
+   * Reagiert auf Musik-Mute.
+   */
   watch(() => channels.music.muted, (m) => {
     audioEngine.musicGain.gain.value = m ? 0 : channels.music.volume / 100
   })
 
+  /**
+   * Reagiert auf Ambient-Lautstärke.
+   */
   watch(() => channels.ambient.volume, (v) => {
     audioEngine.ambientGain.gain.value = channels.ambient.muted ? 0 : v / 100
   })
 
+  /**
+   * Reagiert auf Ambient-Mute.
+   */
   watch(() => channels.ambient.muted, (m) => {
     audioEngine.ambientGain.gain.value = m ? 0 : channels.ambient.volume / 100
   })
 
-  //Urheberfreie Soundeffekte von:
-  //OpenGameArt.org
-  //pixabay.com/sound-effects/
+
+  /**
+   * Map aller Sounddateien im Spiel.
+   * Dient als zentrale Referenz.
+   *
+   * Urheberfreie Soundeffekte von:
+   * OpenGameArt.org
+   * pixabay.com/sound-effects/
+  */
   const sfxMap: Record<string, string> = {
     //UI Sounds
     click: '/audio/ui/ClickSound.mp3?v=2',
@@ -87,6 +132,11 @@ export const useAudioStore = defineStore('audio', () => {
     ambientForest04: '/audio/ambient/ForestAmbient04.mp3',
   }
 
+  /**
+   * Spielt einen UI-/SFX-Sound ab. Gedacht für kurze Sounds die keine Live-Audio-Anpassung benötigen. Sonst AudioEngine verwenden.
+   *
+   * @param key Key aus sfxMap
+   */
   function playSfx(key: keyof typeof sfxMap) {
     const channel = channels.sfx
     if (channel.muted) return
