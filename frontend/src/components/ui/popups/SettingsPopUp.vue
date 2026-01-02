@@ -4,6 +4,7 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import AudioSettings from '../AudioSettings.vue'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
+import LanguageSelection from '../LanguageSelection.vue'
 
 const milefizStore = useMilefizStore()
 const router = useRouter()
@@ -22,6 +23,9 @@ function onHover() {
             <div class="text">
                 <h1 class="title">Menu</h1>
             </div>
+            
+            <!-- LANGUAGE SETTINGS -->
+            <LanguageSelection></LanguageSelection>
 
             <!-- AUDIO SETTINGS -->
             <AudioSettings></AudioSettings>
@@ -55,6 +59,7 @@ function onHover() {
     width: 40vw;
     height: 70vh;
     text-align: center;
+    position: relative;
     
     align-items: center;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
