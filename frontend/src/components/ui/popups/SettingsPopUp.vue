@@ -19,10 +19,6 @@ function onHover() {
 <template>
     <div class="overlay">
         <div class="popup">
-
-            <div class="text">
-                <h1 class="title">Menu</h1>
-            </div>
             
             <!-- LANGUAGE SETTINGS -->
             <LanguageSelection></LanguageSelection>
@@ -60,24 +56,14 @@ function onHover() {
     height: 70vh;
     text-align: center;
     position: relative;
+    padding-top: 6vh;
+    
+    justify-content: center;
     
     align-items: center;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     border: 7px solid #57AA51;
     animation: fadeIn 0.3s ease;
-}
-
-.text {
-    display: flex;
-    flex-direction: column;
-    margin: 3vh 0 0 0;
-    text-align: center;
-    align-items: center;
-}
-
-.title {
-    font-size: 7vh;
-    color: #000000;
 }
 
 .button-container {

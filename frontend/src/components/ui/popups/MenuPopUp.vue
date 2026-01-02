@@ -22,7 +22,6 @@ function onHover() {
 
             <!-- MENU -->
             <div v-if="!milefizStore.popUpSettingsOpen">
-                <h1 class="title">Menu</h1>
 
                 <div class="button-container">
                     <button class="popup-menu-button" @mouseenter="onHover" @click="milefizStore.closePopUpMenu()">{{
@@ -57,11 +56,15 @@ function onHover() {
     display: flex;
     flex-direction: column;
     background-color: var(--background-color-forms);
+
     border-radius: 15px;
-    width: 25vw;
-    min-height: 50vh;
+    width: 20vw;
+    min-height: 45vh;
     padding: 2vh;
+    
+    justify-content: center;
     text-align: center;
+
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     border: 7px solid #57AA51;
     animation: fadeIn 0.3s ease;
@@ -71,20 +74,6 @@ function onHover() {
     display: flex;
     flex-direction: column;
     gap: 2vh;
-}
-
-.text {
-    display: flex;
-    flex-direction: column;
-    margin: 3vh 0;
-    text-align: center;
-    align-items: center;
-}
-
-.title {
-    font-size: 7vh;
-    color: #000000;
-    margin-bottom: 2vh;
 }
 
 .button-container {
