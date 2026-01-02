@@ -361,6 +361,8 @@ const toggleCamera = (e: KeyboardEvent) => {
   }
 }
 
+
+
 /**
  * Die Richtung wird relativ zur aktuellen Kamerasicht berechnet.
  * 
