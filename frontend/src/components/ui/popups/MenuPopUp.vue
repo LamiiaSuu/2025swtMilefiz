@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
+import { onBeforeUnmount } from 'vue'
 
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
@@ -13,6 +14,11 @@ const audio = useAudioStore()
 function onHover() {
     audio.playSfx('hover')
 }
+
+onBeforeUnmount(() => {
+    milefizStore.closePopUpMenu()
+    milefizStore.closePopUpSettings()
+})
 
 </script>
 

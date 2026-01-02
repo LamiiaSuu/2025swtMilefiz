@@ -761,9 +761,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName.value = ''
     winnerColor.value = ''
 
-    popUpMenuOpen.value = false
-    popUpSettingsOpen.value = false
-
     const boardStore = useBoardStore()
 
     boardStore.resetBoardStore()
