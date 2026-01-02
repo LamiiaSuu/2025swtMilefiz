@@ -14,6 +14,11 @@ function onHover() {
   audio.playSfx('hover')
 }
 
+const onBackClick = () => {
+    audio.playSfx('click')
+    milefizStore.closePopUpSettings()
+}
+
 </script>
 
 <template>
@@ -27,7 +32,7 @@ function onHover() {
             <AudioSettings></AudioSettings>
 
             <div class="button-container">
-                <button class="back-button" @mouseenter="onHover" @click="milefizStore.closePopUpSettings()">{{ tUI('BACK') }}</button>
+                <button class="back-button" @mouseenter="onHover" @click="onBackClick()">{{ tUI('BACK') }}</button>
             </div>
 
         </div>

@@ -14,6 +14,20 @@ function onHover() {
     audio.playSfx('hover')
 }
 
+const onContinueClick = () => {
+    audio.playSfx('click')
+    milefizStore.closePopUpMenu()
+}
+
+const onSettingsClick = () => {
+    audio.playSfx('click')
+    milefizStore.openPopUpSettings()
+}
+
+const onBackClick = () => {
+    audio.playSfx('click')
+}
+
 </script>
 
 <template>
@@ -24,13 +38,14 @@ function onHover() {
             <div v-if="!milefizStore.popUpSettingsOpen">
 
                 <div class="button-container">
-                    <button class="popup-menu-button" @mouseenter="onHover" @click="milefizStore.closePopUpMenu()">{{
-                        tUI('CONTINUE') }}</button>
+                    <button class="popup-menu-button" @mouseenter="onHover"
+                        @click="onContinueClick()">{{
+                            tUI('CONTINUE') }}</button>
 
-                    <button class="popup-menu-button" @mouseenter="onHover" @click="milefizStore.openPopUpSettings()">{{
+                    <button class="popup-menu-button" @mouseenter="onHover" @click="onSettingsClick()">{{
                         tUI('SETTINGS') }}</button>
 
-                    <BackButton class="back-button" @mouseenter="onHover" :to="{ name: 'Homepage' }">{{
+                    <BackButton class="back-button" @mouseenter="onHover" @click="onBackClick()" :to="{ name: 'Homepage' }">{{
                         tUI('LEAVE_GAME') }}</BackButton>
                 </div>
             </div>
@@ -61,7 +76,7 @@ function onHover() {
     width: 20vw;
     min-height: 45vh;
     padding: 2vh;
-    
+
     justify-content: center;
     text-align: center;
 
