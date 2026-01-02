@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import AudioSettings from '../AudioSettings.vue'
+import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
 
-const store = useMilefizStore()
+const milefizStore = useMilefizStore()
 const router = useRouter()
+const audio = useAudioStore()
+
+function onHover() {
+  audio.playSfx('hover')
+}
 
 </script>
 
@@ -17,13 +23,11 @@ const router = useRouter()
                 <h1 class="title">Menu</h1>
             </div>
 
-
             <!-- AUDIO SETTINGS -->
             <AudioSettings></AudioSettings>
 
             <div class="button-container">
-                <button class="popup-menu-button" @click="store.togglePopUpMenu()">Weiter</button>
-                <button class="popup-menu-button">Einstellungen</button>
+                <button class="back-button" @mouseenter="onHover" @click="milefizStore.closePopUpSettings()">{{ tUI('BACK') }}</button>
             </div>
 
         </div>
@@ -48,9 +52,11 @@ const router = useRouter()
     flex-direction: column;
     background-color: var(--background-color-forms);
     border-radius: 15px;
-    width: 100vw;
-    height: 100vh;
+    width: 40vw;
+    height: 70vh;
     text-align: center;
+    
+    align-items: center;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     border: 7px solid #57AA51;
     animation: fadeIn 0.3s ease;
@@ -59,7 +65,7 @@ const router = useRouter()
 .text {
     display: flex;
     flex-direction: column;
-    margin: 3vh 0;
+    margin: 3vh 0 0 0;
     text-align: center;
     align-items: center;
 }
@@ -72,8 +78,9 @@ const router = useRouter()
 .button-container {
     display: flex;
     flex-direction: column;
+    
+    padding: 4vh 0;
     gap: 3vh;
-    align-items: center;
 }
 
 .button-container :deep(button) {
@@ -95,10 +102,6 @@ const router = useRouter()
 }
 
 .back-button {
-    background-image: var(--button-gradient-red);
-}
-
-.popup-menu-button {
     background-image: var(--button-gradient-green);
 }
 
