@@ -78,6 +78,7 @@ const onMouseMove = (e: MouseEvent) => {
     return
   }
 
+
   // Horizontale Rotation - Dreht Charakter!
   horizontalRotation.value -= e.movementX * mouseSensitivity
   emit('rotateCharacter', horizontalRotation.value)
@@ -115,7 +116,7 @@ onMounted(() => {
     requestLock()
 
     // Fallback: auf ersten Klick warten
-    document.addEventListener('click', requestLock, { once: true })
+    document.addEventListener('click', requestLock, { once: false })
   }
 
   const updateCamera = () => {
@@ -169,7 +170,7 @@ watch(
 
 onUnmounted(() => {
   document.removeEventListener('mousemove', onMouseMove)
-  document.exitPointerLock()
+    document.exitPointerLock()
 })
 
 // Gibt Kamera frei
