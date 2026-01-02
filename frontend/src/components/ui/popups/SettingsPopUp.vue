@@ -20,7 +20,7 @@ function onHover() {
         <div class="popup">
 
             <div class="text">
-                <h1 class="title">Menu</h1>
+                <h1 class="title">{{ tUI('MENU') }}</h1>
             </div>
 
             <!-- AUDIO SETTINGS -->
