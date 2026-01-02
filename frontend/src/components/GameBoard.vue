@@ -240,17 +240,31 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
     e.preventDefault()
-    milefizStore.popUpMenuOpen = !milefizStore.popUpMenuOpen
-    return
+
+    // Schließt die PopUp-Einstellungen, wenn sie offen sind
+    if (milefizStore.popUpSettingsOpen) {
+      milefizStore.closePopUpSettings()
+      return
+    }
+
+    // Schließt das PopUp-Menu, wenn es offen sind
+    if (milefizStore.popUpMenuOpen) {
+      milefizStore.closePopUpMenu()
+      return
+    } 
+    else { // Oeffnet das PopUp-Menu
+      milefizStore.openPopUpMenu()
+      return
+    }
   }
 
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
     e.preventDefault()
-    if (milefizStore.gamedata.moved){
+    if (milefizStore.gamedata.moved) {
       showWarning('MEEPLE_SELECTION_REJECTED')
       return
-    } 
+    }
     cycleSelection(e.shiftKey ? -1 : 1)
     return
   }
@@ -293,10 +307,10 @@ function cycleSelection(offset: number = 1) {
 function handleMeepleSelectionKeydown(e: KeyboardEvent) {
   if (e.key < '1' || e.key > '5') return
 
-  if (milefizStore.gamedata.moved){
+  if (milefizStore.gamedata.moved) {
     showWarning('MEEPLE_SELECTION_REJECTED')
     return
-  } 
+  }
 
   e.preventDefault()
   const index = Number(e.key) - 1
@@ -557,9 +571,7 @@ const connectionSegments = computed(() => {
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
     <!-- Verbindungspfade zwischen verbundenen Tiles -->
-    <Path v-for="seg in connectionSegments" :key="seg.key"
-      :position="[seg.x, 0, seg.z]"
-      :rotationY="seg.rotY"
+    <Path v-for="seg in connectionSegments" :key="seg.key" :position="[seg.x, 0, seg.z]" :rotationY="seg.rotY"
       :length="seg.length" />
 
     <!-- Spielfeldtiles rendern -->
