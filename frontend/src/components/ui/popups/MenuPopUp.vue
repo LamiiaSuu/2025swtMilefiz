@@ -22,7 +22,7 @@ function onHover() {
 
             <!-- MENU -->
             <div v-if="!milefizStore.popUpSettingsOpen">
-                <h1 class="title">Menu</h1>
+                <h1 class="title">{{ tUI('MENU') }}</h1>
 
                 <div class="button-container">
                     <button class="popup-menu-button" @mouseenter="onHover" @click="milefizStore.closePopUpMenu()">{{

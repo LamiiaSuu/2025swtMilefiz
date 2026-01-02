@@ -45,4 +45,5 @@ export const UI_DE: Record<UIKey, string> = {
     CANCEL: 'Abbrechen',
     CONTINUE: 'Weiter',
     LEAVE_GAME: 'Spiel verlassen',
+    MENU: 'Menü',
 }

@@ -47,3 +47,4 @@ export type UIKey =
   | 'CANCEL'
   | 'CONTINUE'
   | 'LEAVE_GAME'
+  | 'MENU'
