@@ -1,0 +1,19 @@
+import type { ErrorCode } from '@/errors/errorCodes'
+
+export const ERRORS_DE: Record<ErrorCode, string> = {
+    ROLL_DICE_ERROR_MOVES_LEFT: 'Noch Züge offen - Würfeln nicht erlaubt.',
+    REMAINING_MOVES_LOST: 'Kein Zug mehr möglich - Verbleibende Züge verloren!',
+    CHEATED: 'Du kleiner Cheater.',
+    MEEPLE_SELECTION_REJECTED: 'Meeple bereits bewegt - Wechsel nicht möglich.',
+    MOVE_ERROR_INTO_START: 'Startfelder können nicht betreten werden!',
+    MOVE_ERROR_NO_FIELD_IN_DIRECTION: 'Kein Feld in diese Richtung!',
+    MOVE_ERROR_NO_MOVES_LEFT: 'Keine verbleindenden Züge!',
+    MOVE_ERROR_CANT_CHANGE_DIRECTION: 'Richtungswechsel nicht erlaubt!',
+    MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL: 'Ziel kann nur mit dem letzten Zug betreten werden!',
+    MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE: 'Feld bereits durch eigenen Meeple besetzt!',
+    MOVE_BARRIER_REJECTED_START_OR_END: 'Barriere kann nicht auf Start- oder Zielfeld gesetzt werden',
+    MOVE_BARRIER_OCCUPIED: 'Barriere kann nicht auf besetztes Feld gesetzt werden',
+    REJECTED_BY_BARRIER: 'Autsch! Das sah schmerzhaft aus - verbleibende Züge verloren!',
+    SAVE_ENERGY_ERROR: 'Maximale Energie oder Meeple bereits bewegt!',
+    CONSUME_ENERGY_ERROR: 'Nicht genug Energie für einen Sprung!'
+}

@@ -118,7 +118,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("no moves left", evt.msg());
+        assertEquals("MOVE_ERROR_NO_MOVES_LEFT", evt.msg());
     }
 
     // Versuch in eine Richtung zu ziehen, in der kein Feld ist.
@@ -133,7 +133,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("No Field in this Direction", evt.msg());
+        assertEquals("MOVE_ERROR_NO_FIELD_IN_DIRECTION", evt.msg());
     }
 
     // Versuch die Richtung innerhalb eines Zuges zu wechseln
@@ -150,7 +150,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("Cant change direction!", evt.msg());
+        assertEquals("MOVE_ERROR_CANT_CHANGE_DIRECTION", evt.msg());
     }
 
     // Versuch auf ein Startfeld zu gehen
@@ -168,7 +168,7 @@ public class MovementServiceMeepleTest {
         assertInstanceOf(FrontendMoveRejectedEvent.class, result);
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("Cant go back to a starting field!", evt.msg());
+        assertEquals("MOVE_ERROR_INTO_START", evt.msg());
     }
 
     // Versuch Endfeld mit Restzügen zu betreten
@@ -187,7 +187,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("Cant enter End with remaining Moves", evt.msg());
+        assertEquals("MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL", evt.msg());
     }
 
     // Sieg, wenn erster Meeple das Ziel erreicht
@@ -396,7 +396,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("Attempt to occupy a field with multiple meeple failed", evt.msg());
+        assertEquals("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE", evt.msg());
 
         assertEquals(currentField, meeple.getCurrentField());
     }

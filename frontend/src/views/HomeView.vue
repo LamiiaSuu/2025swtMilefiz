@@ -1,11 +1,12 @@
 <template>
   <div class="home">
     <Header overlay></Header>
+    <LanguageSelection></LanguageSelection>
     <div class="button-container">
-      <button class="menu-button" @click="newGameStart">Neues Spiel</button>
-      <button class="menu-button" @click="goToJoinGame">Spiel beitreten</button>
-      <button class="menu-button" @click="goToMapEditor">Map Editor</button>
-      <button class="menu-button" @click="goToSettings">Einstellungen</button>
+      <button class="menu-button" @mouseenter="onHover" @click="newGameStart">{{ tUI('NEW_GAME') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToJoinGame">{{ tUI('JOIN_GAME') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToMapEditor">{{ tUI('MAP_EDITOR') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToSettings">{{ tUI('SETTINGS') }}</button>
     </div>
   </div>
 </template>
@@ -14,6 +15,8 @@
 import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
 import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
+import LanguageSelection from '@/components/ui/LanguageSelection.vue'
 
 const router = useRouter()
 const audio = useAudioStore()
@@ -36,6 +39,10 @@ const goToMapEditor = () => {
 const goToSettings = () => {
   audio.playSfx('click')
   router.push('/settings')
+}
+
+function onHover() {
+  audio.playSfx('hover')
 }
 </script>
 
@@ -78,4 +85,5 @@ const goToSettings = () => {
   transform: scale(1.05);
   transition: transform 0.2s ease;
 }
+
 </style>

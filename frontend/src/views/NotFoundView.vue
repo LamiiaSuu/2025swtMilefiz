@@ -2,25 +2,33 @@
 import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
+import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
+import LanguageSelection from '@/components/ui/LanguageSelection.vue'
 
 const router = useRouter()
+const audio = useAudioStore()
 
+function onHover() {
+  audio.playSfx('hover')
+}
 </script>
 
 <template>
   <div class="not-found">
-    <Header overlay>Seite nicht gefunden</Header>
-
+    <Header overlay>{{ tUI('PAGE_NOT_FOUND') }}</Header>
+    <LanguageSelection></LanguageSelection>
     <div class="content">
       <h1>404</h1>
       <p>
-        Diese Seite existiert nicht.<br />
-        Vielleicht haben wir sie auch noch nicht implementiert.
+        {{ tUI('PAGE_NOT_FOUND_FLAVOR_TEXT_UPPER') }}
+        <br />
+        {{ tUI('PAGE_NOT_FOUND_FLAVOR_TEXT_LOWER') }}
       </p>
 
       <div class="button-container">
 
-        <BackButton :to="{ name: 'Homepage' }" />
+        <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
       </div>
     </div>
   </div>
@@ -59,6 +67,8 @@ const router = useRouter()
   font-size: 6rem;
   margin-bottom: 0.5rem;
   text-shadow: 0 0 32px rgba(0, 0, 0, 1);
+  paint-order: stroke fill;
+  -webkit-text-stroke: 10px black;
 }
 
 .content p {
@@ -68,7 +78,8 @@ const router = useRouter()
   0 0 8px rgba(0,0,0,0.9),
   0 0 20px rgba(0,0,0,0.8),
   0 0 40px rgba(0,0,0,0.5);
-  
+  paint-order: stroke fill;
+  -webkit-text-stroke: 6px black;
 }
 
 .button-container {
@@ -93,4 +104,5 @@ const router = useRouter()
   transform: scale(1.05);
   transition: transform 0.2s ease;
 }
+
 </style>

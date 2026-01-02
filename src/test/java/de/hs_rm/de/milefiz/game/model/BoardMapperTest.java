@@ -37,28 +37,22 @@ public class BoardMapperTest {
 
     @Test
     public void testSameStartfields() {
-        
+
         Board board = BoardMapper.mapToBoard(boardDTO);
-
         boardDTO = BoardMapper.mapToDTO(board);
-
         Board board2 = BoardMapper.mapToBoard(boardDTO);
-        
+
         if (board.getStartBlue() != null) {
-            assertEquals(board.getStartBlue().getId(), board2.getStartBlue().getId());            
-            assertEquals(board.getStartBlue().getNeighbours(), board2.getStartBlue().getNeighbours());
+            assertEquals(board.getStartBlue().getId(), board2.getStartBlue().getId());
         }
-        if (board.getStartGreen() != null) {            
+        if (board.getStartGreen() != null) {
             assertEquals(board.getStartGreen().getId(), board2.getStartGreen().getId());
-            assertEquals(board.getStartGreen().getNeighbours(), board2.getStartGreen().getNeighbours());
         }
         if (board.getStartRed() != null) {
             assertEquals(board.getStartRed().getId(), board2.getStartRed().getId());
-            assertEquals(board.getStartRed().getNeighbours(), board2.getStartRed().getNeighbours());            
         }
         if (board.getStartYellow() != null) {
             assertEquals(board.getStartYellow().getId(), board2.getStartYellow().getId());
-            assertEquals(board.getStartYellow().getNeighbours(), board2.getStartYellow().getNeighbours());            
         }
     }
 

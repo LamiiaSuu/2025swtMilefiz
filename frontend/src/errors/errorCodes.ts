@@ -1,0 +1,24 @@
+/**
+ * Zentrale Liste aller Fehlercodes, die vom Backend gesendet
+ * und im Frontend übersetzt werden.
+ *
+ * Neue Fehler:
+ * 1. Hier hinzufügen
+ * 2. In allen Sprach-Dateien übersetzen
+ */
+export type ErrorCode =
+    'ROLL_DICE_ERROR_MOVES_LEFT'
+  | 'REMAINING_MOVES_LOST'
+  | 'CHEATED'
+  | 'MEEPLE_SELECTION_REJECTED'
+  | 'MOVE_ERROR_INTO_START'
+  | 'MOVE_ERROR_NO_FIELD_IN_DIRECTION'
+  | 'MOVE_ERROR_NO_MOVES_LEFT'
+  | 'MOVE_ERROR_CANT_CHANGE_DIRECTION'
+  | 'MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL'
+  | 'MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE'
+  | 'MOVE_BARRIER_REJECTED_START_OR_END'
+  | 'MOVE_BARRIER_OCCUPIED'
+  | 'REJECTED_BY_BARRIER'
+  | 'SAVE_ENERGY_ERROR'
+  | 'CONSUME_ENERGY_ERROR'

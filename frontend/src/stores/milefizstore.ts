@@ -9,6 +9,7 @@ import { useBoardStore } from "./boardStore"
 import { generateUUID } from 'three/src/math/MathUtils.js';
 import { useErrorHandler } from '@/composables/useErrorHandler';
 import { startingbaseColors, playerColors } from '@/types/colorsAssets';
+import { useAudioStore } from '@/stores/audioStore'
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
@@ -17,6 +18,8 @@ const DEST = '/topic/milefiz/lobby/'
 let stompclient: Client | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
+  const audioStore = useAudioStore()
+
   /**
    * Cooldown für das Würfelsystem
    * cooldown
@@ -85,7 +88,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
   const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
 
-
   function startMilefizLiveUpdate() {
     console.log('Starting Liveupdater for Milefiz with playerToken ' + gamedata.playerToken)
     // Nur eine Instanz
@@ -137,6 +139,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           console.log(
             `Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`,
           )
+          audioStore.playSfx('eventError')
           cooldown.remainingSeconds = event.seconds
         }
 
@@ -149,6 +152,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             `Player ${event.playerId} still has ${event.moves} moves left and therefore can't roll their dice yet!`,
           )
           gamedata.currentDiceRoll = event.moves
+          showWarning(`ROLL_DICE_ERROR_MOVES_LEFT`)
         }
 
         // Sobald der Cooldown eines Spielers ready ist wird vom Backend hier hin das Signal mit LobbyID und SpielerID gesendet und hier abgefangen.
@@ -157,11 +161,31 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           cooldown.active = false
           cooldown.remainingSeconds = 0
         } else if (event.type === 'MOVE_ERROR') {
-          console.warn('Move rejected:', event.msg)
-          return
+          if(event.playerId === gamedata.playerId){
+            console.warn('Move rejected:', event.msg)
+            if( event.msg === "MOVE_ERROR_INTO_START"){
+              showWarning("MOVE_ERROR_INTO_START")
+            }
+            else if( event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION"){
+              showWarning("MOVE_ERROR_NO_FIELD_IN_DIRECTION")
+            }
+            else if( event.msg === "MOVE_ERROR_NO_MOVES_LEFT"){
+              showWarning("MOVE_ERROR_NO_MOVES_LEFT")
+            }
+            else if( event.msg === "MOVE_ERROR_CANT_CHANGE_DIRECTION"){
+              showWarning("MOVE_ERROR_CANT_CHANGE_DIRECTION")
+            }
+            else if( event.msg === "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL"){
+              showWarning("MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL")
+            }
+            else if( event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE"){
+              showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
+            }
+            return
+        }
         } else if (event.type === 'CHEATED') {
           if (event.playerId === gamedata.playerId) {
-            showWarning("Du kleiner Cheater")
+            showWarning("CHEATED")
             window.setTimeout(cheatRedirect, 2500)
           }
         } else if (event.type === 'MOVE') {
@@ -181,6 +205,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY') {
           energy.maxEnergy = event.maxEnergy
           if (event.playerId === gamedata.playerId) {
+            if(gamedata.currentDiceRoll == 0) {
+              audioStore.playSfx('eventError')
+              return
+            }
+            audioStore.playSfx('eventEnergySave')
             gamedata.currentDiceRoll = 0
             gamedata.energy = event.energy
             energy.isEnergyFresh = false;
@@ -192,7 +221,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Energy save rejected:', event.msg)
-            showWarning(`Energie speichern fehlgeschlagen: ${event.msg}`)
+            showWarning(`SAVE_ENERGY_ERROR`)
           }
           return
         }
@@ -205,12 +234,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'CONSUME_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Consume energy rejected:', event.msg)
+            //audioStore.playSfx('eventError')
+            showWarning(`CONSUME_ENERGY_ERROR`)
           }
         } if (event.type === "MOVE_WITH_LOSS") {
           boardStore.updateMeeplePosition(event.id, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = event.moved
+            showWarning(`REMAINING_MOVES_LOST`)
             //TODO moveloss animieren
             console.warn("lost remaining moves")
           }
@@ -232,8 +264,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
-          console.warn("u ran into barrieeer oh no")
+          console.log("u ran into barrieeer oh no")
           if (event.playerId === gamedata.playerId) {
+            audioStore.playSfx('impactBarrier')
+            showWarning('REJECTED_BY_BARRIER')
+            gamedata.moved = false
             gamedata.currentDiceRoll = event.remainingMoves
           }
         }
@@ -253,6 +288,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
+          if( event.msg === "MOVE_BARRIER_REJECTED_START_OR_END"){
+            showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
+          }
+          else if( event.msg === "MOVE_BARRIER_OCCUPIED"){
+            showWarning("MOVE_BARRIER_OCCUPIED")
+          }
         }
 
         // SPIEL STARTET
@@ -329,12 +370,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   /**
    * Joint eine Lobby mit der angegebenen Id und startet den WebSocket zum ständigen synchronisieren von Daten.
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
+   * @param username String des username des Spielers
    */
-  async function joinLobby(lobbyId: string = 'random') {
+  async function joinLobby(lobbyId: string = 'random', username: string = 'Anonymer Kek') {
     console.log('Start receiving Gameboard Data...')
     try {
       if (lobbyId == null) lobbyId = 'random'
-      const resp = await fetch('/api/lobby/join/' + lobbyId)
+      const url = '/api/lobby/join/' + lobbyId + '?username=' + encodeURIComponent(username ?? '')
+      const resp = await fetch(url)
       if (!resp.ok) {
         console.error('Error while recieving Data:\n', resp.statusText)
         throw new Error(resp.statusText)
@@ -661,6 +704,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return playerColors.YELLOW
     }
   }
+
 
   function togglePopUpMenu() {
     popUpMenuOpen.value = !popUpMenuOpen.value

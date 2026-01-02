@@ -8,6 +8,7 @@ import DeleteButton from './buttons/DeleteButton.vue';
 import TileButton from './buttons/TileButton.vue';
 import GoalButton from './buttons/GoalButton.vue';
 import HouseButton from './buttons/HouseButton.vue';
+import { tUI } from '@/i18n'
 
 type ToolType = 'start' | 'goal' | 'tile' | 'barrier'
 
@@ -70,7 +71,7 @@ onUnmounted(() => {
           >
             <HouseButton />
           </div>
-          <p>Start (Q)</p>
+          <p>{{ tUI('BASE') }} (Q)</p>
         </div>
         <div
           class="editor-icon-with-text"
@@ -82,7 +83,7 @@ onUnmounted(() => {
           >
             <GoalButton />
           </div>
-          <p>Ziel (W)</p>
+          <p>{{ tUI('GOAL') }} (W)</p>
         </div>
         <div
           class="editor-icon-with-text"
@@ -94,7 +95,7 @@ onUnmounted(() => {
           >
             <TileButton />
           </div>
-          <p>Standard (E)</p>
+          <p>{{ tUI('STANDARD_TILE') }} (E)</p>
         </div>
         <div
           class="editor-icon-with-text"
@@ -106,7 +107,7 @@ onUnmounted(() => {
           >
             <BarrierButton />
           </div>
-          <p>Sperre (R)</p>
+          <p>{{ tUI('BARRIER') }} (R)</p>
         </div>
         <div style="padding-left: 50px;">
           <div
@@ -117,7 +118,7 @@ onUnmounted(() => {
             >
               <DeleteButton />
             </div>
-            <p>Löschen (Z)</p>
+            <p>{{ tUI('DELETE') }} (Z)</p>
           </div>
         </div>
         
@@ -129,7 +130,7 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .editor-hud-container {
   position: fixed;
   inset: 0;

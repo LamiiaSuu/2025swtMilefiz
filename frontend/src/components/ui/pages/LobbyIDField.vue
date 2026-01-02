@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { tUI } from '@/i18n';
 import { useAudioStore } from '@/stores/audioStore';
 import { useMilefizStore } from '@/stores/milefizstore';
 import { computed, ref } from 'vue'
@@ -24,17 +25,19 @@ const copyToClipboard = async () => {
     }
 }
 
-
+function onHover() {
+  audio.playSfx('hover')
+}
 </script>
 
 <template>
     <!-- Lobby-ID -->
     <div class="form-row">
-        <label>Lobby-ID</label>
+        <label>{{ tUI('LOBBY_ID') }}</label>
 
         <div class="input-with-button">
             <input type="text" v-model="lobbyId" disabled class="form-input">
-            <button type="button" @click="copyToClipboard" class="copy-button" title="In Zwischenablage kopieren">
+            <button type="button" @mouseenter="onHover" @click="copyToClipboard" class="copy-button" title="In Zwischenablage kopieren">
                 <img src="@/assets/buttons/copy-clipboard-icon.png" alt="Copy" width="20" height="20">
             </button>
         </div>

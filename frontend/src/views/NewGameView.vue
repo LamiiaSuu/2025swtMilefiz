@@ -8,6 +8,8 @@ import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { storeToRefs } from 'pinia'
 import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
+import LanguageSelection from '@/components/ui/LanguageSelection.vue'
 
 const { startGameCommand } = useMilefizStore()
 const milefizStore = useMilefizStore()
@@ -21,6 +23,10 @@ onMounted(() => {
     }
 
 })
+
+function onHover() {
+  audio.playSfx('hover')
+}
 
 // Reaktive Leader-Prüfung
 const isOwnLeader = computed(() => storeIsOwnLeader())
@@ -81,8 +87,8 @@ const handleFileChange = (event: Event) => {
 
     <div class="content">
         <!-- MI'lefiz Header -->
-        <Header>Neues Spiel</Header>
-
+        <Header>{{ tUI('NEW_GAME') }}</Header>
+        <LanguageSelection></LanguageSelection>
         <div class="new-game-form">
             <form>
                 <!-- Linke Spalte -->
@@ -93,31 +99,31 @@ const handleFileChange = (event: Event) => {
 
                     <!-- Lobby-Name -->
                     <div class="form-row">
-                        <label>Lobby-Name</label>
-                        <input type="text" v-model="lobbyName" class="form-input" placeholder="Lobby-Name"
+                        <label>{{ tUI('LOBBY_NAME') }}</label>
+                        <input type="text" v-model="lobbyName" class="form-input" :placeholder=" tUI('LOBBY_NAME') "
                             :disabled="!isOwnLeader">
                     </div>
 
                     <!-- Map Buttons (Nur bei Lobby-Ersteller)-->
                     <template v-if="isOwnLeader">
                         <div class="form-row">
-                            <label>Map</label>
+                            <label>{{ tUI('MAP') }}</label>
                             <div class="map-buttons">
-                                <button type="button" class="map-button" :class="{ active: mapMode === 'standard' }"
+                                <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'standard' }"
                                     @click="mapMode = 'standard'">
-                                    Standardmap
+                                    {{ tUI('STANDARD_MAP') }}
                                 </button>
-                                <button type="button" class="map-button" :class="{ active: mapMode === 'import' }"
+                                <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'import' }"
                                     @click="mapMode = 'import'">
-                                    Importieren
+                                    {{ tUI('IMPORT') }}
                                 </button>
                             </div>
                         </div>
 
                         <!-- Datei importieren -->
                         <div class="form-row">
-                            <label>Datei</label>
-                            <input type="file" @change="handleFileChange" class="file-input"
+                            <label>{{ tUI('FILE') }}</label>
+                            <input type="file" @mouseenter="onHover" @change="handleFileChange" class="file-input"
                                 :disabled="mapMode === 'standard'" accept=".json,.map">
                         </div>
                     </template>
@@ -132,7 +138,7 @@ const handleFileChange = (event: Event) => {
 
                     <!-- Spieler-Liste -->
                     <div class="form-row">
-                        <label>Spieler</label>
+                        <label>{{ tUI('PLAYERS') }}</label>
                         <div class="players-list">
                             <div v-for="(player, index) in lobby?.players" :key="index" class="player-item">
                                 <span class="player-color-dot" :style="{ backgroundColor: player.color }"></span>
@@ -140,7 +146,7 @@ const handleFileChange = (event: Event) => {
                                 <span v-if="player.leader" class="tooltip-wrapper">
                                     <img src="@/assets/buttons/sword-icon.png" style="filter: brightness(0)"
                                         alt="Leader" width="20" height="20"></img>
-                                    <span class="tooltip">Leader</span>
+                                    <span class="tooltip">{{ tUI('LEADER') }}</span>
                                 </span>
                             </div>
                         </div>
@@ -150,11 +156,11 @@ const handleFileChange = (event: Event) => {
                     <div class="form-row">
                         <div class="button-container">
                             <button type="button" class="start-game-button"
-                                @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('click') }"
+                                @mouseenter="onHover" @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('joinGame') }"
                                 :disabled="!isOwnLeader" :class="{ active: isOwnLeader }">
-                                {{ isOwnLeader ? 'Spiel Starten' : 'Warten auf Spielersteller...' }}
+                                {{ isOwnLeader ? tUI('START_GAME')  : tUI('WAITING_FOR_LEADER') }}
                             </button>
-                            <BackButton :to="{ name: 'Homepage' }" />
+                            <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
                         </div>
                     </div>
                 </div>
@@ -380,4 +386,5 @@ select {
 .tooltip-wrapper:hover .tooltip {
     opacity: 1;
 }
+
 </style>

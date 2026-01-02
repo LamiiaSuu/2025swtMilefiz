@@ -4,19 +4,28 @@
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import Header from '@/components/ui/pages/Header.vue'
 import AudioSettings from '@/components/ui/AudioSettings.vue';
+import { useAudioStore } from '@/stores/audioStore';
+import { tUI } from '@/i18n'
+import LanguageSelection from '@/components/ui/LanguageSelection.vue';
+
+const audio = useAudioStore()
+
+function onHover() {
+  audio.playSfx('hover')
+}
 
 </script>
 
 <template>
   <div class="settings">
-    <Header overlay>Einstellungen</Header>
-
+    <Header overlay>{{ tUI('SETTINGS') }}</Header>
+    <LanguageSelection></LanguageSelection>
     <!-- AUDIO SETTINGS -->
     <AudioSettings></AudioSettings>
 
     <!-- BACK -->
     <div class="settings-button-container">
-      <BackButton :to="{ name: 'Homepage' }" />
+      <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
     </div>
   </div>
 </template>
@@ -61,5 +70,6 @@ import AudioSettings from '@/components/ui/AudioSettings.vue';
   transform: scale(1.05);
   transition: transform 0.2s ease;
 }
+
 
 </style>

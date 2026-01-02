@@ -95,7 +95,7 @@ watch(() => errorState.show, (newVal) => {
 /*Warning Overlay - Zentriert im Bildschirm */
 .warning-text-overlay {
   position: fixed;
-  top: 40%;
+  top: 20%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1000;
