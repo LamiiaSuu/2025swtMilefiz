@@ -22,6 +22,7 @@ import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCheatedEvent;
@@ -35,6 +36,8 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveWithLossEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendPlayerHasWonEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRejectedByBarrierEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent;
+import de.hs_rm.de.milefiz.game.service.DuelService;
+import de.hs_rm.de.milefiz.game.service.DuelServiceImpl;
 
 /**
  * Implementierung des {@link MovementService}, die für die komplette
@@ -70,14 +73,16 @@ public class MovementServiceImpl implements MovementService {
 
     private final Logger logger = LoggerFactory.getLogger(MovementServiceImpl.class);
     private LobbyManager lobbyManager;
+    private final DuelService duelService;
     private static final int LAST_MOVE = 1;
     private static final int SECOND_TO_LAST_MOVE = 2;
     private static final boolean TESTING_LOCALLY = false; // true wenn es bei sich lokal laufen lässt, damit die
                                                           // barriere vorerst randomly verschoben wird.
                                                           // muss false sein für die unit tests
 
-    public MovementServiceImpl(LobbyManager lobbyManager) {
+    public MovementServiceImpl(LobbyManager lobbyManager, DuelService duelService) {
         this.lobbyManager = lobbyManager;
+        this.duelService = duelService;
     }
 
     /**
@@ -270,27 +275,47 @@ public class MovementServiceImpl implements MovementService {
         // Sonderfaelle wenn es sich um den letzten Zug handelt
         if (player.getRemainingMoves() == LAST_MOVE) {
 
-            // Duell einleiten, wenn man auf einem Feld landet, auf dem ein Meeple eines
-            // anderen Spielers steht
             for (Player rivalPlayer : lobby.getPlayers()) {
-                if (player.equals(rivalPlayer)) {
-                    continue;
-                }
+
+                if (player.equals(rivalPlayer)) continue;
+
                 for (Meeple rivalMeeple : rivalPlayer.getMeeples()) {
+
                     if (rivalMeeple.getCurrentField().equals(nextField)) {
+
                         meeple.setCurrentField(nextField);
                         meeple.clearLastField();
                         player.setActiveMeeple(meeple);
                         player.useMove();
-                        logger.info("Initiating duel between meeple {} and meeple {}", meeple.getId(),
-                                rivalMeeple.getId());
-                        return new FrontendDuelEvent(player.getId(), meeple.getId(), rivalMeeple.getId(),
+
+                        logger.info("Initiating duel between meeple {} and meeple {}", 
+                                meeple.getId(), rivalMeeple.getId());
+
+                        var duel = duelService.createDuel(
+                                player.getId(),
+                                rivalPlayer.getId()
+                        );
+
+                        var miniGame = duelService.assignRandomGameToDuel(duel.getId());
+
+
+                        if (miniGame instanceof DiceGame dice) {
+                            dice.initPlayers(player.getId(), rivalPlayer.getId());
+                        }
+
+                        return new FrontendDuelEvent(
+                                duel.getId(),
+                                player.getId(),
+                                meeple.getId(),
+                                rivalMeeple.getId(),
                                 nextField.getId(),
-                                player.getRemainingMoves());
+                                player.getRemainingMoves()
+                        );
                     }
                 }
             }
         }
+
 
         //Spieler hat schon gemoved in diesem Zug und versucht einen anderen Meeple zu bewegen
         if (player.hasMoved() && player.getActiveMeeple() != null && !player.getActiveMeeple().equals(meeple)) {

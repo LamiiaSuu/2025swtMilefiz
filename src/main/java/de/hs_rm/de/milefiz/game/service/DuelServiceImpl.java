@@ -2,24 +2,40 @@ package de.hs_rm.de.milefiz.game.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+
+import de.hs_rm.de.milefiz.game.model.MiniGame;
+import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DummyGame;
 
-import de.hs_rm.de.milefiz.game.model.MiniGame;
-
 public class DuelServiceImpl implements DuelService {
 
+    /**
+     * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen entstehen).
+     */
     private final List<Supplier<MiniGame>> gameFactories = new ArrayList<>();
+
+    /**
+     * Zufallsquelle für Spielauswahl.
+     */
     private final Random random = new Random();
 
+    /**
+     * In-Memory-Speicher aller aktuell laufenden Duelle.
+     * <p>
+     * Key: Duel-ID<br>
+     * Value: Duel (inkl. zugewiesenem Mini-Game)
+     */
+    private final Map<UUID, Duel> duels = new ConcurrentHashMap<>();
+
     public DuelServiceImpl() {
-
         gameFactories.add(DiceGame::new);
-
         gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
-
         gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
     }
 
@@ -33,9 +49,7 @@ public class DuelServiceImpl implements DuelService {
         }
 
         int index = random.nextInt(gameFactories.size());
-
-        // Erstellt jedes mal ein neues Objekt, damit die Werte darin gesetzt werden können.
-        return gameFactories.get(index).get();
+        return gameFactories.get(index).get(); // immer neue Instanz
     }
 
     /**
@@ -43,7 +57,52 @@ public class DuelServiceImpl implements DuelService {
      */
     @Override
     public List<MiniGame> getGames() {
-        // Gibt schreibgeschützte variante zurück.
-        return gameFactories.stream().map(Supplier::get).toList();
+        return gameFactories.stream()
+                .map(Supplier::get)
+                .toList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MiniGame assignRandomGameToDuel(UUID duelId) {
+        Duel duel = duels.get(duelId);
+
+        if (duel == null) {
+            throw new IllegalStateException("Duel not found: " + duelId);
+        }
+
+        MiniGame game = randomGame();
+        duel.setMiniGame(game);
+
+        return game;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MiniGame getMiniGame(UUID duelId) {
+        Duel duel = duels.get(duelId);
+
+        if (duel == null) {
+            throw new IllegalStateException("Duel not found: " + duelId);
+        }
+
+        return duel.getMiniGame();
+    }
+
+    /**
+     * Hilfsmethode: Neues Duell registrieren (z. B. wenn zwei Meeples kollidieren).
+     */
+    @Override
+    public Duel createDuel(UUID p1, UUID p2) {
+        UUID duelId = UUID.randomUUID();
+
+        Duel duel = new Duel(duelId, p1, p2);
+        duels.put(duelId, duel);
+
+        return duel;
     }
 }
