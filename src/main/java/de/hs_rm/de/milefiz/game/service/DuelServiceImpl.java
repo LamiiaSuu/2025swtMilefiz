@@ -119,4 +119,21 @@ public class DuelServiceImpl implements DuelService {
 
         return duel;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Duel getDuel(UUID duelId) {
+        var duel = duels.get(duelId);
+
+        if (duel == null) {
+            throw new IllegalArgumentException(
+                    "Duel with id " + duelId + " not found"
+            );
+        }
+
+        return duel;
+    }
+
 }

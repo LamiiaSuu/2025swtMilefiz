@@ -124,4 +124,24 @@ public interface DuelService {
      * @throws IllegalStateException wenn das Duell nicht existiert
      */
     MiniGame getMiniGame(UUID duelId);
+
+    /**
+     * Liefert ein vorhandenes Duell anhand seiner ID.
+     *
+     * <p>
+     * Die Methode wird verwendet, wenn:
+     * <ul>
+     *     <li>für ein laufendes Duell der Status abgefragt werden soll</li>
+     *     <li>ein Mini-Spiel Aktionen (z. B. DiceGame) auf das Duell zugreifen muss</li>
+     *     <li>nach Abschluss des Duells Konsequenzen (Meeple zurücksetzen, etc.) berechnet werden</li>
+     * </ul>
+     *
+     * @param duelId eindeutige ID des Duells
+     * @return das zugehörige {@link Duel}-Objekt
+     *
+     * @throws IllegalArgumentException
+     *         wenn kein Duell mit dieser ID existiert
+     */
+    Duel getDuel(UUID duelId);
+
 }
