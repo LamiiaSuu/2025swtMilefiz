@@ -36,9 +36,6 @@ public interface DuelService {
      *         wenn keine Mini-Spiele registriert sind und somit keine Auswahl
      *         getroffen werden kann.
      *
-     * @implNote
-     * Diese Methode verändert die zugrunde liegende Spieleliste nicht.
-     * Sie verwendet ausschließlich die aktuellen Einträge.
      */
     MiniGame randomGame();
 
@@ -67,22 +64,22 @@ public interface DuelService {
      * der sich momentan in einem aktiven Duell befindet.
      * </p>
      *
-     * <p>
+     * 
      * Hintergrund:
      * <ul>
      *     <li>Ein Meeple darf nicht in mehrere Duelle gleichzeitig verwickelt sein; ein Spieler schon.</li>
      *     <li>Andere Spieler dürfen nicht auf Meeples interagieren, die aktuell
      *         durch ein Duell "blockiert" sind.</li>
      * </ul>
-     * </p>
+     * 
      *
-     * <p>
+     * 
      * Typische Verwendung:
      * <ul>
      *     <li>Validierung im Bewegungs- / Duell-Trigger-Code</li>
      *     <li>Anzeige im Frontend (z. B. "Warte, Duell läuft")</li>
      * </ul>
-     * </p>
+     * 
      *
      * @param meepleId
      *        die eindeutige ID des Meeples, der geprüft werden soll
