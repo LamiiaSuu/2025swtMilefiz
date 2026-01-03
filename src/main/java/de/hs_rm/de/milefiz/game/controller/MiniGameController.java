@@ -20,6 +20,18 @@ import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 
+/**
+ * Controller für die Mini-Spiele innerhalb eines Duells.
+ * <p>
+ * Aktuell wird hier nur das Würfel-Minigame verarbeitet.
+ * Der Controller:
+ * <ul>
+ *   <li>empfängt Würfelaktionen vom Client</li>
+ *   <li>führt den Wurf im entsprechenden Mini-Spiel aus</li>
+ *   <li>sendet Live-Updates an das Frontend</li>
+ *   <li>setzt Verlierer-Meeples nach Spielende zurück in ihre Basis</li>
+ * </ul>
+ */
 @Controller
 public class MiniGameController {
 
@@ -37,7 +49,23 @@ public class MiniGameController {
         this.lobbyManager = lobbyManager;
     }
 
-    // Würfeln der Spieler
+    /**
+     * Verarbeitet einen Würfelwurf im Duel-Mini-Game.
+     *
+     * <p>
+     * Ablauf:
+     * <ol>
+     *   <li>Lobby wird geladen</li>
+     *   <li>Mini-Game des Duells wird geholt</li>
+     *   <li>Spieler würfelt</li>
+     *   <li>Frontend erhält Update</li>
+     *   <li>Falls Spiel beendet -> Loser-Meeples werden zurück in die Basis gesetzt. Das können auch beide sein.</li>
+     * </ol>
+     *
+     * @param lobbyId ID der Lobby
+     * @param duelId  ID des Duells
+     * @param player  Spieler, der gerade würfelt
+     */
     @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/dice/roll")
     public void handleDiceRoll(
             @DestinationVariable UUID lobbyId,
@@ -71,6 +99,26 @@ public class MiniGameController {
         }
     }
 
+    /**
+     * Setzt nach einem beendeten Duell die Loser-Meeples
+     * zurück auf ihr jeweiliges Startfeld. Das können beide sein.
+     *
+     * <p>
+     * Regeln:
+     * <ul>
+     *   <li>Gewinner bleibt stehen</li>
+     *   <li>Verlierer gehen zurück in die Basis</li>
+     *   <li>Bei Unentschieden verlieren beide</li>
+     * </ul>
+     *
+     * <p>
+     * Zusätzlich wird ein {@link FrontendMoveEvent}
+     * gesendet, damit das Update im Frontend animiert wird.
+     *
+     * @param lobby  aktuelle Lobby
+     * @param duelId ID des Duells
+     * @param game   beendetes Mini-Game
+     */
     private void sendLoserHome(Lobby lobby, UUID duelId, MiniGame game){
         
         var duel = duelService.getDuel(duelId);
@@ -92,7 +140,7 @@ public class MiniGameController {
                 lobby.getPlayer(p2).getColor()
         );
 
-        // --- Spieler 1 verliert?
+        // Spieler 1 verliert?
         if (winner == null || !winner.equals(p1)) {
             m1.clearLastField();
             messaging.sendEvent(new LobbyMessage(
@@ -109,7 +157,7 @@ public class MiniGameController {
             m1.setCurrentField(start1);
         }
 
-        // --- Spieler 2 verliert?
+        // Spieler 2 verliert?
         if (winner == null || !winner.equals(p2)) {
             m2.clearLastField();
             messaging.sendEvent(new LobbyMessage(
