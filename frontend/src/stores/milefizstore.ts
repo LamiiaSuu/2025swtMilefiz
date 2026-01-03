@@ -57,6 +57,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const winnerName = ref<string | null>(null)
   const winnerColor = ref<string | null>(null)
 
+  /**
+   * PopUp-Menu
+   * @prop {boolean} popUpMenuOpen - True, wenn das PopUp-Menu offen ist
+   * @prop {boolean} popUpSettingsOpen - True, wenn das PopUp-Menu fuer Einstellungen offen ist
+  */
+  const popUpMenuOpen = ref(false)
+  const popUpSettingsOpen = ref(false)
+
   // Beispiele für Daten
   const gamedata = reactive<{
     playerId: string
@@ -155,28 +163,28 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           cooldown.active = false
           cooldown.remainingSeconds = 0
         } else if (event.type === 'MOVE_ERROR') {
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             console.warn('Move rejected:', event.msg)
-            if( event.msg === "MOVE_ERROR_INTO_START"){
+            if (event.msg === "MOVE_ERROR_INTO_START") {
               showWarning("MOVE_ERROR_INTO_START")
             }
-            else if( event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION"){
+            else if (event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION") {
               showWarning("MOVE_ERROR_NO_FIELD_IN_DIRECTION")
             }
-            else if( event.msg === "MOVE_ERROR_NO_MOVES_LEFT"){
+            else if (event.msg === "MOVE_ERROR_NO_MOVES_LEFT") {
               showWarning("MOVE_ERROR_NO_MOVES_LEFT")
             }
-            else if( event.msg === "MOVE_ERROR_CANT_CHANGE_DIRECTION"){
+            else if (event.msg === "MOVE_ERROR_CANT_CHANGE_DIRECTION") {
               showWarning("MOVE_ERROR_CANT_CHANGE_DIRECTION")
             }
-            else if( event.msg === "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL"){
+            else if (event.msg === "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL") {
               showWarning("MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL")
             }
-            else if( event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE"){
+            else if (event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE") {
               showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
             }
             return
-        }
+          }
         } else if (event.type === 'CHEATED') {
           if (event.playerId === gamedata.playerId) {
             showWarning("CHEATED")
@@ -199,7 +207,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY') {
           energy.maxEnergy = event.maxEnergy
           if (event.playerId === gamedata.playerId) {
-            if(gamedata.currentDiceRoll == 0) {
+            if (gamedata.currentDiceRoll == 0) {
               audioStore.playSfx('eventError')
               return
             }
@@ -282,10 +290,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
-          if( event.msg === "MOVE_BARRIER_REJECTED_START_OR_END"){
+          if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
             showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
           }
-          else if( event.msg === "MOVE_BARRIER_OCCUPIED"){
+          else if (event.msg === "MOVE_BARRIER_OCCUPIED") {
             showWarning("MOVE_BARRIER_OCCUPIED")
           }
         }
@@ -701,6 +709,31 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
 
   /**
+   * Pop Up Menu Funktionen
+  */
+
+  // Oeffnet PopUp Menu
+  function openPopUpMenu() {
+    popUpMenuOpen.value = true
+  }
+
+  // Schließt PopUp Menu
+  function closePopUpMenu() {
+    popUpMenuOpen.value = false
+    popUpSettingsOpen.value = false
+  }
+
+  // Oeffnet PopUp Einstellungen
+  function openPopUpSettings() {
+    popUpSettingsOpen.value = true
+  }
+
+  // Schließt PopUp Einstellungen
+  function closePopUpSettings() {
+    popUpSettingsOpen.value = false
+  }
+
+  /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
   function disconnectAndReset() {
@@ -727,6 +760,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     gameFinished.value = false
     winnerName.value = ''
     winnerColor.value = ''
+
+    popUpMenuOpen.value = false
+    popUpSettingsOpen.value = false
 
     const boardStore = useBoardStore()
 
@@ -758,5 +794,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName,
     gameFinished,
     getWinnerColor,
+    popUpMenuOpen,
+    popUpSettingsOpen,
+    openPopUpMenu,
+    closePopUpMenu,
+    openPopUpSettings,
+    closePopUpSettings,
   }
 })
