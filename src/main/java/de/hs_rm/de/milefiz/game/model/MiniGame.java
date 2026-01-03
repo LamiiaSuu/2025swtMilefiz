@@ -2,7 +2,7 @@ package de.hs_rm.de.milefiz.game.model;
 
 import java.util.UUID;
 
-public class MiniGame {
+public abstract class MiniGame {
 
     /**
      * Eindeutige numerische ID des Mini-Spiels.
