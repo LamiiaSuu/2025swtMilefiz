@@ -309,7 +309,8 @@ public class MovementServiceImpl implements MovementService {
                                 meeple.getId(),
                                 rivalMeeple.getId(),
                                 nextField.getId(),
-                                player.getRemainingMoves()
+                                player.getRemainingMoves(),
+                                miniGame
                         );
                     }
                 }

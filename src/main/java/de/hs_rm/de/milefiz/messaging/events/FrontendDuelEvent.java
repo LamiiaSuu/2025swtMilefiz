@@ -2,6 +2,8 @@ package de.hs_rm.de.milefiz.messaging.events;
 
 import java.util.UUID;
 
+import de.hs_rm.de.milefiz.game.model.MiniGame;
+
 /**
  * Frontend-Event, das ausgelöst wird, wenn zwei Meeples auf demselben Feld
  * aufeinandertreffen und dadurch ein Duell entsteht.
@@ -30,16 +32,34 @@ public record FrontendDuelEvent(
         UUID firstMeepleId,
         UUID secondMeepleId,
         UUID targetField,
-        int remainingMoves
+        int remainingMoves,
+        int miniGameId,
+        String miniGameName,
+        String miniGameType
 ) implements FrontendEvent {
 
-    public FrontendDuelEvent(UUID duelId,
-                             UUID playerId,
-                             UUID firstMeepleId,
-                             UUID secondMeepleId,
-                             UUID targetField,
-                             int remainingMoves) {
-        this(EventType.DUEL.name(), duelId, playerId, firstMeepleId, secondMeepleId, targetField, remainingMoves);
+    public FrontendDuelEvent(
+            UUID duelId,
+            UUID playerId,
+            UUID firstMeepleId,
+            UUID secondMeepleId,
+            UUID targetField,
+            int remainingMoves,
+            MiniGame game
+    ) {
+        this(
+                EventType.DUEL.name(),
+                duelId,
+                playerId,
+                firstMeepleId,
+                secondMeepleId,
+                targetField,
+                remainingMoves,
+                game.getId(),
+                game.getName(),
+                game.getClass().getSimpleName() // z. B. DiceGame
+        );
     }
 }
+
 
