@@ -178,7 +178,26 @@ public class DuelServiceImpl implements DuelService {
         sendLoserHome(lobby, duel, dice);
     }
 
-
+    /**
+     * Setzt nach einem beendeten Duell die Loser-Meeples
+     * zurück auf ihr jeweiliges Startfeld. Das können beide sein.
+     *
+     * <p>
+     * Regeln:
+     * <ul>
+     *   <li>Gewinner bleibt stehen</li>
+     *   <li>Verlierer gehen zurück in die Basis</li>
+     *   <li>Bei Unentschieden verlieren beide</li>
+     * </ul>
+     *
+     * <p>
+     * Zusätzlich wird ein {@link FrontendMoveEvent}
+     * gesendet, damit das Update im Frontend animiert wird.
+     *
+     * @param lobby  aktuelle Lobby
+     * @param duelId ID des Duells
+     * @param game   beendetes Mini-Game
+     */
     private void sendLoserHome(Lobby lobby, Duel duel, MiniGame game) {
 
         var winner = game.getWinner();

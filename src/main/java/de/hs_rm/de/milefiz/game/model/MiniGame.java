@@ -4,6 +4,8 @@ import java.util.UUID;
 
 public abstract class MiniGame {
 
+    private Runnable onFinished;
+
     /**
      * Eindeutige numerische ID des Mini-Spiels.
      * <p>
@@ -110,16 +112,52 @@ public abstract class MiniGame {
         this.finished = finished;
     }
 
+    /**
+     * Gibt die Timeout-Dauer des Mini-Games zurück.
+     * <p>
+     * Die Zeit ist in Sekunden angegeben und beschreibt,
+     * wie lange ein Mini-Game maximal laufen darf,
+     * bevor automatisch abgebrochen bzw. ausgewertet wird.
+     *
+     * @return Timeout in Sekunden
+     */
     public int getTimeOut(){
         return timeOut;
     }
 
-    private Runnable onFinished;
-
+    
+    /**
+     * Registriert einen Callback, der ausgeführt wird,
+     * sobald das Mini-Game vollständig beendet ist.
+     * <p>
+     * Typische Anwendungsfälle:
+     * <ul>
+     *   <li>Updates an das Frontend senden</li>
+     *   <li>Verlierer-Meeples zurücksetzen</li>
+     *   <li>Duell als abgeschlossen markieren</li>
+     * </ul>
+     *
+     * @param onFinished Code, der beim Abschluss ausgeführt werden soll
+     */
     public void setOnFinished(Runnable onFinished) {
         this.onFinished = onFinished;
     }
 
+
+    /**
+     * Benachrichtigt alle Listener, dass das Mini-Game
+     * erfolgreich beendet wurde.
+     * <p>
+     * Diese Methode wird normalerweise von der Subklasse
+     * (z. B. {@code DiceGame}) aufgerufen, nachdem:
+     * <ul>
+     *   <li>ein Gewinner bestimmt wurde</li>
+     *   <li>oder ein Timeout ausgelöst hat</li>
+     * </ul>
+     *
+     * Ruft intern den registrierten {@link Runnable}
+     * aus {@link #setOnFinished(Runnable)} auf — falls vorhanden.
+     */
     protected void notifyFinished() {
         if (onFinished != null) {
             onFinished.run();

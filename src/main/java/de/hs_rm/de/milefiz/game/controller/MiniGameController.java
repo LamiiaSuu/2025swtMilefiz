@@ -169,6 +169,30 @@ public class MiniGameController {
         }
     }
 
+        /**
+         * Sendet den aktuellen Status des Würfel-Minigames an alle Clients der Lobby.
+         *
+         * <p>
+         * Diese Methode wird immer dann aufgerufen, wenn sich der Zustand des
+         * Duell-Minigames ändert – z. B. nach einem Würfelwurf oder nach Ablauf
+         * des Timeouts.
+         *
+         * <p>
+         * Das Frontend erhält dadurch:
+         * <ul>
+         *   <li>die IDs beider Spieler</li>
+         *   <li>die aktuellen Würfelergebnisse</li>
+         *   <li>den Gewinner (falls bereits ermittelt)</li>
+         *   <li>den Finished-Status</li>
+         * </ul>
+         *
+         * Das Frontend aktualisiert daraufhin die Duel-UI und zeigt ggf.
+         * das Ergebnis an.
+         *
+         * @param lobby  die Lobby, in der das Duell stattfindet
+         * @param duelId ID des Duells
+         * @param game   aktueller Zustand des Würfel-Minigames
+         */
     private void broadcastDiceUpdate(Lobby lobby, UUID duelId, DiceGame game) {
 
         var event = new FrontendDiceGameUpdateEvent(
