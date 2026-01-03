@@ -11,12 +11,16 @@
 
         <div class="players">
           <div class="player">
-            <h3>Du</h3>
+            <h3>{{ isOwnMeeple(duel.firstMeeple)
+      ? getPlayerNameByMeeple(duel.firstMeeple)
+      : getPlayerNameByMeeple(duel.secondMeeple) }}</h3>
             <div class="dice">{{ duel.state?.rollP1 ?? "-" }}</div>
           </div>
 
           <div class="player">
-            <h3>Gegner</h3>
+            <h3>{{ isOwnMeeple(duel.firstMeeple)
+      ? getPlayerNameByMeeple(duel.secondMeeple)
+      : getPlayerNameByMeeple(duel.firstMeeple) }}</h3>
             <div class="dice">{{ duel.state?.rollP2 ?? "-" }}</div>
           </div>
         </div>
@@ -68,6 +72,29 @@ function roll(duel: any) {
     { playerId: store.gamedata.playerId }
   )
 }
+
+function getPlayerNameByMeeple(meepleId: string) {
+  const lobby = store.gamedata.lobby
+  if (!lobby) return "?"
+
+  for (const player of lobby.players) {
+    if (player.meeples?.some(m => m.id === meepleId)) {
+      return player.playerName ?? "?"
+    }
+  }
+
+  return "?"
+}
+
+function isOwnMeeple(meepleId: string) {
+  const lobby = store.gamedata.lobby
+  if (!lobby) return false
+
+  const me = lobby.players.find(p => p.id === store.gamedata.playerId)
+  return me?.meeples?.some(m => m.id === meepleId)
+}
+
+
 
 // automatisch schließen, wenn Duel fertig -> 2s
 watch(
