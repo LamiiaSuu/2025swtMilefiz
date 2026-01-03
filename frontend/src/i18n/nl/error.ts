@@ -21,4 +21,5 @@ export const ERRORS_NL: Record<ErrorCode, string> = {
     BOARD_INVALID: 'Mapvalidatie mislukt: Een map moet 4 startvelden hebben die met minimaal één doelveld verbonden zijn.',
     BOARD_SUCCESSFULLY_IMPORTED: 'Map succesvol geïmporteerd!',
     BOARD_COULD_NOT_BE_IMPORTED: 'Map kon niet worden geïmporteerd: ',
+    MEEPLE_IN_DUEL: 'De tegenstander zit al in een duel. Wacht tot het duel is afgelopen!',
 }

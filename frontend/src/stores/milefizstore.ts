@@ -83,6 +83,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
     moved: false
   })
+  const activeDuels = reactive<Record<string, any>>({})
+
 
   const isJoined = computed(() => {
     return Boolean(gamedata.lobby)
@@ -183,6 +185,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             else if (event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE") {
               showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
             }
+            else if( event.msg === "MEEPLE_IN_DUEL"){
+              showWarning("MEEPLE_IN_DUEL")
+            }
             return
           }
         } else if (event.type === 'CHEATED') {
@@ -275,11 +280,42 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           }
         }
         if (event.type === "DUEL") {
+
           boardStore.updateMeeplePosition(event.firstMeepleId, event.targetField)
+
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = false;
           }
-          //TODO duel zwischen zwei meeples einleiten
+          if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId ){
+          activeDuels[event.duelId] = {
+            duelId: event.duelId,
+
+            firstMeeple: event.firstMeepleId,
+            secondMeeple: event.secondMeepleId,
+            targetField: event.targetField,
+
+            miniGameId: event.miniGameId,
+            miniGameName: event.miniGameName,
+            miniGameType: event.miniGameType,
+
+            timeOut: event.timeOut,
+
+            state: {}
+          }
+          document.exitPointerLock()
+        }
+          
+        }
+        if (event.type === "DICE_GAME_UPDATE") {
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          duel.state.rollP1 = event.rollP1
+          duel.state.rollP2 = event.rollP2
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
         }
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
@@ -782,6 +818,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     popUpMenuOpen.value = false
     popUpSettingsOpen.value = false
 
+    Object.keys(activeDuels).forEach(key => {
+      delete activeDuels[key]
+    })
+
     const boardStore = useBoardStore()
 
     boardStore.resetBoardStore()
@@ -818,5 +858,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     closePopUpMenu,
     openPopUpSettings,
     closePopUpSettings,
+    activeDuels,
   }
 })

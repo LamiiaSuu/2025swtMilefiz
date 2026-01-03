@@ -61,7 +61,7 @@ const onBackClick = () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10000;
+    z-index: 99991;
     pointer-events: auto;
 
     background-color: rgba(0, 0, 0, 0.6);
