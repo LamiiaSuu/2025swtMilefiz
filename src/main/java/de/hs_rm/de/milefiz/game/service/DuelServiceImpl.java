@@ -37,8 +37,8 @@ public class DuelServiceImpl implements DuelService {
 
     public DuelServiceImpl() {
         gameFactories.add(DiceGame::new);
-        gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
-        gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
+        //gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
+        //gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
     }
 
     /**
