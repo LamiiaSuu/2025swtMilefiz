@@ -29,6 +29,7 @@ public record FrontendDuelEvent(
         String type,
         UUID duelId,
         UUID playerId,
+        UUID rivalId,
         UUID firstMeepleId,
         UUID secondMeepleId,
         UUID targetField,
@@ -41,6 +42,7 @@ public record FrontendDuelEvent(
     public FrontendDuelEvent(
             UUID duelId,
             UUID playerId,
+            UUID rivalId,
             UUID firstMeepleId,
             UUID secondMeepleId,
             UUID targetField,
@@ -51,6 +53,7 @@ public record FrontendDuelEvent(
                 EventType.DUEL.name(),
                 duelId,
                 playerId,
+                rivalId,
                 firstMeepleId,
                 secondMeepleId,
                 targetField,

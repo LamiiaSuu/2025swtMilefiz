@@ -306,6 +306,7 @@ public class MovementServiceImpl implements MovementService {
                         return new FrontendDuelEvent(
                                 duel.getId(),
                                 player.getId(),
+                                rivalPlayer.getId(),
                                 meeple.getId(),
                                 rivalMeeple.getId(),
                                 nextField.getId(),

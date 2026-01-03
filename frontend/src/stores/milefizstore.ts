@@ -274,8 +274,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = false;
           }
-
+          if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId )
           activeDuels[event.duelId] = {
             duelId: event.duelId,
 
@@ -289,6 +290,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
             state: {}
           }
+          
         }
         if (event.type === "DICE_GAME_UPDATE") {
 
