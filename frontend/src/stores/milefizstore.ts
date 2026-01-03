@@ -75,6 +75,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
     moved: false
   })
+  const activeDuels = reactive<Record<string, any>>({})
+
 
   const isJoined = computed(() => {
     return Boolean(gamedata.lobby)
@@ -267,11 +269,36 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           }
         }
         if (event.type === "DUEL") {
+
           boardStore.updateMeeplePosition(event.firstMeepleId, event.targetField)
+
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
-          //TODO duel zwischen zwei meeples einleiten
+
+          activeDuels[event.duelId] = {
+            duelId: event.duelId,
+
+            firstMeeple: event.firstMeepleId,
+            secondMeeple: event.secondMeepleId,
+            targetField: event.targetField,
+
+            miniGameId: event.miniGameId,
+            miniGameName: event.miniGameName,
+            miniGameType: event.miniGameType,
+
+            state: {}
+          }
+        }
+        if (event.type === "DICE_GAME_UPDATE") {
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          duel.state.rollP1 = event.rollP1
+          duel.state.rollP2 = event.rollP2
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
         }
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
@@ -758,5 +785,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName,
     gameFinished,
     getWinnerColor,
+    activeDuels,
   }
 })
