@@ -11,6 +11,7 @@ import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
+import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.service.DuelService;
@@ -65,10 +66,13 @@ public class MiniGameController {
 
         messaging.sendEvent(new LobbyMessage(lobby, event));
         
-        if (!game.isFinished()) {
-            return;
+        if (game.isFinished()) {
+            sendLoserHome(lobby, duelId, game);
         }
+    }
 
+    private void sendLoserHome(Lobby lobby, UUID duelId, MiniGame game){
+        
         var duel = duelService.getDuel(duelId);
 
         UUID winner = game.getWinner();
