@@ -54,6 +54,18 @@ public class DuelServiceImpl implements DuelService {
         return gameFactories.get(index).get(); // immer neue Instanz
     }
 
+    @Override
+    public boolean isMeepleInDuel(UUID meepleId) {
+        return duels.values().stream()
+                // nur Duelle berücksichtigen, die noch ein aktives Mini-Game haben
+                .filter(duel -> duel.getMiniGame() != null && !duel.getMiniGame().isFinished())
+                .anyMatch(duel ->
+                        duel.getFirstMeeple().equals(meepleId)
+                    || duel.getSecondMeeple().equals(meepleId)
+                );
+    }
+
+
     /**
      * {@inheritDoc}
      */
@@ -96,13 +108,13 @@ public class DuelServiceImpl implements DuelService {
     }
 
     /**
-     * Hilfsmethode: Neues Duell registrieren (z. B. wenn zwei Meeples kollidieren).
+     * {@inheritDoc}
      */
     @Override
-    public Duel createDuel(UUID p1, UUID p2) {
+    public Duel createDuel(UUID p1, UUID p2, UUID m1, UUID m2) {
         UUID duelId = UUID.randomUUID();
 
-        Duel duel = new Duel(duelId, p1, p2);
+        Duel duel = new Duel(duelId, p1, p2, m1, m2);
         duels.put(duelId, duel);
 
         return duel;

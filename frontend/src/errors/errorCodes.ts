@@ -22,3 +22,4 @@ export type ErrorCode =
   | 'REJECTED_BY_BARRIER'
   | 'SAVE_ENERGY_ERROR'
   | 'CONSUME_ENERGY_ERROR'
+  | 'MEEPLE_IN_DUEL'

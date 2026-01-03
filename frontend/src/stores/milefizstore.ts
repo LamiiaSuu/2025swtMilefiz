@@ -177,6 +177,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             else if( event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE"){
               showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
             }
+            else if( event.msg === "MEEPLE_IN_DUEL"){
+              showWarning("MEEPLE_IN_DUEL")
+            }
             return
         }
         } else if (event.type === 'CHEATED') {

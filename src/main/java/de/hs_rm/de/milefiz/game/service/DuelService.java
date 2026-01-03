@@ -59,13 +59,49 @@ public interface DuelService {
     List<MiniGame> getGames();
 
     /**
+     * Prüft, ob ein bestimmter Meeple aktuell in einem Duell beteiligt ist.
+     *
+     * <p>
+     * Diese Methode wird verwendet, um Spielzüge zu verhindern, bei denen
+     * ein Meeple auf ein Feld ziehen möchte, auf dem bereits ein Meeple steht,
+     * der sich momentan in einem aktiven Duell befindet.
+     * </p>
+     *
+     * <p>
+     * Hintergrund:
+     * <ul>
+     *     <li>Ein Meeple darf nicht in mehrere Duelle gleichzeitig verwickelt sein; ein Spieler schon.</li>
+     *     <li>Andere Spieler dürfen nicht auf Meeples interagieren, die aktuell
+     *         durch ein Duell "blockiert" sind.</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * Typische Verwendung:
+     * <ul>
+     *     <li>Validierung im Bewegungs- / Duell-Trigger-Code</li>
+     *     <li>Anzeige im Frontend (z. B. "Warte, Duell läuft")</li>
+     * </ul>
+     * </p>
+     *
+     * @param meepleId
+     *        die eindeutige ID des Meeples, der geprüft werden soll
+     *
+     * @return {@code true}, wenn der Meeple aktuell in einem aktiven Duell
+     *         registriert ist, andernfalls {@code false}
+     */
+    boolean isMeepleInDuel(UUID meepleId);
+
+    /**
      * Erstellt ein neues Duell zwischen zwei Spielern und registriert es.
      *
      * @param player1 erster Spieler
      * @param player2 zweiter Spieler
+     * @param meeple1 Meeple des ersten Spielers
+     * @param meeple2 Meeple des zweiten Spielers
      * @return das neu erstellte {@link Duel}
      */
-    Duel createDuel(UUID player1, UUID player2);
+    Duel createDuel(UUID player1, UUID player2, UUID meeple1, UUID meeple2);
 
     /**
      * Weist einem bestehenden Duell ein zufälliges Mini-Spiel zu.

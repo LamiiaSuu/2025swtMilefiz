@@ -22,6 +22,16 @@ public class Duel {
     private final UUID player2;
 
     /**
+     * Der Meeple von {@link #player1}, der im Duell steht.
+     */
+    private final UUID firstMeeple;
+
+    /**
+     * Der Meeple von {@link #player2}, der im Duell steht.
+     */
+    private final UUID secondMeeple;
+
+    /**
      * Das zugehörige Mini-Spiel.
      * Kann initial {@code null} sein und später gesetzt werden.
      */
@@ -33,18 +43,22 @@ public class Duel {
      * @param id      eindeutige Duel-ID
      * @param player1 erster Spieler
      * @param player2 zweiter Spieler
+     * @param firstMeeple Meeple des ersten Spielers
+     * @param secondMeeple Meeple des zweiten Spielers
      */
-    public Duel(UUID id, UUID player1, UUID player2) {
+    public Duel(UUID id, UUID player1, UUID player2, UUID firstMeeple, UUID secondMeeple) {
         this.id = id;
         this.player1 = player1;
         this.player2 = player2;
+        this.firstMeeple = firstMeeple;
+        this.secondMeeple = secondMeeple;
     }
 
     /**
      * Vollständiger Konstruktor — falls ein Mini-Spiel bereits bekannt ist.
      */
-    public Duel(UUID id, UUID player1, UUID player2, MiniGame miniGame) {
-        this(id, player1, player2);
+    public Duel(UUID id, UUID player1, UUID player2, UUID firstMeeple, UUID secondMeeple, MiniGame miniGame) {
+        this(id, player1, player2, firstMeeple, secondMeeple);
         this.miniGame = miniGame;
     }
 
@@ -58,6 +72,14 @@ public class Duel {
 
     public UUID getPlayer2() {
         return player2;
+    }
+
+    public UUID getFirstMeeple() {
+        return firstMeeple;
+    }
+
+    public UUID getSecondMeeple() {
+        return secondMeeple;
     }
 
     public MiniGame getMiniGame() {

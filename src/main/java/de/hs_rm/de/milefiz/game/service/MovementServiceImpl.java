@@ -283,6 +283,15 @@ public class MovementServiceImpl implements MovementService {
 
                     if (rivalMeeple.getCurrentField().equals(nextField)) {
 
+                        if (duelService.isMeepleInDuel(rivalMeeple.getId())) {
+                            logger.info("Move blocked — rival meeple {} is already in a duel", rivalMeeple.getId());
+
+                            return new FrontendMoveRejectedEvent(
+                                player.getId(),
+                                "MEEPLE_IN_DUEL"
+                            );
+                        }
+
                         meeple.setCurrentField(nextField);
                         meeple.clearLastField();
                         player.setActiveMeeple(meeple);
@@ -293,7 +302,9 @@ public class MovementServiceImpl implements MovementService {
 
                         var duel = duelService.createDuel(
                                 player.getId(),
-                                rivalPlayer.getId()
+                                rivalPlayer.getId(),
+                                meeple.getId(),
+                                rivalMeeple.getId()
                         );
 
                         var miniGame = duelService.assignRandomGameToDuel(duel.getId());
