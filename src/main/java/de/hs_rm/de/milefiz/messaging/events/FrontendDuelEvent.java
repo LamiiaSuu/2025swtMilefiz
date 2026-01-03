@@ -23,7 +23,7 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
  * @param targetField    ID des Feldes, auf dem das Duell stattfindet
  * @param remainingMoves Anzahl der verbleibenden Züge nach der Bewegung
  *
- * Author: Maximilian Ressel
+ * Author: Maximilian Ressel / Robert Bothfeld
  */
 public record FrontendDuelEvent(
         String type,
@@ -57,7 +57,7 @@ public record FrontendDuelEvent(
                 remainingMoves,
                 game.getId(),
                 game.getName(),
-                game.getClass().getSimpleName() // z. B. DiceGame
+                game.getClass().getSimpleName()
         );
     }
 }
