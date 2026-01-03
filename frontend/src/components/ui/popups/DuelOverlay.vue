@@ -7,37 +7,11 @@
         :key="duel.duelId"
         class="duel-card"
       >
-        <h2>{{ duel.miniGameName }}</h2>
-
-        <div class="players">
-          <div class="player">
-            <h3>{{ isOwnMeeple(duel.firstMeeple)
-      ? getPlayerNameByMeeple(duel.firstMeeple)
-      : getPlayerNameByMeeple(duel.secondMeeple) }}</h3>
-            <div class="dice">{{ duel.state?.rollP1 ?? "-" }}</div>
-          </div>
-
-          <div class="player">
-            <h3>{{ isOwnMeeple(duel.firstMeeple)
-      ? getPlayerNameByMeeple(duel.secondMeeple)
-      : getPlayerNameByMeeple(duel.firstMeeple) }}</h3>
-            <div class="dice">{{ duel.state?.rollP2 ?? "-" }}</div>
-          </div>
-        </div>
-
-        <button
-          v-if="!duel.state?.finished"
-          :disabled="waiting === duel.duelId"
-          @click="roll(duel)"
-        >
-          Würfeln
-        </button>
-
-        <div v-if="duel.state?.finished" class="winner">
-          <span v-if="isWinner(duel)">🎉 Du hast gewonnen!</span>
-          <span v-else>😵 Du hast verloren…</span>
-        </div>
-
+        <component
+          :is="resolveComponent(duel)"
+          :duel="duel"
+          @close="() => emit('close', duel.duelId)"
+        />
       </div>
 
     </div>
@@ -45,8 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
-import { useMilefizStore } from "@/stores/milefizstore"
+import DiceMiniGame from "../minigames/DiceMiniGame.vue"
 
 const props = defineProps<{
   duels: any[]
@@ -56,58 +29,15 @@ const emit = defineEmits<{
   (e: "close", duelId: string): void
 }>()
 
-const store = useMilefizStore()
+function resolveComponent(duel: any) {
+  switch (duel.miniGameType) {
+    case "DiceGame":
+      return DiceMiniGame
 
-const waiting = ref<string | null>(null)
-
-function isWinner(duel: any) {
-  return duel.state?.winner === store.gamedata.playerId
-}
-
-function roll(duel: any) {
-  waiting.value = duel.duelId
-
-  store.sendLobbyMessage(
-    `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${duel.duelId}/dice/roll`,
-    { playerId: store.gamedata.playerId }
-  )
-}
-
-function getPlayerNameByMeeple(meepleId: string) {
-  const lobby = store.gamedata.lobby
-  if (!lobby) return "?"
-
-  for (const player of lobby.players) {
-    if (player.meeples?.some(m => m.id === meepleId)) {
-      return player.playerName ?? "?"
-    }
+    default:
+      return DiceMiniGame   
   }
-
-  return "?"
 }
-
-function isOwnMeeple(meepleId: string) {
-  const lobby = store.gamedata.lobby
-  if (!lobby) return false
-
-  const me = lobby.players.find(p => p.id === store.gamedata.playerId)
-  return me?.meeples?.some(m => m.id === meepleId)
-}
-
-
-
-// automatisch schließen, wenn Duel fertig -> 2s
-watch(
-  () => props.duels.map(d => ({ id: d.duelId, finished: d.state?.finished })),
-  (list) => {
-    list.forEach(entry => {
-      if (entry.finished) {
-        setTimeout(() => emit("close", entry.id), 2000)
-      }
-    })
-  },
-  { deep: true }
-)
 </script>
 
 <style scoped>
@@ -136,35 +66,5 @@ watch(
   color: white;
   min-width: 340px;
   box-shadow: 0 10px 32px rgba(0,0,0,.35);
-}
-
-.players {
-  display: flex;
-  justify-content: space-between;
-  margin: 14px 0 10px;
-  gap: 12px;
-}
-
-.player {
-  flex: 1;
-  text-align: center;
-}
-
-.dice {
-  font-size: 2.4rem;
-}
-
-button {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
-.winner {
-  margin-top: 10px;
-  text-align: center;
-  font-weight: bold;
 }
 </style>
