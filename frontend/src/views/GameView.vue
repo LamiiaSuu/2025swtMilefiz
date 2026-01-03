@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useMilefizStore } from '@/stores/milefizstore'
 import GameBoard from '@/components/GameBoard.vue'
-import { onMounted, onBeforeUnmount } from 'vue'
+import { onMounted, onBeforeUnmount, computed } from 'vue'
 import GameHUD from '@/components/ui/GameHUD.vue'
 import { audioEngine } from '@/composables/audioEngine'
+import DuelOverlay from '@/components/ui/popups/DuelOverlay.vue'
 
 /**
  * Spielansicht (In-Game Screen).
@@ -20,6 +21,10 @@ import { audioEngine } from '@/composables/audioEngine'
  * Beim Betreten werden Playlists gestartet,
  * beim Verlassen sauber gestoppt.
  */
+
+const store = useMilefizStore()
+
+const activeDuels = computed(() => store.activeDuels)
 
 /**
  * Startet Ambient- und Musik-Playlists,
@@ -61,6 +66,14 @@ onBeforeUnmount(() => {
 
 <template>
   <main >
+    <DuelOverlay
+      v-if="Object.keys(activeDuels).length > 0"
+      :duels="Object.values(activeDuels)"
+      @close="id => delete store.activeDuels[id]"
+    />
+
+
+
     <!-- HUD (Spielstatus, Buttons etc.) -->
     <GameHUD />
 

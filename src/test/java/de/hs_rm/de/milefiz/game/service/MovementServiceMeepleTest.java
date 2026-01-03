@@ -42,6 +42,7 @@ public class MovementServiceMeepleTest {
 
     @Mock
     private LobbyManager lobbyManager;
+    private DuelService duelService;
 
     private MovementService movementService;
     private Lobby lobby;
@@ -57,7 +58,7 @@ public class MovementServiceMeepleTest {
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        movementService = new MovementServiceImpl(lobbyManager);
+        movementService = new MovementServiceImpl(lobbyManager, duelService);
 
         // Felder
         currentField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 0));
