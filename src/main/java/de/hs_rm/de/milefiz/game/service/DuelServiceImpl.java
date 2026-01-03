@@ -9,9 +9,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import de.hs_rm.de.milefiz.game.model.MiniGame;
+import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.model.Duel;
+import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DummyGame;
+import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
+import de.hs_rm.de.milefiz.messaging.LobbyMessage;
+import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,10 +42,15 @@ public class DuelServiceImpl implements DuelService {
      */
     private final Map<UUID, Duel> duels = new ConcurrentHashMap<>();
 
-    public DuelServiceImpl() {
+    private final LobbyManager lobbyManager;
+    private final FrontendMessagingService messaging;
+
+    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
         gameFactories.add(DiceGame::new);
         //gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
         //gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
+        this.lobbyManager = lobbyManager;
+        this.messaging = messaging;
     }
 
     /**
@@ -90,6 +102,8 @@ public class DuelServiceImpl implements DuelService {
         MiniGame game = randomGame();
         duel.setMiniGame(game);
 
+        game.setOnFinished(() -> handleMiniGameFinished(duel));
+
         return game;
     }
 
@@ -135,5 +149,88 @@ public class DuelServiceImpl implements DuelService {
 
         return duel;
     }
+
+    private void handleMiniGameFinished(Duel duel) {
+
+        MiniGame game = duel.getMiniGame();
+
+        if (!(game instanceof DiceGame dice)) {
+            return;
+        }
+
+        // Lobby holen
+        Lobby lobby = lobbyManager.getLobbyFromPlayerUUID(duel.getPlayer1());
+
+        // Dice Update senden 
+        var update = new FrontendDiceGameUpdateEvent(
+                duel.getId(),
+                dice.getP1(),
+                dice.getP2(),
+                dice.getRollP1(),
+                dice.getRollP2(),
+                dice.getWinner(),
+                dice.isFinished()
+        );
+
+        messaging.sendEvent(new LobbyMessage(lobby, update));
+
+        // Verlierer heimschicken
+        sendLoserHome(lobby, duel, dice);
+    }
+
+
+    private void sendLoserHome(Lobby lobby, Duel duel, MiniGame game) {
+
+        var winner = game.getWinner();
+
+        var p1 = duel.getPlayer1();
+        var p2 = duel.getPlayer2();
+
+        var m1 = lobby.getMeepleById(duel.getFirstMeeple());
+        var m2 = lobby.getMeepleById(duel.getSecondMeeple());
+
+        var start1 = lobby.getBoard().getStartField(
+                lobby.getPlayer(p1).getColor()
+        );
+
+        var start2 = lobby.getBoard().getStartField(
+                lobby.getPlayer(p2).getColor()
+        );
+
+        if (winner == null || !winner.equals(p1)) {
+
+            messaging.sendEvent(new LobbyMessage(
+                    lobby,
+                    new FrontendMoveEvent(
+                            p1,
+                            m1.getId(),
+                            start1.getId(),
+                            lobby.getPlayer(p1).getRemainingMoves(),
+                            lobby.getPlayer(p1).hasMoved()
+                    )
+            ));
+
+            m1.setCurrentField(start1);
+            m1.clearLastField();
+        }
+
+        if (winner == null || !winner.equals(p2)) {
+
+            messaging.sendEvent(new LobbyMessage(
+                    lobby,
+                    new FrontendMoveEvent(
+                            p2,
+                            m2.getId(),
+                            start2.getId(),
+                            lobby.getPlayer(p2).getRemainingMoves(),
+                            lobby.getPlayer(p2).hasMoved()
+                    )
+            ));
+
+            m2.setCurrentField(start2);
+            m2.clearLastField();
+        }
+    }
+
 
 }

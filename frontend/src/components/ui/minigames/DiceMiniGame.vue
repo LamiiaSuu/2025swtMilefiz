@@ -2,6 +2,10 @@
   <div>
     <h2>{{ duel.miniGameName }}</h2>
 
+    <p v-if="countdown !== null">
+      ⏳ {{ countdown }}s
+    </p>
+
     <div class="players">
       <div class="player">
         <h3>{{ getPlayerNameByMeeple(duel.firstMeeple) }}</h3>
@@ -33,8 +37,10 @@
 
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { ref, watch, onMounted } from "vue"
 import { useMilefizStore } from "@/stores/milefizstore"
+
+const countdown = ref<number | null>(null)
 
 const props = defineProps<{
   duel: any
@@ -60,6 +66,7 @@ function roll() {
   )
 }
 
+
 function getPlayerNameByMeeple(meepleId: string) {
   const lobby = store.gamedata.lobby
   if (!lobby) return "?"
@@ -76,9 +83,34 @@ function getPlayerNameByMeeple(meepleId: string) {
 watch(
   () => props.duel.state?.finished,
   finished => {
-    if (finished) setTimeout(() => emit("close"), 2000)
+    if (finished) setTimeout(() => emit("close"), 1500)
   }
 )
+
+watch(
+  () => props.duel?.timeOut,
+  (timeOut) => {
+    if (!timeOut) return
+
+    countdown.value = timeOut-1
+
+    const interval = setInterval(() => {
+      if (countdown.value === null) {
+        clearInterval(interval)
+        return
+      }
+
+      countdown.value--
+
+      if (countdown.value <= 0) {
+        clearInterval(interval)
+      }
+    }, 1000)
+  },
+  { immediate: true }
+)
+
+
 </script>
 
 <style scoped>

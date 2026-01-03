@@ -82,22 +82,14 @@ public class MiniGameController {
         // würfelt für diesen Spieler
         game.roll(player.getId());
 
-        var event = new FrontendDiceGameUpdateEvent(
-                duelId,
-                game.getP1(),
-                game.getP2(),
-                game.getRollP1(),
-                game.getRollP2(),
-                game.getWinner(),
-                game.isFinished()
-        );
+        broadcastDiceUpdate(lobby, duelId, game);
 
-        messaging.sendEvent(new LobbyMessage(lobby, event));
-        
         if (game.isFinished()) {
-            sendLoserHome(lobby, duelId, game);
+                sendLoserHome(lobby, duelId, game);
         }
+        
     }
+    
 
     /**
      * Setzt nach einem beendeten Duell die Loser-Meeples
@@ -176,4 +168,19 @@ public class MiniGameController {
             m2.clearLastField();
         }
     }
+
+    private void broadcastDiceUpdate(Lobby lobby, UUID duelId, DiceGame game) {
+
+        var event = new FrontendDiceGameUpdateEvent(
+                duelId,
+                game.getP1(),
+                game.getP2(),
+                game.getRollP1(),
+                game.getRollP2(),
+                game.getWinner(),
+                game.isFinished()
+        );
+
+        messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
 }

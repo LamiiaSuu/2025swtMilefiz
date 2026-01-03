@@ -26,6 +26,11 @@ public abstract class MiniGame {
     private UUID winner;
 
     /**
+     * Zeit, welche die Spieler haben um das Spiel zu beenden in Sekunden.
+     */
+    private int timeOut;
+
+    /**
      * Gibt an, ob das Mini-Spiel abgeschlossen wurde.
      * <p>
      * {@code false} = Spiel läuft oder wurde noch nicht gestartet.<br>
@@ -42,10 +47,11 @@ public abstract class MiniGame {
      * @param id    eindeutige ID des Mini-Spiels
      * @param name  Anzeigename des Mini-Spiels
      */
-    public MiniGame(int id, String name) {
+    public MiniGame(int id, String name, int timeOut) {
         this.id = id;
         this.name = name;
         this.finished = false;
+        this.timeOut = timeOut;
     }
 
     /**
@@ -102,6 +108,22 @@ public abstract class MiniGame {
      */
     public void setFinished(boolean finished) {
         this.finished = finished;
+    }
+
+    public int getTimeOut(){
+        return timeOut;
+    }
+
+    private Runnable onFinished;
+
+    public void setOnFinished(Runnable onFinished) {
+        this.onFinished = onFinished;
+    }
+
+    protected void notifyFinished() {
+        if (onFinished != null) {
+            onFinished.run();
+        }
     }
 }
 

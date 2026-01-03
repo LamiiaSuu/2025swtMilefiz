@@ -291,6 +291,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             miniGameName: event.miniGameName,
             miniGameType: event.miniGameType,
 
+            timeOut: event.timeOut,
+
             state: {}
           }
           document.exitPointerLock()

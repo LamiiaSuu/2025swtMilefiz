@@ -36,7 +36,8 @@ public record FrontendDuelEvent(
         int remainingMoves,
         int miniGameId,
         String miniGameName,
-        String miniGameType
+        String miniGameType,
+        int timeOut
 ) implements FrontendEvent {
 
     public FrontendDuelEvent(
@@ -60,7 +61,8 @@ public record FrontendDuelEvent(
                 remainingMoves,
                 game.getId(),
                 game.getName(),
-                game.getClass().getSimpleName()
+                game.getClass().getSimpleName(),
+                game.getTimeOut()
         );
     }
 }

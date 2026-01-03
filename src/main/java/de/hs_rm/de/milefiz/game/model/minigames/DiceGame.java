@@ -2,6 +2,9 @@ package de.hs_rm.de.milefiz.game.model.minigames;
 
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 
@@ -16,6 +19,11 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
  */
 public class DiceGame extends MiniGame {
 
+    private final ScheduledExecutorService scheduler =
+        Executors.newSingleThreadScheduledExecutor();
+
+    private boolean timeoutStarted = false;
+
     private final Random random = new Random();
 
     private UUID player1;
@@ -25,7 +33,7 @@ public class DiceGame extends MiniGame {
     private Integer rollP2;
 
     public DiceGame() {
-        super(1, "Würfel-Spiel");
+        super(1, "Würfel-Spiel", 6);
     }
 
     /**
@@ -35,6 +43,13 @@ public class DiceGame extends MiniGame {
     public void initPlayers(UUID p1, UUID p2) {
         this.player1 = p1;
         this.player2 = p2;
+
+        // Starte den Timeout
+        if (!timeoutStarted) {
+            timeoutStarted = true;
+
+            scheduler.schedule(this::forceMissingRolls, getTimeOut(), TimeUnit.SECONDS);
+        }
     }
 
     /**
@@ -87,6 +102,7 @@ public class DiceGame extends MiniGame {
         }
 
         setFinished(true);
+        notifyFinished();
     }
 
     public Integer getRollP1() {
@@ -104,4 +120,17 @@ public class DiceGame extends MiniGame {
     public UUID getP2() {
         return player2;
     }
+    
+    private void forceMissingRolls() {
+
+        // Nur, Wenn nicht gerollt
+        if (isFinished()) return;
+
+        if (rollP1 == null) rollP1 = 0;
+        if (rollP2 == null) rollP2 = 0;
+
+        checkFinished();   // normal auswerten
+    }
+
+
 }
