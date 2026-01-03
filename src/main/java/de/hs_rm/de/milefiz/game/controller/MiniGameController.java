@@ -90,6 +90,7 @@ public class MiniGameController {
 
         // --- Spieler 1 verliert?
         if (winner == null || !winner.equals(p1)) {
+            m1.clearLastField();
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
@@ -106,6 +107,7 @@ public class MiniGameController {
 
         // --- Spieler 2 verliert?
         if (winner == null || !winner.equals(p2)) {
+            m2.clearLastField();
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
