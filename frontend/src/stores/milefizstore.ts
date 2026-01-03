@@ -800,6 +800,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     popUpMenuOpen.value = false
     popUpSettingsOpen.value = false
 
+    Object.keys(activeDuels).forEach(key => {
+      delete activeDuels[key]
+    })
+
     const boardStore = useBoardStore()
 
     boardStore.resetBoardStore()
