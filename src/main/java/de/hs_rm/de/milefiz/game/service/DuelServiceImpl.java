@@ -18,7 +18,9 @@ public class DuelServiceImpl implements DuelService {
         games.add(new MiniGame(3, "Dummy Game #3"));
     }
 
-    //Gibt ein random Minigame zurück
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MiniGame randomGame() {
         if (games.isEmpty()) {
@@ -29,14 +31,12 @@ public class DuelServiceImpl implements DuelService {
         return games.get(index);
     }
 
-    //Gibt schreibgeschützte Sicht zurück der Spiele
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<MiniGame> getRegisteredGames() {
+    public List<MiniGame> getGames() {
         return List.copyOf(games);
-    }
-
-    public void registerGame(MiniGame game) {
-        games.add(game);
     }
 }
 
