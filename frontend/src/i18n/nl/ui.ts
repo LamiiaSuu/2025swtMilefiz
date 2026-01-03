@@ -43,4 +43,6 @@ export const UI_NL: Record<UIKey, string> = {
     BACK_TO_MAIN_MENU_CONFIRMATION: 'Wil je echt terugkeren naar het hoofdmenu?',
     BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR: 'Wil je echt terugkeren naar het hoofdmenu? Niet-opgeslagen wijzigingen gaan verloren.',
     CANCEL: 'Annuleren',
+    CONTINUE:'Doorgaan',
+    LEAVE_GAME: 'Verlaat het spel',
 }

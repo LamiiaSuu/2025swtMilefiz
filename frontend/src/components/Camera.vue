@@ -69,17 +69,13 @@ const cameraRotation = computed((): [number, number, number] => {
 // Kamera Maussteuerung
 const onMouseMove = (e: MouseEvent) => {
   if (!props.useFirstPerson) return // Keine Maussteurung
-  
-  // Pointer Lock versuchen
-  if (props.useFirstPerson && !milefizStore.gameFinished) {
-    const requestLock = () => {
-      if (!document.pointerLockElement && props.useFirstPerson) {
-        document.body.requestPointerLock()
-      }
-    }
 
-    // Fallback: auf ersten Klick warten
-    document.addEventListener('click', requestLock, { once: true })
+  // PointerLock verlassen, wenn ein PopUp offen ist
+  if (milefizStore.popUpMenuOpen || milefizStore.popUpSettingsOpen || milefizStore.gameFinished) {
+    if (document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+    return
   }
 
   
@@ -104,9 +100,7 @@ const onMouseMove = (e: MouseEvent) => {
 // Wenn man im First Person Mode esc drückt, 
 // taucht der Zeiger wieder auf und man kann sich noch umschauen
 watch(() => props.useFirstPerson, (isFirstPerson) => {
-  if (isFirstPerson) {
-    document.body.requestPointerLock()
-  } else {
+  if (!isFirstPerson) {
     document.exitPointerLock() // Mauszeiger bei OrbitControl wieder an
   }
 })
@@ -117,7 +111,7 @@ onMounted(() => {
   // Direkt Pointer Lock versuchen
   if (props.useFirstPerson) {
     const requestLock = () => {
-      if (!document.pointerLockElement) {
+      if (!document.pointerLockElement && !milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.gameFinished && props.useFirstPerson && globalThis.location.pathname === '/game') {
         document.body.requestPointerLock()
       }
     }
@@ -127,11 +121,11 @@ onMounted(() => {
     requestLock()
 
     // Fallback: auf ersten Klick warten
-    document.addEventListener('click', requestLock, { once: true })
+    document.addEventListener('click', requestLock, { once: false })
   }
 
   const updateCamera = () => {
-    
+
     // Kamera nur updaten, wenn First Person an und cameraRef existiert
     if (props.useFirstPerson && cameraRef.value && props.gameCharRef?.characterPosition) {
       const charPos = props.gameCharRef.characterPosition.position
@@ -181,9 +175,7 @@ watch(
 
 onUnmounted(() => {
   document.removeEventListener('mousemove', onMouseMove)
-  if (document.pointerLockElement) {
     document.exitPointerLock()
-  }
 })
 
 // Gibt Kamera frei
@@ -196,12 +188,6 @@ defineExpose({
 </script>
 
 <template>
-  <TresPerspectiveCamera 
-    v-if="useFirstPerson" 
-    ref="cameraRef" 
-    :position="cameraPosition" 
-    :rotation="cameraRotation" 
-    :fov="90" 
-    rotation-order="YXZ" 
-  />
+  <TresPerspectiveCamera v-if="useFirstPerson" ref="cameraRef" :position="cameraPosition" :rotation="cameraRotation"
+    :fov="90" rotation-order="YXZ" />
 </template>

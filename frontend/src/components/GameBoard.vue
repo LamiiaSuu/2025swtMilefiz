@@ -238,6 +238,26 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    e.preventDefault()
+
+    // Schließt die PopUp-Einstellungen, wenn sie offen sind
+    if (milefizStore.popUpSettingsOpen) {
+      milefizStore.closePopUpSettings()
+      return
+    }
+
+    // Schließt das PopUp-Menu, wenn es offen sind
+    if (milefizStore.popUpMenuOpen) {
+      milefizStore.closePopUpMenu()
+      return
+    } 
+    else { // Oeffnet das PopUp-Menu
+      milefizStore.openPopUpMenu()
+      return
+    }
+  }
+
 
   // Wenn ein Duell aktiv ist → alle Steuerungen blockieren
   if (Object.keys(milefizStore.activeDuels).length > 0) {
@@ -248,10 +268,10 @@ const handleKeydown = (e: KeyboardEvent) => {
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
     e.preventDefault()
-    if (milefizStore.gamedata.moved){
+    if (milefizStore.gamedata.moved) {
       showWarning('MEEPLE_SELECTION_REJECTED')
       return
-    } 
+    }
     cycleSelection(e.shiftKey ? -1 : 1)
     return
   }
@@ -294,10 +314,10 @@ function cycleSelection(offset: number = 1) {
 function handleMeepleSelectionKeydown(e: KeyboardEvent) {
   if (e.key < '1' || e.key > '5') return
 
-  if (milefizStore.gamedata.moved){
+  if (milefizStore.gamedata.moved) {
     showWarning('MEEPLE_SELECTION_REJECTED')
     return
-  } 
+  }
 
   e.preventDefault()
   const index = Number(e.key) - 1
@@ -416,6 +436,11 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     direction = moveDir.z > 0 ? "SOUTH" : "NORTH"
   }
 
+  //initial setzen für responiveness, wird beim empfangen des Move Events aus dem Backend auf den wahren Wert gesetzt
+  if (milefizStore.gamedata.currentDiceRoll && milefizStore.gamedata.currentDiceRoll > 0) {
+    milefizStore.gamedata.moved = true
+  }
+
   milefizStore.sendMove(meepleId, direction)
 }
 
@@ -460,9 +485,9 @@ onUnmounted(() => {
 const meepleColorMap = computed(() => {
   const lobby = milefizStore.gamedata.lobby
   if (!lobby) return new Map<string, string>()
-  
+
   const map = new Map<string, string>()
-  
+
   // Iteriere über alle Spieler
   for (const player of lobby.players) {
     // Alle Meeples dieses Spielers bekommen seine Farbe
@@ -470,7 +495,7 @@ const meepleColorMap = computed(() => {
       map.set(meeple.id, player.color) // player.color = "RED" | "GREEN" | "YELLOW" | "BLUE"
     }
   }
-  
+
   return map
 })
 
@@ -542,22 +567,18 @@ const connectionSegments = computed(() => {
     <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
-    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2"/>
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" />
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
-    <GameCharacter v-for="id in allMeepleIds" :key="id"
-      :ref="el => registerGameCharRefFromTemplate(id, el)"
-      :meepleId="id"
-      :playerColor="meepleColorMap.get(id)"/>
+    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="el => registerGameCharRefFromTemplate(id, el)"
+      :meepleId="id" :playerColor="meepleColorMap.get(id)" />
 
     <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
     <!-- Verbindungspfade zwischen verbundenen Tiles -->
-    <Path v-for="seg in connectionSegments" :key="seg.key"
-      :position="[seg.x, 0, seg.z]"
-      :rotationY="seg.rotY"
+    <Path v-for="seg in connectionSegments" :key="seg.key" :position="[seg.x, 0, seg.z]" :rotationY="seg.rotY"
       :length="seg.length" />
 
     <!-- Spielfeldtiles rendern -->
