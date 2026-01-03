@@ -238,6 +238,13 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
+
+  // Wenn ein Duell aktiv ist → alle Steuerungen blockieren
+  if (Object.keys(milefizStore.activeDuels).length > 0) {
+    e.preventDefault()
+    return
+  }
+  
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
     e.preventDefault()
@@ -248,7 +255,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     cycleSelection(e.shiftKey ? -1 : 1)
     return
   }
-
+  
   toggleCamera(e)
   handleJump(e)
   handleMoveKeys(e)

@@ -142,7 +142,7 @@ public class MiniGameController {
 
         // Spieler 1 verliert?
         if (winner == null || !winner.equals(p1)) {
-            m1.clearLastField();
+            
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
@@ -153,13 +153,14 @@ public class MiniGameController {
                             lobby.getPlayer(p1).hasMoved()
                     )
             ));
-
+            
             m1.setCurrentField(start1);
+            m1.clearLastField();
         }
 
         // Spieler 2 verliert?
         if (winner == null || !winner.equals(p2)) {
-            m2.clearLastField();
+            
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
@@ -170,8 +171,9 @@ public class MiniGameController {
                             lobby.getPlayer(p2).hasMoved()
                     )
             ));
-
+            
             m2.setCurrentField(start2);
+            m2.clearLastField();
         }
     }
 }
