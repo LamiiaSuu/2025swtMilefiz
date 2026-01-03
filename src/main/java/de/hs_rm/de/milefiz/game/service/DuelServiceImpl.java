@@ -12,7 +12,9 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DummyGame;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DuelServiceImpl implements DuelService {
 
     /**
