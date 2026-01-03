@@ -24,7 +24,7 @@ import DuelOverlay from '@/components/ui/popups/DuelOverlay.vue'
 
 const store = useMilefizStore()
 
-const activeDuels = computed(() => store.activeDuels)
+const activeDuels = store.activeDuels
 
 /**
  * Startet Ambient- und Musik-Playlists,
@@ -66,13 +66,12 @@ onBeforeUnmount(() => {
 
 <template>
   <main >
+    <!-- Duelle -->
     <DuelOverlay
       v-if="Object.keys(activeDuels).length > 0"
       :duels="Object.values(activeDuels)"
-      @close="id => delete store.activeDuels[id]"
+      @close="id => delete activeDuels[id]"
     />
-
-
 
     <!-- HUD (Spielstatus, Buttons etc.) -->
     <GameHUD />
