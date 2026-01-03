@@ -10,6 +10,8 @@ import MeepleBar from './MeepleBar.vue';
 import SaveEnergyButton from './SaveEnergyButton.vue';
 import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
+import MenuPopUp from './popups/MenuPopUp.vue';
+import SettingsPopUp from './popups/SettingsPopUp.vue';
 
 const milefizStore = useMilefizStore()
 
@@ -21,9 +23,20 @@ import ErrorMessage from './ErrorMessage.vue';
   <div class="hud-container">
     <!-- Win Popup -->
     <transition name="fade">
-      <WinPopUp v-if="milefizStore.gameFinished"/>
+      <WinPopUp v-if="milefizStore.gameFinished" />
     </transition>
 
+    <!-- Menu Popup -->
+    <transition name="fade">
+      <MenuPopUp v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen" />
+    </transition>
+
+    <!-- Settings Popup -->
+    <transition name="fade">
+      <SettingsPopUp v-if="milefizStore.popUpSettingsOpen" />
+    </transition>
+
+    <!-- Meeple Bar -->
     <div style="position: absolute; top: 2vw; right: 0px;" class="meeple-icon-bar">
       <MeepleBar />
     </div>
@@ -34,7 +47,7 @@ import ErrorMessage from './ErrorMessage.vue';
     </div>
 
     <div class="error-message-container">
-        <ErrorMessage />
+      <ErrorMessage />
     </div>
 
     <!-- Button Bar -->
@@ -75,8 +88,10 @@ import ErrorMessage from './ErrorMessage.vue';
 
 .error-message-container {
   position: absolute;
-  top: 2vh;            /* Abstand von oben */
-  left: 2vw;          /* Abstand von rechts */
+  top: 2vh;
+  /* Abstand von oben */
+  left: 2vw;
+  /* Abstand von rechts */
 }
 
 .button-bar {
@@ -110,6 +125,7 @@ import ErrorMessage from './ErrorMessage.vue';
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
