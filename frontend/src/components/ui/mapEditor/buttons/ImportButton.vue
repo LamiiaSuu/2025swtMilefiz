@@ -1,16 +1,55 @@
 <script setup lang="ts">
+import { ref, inject, onMounted, onUnmounted } from 'vue'
+
+const fileInput = ref<HTMLInputElement>()
+const emitImport = inject<(file: File) => void>("emitImport")
+
+function handleImport() {
+    fileInput.value?.click()
+}
+
+function handleFileSelected(event: Event) {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+
+    if (file && file.name.endsWith(".json")) {
+        if (emitImport) {
+            emitImport(file)
+        }
+    } else {
+        alert("Board-Datei auswählen")
+    }
+
+    // Reset input
+    target.value = ''
+}
+
+
+onMounted(() => {
+    window.addEventListener("keydown", onKeypress)
+});
+
+onUnmounted(() => {
+    window.removeEventListener("keydown", onKeypress)
+})
+
+// Hotkey O
+const onKeypress = (e: KeyboardEvent) => {
+    if (e.key.toLocaleLowerCase() === "o") {
+        handleImport()
+    }
+}
 
 </script>
 <template>
-    <button class="action-button">
-        <img src="/mapEditorIcons/folder.png" class="action-icon invert-color" />
+    <input ref="fileInput" type="file" accept=".json" style="display: none" @change="handleFileSelected" />
+    <button class="editor-action-button" @click="handleImport">
+        <img src="/mapEditorIcons/folder.png" class="action-icon editor-invert-color" />
     </button>
 </template>
 
-<style>
-
-
-.action-button {
+<style scoped>
+.editor-action-button {
     position: relative;
     padding: 5px;
     width: 100px;
@@ -23,12 +62,11 @@
     transition: filter 120ms ease-out, transform 120ms ease-out;
 }
 
-.invert-color {
+.editor-invert-color {
     filter: invert(1);
 }
 
-.action-button:hover {
-  transform: scale(1.05);
+.editor-action-button:hover {
+    transform: scale(1.05);
 }
-
 </style>

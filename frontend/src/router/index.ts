@@ -5,6 +5,7 @@ import NewGameView from '@/views/NewGameView.vue'
 import JoinGameView from '@/views/JoinGameView.vue'
 import SettingView from '@/views/SettingView.vue'
 import MapEditorView from '@/views/MapEditorView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 import pinia from '@/stores/pinia'
 import { useMilefizStore } from '@/stores/milefizstore'
@@ -53,11 +54,18 @@ const router = createRouter({
 
         // warten bis lobby gejoint
         if (id) {
-          console.log(`joine mit ${id}`);
-          await joinLobby(id)
+          //username aus query
+          const username = (to.query.username as string | undefined) ?? 'Anonymer Kek'
+          console.log(`joine mit ${id} (username=${username})`);
+          await joinLobby(id, username)
         }
         return { name: 'game-start', replace: true }
       },
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFoundView',
+      component: NotFoundView,
     },
   ],
 })

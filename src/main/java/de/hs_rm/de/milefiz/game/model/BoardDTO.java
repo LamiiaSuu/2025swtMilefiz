@@ -8,10 +8,12 @@ import java.util.UUID;
  * DTO des Spielbretts zur Übertragung an das Frontend
  */
 public class BoardDTO {
+
     private UUID id;
     private String name;
 
-    public BoardDTO() {}
+    public BoardDTO() {
+    }
 
     public BoardDTO(UUID id, String name) {
         this.id = id;
@@ -23,7 +25,7 @@ public class BoardDTO {
     public List<FieldDTO> getFields() {
         return fields;
     }
-    
+
     public UUID getId() {
         return id;
     }
@@ -43,18 +45,31 @@ public class BoardDTO {
     public void addField(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
         this.fields.add(new FieldDTO(id, type, position, barrier, north, east, south, west));
     }
-    
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("BoardDTO{");
+        sb.append("id=").append(id);
+        sb.append(", name=").append(name);
+        sb.append(", fields=").append(fields);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public static class FieldDTO {
+
         private UUID id;
         private UUID north;
-        private UUID east; 
+        private UUID east;
         private UUID south;
-        private UUID west; 
+        private UUID west;
         private FieldType type;
         private boolean barrier;
         private Position position;
 
-        public FieldDTO() {}
+        public FieldDTO() {
+        }
 
         public FieldDTO(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
             this.id = id;
@@ -130,10 +145,11 @@ public class BoardDTO {
         public void setPosition(Position position) {
             this.position = position;
         }
-        
-        
+
+        @Override
+        public String toString() {
+            return "FieldDTO [id=" + id + ", north=" + north + ", east=" + east + ", south=" + south + ", west=" + west
+                    + ", type=" + type + ", barrier=" + barrier + ", position=" + position + "]";
+        }
     }
-
-
-
 }

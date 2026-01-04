@@ -24,6 +24,7 @@ import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
+import de.hs_rm.de.milefiz.messaging.events.FrontendCheatedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveBarrierEvent;
@@ -141,7 +142,8 @@ public class MovementServiceImpl implements MovementService {
         // Wenn keine weiteren Schritte verfügbar sind, kann man man sich nicht bewegen
         if (!player.canMove()) {
             logger.info("No more moves left");
-            return new FrontendMoveRejectedEvent("no moves left");
+            if (player.hasMoved()) player.setMoved(false);
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_MOVES_LEFT");
         }
 
         // Ziel-Feld anhand der Bewegungsrichtung bestimmen
@@ -156,7 +158,7 @@ public class MovementServiceImpl implements MovementService {
         // Fehler, wenn in der angegeben Richtung kein Feld ist
         if (nextField == null) {
             logger.info("No Field in this Direction");
-            return new FrontendMoveRejectedEvent("No Field in this Direction");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_FIELD_IN_DIRECTION");
         }
 
         // RICHTUNGSWECHSEL
@@ -164,7 +166,7 @@ public class MovementServiceImpl implements MovementService {
         // (Richtungswechsel ist verboten)
         if (lastField != null && nextField.equals(lastField)) {
             logger.info("Cant change direction!");
-            return new FrontendMoveRejectedEvent("Cant change direction!");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_CANT_CHANGE_DIRECTION");
         }
 
         // START
@@ -172,7 +174,7 @@ public class MovementServiceImpl implements MovementService {
         // kann man auch nicht die der anderen betreten)
         if (nextField.getType().isStart()) {
             logger.info("Cant go back to a starting field!");
-            return new FrontendMoveRejectedEvent("Cant go back to a starting field!");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_INTO_START");
         }
 
         // ZIEL
@@ -186,7 +188,7 @@ public class MovementServiceImpl implements MovementService {
                         nextField.getId());
             }
             logger.info("Cant enter End with remaining moves");
-            return new FrontendMoveRejectedEvent("Cant enter End with remaining Moves");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
         }
 
         // SACKGASSE DURCH BARRIEREN
@@ -203,7 +205,8 @@ public class MovementServiceImpl implements MovementService {
                     player.getId(),
                     meeple.getId(),
                     nextField.getId(),
-                    player.getRemainingMoves());
+                    player.getRemainingMoves(),
+                    player.hasMoved());
         }
 
         // BARRIERE
@@ -241,7 +244,7 @@ public class MovementServiceImpl implements MovementService {
         // Ueberpruefen, ob das Zielfeld durch einen eigenen Meeple blockiert ist
         if (player.getRemainingMoves() == LAST_MOVE && ownMeepleFields.contains(nextField)) {
             logger.info("Attempt to occupy a field with multiple meeple failed");
-            return new FrontendMoveRejectedEvent("Attempt to occupy a field with multiple meeple failed");
+            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE");
         }
 
         // SACKGASSE DURCH EIGENE MEEPLE
@@ -258,7 +261,8 @@ public class MovementServiceImpl implements MovementService {
                         player.getId(),
                         meeple.getId(),
                         nextField.getId(),
-                        player.getRemainingMoves());
+                        player.getRemainingMoves(),
+                        player.hasMoved());
             }
         }
 
@@ -276,6 +280,7 @@ public class MovementServiceImpl implements MovementService {
                     if (rivalMeeple.getCurrentField().equals(nextField)) {
                         meeple.setCurrentField(nextField);
                         meeple.clearLastField();
+                        player.setActiveMeeple(meeple);
                         player.useMove();
                         logger.info("Initiating duel between meeple {} and meeple {}", meeple.getId(),
                                 rivalMeeple.getId());
@@ -287,14 +292,27 @@ public class MovementServiceImpl implements MovementService {
             }
         }
 
+        //Spieler hat schon gemoved in diesem Zug und versucht einen anderen Meeple zu bewegen
+        if (player.hasMoved() && player.getActiveMeeple() != null && !player.getActiveMeeple().equals(meeple)) {
+            logger.info("Attempt to switch Meeple during move failed.");
+            return new FrontendCheatedEvent(player.getId(), "Attempt to switch Meeple during move failed.");
+        }
+
         // Spielfeld-Zustand aktualisieren
         // lastField wird jetzt im Meeple.setCurrentField aktualisiert
         meeple.setCurrentField(nextField);
+
+        //der erste Zug nach dem Würfeln und mehr als 1 move verfügbar
+        if (player.getRemainingMoves() > 1 && !player.hasMoved()) {
+            player.setActiveMeeple(meeple);
+        }
 
         // Spieler nutzt einen Zug
         player.useMove();
         if (player.getRemainingMoves() == 0) {
             meeple.clearLastField();
+            player.setActiveMeeple(null);
+            player.setMoved(false);
         }
 
         // Erfolgreiche Bewegung an Clients senden
@@ -302,7 +320,8 @@ public class MovementServiceImpl implements MovementService {
                 player.getId(),
                 meeple.getId(),
                 nextField.getId(),
-                player.getRemainingMoves());
+                player.getRemainingMoves(),
+                player.hasMoved());
 
         logger.info("Meeple {} moved to {} ({} remaining moves)", meeple.getId(), nextField.getId(),
                 player.getRemainingMoves());
@@ -370,6 +389,8 @@ public class MovementServiceImpl implements MovementService {
         meeple.setCurrentField(nextField);
         meeple.clearLastField();
         player.setRemainingMoves(0);
+        player.setActiveMeeple(null);
+        player.setMoved(false);
     }
 
     /**
@@ -437,13 +458,13 @@ public class MovementServiceImpl implements MovementService {
         // Fehler, wenn es sich um ein Startfeld oder das Ende handelt
         if (targetField.getType().isEnd() || targetField.getType().isStart()) {
             logger.info("Cant place a barrier on Start or End");
-            return new FrontendMoveBarrierRejectedEvent("Cant place a barrier on Start or End");
+            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_REJECTED_START_OR_END");
         }
 
         // Fehler wenn das Feld besetzt ist
         if (isOccupied(lobby, board, targetField)) {
             logger.info("Cant place a barrier on an occupied Field");
-            return new FrontendMoveBarrierRejectedEvent("Cant place a barrier on an occupied Field");
+            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_OCCUPIED");
         }
 
         barrier.setCurrentField(targetField);

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
+import { useAudioStore } from "@/stores/audioStore";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
+const audio = useAudioStore()
 
 const isEnergyFull = computed(()=> milefizStore.energy.isEnergyFull);
 
@@ -33,6 +35,7 @@ const disabled = computed(() =>
 /* Hüpfen Hotkey Mapping auf Key " " (Spacebar)*/
 const onKeypress = (e: KeyboardEvent) => {
     if (e.key === " ") {
+        audio.playSfx('gameHUD')
         jump()
     }
 }

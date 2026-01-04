@@ -105,7 +105,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
         when(lobbyMapper.toDTO(testLobby)).thenReturn(lobbyDTO);
         
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, "Anonymer Kek");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -126,7 +126,7 @@ class LobbyRestControllerTest {
         UUID nonExistentId = UUID.randomUUID();
         when(lobbyManager.getLobby(nonExistentId)).thenThrow(new LobbyNotFoundException());
         try {
-            lobbyRestController.joinLobby(nonExistentId);
+            lobbyRestController.joinLobby(nonExistentId, "Anonymer Kek");
         } catch (LobbyNotFoundException ex) {
             // Expected exception
             assertNotNull(ex);
@@ -142,7 +142,7 @@ class LobbyRestControllerTest {
         testLobby.join(new Player(Color.BLUE));
         
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, "Anonymer Kek");
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -163,7 +163,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
         when(lobbyMapper.toDTO(testLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, "Anonymer Kek");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         
@@ -200,7 +200,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobby(newLobbyId)).thenReturn(newLobby);
         when(lobbyMapper.toDTO(newLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby();
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby("Anonymer Kek");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -228,7 +228,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobby(newLobbyId)).thenReturn(newLobby);
         when(lobbyMapper.toDTO(newLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby();
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby("Anonymer Kek");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { tUI } from '@/i18n'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { computed } from 'vue'
 
@@ -25,7 +26,7 @@ const rollValue = computed(() => {
       <div class="dice-icon-inactive">
         <img src="@/assets/hud/dice.png" class="action-icon" alt="dice"/>
       </div>
-      <div class="label">Würfle!</div>
+      <div class="label">{{ tUI('ROLL_DICE') }}!</div>
     </div>
   </div>
 </template>

@@ -4,9 +4,18 @@ import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import WinCharacter from './WinCharacter.vue'
 import { TresCanvas } from '@tresjs/core'
+import { onMounted } from 'vue'
+import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
 
 const store = useMilefizStore()
 const router = useRouter()
+
+onMounted(() => {
+  // Play win sound effect when the popup is shown
+  const audioStore = useAudioStore()
+  audioStore.playSfx('win')
+})
 
 </script>
 
@@ -19,8 +28,8 @@ const router = useRouter()
     <div class="popup">
 
       <div class="text">
-        <h1 class="title">{{ store.winnerName || 'Unbekannter Spieler' }} hat gewonnen!</h1>
-        <p class="info-text">Du kannst jetzt zurück ins Hauptmenü gehen.</p>
+        <h1 class="title">{{ store.winnerName || tUI('UNKNOWN_PLAYER') }} {{ tUI('HAS_WON') }}!</h1>
+        <p class="info-text">{{ tUI('YOU_CAN_GO_BACK_TO_MAIN_MENU') }}</p>
       </div>
 
       <div class="character-container">
@@ -35,7 +44,7 @@ const router = useRouter()
       </div>
 
       <div class="button-container">
-        <BackButton :to="{ name: 'Homepage' }">&lt; Zurück zum Hauptmenü</BackButton>
+        <BackButton :to="{ name: 'Homepage' }">&lt; {{ tUI('BACK_TO_MAIN_MENU') }}</BackButton>
       </div>
 
     </div>

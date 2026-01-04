@@ -118,7 +118,7 @@ public class MovementServiceBarrierTest {
 
         FrontendMoveBarrierRejectedEvent evt = (FrontendMoveBarrierRejectedEvent) result;
         assertEquals("BARRIER_MOVE_ERROR", evt.type());
-        assertEquals("Cant place a barrier on Start or End", evt.msg());
+        assertEquals("MOVE_BARRIER_REJECTED_START_OR_END", evt.msg());
     }
 
     // Versuch Barriere auf Endfeld zu setzen
@@ -132,7 +132,7 @@ public class MovementServiceBarrierTest {
 
         FrontendMoveBarrierRejectedEvent evt = (FrontendMoveBarrierRejectedEvent) result;
         assertEquals("BARRIER_MOVE_ERROR", evt.type());
-        assertEquals("Cant place a barrier on Start or End", evt.msg());
+        assertEquals("MOVE_BARRIER_REJECTED_START_OR_END", evt.msg());
     }
 
     // Versuch eine Barriere auf Feld mit Meeple zu setzen
@@ -147,7 +147,7 @@ public class MovementServiceBarrierTest {
 
         FrontendMoveBarrierRejectedEvent evt = (FrontendMoveBarrierRejectedEvent) result;
         assertEquals("BARRIER_MOVE_ERROR", evt.type());
-        assertEquals("Cant place a barrier on an occupied Field", evt.msg());
+        assertEquals("MOVE_BARRIER_OCCUPIED", evt.msg());
     }
 
     // Versuch Barriere auf Feld mit Barriere zu setzen
@@ -166,7 +166,7 @@ public class MovementServiceBarrierTest {
 
         FrontendMoveBarrierRejectedEvent evt = (FrontendMoveBarrierRejectedEvent) result;
         assertEquals("BARRIER_MOVE_ERROR", evt.type());
-        assertEquals("Cant place a barrier on an occupied Field", evt.msg());
+        assertEquals("MOVE_BARRIER_OCCUPIED", evt.msg());
     }
 
 }

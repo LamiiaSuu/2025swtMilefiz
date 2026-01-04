@@ -2,15 +2,15 @@
 
 </script>
 <template>
-    <button class="action-button">
-        <img src="/mapEditorIcons/barrier.png" class="action-icon invert-color" />
+    <button class="editor-action-button">
+        <img src="/mapEditorIcons/barrier.png" class="action-icon editor-invert-color" />
     </button>
 </template>
 
-<style>
+<style scoped>
 
 
-.action-button {
+.editor-action-button {
     position: relative;
     padding: 5px;
     width: 100px;
@@ -23,11 +23,11 @@
     transition: filter 120ms ease-out, transform 120ms ease-out;
 }
 
-.invert-color {
+.editor-invert-color {
     filter: invert(1);
 }
 
-.action-button:hover {
+.editor-action-button:hover {
   transform: scale(1.05);
 }
 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed, watchEffect } from 'vue'
 import type { TresObject } from '@tresjs/core'
 import type { PerspectiveCamera, Vector3 } from 'three'
+import { audioEngine } from '@/composables/audioEngine'
 import { useMilefizStore } from '@/stores/milefizstore';
 
 const milefizStore = useMilefizStore()
@@ -25,27 +26,39 @@ const horizontalRotation = ref(0) // Links + Rechts Rotation
 const mouseSensitivity = 0.002
 const maxVerticalAngle = Math.PI / 3 // Limitiert Hoch/Runter
 
-
-
 // Berechnete Kamera Position neu, wenn sie sich ändert
 // Kamera Position = Charakter Position + Offset
 const cameraPosition = computed((): [number, number, number] => {
-  if (!props.gameCharRef || !props.useFirstPerson) {
-    return [0, 1, 0]
+
+  if (cameraRef.value && (props.useFirstPerson || !props.useFirstPerson)) {
+    const p = cameraRef.value.position
+    return [p.x, p.y, p.z]
   }
 
-  const char = props.gameCharRef as any
-  const offset = props.offset || { x: 0, y: 1, z: 0 }
+  return [0, 1, 0]
+})
 
-  // Position wird vom Charakter abgefragt
-  const charPos = char?.characterPosition?.position || [0, 0, 0]
+watchEffect(() => {
+  const l = audioEngine.context.listener
 
-  // Rückgabe von Kamera Position (Charakter Position + Offset)
-  return [
-    charPos.x + offset.x,
-    charPos.y + offset.y,
-    charPos.z + offset.z
-  ]
+  // Position setzen
+  l.positionX.value = cameraPosition.value[0]
+  l.positionY.value = cameraPosition.value[1]
+  l.positionZ.value = cameraPosition.value[2]
+
+  // Forward / Blickrichtung setzen
+  // z.B. berechne aus horizontalRotation + verticalRotation
+  const dirX = Math.sin(horizontalRotation.value) * Math.cos(verticalRotation.value)
+  const dirY = Math.sin(verticalRotation.value)
+  const dirZ = Math.cos(horizontalRotation.value) * Math.cos(verticalRotation.value)
+
+  l.forwardX.value = dirX
+  l.forwardY.value = dirY
+  l.forwardZ.value = dirZ
+
+  l.upX.value = 0
+  l.upY.value = 1
+  l.upZ.value = 0
 })
 
 // Berechnete Rotation der Kamera neu, wenn sie sich ändert
@@ -56,21 +69,16 @@ const cameraRotation = computed((): [number, number, number] => {
 // Kamera Maussteuerung
 const onMouseMove = (e: MouseEvent) => {
   if (!props.useFirstPerson) return // Keine Maussteurung
-  
-  // Pointer Lock versuchen
-  if (props.useFirstPerson && !milefizStore.gameFinished) {
-    const requestLock = () => {
-      if (!document.pointerLockElement && props.useFirstPerson) {
-        document.body.requestPointerLock()
-      }
-    }
 
-    // Fallback: auf ersten Klick warten
-    document.addEventListener('click', requestLock, { once: true })
+  // PointerLock verlassen, wenn ein PopUp offen ist
+  if (milefizStore.popUpMenuOpen || milefizStore.popUpSettingsOpen || milefizStore.gameFinished) {
+    if (document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+    return
   }
 
-  
-  
+
   // Horizontale Rotation - Dreht Charakter!
   horizontalRotation.value -= e.movementX * mouseSensitivity
   emit('rotateCharacter', horizontalRotation.value)
@@ -87,9 +95,7 @@ const onMouseMove = (e: MouseEvent) => {
 // Wenn man im First Person Mode esc drückt, 
 // taucht der Zeiger wieder auf und man kann sich noch umschauen
 watch(() => props.useFirstPerson, (isFirstPerson) => {
-  if (isFirstPerson) {
-    document.body.requestPointerLock()
-  } else {
+  if (!isFirstPerson) {
     document.exitPointerLock() // Mauszeiger bei OrbitControl wieder an
   }
 })
@@ -100,7 +106,7 @@ onMounted(() => {
   // Direkt Pointer Lock versuchen
   if (props.useFirstPerson) {
     const requestLock = () => {
-      if (!document.pointerLockElement) {
+      if (!document.pointerLockElement && !milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.gameFinished && props.useFirstPerson && globalThis.location.pathname === '/game') {
         document.body.requestPointerLock()
       }
     }
@@ -110,11 +116,11 @@ onMounted(() => {
     requestLock()
 
     // Fallback: auf ersten Klick warten
-    document.addEventListener('click', requestLock, { once: true })
+    document.addEventListener('click', requestLock, { once: false })
   }
 
   const updateCamera = () => {
-    
+
     // Kamera nur updaten, wenn First Person an und cameraRef existiert
     if (props.useFirstPerson && cameraRef.value && props.gameCharRef?.characterPosition) {
       const charPos = props.gameCharRef.characterPosition.position
@@ -164,9 +170,7 @@ watch(
 
 onUnmounted(() => {
   document.removeEventListener('mousemove', onMouseMove)
-  if (document.pointerLockElement) {
     document.exitPointerLock()
-  }
 })
 
 // Gibt Kamera frei
@@ -179,12 +183,6 @@ defineExpose({
 </script>
 
 <template>
-  <TresPerspectiveCamera 
-    v-if="useFirstPerson" 
-    ref="cameraRef" 
-    :position="cameraPosition" 
-    :rotation="cameraRotation" 
-    :fov="90" 
-    rotation-order="YXZ" 
-  />
+  <TresPerspectiveCamera v-if="useFirstPerson" ref="cameraRef" :position="cameraPosition" :rotation="cameraRotation"
+    :fov="90" rotation-order="YXZ" />
 </template>

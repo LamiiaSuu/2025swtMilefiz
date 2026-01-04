@@ -101,22 +101,22 @@ public class BoardMapper {
             for (Field tempField : fields) {
                 UUID dirID = tempDTO.getNorth();
                 if (dirID != null && dirID.equals(tempField.getId())) {
-                    tempField.addNeighbour(field, Direction.SOUTH);
+                    tempField.addNeighbour(field, Direction.NORTH);
                 }
 
                 dirID = tempDTO.getEast();
                 if (dirID != null && dirID.equals(tempField.getId())) {
-                    tempField.addNeighbour(field, Direction.WEST);
+                    tempField.addNeighbour(field, Direction.EAST);
                 }
 
                 dirID = tempDTO.getSouth();
                 if (dirID != null && dirID.equals(tempField.getId())) {
-                    tempField.addNeighbour(field, Direction.NORTH);
+                    tempField.addNeighbour(field, Direction.SOUTH);
                 }
 
                 dirID = tempDTO.getWest();
                 if (dirID != null && dirID.equals(tempField.getId())) {
-                    tempField.addNeighbour(field, Direction.EAST);
+                    tempField.addNeighbour(field, Direction.WEST);
                 }
             }
 
