@@ -45,4 +45,7 @@ export const UI_EN: Record<UIKey, string> = {
     CANCEL: 'Cancel',
     CONTINUE: 'Continue',
     LEAVE_GAME: 'Leave Game',
+    MINIGAME_WON: 'You won!',
+    MINIGAME_LOST: 'You lost...',
+    DICE_MINIGAME: 'Dice Minigame',
 }

@@ -47,3 +47,6 @@ export type UIKey =
   | 'CANCEL'
   | 'CONTINUE'
   | 'LEAVE_GAME'
+  | 'MINIGAME_WON'
+  | 'MINIGAME_LOST'
+  | 'DICE_MINIGAME'
