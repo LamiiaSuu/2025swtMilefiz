@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import Header from '../pages/Header.vue'
-import CloseButton from './CloseButton.vue'
+import PopUpCloseButton from './PopUpCloseButton.vue'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
 
@@ -41,13 +41,12 @@ const onBackClick = () => {
 
 <template>
     <div class="overlay">
-
-
         <!-- MI'lefiz Header -->
         <Header>{{ tUI('POPUP_MENU') }}</Header>
 
-        
-        <CloseButton></CloseButton>
+        <!-- Close Button -->
+        <PopUpCloseButton></PopUpCloseButton>
+
         <div class="popup">
 
             <!-- MENU -->
@@ -86,7 +85,6 @@ const onBackClick = () => {
     align-items: center;
     z-index: 99991;
     pointer-events: auto;
-
     flex-direction: column;
 
     background-color: rgba(0, 0, 0, 0.6);
@@ -131,7 +129,6 @@ const onBackClick = () => {
     margin-top: 2vh;
     padding: 10px 45px;
 
-
     color: white;
     font-size: 3.5vh;
 
@@ -139,7 +136,6 @@ const onBackClick = () => {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
     background-image: var(--button-gradient-red);
-
 
     outline: none;
 
