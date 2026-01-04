@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DiceMiniGame from "../minigames/DiceMiniGame.vue"
+import DiceMiniGame from './minigames/DiceMiniGame.vue';
 
 const props = defineProps<{
   duels: any[]
@@ -41,6 +41,8 @@ function resolveComponent(duel: any) {
   align-items: center;
   justify-content: center;
   z-index: 99990;
+  
+  
 }
 
 .duel-container {
@@ -57,7 +59,7 @@ function resolveComponent(duel: any) {
   background-color: var(--background-color-forms);
   border-radius: 15px;
   width: 45vw;
-  height: 55vh;
+  height: 65vh;
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
