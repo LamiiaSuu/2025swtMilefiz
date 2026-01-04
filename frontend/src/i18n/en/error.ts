@@ -15,5 +15,6 @@ export const ERRORS_EN: Record<ErrorCode, string> = {
     MOVE_BARRIER_OCCUPIED: 'Barrier cannot be placed on an occupied space',
     REJECTED_BY_BARRIER: 'Ouch! That looked painful - remaining moves lost!',
     SAVE_ENERGY_ERROR: 'Maximum energy reached or meeple already moved!',
-    CONSUME_ENERGY_ERROR: 'Not enough energy for a jump!'
+    CONSUME_ENERGY_ERROR: 'Not enough energy for a jump!',
+    MEEPLE_IN_DUEL: 'The opposing meeple is already in a duel. Please wait until the duel is finished!',
 }

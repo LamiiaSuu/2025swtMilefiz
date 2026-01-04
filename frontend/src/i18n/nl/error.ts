@@ -15,5 +15,6 @@ export const ERRORS_NL: Record<ErrorCode, string> = {
     MOVE_BARRIER_OCCUPIED: 'Barrier kan niet op een bezet veld geplaatst worden',
     REJECTED_BY_BARRIER: 'Oei! Dat zag pijnlijk uit – resterende zetten verloren!',
     SAVE_ENERGY_ERROR: 'Maximale energie bereikt of meeple al verplaatst!',
-    CONSUME_ENERGY_ERROR: 'Niet genoeg energie voor een sprong!'
+    CONSUME_ENERGY_ERROR: 'Niet genoeg energie voor een sprong!',
+    MEEPLE_IN_DUEL: 'De tegenstander zit al in een duel. Wacht tot het duel is afgelopen!',
 }

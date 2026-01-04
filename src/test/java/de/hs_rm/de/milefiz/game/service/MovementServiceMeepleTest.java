@@ -27,6 +27,7 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.Position;
+import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
@@ -42,6 +43,8 @@ public class MovementServiceMeepleTest {
 
     @Mock
     private LobbyManager lobbyManager;
+    private DuelService duelService;
+    FrontendMessagingService messaging;
 
     private MovementService movementService;
     private Lobby lobby;
@@ -57,7 +60,8 @@ public class MovementServiceMeepleTest {
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        movementService = new MovementServiceImpl(lobbyManager);
+        duelService = new DuelServiceImpl(lobbyManager, messaging);
+        movementService = new MovementServiceImpl(lobbyManager, duelService);
 
         // Felder
         currentField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 0));

@@ -78,7 +78,12 @@ const onMouseMove = (e: MouseEvent) => {
     return
   }
 
-
+  
+  // Wenn ein Duell aktiv ist -> alle Steuerungen blockieren
+  if (Object.keys(milefizStore.activeDuels).length > 0) {
+    e.preventDefault()
+    return
+  }
   // Horizontale Rotation - Dreht Charakter!
   horizontalRotation.value -= e.movementX * mouseSensitivity
   emit('rotateCharacter', horizontalRotation.value)
