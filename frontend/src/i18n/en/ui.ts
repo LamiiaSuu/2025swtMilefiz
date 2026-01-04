@@ -43,4 +43,6 @@ export const UI_EN: Record<UIKey, string> = {
     BACK_TO_MAIN_MENU_CONFIRMATION: 'Do you really want to return to the main menu?',
     BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR: 'Do you really want to return to the main menu? Unsaved changes will be lost.',
     CANCEL: 'Cancel',
+    CONTINUE: 'Continue',
+    LEAVE_GAME: 'Leave Game',
 }

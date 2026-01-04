@@ -30,11 +30,14 @@ import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveBarrierEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveBarrierRejectedEvent;
+import de.hs_rm.de.milefiz.game.service.DuelService;
+import de.hs_rm.de.milefiz.game.service.DuelServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class MovementServiceBarrierTest {
     @Mock
     private LobbyManager lobbyManager;
+    private DuelService duelService;
 
     private MovementService movementService;
     private Lobby lobby;
@@ -50,7 +53,7 @@ public class MovementServiceBarrierTest {
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        movementService = new MovementServiceImpl(lobbyManager);
+        movementService = new MovementServiceImpl(lobbyManager, duelService);
 
         // Felder
         startField = new Field(UUID.randomUUID(), FieldType.START_GREEN, new Position(0, 0));
