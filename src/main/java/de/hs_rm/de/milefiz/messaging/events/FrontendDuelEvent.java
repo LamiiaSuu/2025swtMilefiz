@@ -2,6 +2,8 @@ package de.hs_rm.de.milefiz.messaging.events;
 
 import java.util.UUID;
 
+import de.hs_rm.de.milefiz.game.model.MiniGame;
+
 /**
  * Frontend-Event, das ausgelöst wird, wenn zwei Meeples auf demselben Feld
  * aufeinandertreffen und dadurch ein Duell entsteht.
@@ -21,10 +23,48 @@ import java.util.UUID;
  * @param targetField    ID des Feldes, auf dem das Duell stattfindet
  * @param remainingMoves Anzahl der verbleibenden Züge nach der Bewegung
  *
- * Author: Maximilian Ressel
+ * Author: Maximilian Ressel / Robert Bothfeld
  */
-public record FrontendDuelEvent (String type, UUID playerId, UUID firstMeepleId, UUID secondMeepleId, UUID targetField, int remainingMoves) implements FrontendEvent{
-    public FrontendDuelEvent(UUID playerId, UUID firstMeepleId, UUID secondMeepleId, UUID targetField, int remainingMoves) {
-        this(EventType.DUEL.name(), playerId, firstMeepleId, secondMeepleId, targetField, remainingMoves);
+public record FrontendDuelEvent(
+        String type,
+        UUID duelId,
+        UUID playerId,
+        UUID rivalId,
+        UUID firstMeepleId,
+        UUID secondMeepleId,
+        UUID targetField,
+        int remainingMoves,
+        int miniGameId,
+        String miniGameName,
+        String miniGameType,
+        int timeOut
+) implements FrontendEvent {
+
+    public FrontendDuelEvent(
+            UUID duelId,
+            UUID playerId,
+            UUID rivalId,
+            UUID firstMeepleId,
+            UUID secondMeepleId,
+            UUID targetField,
+            int remainingMoves,
+            MiniGame game
+    ) {
+        this(
+                EventType.DUEL.name(),
+                duelId,
+                playerId,
+                rivalId,
+                firstMeepleId,
+                secondMeepleId,
+                targetField,
+                remainingMoves,
+                game.getId(),
+                game.getName(),
+                game.getClass().getSimpleName(),
+                game.getTimeOut()
+        );
     }
 }
+
+

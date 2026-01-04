@@ -15,5 +15,6 @@ export const ERRORS_DE: Record<ErrorCode, string> = {
     MOVE_BARRIER_OCCUPIED: 'Barriere kann nicht auf besetztes Feld gesetzt werden',
     REJECTED_BY_BARRIER: 'Autsch! Das sah schmerzhaft aus - verbleibende Züge verloren!',
     SAVE_ENERGY_ERROR: 'Maximale Energie oder Meeple bereits bewegt!',
-    CONSUME_ENERGY_ERROR: 'Nicht genug Energie für einen Sprung!'
+    CONSUME_ENERGY_ERROR: 'Nicht genug Energie für einen Sprung!',
+    MEEPLE_IN_DUEL: 'Gegnerischer Meeple bereits im Duell. Warte bis das Duell entschieden wurde!'
 }
