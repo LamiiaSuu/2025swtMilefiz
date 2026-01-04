@@ -25,6 +25,8 @@ public class Board {
     private Field startRed;
 
     private List<Meeple> barriers;
+    private List<Tree> trees = new ArrayList<>();
+
 
     public Board(String name, Field startGreen, Field startYellow, Field startBlue, Field startRed) {
         this(UUID.randomUUID(), name, startGreen, startYellow, startBlue, startRed);
@@ -76,6 +78,22 @@ public class Board {
         if (!this.barriers.removeIf(b -> b.getId().equals(barrier.getId()))) {
             throw new IllegalArgumentException("Barriere nicht im Board");
         }
+    }
+
+    public List<Tree> getTrees() {
+        return trees;
+    }
+
+    public void addTree(PositionFloat posititon, TreeType type) {
+        trees.add(new Tree(type, posititon));
+    }
+
+    public void addTrees(List<Tree> treeList) {
+        trees.addAll(treeList);
+    }
+
+    public void deleteAllTrees() {
+        trees.clear();
     }
 
     public Field getStartField(Color color) {

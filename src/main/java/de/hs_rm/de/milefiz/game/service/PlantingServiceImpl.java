@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.springframework.stereotype.Service;
+
 import de.hs_rm.de.milefiz.game.model.Position;
 import de.hs_rm.de.milefiz.game.model.PositionFloat;
 import de.hs_rm.de.milefiz.game.model.TreeType;
@@ -27,6 +29,8 @@ import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
  * 
  * @author Thilo Wittmer
  */
+
+@Service
 public class PlantingServiceImpl implements PlantingService {
 
     /**
