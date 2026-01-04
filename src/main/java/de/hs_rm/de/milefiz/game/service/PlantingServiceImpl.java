@@ -23,7 +23,7 @@ import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
  * 
  * <p>
  * Zum Pflanzen der Bäume wird ein blaues Rauschen verwendet, welches mit dem
- * void & cluster Algorithmus erstellt wird.
+ * void und cluster Algorithmus erstellt wird.
  * 
  * @author Thilo Wittmer
  */
@@ -187,7 +187,7 @@ public class PlantingServiceImpl implements PlantingService {
      * @param density      gewünschter Anteil an gesetzten Pixeln in [0,1]
      * @param width        Bildbreite > 0
      * @param height       Bildhöhe > 0
-     * @param kernelRadius Nachbarschaftsradius; falls <= 0 wird eine Heuristik
+     * @param kernelRadius Nachbarschaftsradius; falls kleiner gleich 0 wird eine Heuristik
      *                     genutzt
      * @param seed         RNG-Seed (für reproduzierbare Ergebnisse)
      * @return int[height][width] mit 0/1 Blue-Noise-Muster
