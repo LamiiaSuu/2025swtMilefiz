@@ -12,7 +12,6 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
 import MenuPopUp from './popups/MenuPopUp.vue';
 import SettingsPopUp from './popups/SettingsPopUp.vue';
-import MinigamesView from './popups/minigames/MinigamesView.vue';
 
 const milefizStore = useMilefizStore()
 
@@ -25,11 +24,6 @@ import ErrorMessage from './ErrorMessage.vue';
     <!-- Win Popup -->
     <transition name="fade">
       <WinPopUp v-if="milefizStore.gameFinished" />
-    </transition>
-
-
-    <transition name="fade">
-      <MinigamesView  />
     </transition>
 
     <!-- Menu Popup -->
