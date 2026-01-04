@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
+import Header from '../pages/Header.vue'
 
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
@@ -32,21 +33,25 @@ const onBackClick = () => {
 
 <template>
     <div class="overlay">
+
+        
+        <!-- MI'lefiz Header -->
+        <Header>{{ tUI('NEW_GAME') }}</Header>
         <div class="popup">
 
             <!-- MENU -->
             <div v-if="!milefizStore.popUpSettingsOpen">
 
                 <div class="button-container">
-                    <button class="popup-menu-button" @mouseenter="onHover"
-                        @click="onContinueClick()">{{
-                            tUI('CONTINUE') }}</button>
+                    <button class="menu-button" @mouseenter="onHover" @click="onContinueClick()">{{
+                        tUI('CONTINUE') }}</button>
 
-                    <button class="popup-menu-button" @mouseenter="onHover" @click="onSettingsClick()">{{
+                    <button class="menu-button" @mouseenter="onHover" @click="onSettingsClick()">{{
                         tUI('SETTINGS') }}</button>
 
-                    <BackButton class="back-button" @mouseenter="onHover" @click="onBackClick()" :to="{ name: 'Homepage' }">{{
-                        tUI('LEAVE_GAME') }}</BackButton>
+                    <BackButton class="back-button" @mouseenter="onHover" @click="onBackClick()"
+                        :to="{ name: 'Homepage' }">{{
+                            tUI('LEAVE_GAME') }}</BackButton>
                 </div>
             </div>
 
@@ -63,6 +68,8 @@ const onBackClick = () => {
     align-items: center;
     z-index: 99991;
     pointer-events: auto;
+    
+    flex-direction: column;
 
     background-color: rgba(0, 0, 0, 0.6);
 }
@@ -70,19 +77,16 @@ const onBackClick = () => {
 .popup {
     display: flex;
     flex-direction: column;
-    background-color: var(--background-color-forms);
 
     border-radius: 15px;
     width: 20vw;
     min-height: 45vh;
-    padding: 2vh;
 
     justify-content: center;
     text-align: center;
-
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    border: 7px solid #57AA51;
     animation: fadeIn 0.3s ease;
+    
+    z-index: -1;
 }
 
 .settings-content {
@@ -105,9 +109,6 @@ const onBackClick = () => {
     font-size: 3vh;
     cursor: pointer;
 
-    border: 3px solid black;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
     font-family: "AcmeFont", sans-serif;
 
     -webkit-text-stroke: 0;
@@ -117,6 +118,10 @@ const onBackClick = () => {
 }
 
 .button-container :deep(.back-button) {
+
+    border: 3px solid black;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
     background-image: var(--button-gradient-red);
 }
 
