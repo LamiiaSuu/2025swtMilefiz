@@ -71,10 +71,6 @@ public class BoardDTO {
         trees.add(new TreeDTO(treePosition, treeType));
     }
 
-    public void addTrees(List<TreeDTO> treeList) {
-        trees.addAll(treeList);
-    }
-
     public void deleteAllTrees() {
         trees.clear();
     }

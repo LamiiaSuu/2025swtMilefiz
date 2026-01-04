@@ -42,7 +42,6 @@ public class GameServiceImpl implements GameService {
     private final DiceServiceImpl diceService;
     private final CooldownServiceImpl cooldownService;
     private final MovementService movementService;
-    private final PlantingService plantingService;
     private final ApplicationEventPublisher publisher;
     private Board testBoard;
 
@@ -58,11 +57,8 @@ public class GameServiceImpl implements GameService {
      * 
      */
     public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher,
-            CooldownServiceImpl cooldownService, MovementService movementService, PlantingService plantingService)
+            CooldownServiceImpl cooldownService, MovementService movementService)
             throws IOException {
-
-        this.plantingService = plantingService;
-
         final String BOARD_PATH = "boards/dummyBoard.json";
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -75,8 +71,7 @@ public class GameServiceImpl implements GameService {
         try {
             BoardDTO testBoardDTO = objectMapper.readValue(inputStream,
                     BoardDTO.class);
-                 BoardDTO plantBoardDTO = plantingService.plantTrees(testBoardDTO, 1f);
-            testBoard = BoardMapper.mapToBoard(plantBoardDTO);
+            testBoard = BoardMapper.mapToBoard(testBoardDTO);
             logger.info("Test board loaded successfully from: {}", BOARD_PATH);
         } finally {
             inputStream.close();
