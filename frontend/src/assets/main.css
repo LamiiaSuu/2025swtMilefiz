@@ -134,3 +134,8 @@ form label {
     
   paint-order: stroke fill;
 }
+
+
+button:hover {
+  filter: brightness(1.1);
+}
