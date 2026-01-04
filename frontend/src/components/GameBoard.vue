@@ -6,6 +6,7 @@ import GameCharacter from './GameCharacter.vue'
 import { useBoardStore } from '@/stores/boardStore'
 import Tile from './Tile.vue'
 import Path from './Path.vue'
+import Foliage from './Foliage.vue'
 import Camera from './Camera.vue'
 import { useMilefizStore } from "@/stores/milefizstore"
 import type { Direction } from "@/types/movement"
@@ -584,6 +585,10 @@ const connectionSegments = computed(() => {
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
       :position="[field.position.x, 0, field.position.y]" :type="field.type" />
+
+    <!-- Pflanzen und Bäume -->
+    <Foliage v-for="tree in boardStore.board?.trees"
+      :position="[tree.treePosition.x, 0, tree.treePosition.y]" :type="tree.treeType" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
