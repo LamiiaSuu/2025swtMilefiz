@@ -12,27 +12,29 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.hs_rm.de.milefiz.game.model.BoardDTO.FieldDTO;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 
 public class BoardMapperTest {
     BoardDTO boardDTO;
 
     @BeforeEach
-    void init() throws IOException{
+    void init() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        
+
         InputStream inputStream = getClass().getClassLoader()
-            .getResourceAsStream("boards/dummyBoard.json");
-            
+                .getResourceAsStream("boards/dummyBoard.json");
+
         if (inputStream == null) {
             throw new IOException("Test board file not found");
         }
-        
+
         try {
             boardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
         } finally {
             inputStream.close();
-        }   
+        }
     }
 
     @Test
@@ -61,14 +63,14 @@ public class BoardMapperTest {
         Board board = BoardMapper.mapToBoard(boardDTO);
 
         FieldDTO barrier = boardDTO.getFields().stream()
-            .filter(f -> f.isBarrier())
-            .findFirst()
-            .get();
-        
+                .filter(f -> f.isBarrier())
+                .findFirst()
+                .get();
+
         List<UUID> barrierIDs = board.getBarriers().stream()
-                                    .map(m -> m.getCurrentField().getId())
-                                    .toList();
+                .map(m -> m.getCurrentField().getId())
+                .toList();
 
         assertTrue(barrierIDs.contains(barrier.getId()));
-        }
+    }
 }
