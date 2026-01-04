@@ -76,33 +76,34 @@ watch(
 </script>
 
 <template>
-  <div>
+  <div class="content">
 
     <div class="text">
       <h1 class="title">{{ tUI('DICE_MINIGAME') }}</h1>
     </div>
 
 
-    <p v-if="countdown !== null">
-      ⏳ {{ countdown }}s
+    <p v-if="countdown !== null" class="countdown">
+      <img src="/minigames/hourglass_icon.png" class="countdown-icon"> {{ countdown }}s
     </p>
 
     <div class="players">
       <div class="player">
-        <h3>{{ getPlayerNameByMeeple(duel.firstMeeple) }}</h3>
-
         <div class="dice">{{ duel.state?.rollP1 ?? "-" }}</div>
+        <h2>{{ getPlayerNameByMeeple(duel.firstMeeple) }}</h2>
+
       </div>
 
       <div class="player">
-        <h3>{{ getPlayerNameByMeeple(duel.secondMeeple) }}</h3>
-
         <div class="dice">{{ duel.state?.rollP2 ?? "-" }}</div>
+
+        <h2>{{ getPlayerNameByMeeple(duel.secondMeeple) }}</h2>
+
       </div>
     </div>
 
     <button v-if="!duel.state?.finished" :disabled="waiting === duel.duelId" @click="roll()">
-      {{ tUI('ROLL_DICE') }}
+      {{ tUI('ROLL_DICE') }}!
     </button>
 
     <div v-if="duel.state?.finished" class="winner">
@@ -113,6 +114,14 @@ watch(
 </template>
 
 <style scoped>
+.content {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .text {
   flex: 1;
   display: flex;
@@ -128,6 +137,14 @@ watch(
   margin-bottom: 1vh;
 }
 
+.countdown-icon {
+  font-size: 3vh;
+}
+
+.countdown-icon {
+  width: 5%;
+  height: 5%;
+}
 
 .players {
   display: flex;
