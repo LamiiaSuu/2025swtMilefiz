@@ -32,8 +32,8 @@ function closePopUps() {
 <style scoped>
 .close-button {
     position: absolute;
-    top: 4%;
-    right: -20%;
+    margin-top: -40%;
+    margin-right: -112.5%;
     display: flex;
     align-items: center; 
 
