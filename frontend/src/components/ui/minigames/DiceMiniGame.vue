@@ -1,44 +1,7 @@
-<template>
-  <div>
-    <h2>{{ duel.miniGameName }}</h2>
-
-    <p v-if="countdown !== null">
-      ⏳ {{ countdown }}s
-    </p>
-
-    <div class="players">
-      <div class="player">
-        <h3>{{ getPlayerNameByMeeple(duel.firstMeeple) }}</h3>
-
-        <div class="dice">{{ duel.state?.rollP1 ?? "-" }}</div>
-      </div>
-
-      <div class="player">
-        <h3>{{ getPlayerNameByMeeple(duel.secondMeeple) }}</h3>
-
-        <div class="dice">{{ duel.state?.rollP2 ?? "-" }}</div>
-      </div>
-    </div>
-
-    <button
-      v-if="!duel.state?.finished"
-      :disabled="waiting === duel.duelId"
-      @click="roll()"
-    >
-      Würfeln
-    </button>
-
-    <div v-if="duel.state?.finished" class="winner">
-      <span v-if="isWinner()">🎉 Du hast gewonnen!</span>
-      <span v-else>😵 Du hast verloren…</span>
-    </div>
-  </div>
-</template>
-
-
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue"
 import { useMilefizStore } from "@/stores/milefizstore"
+import { tUI } from '@/i18n'
 
 const countdown = ref<number | null>(null)
 
@@ -66,7 +29,6 @@ function roll() {
   )
 }
 
-
 function getPlayerNameByMeeple(meepleId: string) {
   const lobby = store.gamedata.lobby
   if (!lobby) return "?"
@@ -92,7 +54,7 @@ watch(
   (timeOut) => {
     if (!timeOut) return
 
-    countdown.value = timeOut-1
+    countdown.value = timeOut - 1
 
     const interval = setInterval(() => {
       if (countdown.value === null) {
@@ -113,7 +75,60 @@ watch(
 
 </script>
 
+<template>
+  <div>
+
+    <div class="text">
+      <h1 class="title">{{ tUI('DICE_MINIGAME') }}</h1>
+    </div>
+
+
+    <p v-if="countdown !== null">
+      ⏳ {{ countdown }}s
+    </p>
+
+    <div class="players">
+      <div class="player">
+        <h3>{{ getPlayerNameByMeeple(duel.firstMeeple) }}</h3>
+
+        <div class="dice">{{ duel.state?.rollP1 ?? "-" }}</div>
+      </div>
+
+      <div class="player">
+        <h3>{{ getPlayerNameByMeeple(duel.secondMeeple) }}</h3>
+
+        <div class="dice">{{ duel.state?.rollP2 ?? "-" }}</div>
+      </div>
+    </div>
+
+    <button v-if="!duel.state?.finished" :disabled="waiting === duel.duelId" @click="roll()">
+      {{ tUI('ROLL_DICE') }}
+    </button>
+
+    <div v-if="duel.state?.finished" class="winner">
+      <span v-if="isWinner()">{{ tUI('MINIGAME_WON') }}</span>
+      <span v-else>{{ tUI('MINIGAME_LOST') }}</span>
+    </div>
+  </div>
+</template>
+
 <style scoped>
+.text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 3vh 0;
+  text-align: center;
+  align-items: center;
+}
+
+.title {
+  font-size: 7vh;
+  color: #000000;
+  margin-bottom: 1vh;
+}
+
+
 .players {
   display: flex;
   justify-content: space-between;
@@ -130,17 +145,27 @@ watch(
   font-size: 2.4rem;
 }
 
-button {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
 .winner {
   margin-top: 10px;
   text-align: center;
   font-weight: bold;
+}
+
+button {
+  padding: 15px 30px;
+  background-image: var(--button-gradient-green);
+  color: white;
+  font-size: 3vh;
+  cursor: pointer;
+
+  border: 3px solid black;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+  font-family: "AcmeFont", sans-serif;
+
+  -webkit-text-stroke: 0;
+  paint-order: fill;
+  text-shadow: none;
+  font-weight: 400;
 }
 </style>

@@ -1,23 +1,3 @@
-<template>
-  <div class="overlay">
-    <div class="duel-container">
-
-      <div
-        v-for="duel in duels"
-        :key="duel.duelId"
-        class="duel-card"
-      >
-        <component
-          :is="resolveComponent(duel)"
-          :duel="duel"
-          @close="() => emit('close', duel.duelId)"
-        />
-      </div>
-
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import DiceMiniGame from "../minigames/DiceMiniGame.vue"
 
@@ -35,16 +15,28 @@ function resolveComponent(duel: any) {
       return DiceMiniGame
 
     default:
-      return DiceMiniGame   
+      return DiceMiniGame
   }
 }
 </script>
+
+<template>
+  <div class="overlay">
+    <div class="duel-container">
+
+      <div v-for="duel in duels" :key="duel.duelId" class="duel-card">
+        <component :is="resolveComponent(duel)" :duel="duel" @close="() => emit('close', duel.duelId)" />
+      </div>
+
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0, 0, 0, .55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,11 +52,13 @@ function resolveComponent(duel: any) {
 }
 
 .duel-card {
-  background: #1b1e25;
-  padding: 18px 22px;
-  border-radius: 14px;
-  color: white;
-  min-width: 340px;
-  box-shadow: 0 10px 32px rgba(0,0,0,.35);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-color-forms);
+  border-radius: 15px;
+  width: 45vw;
+  height: 55vh;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 </style>
