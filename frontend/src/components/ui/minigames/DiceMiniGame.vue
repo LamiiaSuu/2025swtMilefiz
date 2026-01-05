@@ -63,7 +63,7 @@
       :disabled="waiting === duel.duelId"
       @click="roll()"
     >
-      {{ tUI('ROLL_DICE') }}
+      {{ tUI('ROLL_DICE') }}!
     </button>
 
     <!-- GEWINNER -->
@@ -181,7 +181,7 @@ function getPlayerColorByMeeple(meepleId: string) {
   text-align: center;
   font-size: 3.4rem;
   font-weight: 800;
-  margin: 6px 0 12px;
+  margin: 6px 0 6px;
   opacity: 0.9;
 }
 
@@ -189,7 +189,7 @@ function getPlayerColorByMeeple(meepleId: string) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   justify-content: space-between;
-  margin: 0px 0 10px;
+  margin: 0px 0 15px;
   gap: 12px;
 }
 
@@ -200,7 +200,7 @@ function getPlayerColorByMeeple(meepleId: string) {
 .player h3 {
   font-size: 1.8rem;
   font-weight: 900;
-  margin: 0 0 6px 0;
+  margin: 0px 0 6px 0;
 
   text-shadow:
     0 0 1px rgba(0,0,0,.95),
@@ -301,7 +301,7 @@ button {
 .dice-roll-button {
   font-family: "Acme", sans-serif;
   font-weight: 900;
-  font-size: 1rem;
+  font-size: 1.6rem;
 
   width: 100%;
   padding: 10px 14px;
