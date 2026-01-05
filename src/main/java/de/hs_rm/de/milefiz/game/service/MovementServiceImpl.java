@@ -249,7 +249,8 @@ public class MovementServiceImpl implements MovementService {
             // Duell einleiten, wenn man auf einem Feld landet, auf dem ein Meeple eines
             // anderen Spielers steht
             for (Meeple rivalMeeple : getRivalMeeples(lobby, player)) {
-                if (rivalMeeple.getCurrentField().equals(nextField)) {
+                Field rivalField = rivalMeeple.getCurrentField();
+                if (rivalField != null && rivalField.equals(nextField)) {
                     meeple.setCurrentField(nextField);
                     meeple.clearLastField();
                     player.setActiveMeeple(meeple);
@@ -378,12 +379,78 @@ public class MovementServiceImpl implements MovementService {
         player.setMoved(false);
     }
 
+    /**
+     * Prüft, ob von einem gegebenen Startfeld aus innerhalb der angegebenen
+     * Anzahl an verbleibenden Schritten mindestens ein legales Stopfeld
+     * erreichbar ist.
+     *
+     * Diese Methode dient als öffentlicher Einstiegspunkt für die rekursive
+     * Tiefensuche und initialisiert die benötigte Memoisierung.
+     * Die eigentliche Logik der Pfadsuche ist in
+     * {@link #existsLegalStopWithinRemainingMovesDfs(Field, Field, int, Set, Set, Map)}
+     * implementiert.
+     *
+     * @param startingField   das Feld, von dem aus die Suche gestartet wird
+     * @param lastField       das zuletzt betretene Feld,
+     *                        oder {@code null}, falls keines existiert
+     * @param remainingMoves  die Anzahl der noch verfügbaren Schritte
+     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeples besetzt sind
+     *                                              
+     * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
+     *                        
+     * @return {@code true}, wenn innerhalb der verbleibenden Schritte mindestens
+     *         ein legales Stopfeld erreichbar ist, andernfalls {@code false}
+     *
+     * @author Maximilian Ressel
+     */
     private boolean existsLegalStopWithinRemainingMoves(Field startingField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields) {
         Map<String, Boolean> memo = new HashMap<>();
         return existsLegalStopWithinRemainingMovesDfs(
                 startingField, lastField, remainingMoves, ownMeepleFields, barrierFields, memo);
     }
+
+    /**
+     * Prüft rekursiv, ob von einem gegebenen Startfeld aus innerhalb der
+     * verbleibenden Anzahl an Schritten mindestens ein legales Stopfeld
+     * erreichbar ist.
+     *
+     * Ein legales Stopfeld ist ein Feld, auf dem der Zug beendet werden darf,
+     * d.h. ein Feld, das:
+     * über ausschließlich legale Zwischenschritte erreichbar ist
+     * (gemäß {@link #isLegalTarget(Field, Field, int, Set, Set)})
+     * und nicht von einem eigenen Meeple besetzt ist.
+     *
+     * Die Methode durchsucht den Bewegungsraum per Tiefensuche (DFS) und
+     * verwendet Memoisierung, um bereits geprüfte Zustände zu cachen.
+     * Ein Zustand ist eindeutig definiert durch:
+     * 
+     * das aktuelle Feld,
+     * das zuletzt betretene Feld,
+     * die verbleibende Anzahl an Schritten
+     *
+     * Die Suche endet erfolgreich, sobald ein legales Stopfeld gefunden wird.
+     * Wird innerhalb der verfügbaren Schritte kein solches Feld erreicht,
+     * liefert die Methode {@code false}.
+     *
+     * @param startingField   das Feld, von dem aus die Suche gestartet wird
+     * @param lastField       das zuletzt betretene Feld (zur Erkennung von
+     *                        Richtungswechseln),
+     *                        oder {@code null}, falls keines existiert
+     * @param remainingMoves  die Anzahl der noch verfügbaren Schritte
+     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeples besetzt
+     *                        sind
+     * 
+     * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
+     * 
+     * @param memo            Cache zur Memoisierung bereits geprüfter Zustände
+     *                        (Key: Feld + letztes Feld + verbleibende Schritte)
+     *
+     * @return {@code true}, wenn innerhalb der verbleibenden Schritte mindestens
+     *         ein legales Stopfeld erreichbar ist, andernfalls {@code false}
+     *
+     * @author Maximilian Ressel
+     */
 
     private boolean existsLegalStopWithinRemainingMovesDfs(Field startingField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Map<String, Boolean> memo) {
@@ -429,6 +496,25 @@ public class MovementServiceImpl implements MovementService {
         return false;
     }
 
+    /**
+     * Prüft, ob ein bestimmtes Feld als nächstes Zielfeld betreten werden darf.
+     *
+     * @param nextField       das Feld, das als nächstes betreten werden soll
+     * @param lastField       das zuvor betretene Feld (zur Erkennung von
+     *                        Richtungswechseln),
+     *                        oder {@code null}, falls keiner existiert
+     * @param remainingMoves  die Anzahl der verbleibenden Moves
+     * 
+     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeplen besetzt
+     *                        sind
+     * 
+     * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
+     * 
+     * @return {@code true}, wenn das Zielfeld unter den gegebenen Bedingungen
+     *         betreten werden darf, andernfalls {@code false}
+     *
+     * @author Maximilian Ressel
+     */
     private boolean isLegalTarget(Field nextField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields) {
 
