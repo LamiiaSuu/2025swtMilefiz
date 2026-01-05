@@ -8,6 +8,7 @@
 
     <!-- Settings Button-->
     <button class="settings-button" @mouseenter="onHover" @click="goToSettings">
+      <!-- cog by Fabio Nucatolo from https://thenounproject.com/browse/icons/term/cog/" - Noun Project (CC BY 3.0) -->
       <img src="@/assets/buttons/settings_icon.png" alt="Settings"/>
     </button>
 
