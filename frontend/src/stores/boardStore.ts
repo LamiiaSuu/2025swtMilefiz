@@ -2,8 +2,8 @@ import { defineStore } from 'pinia'
 import type { IBoardDTD } from './IBoardDTD'
 import { ref } from 'vue'
 import { useMilefizStore } from './milefizstore'
-import type {Player} from '../types/lobbyupdate'
-import type {Lobby} from '../types/lobbyupdate'
+import type { Player } from '../types/lobbyupdate'
+import type { Lobby } from '../types/lobbyupdate'
 
 const gameBoardTiles = ref<IBoardDTD>()
 /**
@@ -51,13 +51,13 @@ export const useBoardStore = defineStore('board', {
             const players: Player[] = lobby.players
             for (const player of players) {
               for (const meeple of player.meeples) {
-                if(meeple.currentFieldId) {
+                if (meeple.currentFieldId) {
                   this.meeplePositions[meeple.id] = meeple.currentFieldId
                 }
                 this.lastFields[meeple.id] = null
               }
-                // Debug: Meeple Positionen loggen nach assignment
-                console.log('boardStore.getBoard: meeplePositions after init:', JSON.stringify(this.meeplePositions))
+              // Debug: Meeple Positionen loggen nach assignment
+              console.log('boardStore.getBoard: meeplePositions after init:', JSON.stringify(this.meeplePositions))
             }
           }
         }
@@ -110,6 +110,23 @@ export const useBoardStore = defineStore('board', {
       };
 
       console.log(`Barrier moved to field ${fieldId}`);
+    },
+    logOccupancySnapshot() {
+      if (!this.board) {
+        console.log('[BoardStore] No board loaded')
+        return
+      }
+
+      const barrierFields = this.board.fields.filter(f => f.barrier).map(f => f.id)
+
+      const meeplesByField: Record<string, string[]> = {}
+      for (const [meepleId, fieldId] of Object.entries(this.meeplePositions)) {
+        if (!meeplesByField[fieldId]) meeplesByField[fieldId] = []
+        meeplesByField[fieldId].push(meepleId)
+      }
+
+      console.log('[BoardStore] Barrier:', barrierFields)
+      console.log('[BoardStore] MeeplesByField:', meeplesByField)
     }
   },
   // Getter um alle Barriere-Meeple ans Frontend zu übergeben

@@ -33,14 +33,13 @@ const { board, ok } = storeToRefs(boardStore)
         :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
         @confirm="milefizStore.confirmMinimapSelection">
         <template #map>
-          <div style="padding:8px; background:#eef;">
-            board: {{ !!board }} | fields: {{ board?.fields?.length ?? 0 }}
-          </div>
-
-          <MinimapGraph v-if="board" :board="board" :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
+          <MiniMapGraph v-if="board" :board="board" :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
             :selected-field-id="milefizStore.minimap.selectedFieldId" @select="milefizStore.selectMinimapField" />
-          <div v-else>Board lädt…</div>
+          <div v-else style="display:grid; place-items:center; width:100%; height:100%;">
+            Board lädt…
+          </div>
         </template>
+
       </MiniMapPopUp>
     </transition>
     <!-- Win Popup -->
