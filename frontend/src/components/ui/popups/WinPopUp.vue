@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
-import WinCharacter from './WinCharacter.vue'
+import WinCharacter from '@/components/animations/WinCharacter.vue'
 import { TresCanvas } from '@tresjs/core'
 import { onMounted } from 'vue'
 import { useAudioStore } from '@/stores/audioStore'
