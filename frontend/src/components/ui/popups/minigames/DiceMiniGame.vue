@@ -2,6 +2,8 @@
 import { ref, watch, onMounted } from "vue"
 import { useMilefizStore } from "@/stores/milefizstore"
 import { tUI } from '@/i18n'
+import { TresCanvas } from '@tresjs/core'
+import D20 from "@/components/animations/D20.vue"
 
 const countdown = ref<number | null>(null)
 
@@ -102,12 +104,33 @@ watch(
     <div class="players">
       <div class="player">
         <div class="dice">{{ duel.state?.rollP1 ?? "-" }}</div>
+
+        <TresCanvas :alpha="true" :clear-color="0x000000" :clear-alpha="0"
+          style="width: 100%; height: 100%; background: transparent !important;">
+          <TresPerspectiveCamera :position="[0, 2, 7]" />
+          <TresAmbientLight :intensity="1" />
+          <TresDirectionalLight :position="[3, 5, 2]" :intensity="5" />
+
+          <WinCharacter :scale="1.4" :y-position="0" :bodyColor="store.getWinnerColor()?.body"
+            :eyeColor="store.getWinnerColor()?.eyes" :rotation-y="-0.35" />
+        </TresCanvas>
+
         <h2>{{ getPlayerNameByMeeple(duel.firstMeeple) }}</h2>
 
       </div>
 
       <div class="player">
         <div class="dice">{{ duel.state?.rollP2 ?? "-" }}</div>
+
+        <TresCanvas :alpha="true" :clear-color="0x000000" :clear-alpha="0"
+          style="width: 100%; height: 100%; background: transparent !important;">
+          <TresPerspectiveCamera :position="[0, 2, 7]" />
+          <TresAmbientLight :intensity="1" />
+          <TresDirectionalLight :position="[3, 5, 2]" :intensity="5" />
+
+          <WinCharacter :scale="1.4" :y-position="0" :bodyColor="store.getWinnerColor()?.body"
+            :eyeColor="store.getWinnerColor()?.eyes" :rotation-y="-0.35" />
+        </TresCanvas>
 
         <h2>{{ getPlayerNameByMeeple(duel.secondMeeple) }}</h2>
 
