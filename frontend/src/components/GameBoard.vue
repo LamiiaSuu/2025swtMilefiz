@@ -13,6 +13,9 @@ import type { Direction } from "@/types/movement"
 import { Vector3 } from 'three'
 import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler';
+import { TreesGeometry } from 'three/examples/jsm/Addons.js'
+
+import { Sizes } from '@/stores/ITreeDTD'
 
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
@@ -587,8 +590,10 @@ const connectionSegments = computed(() => {
       :position="[field.position.x, 0, field.position.y]" :type="field.type" />
 
     <!-- Pflanzen und Bäume -->
-    <Foliage v-for="tree in boardStore.board?.trees"
-      :position="[tree.treePosition.x, 0, tree.treePosition.y]" :type="tree.treeType" />
+
+        <Suspense>
+    <Foliage :position="boardStore.board?.trees.map((tree => [tree.treePosition.x, 0, tree.treePosition.y]))" :type="Sizes.Small" />
+        </Suspense>
   </TresCanvas>
 
   <!-- Fadenkreuz -->
