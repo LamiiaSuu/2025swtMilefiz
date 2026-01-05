@@ -50,4 +50,8 @@ export const UI_NL: Record<UIKey, string> = {
     CONTROLS: 'Sturen',
     LANGUAGE: 'Taal',
     TUTORIAL: 'Handleiding',
+    DUEL_WON: '🎉 Je hebt gewonnen! 🎉',
+    DUEL_LOST: '😵 Je hebt verloren… 😵',
+    MINIGAME_DICE_TITLE: 'Dobbelspel',
+
 }
