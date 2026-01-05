@@ -52,3 +52,7 @@ export type UIKey =
   | 'CONTROLS'
   | 'LANGUAGE'
   | 'TUTORIAL'
+  | 'DUEL_WON'
+  | 'DUEL_LOST'
+  | 'MINIGAME_DICE_TITLE'
+
