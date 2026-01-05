@@ -12,7 +12,7 @@
     <div class="players">
       <!-- Spieler 1 -->
       <div class="player">
-        <h3 :style="{ color: getPlayerColorByMeeple(duel.firstMeeple) }">{{ getPlayerNameByMeeple(duel.firstMeeple) }}</h3>
+        
 
         <div class="dice-wrapper">
           <img
@@ -30,11 +30,12 @@
             {{ duel.state?.rollP1 ?? "" }}
           </div>
         </div>
+        <h3 :style="{ color: getPlayerColorByMeeple(duel.firstMeeple) }">{{ getPlayerNameByMeeple(duel.firstMeeple) }}</h3>
       </div>
 
       <!-- Spieler 2 -->
       <div class="player">
-        <h3 :style="{ color: getPlayerColorByMeeple(duel.secondMeeple) }">{{ getPlayerNameByMeeple(duel.secondMeeple) }}</h3>
+        
 
         <div class="dice-wrapper">
           <img
@@ -52,6 +53,7 @@
             {{ duel.state?.rollP2 ?? "" }}
           </div>
         </div>
+        <h3 :style="{ color: getPlayerColorByMeeple(duel.secondMeeple) }">{{ getPlayerNameByMeeple(duel.secondMeeple) }}</h3>
       </div>
     </div>
 
