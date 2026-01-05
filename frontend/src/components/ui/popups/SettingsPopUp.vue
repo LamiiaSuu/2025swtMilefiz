@@ -5,13 +5,15 @@ import AudioSettings from '../AudioSettings.vue'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
 import LanguageSelection from '../LanguageSelection.vue'
+import PopUpCloseButton from './PopUpCloseButton.vue'
+import Header from '../pages/Header.vue'
 
 const milefizStore = useMilefizStore()
 const router = useRouter()
 const audio = useAudioStore()
 
 function onHover() {
-  audio.playSfx('hover')
+    audio.playSfx('hover')
 }
 
 const onBackClick = () => {
@@ -23,13 +25,31 @@ const onBackClick = () => {
 
 <template>
     <div class="overlay">
-        <div class="popup">
-            
-            <!-- LANGUAGE SETTINGS -->
-            <LanguageSelection></LanguageSelection>
 
-            <!-- AUDIO SETTINGS -->
-            <AudioSettings></AudioSettings>
+        <!-- Close Button -->
+        <PopUpCloseButton></PopUpCloseButton>
+
+        <div class="popup">
+
+            <div class="audio">
+                <h1 class="audio-title">Audio</h1>
+
+                <div class="audio-wrapper">
+                    <!-- AUDIO SETTINGS -->
+                    <AudioSettings></AudioSettings>
+                </div>
+            </div>
+
+            <div class="language">
+
+                <h1>{{ tUI('LANGUAGE') }}</h1>
+
+
+                <div class="language-wrapper">
+                    <!-- LANGUAGE SETTINGS -->
+                    <LanguageSelection></LanguageSelection>
+                </div>
+            </div>
 
             <div class="button-container">
                 <button class="back-button" @mouseenter="onHover" @click="onBackClick()">{{ tUI('BACK') }}</button>
@@ -48,35 +68,110 @@ const onBackClick = () => {
     align-items: center;
     z-index: 99991;
     pointer-events: auto;
+    flex-direction: column;
 
     background-color: rgba(0, 0, 0, 0.6);
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .popup {
     display: flex;
     flex-direction: column;
-    background-color: var(--background-color-forms);
-    border-radius: 15px;
-    width: 40vw;
-    height: 70vh;
+    height: 60vh;
     text-align: center;
     position: relative;
     padding-top: 6vh;
-    
+
     justify-content: center;
-    
+
     align-items: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    border: 7px solid #57AA51;
     animation: fadeIn 0.3s ease;
+
+    margin-top: 5vh;
+    width: 30vw;
+    border-radius: 18px;
+
+    background:
+        linear-gradient(rgba(40, 60, 35, 0.92),
+            rgba(25, 40, 25, 0.92));
+
+    box-shadow:
+        inset 0 0 0 2px rgba(255, 255, 255, 0.06),
+        0 12px 30px rgba(0, 0, 0, 0.45);
+
+    border: 3px solid rgba(120, 160, 110, 0.25);
+
+    z-index: -1;
 }
+
+
+.audio {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    padding-bottom: 1vh;
+    
+    margin-top: -1vh;
+}
+
+.audio h1 {
+    align-self: flex-start;
+    padding-left: 1.5vw;
+    padding-bottom: 1vh;
+    padding-top: -3vh;
+}
+
+h1 {
+    color: white;
+    font-size: 4vh;
+    -webkit-text-stroke: 6px black;
+    text-shadow:
+        3px 3px 6px rgba(0, 0, 0, 0.8),
+        0 0 10px rgba(0, 0, 0, 0.5);
+    paint-order: stroke fill;
+}
+
+.audio-wrapper {
+    display: inline-block;
+}
+
+.audio :deep(.settings-panel) {
+    margin: -2vh 0 1vh 0;
+    background: none;
+    box-shadow: none;
+    border: none;
+}
+
+.language :deep(.language-switch) {
+    top: 50%;
+    transform: translateY(-50%);
+    right: auto;
+    left: auto;
+    margin-left: 3vh;
+}
+
+.language {
+    position: relative;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: 1.5vw;
+    padding-right: 5vw;
+    margin-bottom: -1vh;
+    margin-top: -1vh;
+}
+
 
 .button-container {
     display: flex;
     flex-direction: column;
-    
-    padding: 4vh 0;
-    gap: 3vh;
+
+    padding: 3vh 0 5vh 0;
 }
 
 .button-container :deep(button) {

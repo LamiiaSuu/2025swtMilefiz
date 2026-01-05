@@ -239,7 +239,7 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape') {
+  if (e.key === 'Escape' || e.key === 'm') {
     e.preventDefault()
 
     // Schließt die PopUp-Einstellungen, wenn sie offen sind
@@ -435,11 +435,6 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     direction = moveDir.x > 0 ? "EAST" : "WEST"
   } else {
     direction = moveDir.z > 0 ? "SOUTH" : "NORTH"
-  }
-
-  //initial setzen für responiveness, wird beim empfangen des Move Events aus dem Backend auf den wahren Wert gesetzt
-  if (milefizStore.gamedata.currentDiceRoll && milefizStore.gamedata.currentDiceRoll > 0) {
-    milefizStore.gamedata.moved = true
   }
 
   milefizStore.sendMove(meepleId, direction)

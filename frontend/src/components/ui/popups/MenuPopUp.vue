@@ -2,7 +2,8 @@
 import { useRouter } from 'vue-router'
 import BackButton from '../pages/BackButton.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
-
+import Header from '../pages/Header.vue'
+import PopUpCloseButton from './PopUpCloseButton.vue'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
 
@@ -19,6 +20,14 @@ const onContinueClick = () => {
     milefizStore.closePopUpMenu()
 }
 
+const onTutorialClick = () => {
+    audio.playSfx('click')
+}
+
+const onControlsClick = () => {
+    audio.playSfx('click')
+}
+
 const onSettingsClick = () => {
     audio.playSfx('click')
     milefizStore.openPopUpSettings()
@@ -32,21 +41,32 @@ const onBackClick = () => {
 
 <template>
     <div class="overlay">
+
+        <!-- Close Button -->
+        <PopUpCloseButton></PopUpCloseButton>
+
         <div class="popup">
 
             <!-- MENU -->
             <div v-if="!milefizStore.popUpSettingsOpen">
 
                 <div class="button-container">
-                    <button class="popup-menu-button" @mouseenter="onHover"
-                        @click="onContinueClick()">{{
-                            tUI('CONTINUE') }}</button>
+                    <button class="menu-button" @mouseenter="onHover" @click="onContinueClick()">{{
+                        tUI('BACK') }}</button>
 
-                    <button class="popup-menu-button" @mouseenter="onHover" @click="onSettingsClick()">{{
-                        tUI('SETTINGS') }}</button>
+                    <button class="menu-button" @mouseenter="onHover" @click="onTutorialClick()">{{ tUI('TUTORIAL')
+                    }}</button>
 
-                    <BackButton class="back-button" @mouseenter="onHover" @click="onBackClick()" :to="{ name: 'Homepage' }">{{
-                        tUI('LEAVE_GAME') }}</BackButton>
+                    <button class="menu-button" @mouseenter="onHover" @click="onControlsClick()">{{ tUI('CONTROLS')
+                    }}</button>
+
+                    <button class="menu-button" @mouseenter="onHover" @click="onSettingsClick()">{{ tUI('SETTINGS')
+                    }}</button>
+
+                    <BackButton class="back-button" @mouseenter="onHover" @click="onBackClick()"
+                        :to="{ name: 'Homepage' }" :confirm="true"
+                        :confirmText="tUI('BACK_TO_MAIN_MENU_CONFIRMATION_INGAME')">{{
+                            tUI('LEAVE_GAME') }}</BackButton>
                 </div>
             </div>
 
@@ -63,26 +83,29 @@ const onBackClick = () => {
     align-items: center;
     z-index: 99991;
     pointer-events: auto;
+    flex-direction: column;
 
     background-color: rgba(0, 0, 0, 0.6);
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
 }
 
 .popup {
     display: flex;
     flex-direction: column;
-    background-color: var(--background-color-forms);
 
     border-radius: 15px;
     width: 20vw;
     min-height: 45vh;
-    padding: 2vh;
 
     justify-content: center;
     text-align: center;
-
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    border: 7px solid #57AA51;
     animation: fadeIn 0.3s ease;
+
+    margin-top: 25vh;
+    margin-bottom: 5vh;
 }
 
 .settings-content {
@@ -94,30 +117,33 @@ const onBackClick = () => {
 .button-container {
     display: flex;
     flex-direction: column;
-    gap: 3vh;
+    gap: 2vh;
     align-items: center;
+    margin-top: -15vh;
 }
 
-.button-container :deep(button) {
-    padding: 2vh 0;
-    width: 15vw;
-    color: white;
-    font-size: 3vh;
-    cursor: pointer;
-
-    border: 3px solid black;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
-    font-family: "AcmeFont", sans-serif;
-
-    -webkit-text-stroke: 0;
-    paint-order: fill;
-    text-shadow: none;
-    font-weight: 400;
-}
 
 .button-container :deep(.back-button) {
+    margin-top: 2vh;
+    padding: 10px 45px;
+
+    color: white;
+    font-size: 3.5vh;
+
+    border: 3px solid black;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
     background-image: var(--button-gradient-red);
+
+    outline: none;
+
+    padding-bottom: 1vh;
+
+    -webkit-text-stroke: 6px black;
+    text-shadow:
+        3px 3px 6px rgba(0, 0, 0, 0.8),
+        0 0 10px rgba(0, 0, 0, 0.5);
+    paint-order: stroke fill;
 }
 
 .popup-menu-button {
