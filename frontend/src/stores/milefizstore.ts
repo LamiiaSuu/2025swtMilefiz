@@ -262,6 +262,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = false;
           }
 
         }
