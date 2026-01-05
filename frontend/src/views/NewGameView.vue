@@ -439,6 +439,7 @@ select {
     color: white;
     font-size: 1.3rem;
     transition: background-color 0.2s;
+    font-family: "AcmeFont", sans-serif;
 }
 
 .start-game-button:disabled {
