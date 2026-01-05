@@ -26,9 +26,6 @@ const onBackClick = () => {
 <template>
     <div class="overlay">
 
-        <!-- MI'lefiz Header -->
-        <Header>{{ tUI('SETTINGS') }}</Header>
-
         <!-- Close Button -->
         <PopUpCloseButton></PopUpCloseButton>
 
@@ -92,7 +89,7 @@ const onBackClick = () => {
     align-items: center;
     animation: fadeIn 0.3s ease;
 
-    margin-top: -8vw;
+    margin-top: 5vh;
     width: 30vw;
     border-radius: 18px;
 
