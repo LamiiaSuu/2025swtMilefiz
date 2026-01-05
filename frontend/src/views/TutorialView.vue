@@ -1,23 +1,25 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import Header from '@/components/ui/pages/Header.vue'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
 import LanguageSelection from '@/components/ui/LanguageSelection.vue'
+import TutorialPopUp from '@/components/ui/popups/TutorialPopUp.vue'
 
 const router = useRouter()
 const audio = useAudioStore()
-
 
 </script>
 
 <template>
   <div class="home">
-    <!--MI'lefiz Header -->
-    <Header overlay></Header>
 
     <!-- Language Selection-->
     <LanguageSelection></LanguageSelection>
+
+    
+    <!-- Tutorial PopUp -->
+    <TutorialPopUp></TutorialPopUp>
+
 
   </div>
 </template>
@@ -49,6 +51,4 @@ const audio = useAudioStore()
   filter: blur(4px);
   z-index: -1;
 }
-
-
 </style>

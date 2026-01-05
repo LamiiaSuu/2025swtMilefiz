@@ -45,7 +45,6 @@ const onBackClick = () => {
         <!-- MI'lefiz Header -->
         <Header>{{ tUI('POPUP_MENU') }}</Header>
 
-
         <!-- Close Button -->
         <PopUpCloseButton></PopUpCloseButton>
 
