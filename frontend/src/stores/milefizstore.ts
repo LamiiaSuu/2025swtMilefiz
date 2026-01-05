@@ -57,6 +57,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const winnerName = ref<string | null>(null)
   const winnerColor = ref<string | null>(null)
 
+  /**
+   * PopUp-Menu
+   * @prop {boolean} popUpMenuOpen - True, wenn das PopUp-Menu offen ist
+   * @prop {boolean} popUpSettingsOpen - True, wenn das PopUp-Menu fuer Einstellungen offen ist
+  */
+  const popUpMenuOpen = ref(false)
+  const popUpSettingsOpen = ref(false)
+
   // Beispiele für Daten
   const gamedata = reactive<{
     playerId: string
@@ -75,6 +83,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
     moved: false
   })
+  const activeDuels = reactive<Record<string, any>>({})
+
 
   const isJoined = computed(() => {
     return Boolean(gamedata.lobby)
@@ -155,28 +165,31 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           cooldown.active = false
           cooldown.remainingSeconds = 0
         } else if (event.type === 'MOVE_ERROR') {
-          if(event.playerId === gamedata.playerId){
+          if (event.playerId === gamedata.playerId) {
             console.warn('Move rejected:', event.msg)
-            if( event.msg === "MOVE_ERROR_INTO_START"){
+            if (event.msg === "MOVE_ERROR_INTO_START") {
               showWarning("MOVE_ERROR_INTO_START")
             }
-            else if( event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION"){
+            else if (event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION") {
               showWarning("MOVE_ERROR_NO_FIELD_IN_DIRECTION")
             }
-            else if( event.msg === "MOVE_ERROR_NO_MOVES_LEFT"){
+            else if (event.msg === "MOVE_ERROR_NO_MOVES_LEFT") {
               showWarning("MOVE_ERROR_NO_MOVES_LEFT")
             }
-            else if( event.msg === "MOVE_ERROR_CANT_CHANGE_DIRECTION"){
+            else if (event.msg === "MOVE_ERROR_CANT_CHANGE_DIRECTION") {
               showWarning("MOVE_ERROR_CANT_CHANGE_DIRECTION")
             }
-            else if( event.msg === "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL"){
+            else if (event.msg === "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL") {
               showWarning("MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL")
             }
-            else if( event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE"){
+            else if (event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE") {
               showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
             }
+            else if( event.msg === "MEEPLE_IN_DUEL"){
+              showWarning("MEEPLE_IN_DUEL")
+            }
             return
-        }
+          }
         } else if (event.type === 'CHEATED') {
           if (event.playerId === gamedata.playerId) {
             showWarning("CHEATED")
@@ -199,7 +212,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         } else if (event.type === 'SAVE_ENERGY') {
           energy.maxEnergy = event.maxEnergy
           if (event.playerId === gamedata.playerId) {
-            if(gamedata.currentDiceRoll == 0) {
+            if (gamedata.currentDiceRoll == 0) {
               audioStore.playSfx('eventError')
               return
             }
@@ -249,6 +262,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = false;
           }
 
         }
@@ -267,11 +281,42 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           }
         }
         if (event.type === "DUEL") {
+
           boardStore.updateMeeplePosition(event.firstMeepleId, event.targetField)
+
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = false;
           }
-          //TODO duel zwischen zwei meeples einleiten
+          if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId ){
+          activeDuels[event.duelId] = {
+            duelId: event.duelId,
+
+            firstMeeple: event.firstMeepleId,
+            secondMeeple: event.secondMeepleId,
+            targetField: event.targetField,
+
+            miniGameId: event.miniGameId,
+            miniGameName: event.miniGameName,
+            miniGameType: event.miniGameType,
+
+            timeOut: event.timeOut,
+
+            state: {}
+          }
+          document.exitPointerLock()
+        }
+          
+        }
+        if (event.type === "DICE_GAME_UPDATE") {
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          duel.state.rollP1 = event.rollP1
+          duel.state.rollP2 = event.rollP2
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
         }
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
@@ -282,10 +327,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
           console.warn("Barriermove rejected:", event.msg)
-          if( event.msg === "MOVE_BARRIER_REJECTED_START_OR_END"){
+          if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
             showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
           }
-          else if( event.msg === "MOVE_BARRIER_OCCUPIED"){
+          else if (event.msg === "MOVE_BARRIER_OCCUPIED") {
             showWarning("MOVE_BARRIER_OCCUPIED")
           }
         }
@@ -421,6 +466,24 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (lobbyUpdate.ownPlayerId) gamedata.playerId = lobbyUpdate.ownPlayerId
     if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
     gamedata.lobby = lobbyUpdate.lobby
+
+     const boardStore = useBoardStore()
+
+    if (lobbyUpdate.lobby?.board) {
+      boardStore.board = lobbyUpdate.lobby.board
+      boardStore.ok = true
+
+      // Meeple-Positionen neu setzen
+      boardStore.meeplePositions = {}
+
+      for (const player of lobbyUpdate.lobby.players ?? []) {
+        for (const meeple of player.meeples ?? []) {
+          if (meeple.currentFieldId) {
+            boardStore.meeplePositions[meeple.id] = meeple.currentFieldId
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -701,6 +764,31 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
 
   /**
+   * Pop Up Menu Funktionen
+  */
+
+  // Oeffnet PopUp Menu
+  function openPopUpMenu() {
+    popUpMenuOpen.value = true
+  }
+
+  // Schließt PopUp Menu
+  function closePopUpMenu() {
+    popUpMenuOpen.value = false
+    popUpSettingsOpen.value = false
+  }
+
+  // Oeffnet PopUp Einstellungen
+  function openPopUpSettings() {
+    popUpSettingsOpen.value = true
+  }
+
+  // Schließt PopUp Einstellungen
+  function closePopUpSettings() {
+    popUpSettingsOpen.value = false
+  }
+
+  /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
   function disconnectAndReset() {
@@ -727,6 +815,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     gameFinished.value = false
     winnerName.value = ''
     winnerColor.value = ''
+
+    popUpMenuOpen.value = false
+    popUpSettingsOpen.value = false
+
+    Object.keys(activeDuels).forEach(key => {
+      delete activeDuels[key]
+    })
 
     const boardStore = useBoardStore()
 
@@ -758,5 +853,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName,
     gameFinished,
     getWinnerColor,
+    popUpMenuOpen,
+    popUpSettingsOpen,
+    openPopUpMenu,
+    closePopUpMenu,
+    openPopUpSettings,
+    closePopUpSettings,
+    activeDuels,
   }
 })

@@ -15,5 +15,11 @@ export const ERRORS_EN: Record<ErrorCode, string> = {
     MOVE_BARRIER_OCCUPIED: 'Barrier cannot be placed on an occupied space',
     REJECTED_BY_BARRIER: 'Ouch! That looked painful - remaining moves lost!',
     SAVE_ENERGY_ERROR: 'Maximum energy reached or meeple already moved!',
-    CONSUME_ENERGY_ERROR: 'Not enough energy for a jump!'
+    CONSUME_ENERGY_ERROR: 'Not enough energy for a jump!',
+    NO_LOBBY_FOUND: 'Lobby not found!',
+    NO_FILE_CHOSEN: 'No file selected!',
+    BOARD_INVALID: 'Map validation failed: A map needs 4 start fields connected to at least one goal field.',
+    BOARD_SUCCESSFULLY_IMPORTED: 'Map imported successfully!',
+    BOARD_COULD_NOT_BE_IMPORTED: 'Map could not be imported: ',
+    MEEPLE_IN_DUEL: 'The opposing meeple is already in a duel. Please wait until the duel is finished!',
 }
