@@ -125,6 +125,7 @@ function onHover() {
   font-size: 1.3rem;
   cursor: pointer;
   transition: background-color 0.2s;
+    font-family: "AcmeFont", sans-serif;
 }
 
 .start-game-button:hover {
