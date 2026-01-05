@@ -1,8 +1,13 @@
-package de.hs_rm.de.milefiz.game.model;
+package de.hs_rm.de.milefiz.game.model.dto;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import de.hs_rm.de.milefiz.game.model.FieldType;
+import de.hs_rm.de.milefiz.game.model.Position;
+import de.hs_rm.de.milefiz.game.model.PositionFloat;
+import de.hs_rm.de.milefiz.game.model.TreeType;
 
 /**
  * DTO des Spielbretts zur Übertragung an das Frontend
@@ -11,6 +16,8 @@ public class BoardDTO {
 
     private UUID id;
     private String name;
+    private List<FieldDTO> fields = new ArrayList<>();
+    private List<TreeDTO> trees = new ArrayList<>();
 
     public BoardDTO() {
     }
@@ -19,8 +26,6 @@ public class BoardDTO {
         this.id = id;
         this.name = name;
     }
-
-    private List<FieldDTO> fields = new ArrayList<>();
 
     public List<FieldDTO> getFields() {
         return fields;
@@ -42,7 +47,8 @@ public class BoardDTO {
         this.name = name;
     }
 
-    public void addField(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
+    public void addField(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south,
+            UUID west) {
         this.fields.add(new FieldDTO(id, type, position, barrier, north, east, south, west));
     }
 
@@ -55,6 +61,45 @@ public class BoardDTO {
         sb.append(", fields=").append(fields);
         sb.append('}');
         return sb.toString();
+    }
+
+    public List<TreeDTO> getTrees() {
+        return trees;
+    }
+
+    public void addTree(PositionFloat treePosition, TreeType treeType) {
+        trees.add(new TreeDTO(treePosition, treeType));
+    }
+
+    public void deleteAllTrees() {
+        trees.clear();
+    }
+
+    public static class TreeDTO {
+        private PositionFloat treePosition;
+        private TreeType treeType;
+
+        public TreeDTO(PositionFloat treePosition, TreeType treeType) {
+            this.treePosition = treePosition;
+            this.treeType = treeType;
+        }
+
+        public PositionFloat getTreePosition() {
+            return treePosition;
+        }
+
+        public void setTreePosition(PositionFloat positionF) {
+            this.treePosition = positionF;
+        }
+
+        public TreeType getTreeType() {
+            return treeType;
+        }
+
+        public void setTreeType(TreeType treeType) {
+            this.treeType = treeType;
+        }
+
     }
 
     public static class FieldDTO {
@@ -71,7 +116,8 @@ public class BoardDTO {
         public FieldDTO() {
         }
 
-        public FieldDTO(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south, UUID west) {
+        public FieldDTO(UUID id, FieldType type, Position position, boolean barrier, UUID north, UUID east, UUID south,
+                UUID west) {
             this.id = id;
             this.type = type;
             this.position = position;

@@ -32,8 +32,8 @@ public class DiceGame extends MiniGame {
     private Integer rollP1;
     private Integer rollP2;
 
-    public DiceGame() {
-        super(1, "Würfel-Spiel", 6);
+    public DiceGame(int timeOut) {
+        super(1, "Würfel-Spiel", timeOut);
     }
 
     /**

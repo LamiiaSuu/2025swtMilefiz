@@ -436,11 +436,6 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     direction = moveDir.z > 0 ? "SOUTH" : "NORTH"
   }
 
-  //initial setzen für responiveness, wird beim empfangen des Move Events aus dem Backend auf den wahren Wert gesetzt
-  if (milefizStore.gamedata.currentDiceRoll && milefizStore.gamedata.currentDiceRoll > 0) {
-    milefizStore.gamedata.moved = true
-  }
-
   milefizStore.sendMove(meepleId, direction)
 }
 
