@@ -55,7 +55,7 @@ const onBackClick = () => {
 
                 <div class="button-container">
                     <button class="menu-button" @mouseenter="onHover" @click="onContinueClick()">{{
-                        tUI('BACK') }}</button>
+                        tUI('CONTINUE') }}</button>
 
                     <button class="menu-button" @mouseenter="onHover" @click="onTutorialClick()">{{ tUI('TUTORIAL')
                     }}</button>
