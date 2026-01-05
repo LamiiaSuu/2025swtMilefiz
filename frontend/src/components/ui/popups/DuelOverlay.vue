@@ -54,6 +54,7 @@ function resolveComponent(duel: any) {
 }
 
 .duel-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background-color: var(--background-color-forms);
@@ -62,5 +63,7 @@ function resolveComponent(duel: any) {
   height: 65vh;
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
 }
+
 </style>
