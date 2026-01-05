@@ -60,9 +60,6 @@ const onBackClick = () => {
                     <button class="menu-button" @mouseenter="onHover" @click="onTutorialClick()">{{ tUI('TUTORIAL')
                     }}</button>
 
-                    <button class="menu-button" @mouseenter="onHover" @click="onControlsClick()">{{ tUI('CONTROLS')
-                    }}</button>
-
                     <button class="menu-button" @mouseenter="onHover" @click="onSettingsClick()">{{ tUI('SETTINGS')
                     }}</button>
 
