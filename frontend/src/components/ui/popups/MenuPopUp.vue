@@ -45,6 +45,7 @@ const onBackClick = () => {
         <!-- MI'lefiz Header -->
         <Header>{{ tUI('POPUP_MENU') }}</Header>
 
+
         <!-- Close Button -->
         <PopUpCloseButton></PopUpCloseButton>
 
@@ -89,7 +90,6 @@ const onBackClick = () => {
 
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-
 }
 
 .popup {
@@ -98,14 +98,16 @@ const onBackClick = () => {
 
     border-radius: 15px;
     width: 20vw;
-    min-height: 45vh;
+    height: 50vh;
 
     justify-content: center;
     text-align: center;
     animation: fadeIn 0.3s ease;
 
     margin-top: 5vh;
-    margin-bottom: 5vh;
+    margin-bottom: 7vh;
+
+    padding-top: 5vh;
 }
 
 .settings-content {
@@ -119,16 +121,14 @@ const onBackClick = () => {
     flex-direction: column;
     gap: 2vh;
     align-items: center;
-    margin-top: -15vh;
+    margin-top: -22vh;
 }
 
-
 .button-container :deep(.back-button) {
-    margin-top: 2vh;
     padding: 10px 45px;
 
     color: white;
-    font-size: 3.5vh;
+    font-size: 3vh;
 
     border: 3px solid black;
     border-radius: 10px;
@@ -138,12 +138,13 @@ const onBackClick = () => {
     outline: none;
 
     padding-bottom: 1vh;
+    margin-top: 2vh;
+    
+    font-family: "AcmeFont", sans-serif;
+    font-weight: normal;
 
-    -webkit-text-stroke: 6px black;
-    text-shadow:
-        3px 3px 6px rgba(0, 0, 0, 0.8),
-        0 0 10px rgba(0, 0, 0, 0.5);
-    paint-order: stroke fill;
+    -webkit-text-stroke:none;
+    text-shadow: none;
 }
 
 .popup-menu-button {
