@@ -65,6 +65,21 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const popUpMenuOpen = ref(false)
   const popUpSettingsOpen = ref(false)
 
+
+  /**
+   * TODO doc
+   */
+  const minimap = reactive<{
+    isMiniMapOpen: boolean,
+    selectedFieldId: string,
+    occupancyByFieldId: Record<string, 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE'>,
+  }>({
+    isMiniMapOpen: false,
+    selectedFieldId: '',
+    occupancyByFieldId: {},
+  })
+
+
   // Beispiele für Daten
   const gamedata = reactive<{
     playerId: string
@@ -257,13 +272,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "TRIGGER_BARRIER_MOVE") {
           //TODO verschieben der barriere implementieren
-          //aktuell einfach random platzhalter uuid
-          moveBarrier(event.barrierId, crypto.randomUUID())
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
           }
 
+          //TODO minimap öffnen
+          openMinimap(event.barrierId)
+          //moveBarrier(event.barrierId, crypto.randomUUID())
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
@@ -288,24 +304,24 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.moved = false;
           }
           if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId ){
-          activeDuels[event.duelId] = {
-            duelId: event.duelId,
+            activeDuels[event.duelId] = {
+              duelId: event.duelId,
 
-            firstMeeple: event.firstMeepleId,
-            secondMeeple: event.secondMeepleId,
-            targetField: event.targetField,
+              firstMeeple: event.firstMeepleId,
+              secondMeeple: event.secondMeepleId,
+              targetField: event.targetField,
 
-            miniGameId: event.miniGameId,
-            miniGameName: event.miniGameName,
-            miniGameType: event.miniGameType,
+              miniGameId: event.miniGameId,
+              miniGameName: event.miniGameName,
+              miniGameType: event.miniGameType,
 
-            timeOut: event.timeOut,
+              timeOut: event.timeOut,
 
-            state: {}
+              state: {}
+            }
+            document.exitPointerLock()
           }
-          document.exitPointerLock()
-        }
-          
+
         }
         if (event.type === "DICE_GAME_UPDATE") {
 
@@ -587,6 +603,22 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  //TODO
+  function openMinimap(barrierId: string) {
+    minimap.isMiniMapOpen = true;
+
+  }
+
+  //TODO
+  function confirmMinimapSelection() {
+    minimap.isMiniMapOpen = false
+  }
+
+  //TODO
+  function selectMinimapField() {
+
+  }
+
   function sendRollDice() {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot roll dice: STOMP client not connected.')
@@ -841,5 +873,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     openPopUpSettings,
     closePopUpSettings,
     activeDuels,
+    minimap,
+    confirmMinimapSelection,
+    selectMinimapField,
   }
 })

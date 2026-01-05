@@ -2,6 +2,7 @@
  und enthält momentan nur den "Würfeln" Button -->
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import DiceButton from './DiceButton.vue'
 import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
@@ -12,15 +13,36 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
 import MenuPopUp from './popups/MenuPopUp.vue';
 import SettingsPopUp from './popups/SettingsPopUp.vue';
+import MiniMapPopUp from './popups/MiniMapPopUp.vue';
+import MiniMapGraph from './popups/MiniMapGraph.vue';
+import ErrorMessage from './ErrorMessage.vue';
+import { useBoardStore } from '@/stores/boardStore';
 
 const milefizStore = useMilefizStore()
-
-import ErrorMessage from './ErrorMessage.vue';
+const boardStore = useBoardStore()
+const { board, ok } = storeToRefs(boardStore)
 </script>
 
 
 <template>
   <div class="hud-container">
+    <!-- Minimap Popup-->
+    <transition name="fade">
+      <MiniMapPopUp :is-open="milefizStore.minimap.isMiniMapOpen"
+        :selected-field-id="milefizStore.minimap.selectedFieldId"
+        :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
+        @confirm="milefizStore.confirmMinimapSelection">
+        <template #map>
+          <div style="padding:8px; background:#eef;">
+            board: {{ !!board }} | fields: {{ board?.fields?.length ?? 0 }}
+          </div>
+
+          <MinimapGraph v-if="board" :board="board" :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
+            :selected-field-id="milefizStore.minimap.selectedFieldId" @select="milefizStore.selectMinimapField" />
+          <div v-else>Board lädt…</div>
+        </template>
+      </MiniMapPopUp>
+    </transition>
     <!-- Win Popup -->
     <transition name="fade">
       <WinPopUp v-if="milefizStore.gameFinished" />
