@@ -59,10 +59,10 @@ const onBackClick = () => {
                         tUI('CONTINUE') }}</button>
 
                     <button class="menu-button" @mouseenter="onHover" @click="onTutorialClick()">{{ tUI('TUTORIAL')
-                    }}</button>
+                        }}</button>
 
                     <button class="menu-button" @mouseenter="onHover" @click="onSettingsClick()">{{ tUI('SETTINGS')
-                    }}</button>
+                        }}</button>
 
                     <BackButton class="back-button" @mouseenter="onHover" @click="onBackClick()"
                         :to="{ name: 'Homepage' }" :confirm="true"
@@ -139,12 +139,13 @@ const onBackClick = () => {
 
     padding-bottom: 1vh;
     margin-top: 2vh;
-    
+
     font-family: "AcmeFont", sans-serif;
     font-weight: normal;
 
-    -webkit-text-stroke:none;
+    -webkit-text-stroke: none;
     text-shadow: none;
+    width: 15vw;
 }
 
 .popup-menu-button {
