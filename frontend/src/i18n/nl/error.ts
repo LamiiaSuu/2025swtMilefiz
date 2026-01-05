@@ -16,5 +16,10 @@ export const ERRORS_NL: Record<ErrorCode, string> = {
     REJECTED_BY_BARRIER: 'Oei! Dat zag pijnlijk uit – resterende zetten verloren!',
     SAVE_ENERGY_ERROR: 'Maximale energie bereikt of meeple al verplaatst!',
     CONSUME_ENERGY_ERROR: 'Niet genoeg energie voor een sprong!',
+    NO_LOBBY_FOUND: 'Lobby niet gevonden!',
+    NO_FILE_CHOSEN: 'Geen bestand gekozen!',
+    BOARD_INVALID: 'Mapvalidatie mislukt: Een map moet 4 startvelden hebben die met minimaal één doelveld verbonden zijn.',
+    BOARD_SUCCESSFULLY_IMPORTED: 'Map succesvol geïmporteerd!',
+    BOARD_COULD_NOT_BE_IMPORTED: 'Map kon niet worden geïmporteerd: ',
     MEEPLE_IN_DUEL: 'De tegenstander zit al in een duel. Wacht tot het duel is afgelopen!',
 }

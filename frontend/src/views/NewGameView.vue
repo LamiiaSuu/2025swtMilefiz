@@ -8,13 +8,19 @@ import Header from '@/components/ui/pages/Header.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { storeToRefs } from 'pinia'
 import { useAudioStore } from '@/stores/audioStore'
-import { tUI } from '@/i18n'
+import { tUI, tError } from '@/i18n'
 import LanguageSelection from '@/components/ui/LanguageSelection.vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import ErrorMessage from '@/components/ui/ErrorMessage.vue';
 
 const { startGameCommand } = useMilefizStore()
 const milefizStore = useMilefizStore()
 const { isJoined, joinLobby, createJoinLobby, gamedata, sendLobbyMessage, isOwnLeader: storeIsOwnLeader, disconnectAndReset } = milefizStore
 const audio = useAudioStore()
+const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
+
+const importedBoardActive = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 onMounted(() => {
     if (!isJoined) {
@@ -66,6 +72,14 @@ const lobbyName = computed({
 const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
 
+const canStartGame = computed(() => {
+  if (!isOwnLeader.value) return false
+
+  if (mapMode.value === 'standard') return true
+
+  return importedBoardActive.value
+})
+
 // Importierte Map Datei
 const selectedFile = ref<File | null>(null)
 
@@ -81,6 +95,58 @@ const handleFileChange = (event: Event) => {
     }
 }
 
+function resetImport() {
+  selectedFile.value = null
+  importedBoardActive.value = false
+
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ""
+  }
+}
+
+async function setDefaultBoard(lobbyId: string) {
+  await fetch(`/api/lobby/${lobbyId}/board/setDefault`, {
+    method: "POST"
+  })
+}
+
+async function importAndSetBoard() {
+    if (!selectedFile.value) {
+        showError(tError('NO_FILE_CHOSEN'));
+        return;
+    }
+
+    try {
+        const text = await selectedFile.value.text();
+        const board = JSON.parse(text);
+
+        const lobbyId = lobby.value?.id;
+        if (!lobbyId) {
+            showError(tError('NO_LOBBY_FOUND'));
+            return;
+        }
+
+        // --- Backend: validieren & aktivieren ---
+        const res = await fetch(`/api/lobby/${lobbyId}/board/set`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(board),
+        });
+
+        if (!res.ok) {
+            showCriticalError('BOARD_INVALID');
+            return;
+        }
+
+        showSuccess('BOARD_SUCCESSFULLY_IMPORTED');
+    } catch (err) {
+        console.error(err);
+        showError(tError('BOARD_COULD_NOT_BE_IMPORTED') + err);
+    }
+    importedBoardActive.value = true;
+}
+
+
 </script>
 
 <template>
@@ -89,6 +155,9 @@ const handleFileChange = (event: Event) => {
         <!-- MI'lefiz Header -->
         <Header>{{ tUI('NEW_GAME') }}</Header>
         <LanguageSelection></LanguageSelection>
+        <div class="error-message-container">
+            <ErrorMessage />
+        </div>
         <div class="new-game-form">
             <form>
                 <!-- Linke Spalte -->
@@ -110,7 +179,7 @@ const handleFileChange = (event: Event) => {
                             <label>{{ tUI('MAP') }}</label>
                             <div class="map-buttons">
                                 <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'standard' }"
-                                    @click="mapMode = 'standard'">
+                                    @click="mapMode = 'standard'; setDefaultBoard(lobby?.id!); resetImport()">
                                     {{ tUI('STANDARD_MAP') }}
                                 </button>
                                 <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'import' }"
@@ -123,9 +192,31 @@ const handleFileChange = (event: Event) => {
                         <!-- Datei importieren -->
                         <div class="form-row">
                             <label>{{ tUI('FILE') }}</label>
-                            <input type="file" @mouseenter="onHover" @change="handleFileChange" class="file-input"
-                                :disabled="mapMode === 'standard'" accept=".json,.map">
+
+                            <div style="display: flex; gap: 10px;">
+                                <input
+                                    type="file"
+                                    ref="fileInputRef"
+                                    @mouseenter="onHover"
+                                    @change="handleFileChange"
+                                    class="file-input"
+                                    :disabled="mapMode === 'standard'"
+                                    accept=".json"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="map-button"
+                                    :disabled="mapMode === 'standard'"
+                                    :class="{ active: mapMode === 'import' }"
+                                    @mouseenter="onHover"
+                                    @click="importAndSetBoard"
+                                >
+                                    {{ tUI('IMPORT') }}
+                                </button>
+                            </div>
                         </div>
+
                     </template>
 
                 </div>
@@ -157,7 +248,7 @@ const handleFileChange = (event: Event) => {
                         <div class="button-container">
                             <button type="button" class="start-game-button"
                                 @mouseenter="onHover" @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('joinGame') }"
-                                :disabled="!isOwnLeader" :class="{ active: isOwnLeader }">
+                                :disabled="!canStartGame" :class="{ active: canStartGame }">
                                 {{ isOwnLeader ? tUI('START_GAME')  : tUI('WAITING_FOR_LEADER') }}
                             </button>
                             <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
