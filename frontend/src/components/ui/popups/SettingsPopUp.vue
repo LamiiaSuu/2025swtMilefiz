@@ -31,15 +31,6 @@ const onBackClick = () => {
 
         <div class="popup">
 
-            <div class="audio">
-                <h1 class="audio-title">Audio</h1>
-
-                <div class="audio-wrapper">
-                    <!-- AUDIO SETTINGS -->
-                    <AudioSettings></AudioSettings>
-                </div>
-            </div>
-
             <div class="language">
 
                 <h1>{{ tUI('LANGUAGE') }}</h1>
@@ -50,6 +41,16 @@ const onBackClick = () => {
                     <LanguageSelection></LanguageSelection>
                 </div>
             </div>
+
+            <div class="audio">
+                <h1 class="audio-title">Audio</h1>
+
+                <div class="audio-wrapper">
+                    <!-- AUDIO SETTINGS -->
+                    <AudioSettings></AudioSettings>
+                </div>
+            </div>
+
 
             <div class="button-container">
                 <button class="back-button" @mouseenter="onHover" @click="onBackClick()">{{ tUI('BACK') }}</button>
@@ -79,10 +80,10 @@ const onBackClick = () => {
 .popup {
     display: flex;
     flex-direction: column;
-    height: 60vh;
+    height: 65vh;
     text-align: center;
     position: relative;
-    padding-top: 6vh;
+    padding-top: 0vh;
 
     justify-content: center;
 
@@ -114,7 +115,6 @@ const onBackClick = () => {
     align-items: center;
     position: relative;
     z-index: 10;
-    padding-bottom: 1vh;
     
     margin-top: -1vh;
 }
@@ -122,7 +122,7 @@ const onBackClick = () => {
 .audio h1 {
     align-self: flex-start;
     padding-left: 1.5vw;
-    padding-bottom: 1vh;
+    padding-bottom: -3vh;
     padding-top: -3vh;
 }
 
@@ -141,7 +141,7 @@ h1 {
 }
 
 .audio :deep(.settings-panel) {
-    margin: -2vh 0 1vh 0;
+    margin: 0vh 0 2vh 0;
     background: none;
     box-shadow: none;
     border: none;
@@ -150,9 +150,8 @@ h1 {
 .language :deep(.language-switch) {
     top: 50%;
     transform: translateY(-50%);
-    right: auto;
-    left: auto;
-    margin-left: 3vh;
+    margin-right: 4vh;
+    justify-content: right;
 }
 
 .language {
@@ -162,8 +161,8 @@ h1 {
     box-sizing: border-box;
     padding-left: 1.5vw;
     padding-right: 5vw;
-    margin-bottom: -1vh;
-    margin-top: -1vh;
+    margin-bottom: 5vh;
+    margin-top: 5vh;
 }
 
 
@@ -171,7 +170,7 @@ h1 {
     display: flex;
     flex-direction: column;
 
-    padding: 3vh 0 5vh 0;
+    padding: 0vh 0 6vh 0;
 }
 
 .button-container :deep(button) {
