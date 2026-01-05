@@ -6,6 +6,7 @@ import JoinGameView from '@/views/JoinGameView.vue'
 import SettingView from '@/views/SettingView.vue'
 import MapEditorView from '@/views/MapEditorView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import TutorialView from '@/views/TutorialView.vue'
 
 import pinia from '@/stores/pinia'
 import { useMilefizStore } from '@/stores/milefizstore'
@@ -44,6 +45,11 @@ const router = createRouter({
       path: '/map-editor',
       name: 'map-editor',
       component: MapEditorView,
+    },
+    {
+      path: '/tutorial',
+      name: 'tutorial',
+      component: TutorialView,
     },
     {
       path: '/join/:lobbyid',
