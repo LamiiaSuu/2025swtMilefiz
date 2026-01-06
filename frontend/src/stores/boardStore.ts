@@ -116,23 +116,6 @@ export const useBoardStore = defineStore('board', {
       };
 
       console.log(`Barrier moved to field ${fieldId}`);
-    },
-    logOccupancySnapshot() {
-      if (!this.board) {
-        console.log('[BoardStore] No board loaded')
-        return
-      }
-
-      const barrierFields = this.board.fields.filter(f => f.barrier).map(f => f.id)
-
-      const meeplesByField: Record<string, string[]> = {}
-      for (const [meepleId, fieldId] of Object.entries(this.meeplePositions)) {
-        if (!meeplesByField[fieldId]) meeplesByField[fieldId] = []
-        meeplesByField[fieldId].push(meepleId)
-      }
-
-      console.log('[BoardStore] Barrier:', barrierFields)
-      console.log('[BoardStore] MeeplesByField:', meeplesByField)
     }
   },
   // Getter um alle Barriere-Meeple ans Frontend zu übergeben
