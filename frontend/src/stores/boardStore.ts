@@ -91,21 +91,21 @@ export const useBoardStore = defineStore('board', {
       this.meeplePositions[meepleId] = fieldId
     },
 
-    updateBarrierPosition(barrierId: string, fieldId: string) {
+    updateBarrierPosition(barrierId: string, currentFieldId: string, targetFieldId: string) {
       if (!this.board) return;
 
       //Alte Barriere entfernen
-      const oldField = this.board.fields.find(f => f.barrier);
+      const oldField = this.board.fields.find(f => f.id === currentFieldId);
       if (oldField) {
         oldField.barrier = false;
       }
 
       //Neue Barriere setzen
-      const newField = this.board.fields.find(f => f.id === fieldId);
+      const newField = this.board.fields.find(f => f.id === targetFieldId);
       if (newField) {
         newField.barrier = true;
       } else {
-        console.warn(`Barrier target field ${fieldId} not found.`);
+        console.warn(`Barrier target field ${targetFieldId} not found.`);
         return;
       }
 
@@ -115,7 +115,7 @@ export const useBoardStore = defineStore('board', {
         fields: [...this.board.fields],
       };
 
-      console.log(`Barrier moved to field ${fieldId}`);
+      console.log(`Barrier moved to field ${targetFieldId}`);
     }
   },
   // Getter um alle Barriere-Meeple ans Frontend zu übergeben
