@@ -185,7 +185,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             else if (event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE") {
               showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
             }
-            else if( event.msg === "MEEPLE_IN_DUEL"){
+            else if (event.msg === "MEEPLE_IN_DUEL") {
               showWarning("MEEPLE_IN_DUEL")
             }
             return
@@ -268,8 +268,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
-          boardStore.updateBarrierPosition(event.barrierId, event.targetField);
+          boardStore.updateBarrierPosition(event.barrierId, event.currentField, event.targetField);
         }
+
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
           console.log("u ran into barrieeer oh no")
@@ -288,25 +289,25 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = false;
           }
-          if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId ){
-          activeDuels[event.duelId] = {
-            duelId: event.duelId,
+          if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId) {
+            activeDuels[event.duelId] = {
+              duelId: event.duelId,
 
-            firstMeeple: event.firstMeepleId,
-            secondMeeple: event.secondMeepleId,
-            targetField: event.targetField,
+              firstMeeple: event.firstMeepleId,
+              secondMeeple: event.secondMeepleId,
+              targetField: event.targetField,
 
-            miniGameId: event.miniGameId,
-            miniGameName: event.miniGameName,
-            miniGameType: event.miniGameType,
+              miniGameId: event.miniGameId,
+              miniGameName: event.miniGameName,
+              miniGameType: event.miniGameType,
 
-            timeOut: event.timeOut,
+              timeOut: event.timeOut,
 
-            state: {}
+              state: {}
+            }
+            document.exitPointerLock()
           }
-          document.exitPointerLock()
-        }
-          
+
         }
         if (event.type === "DICE_GAME_UPDATE") {
 
@@ -467,7 +468,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
     gamedata.lobby = lobbyUpdate.lobby
 
-     const boardStore = useBoardStore()
+    const boardStore = useBoardStore()
 
     if (lobbyUpdate.lobby?.board) {
       boardStore.board = lobbyUpdate.lobby.board
