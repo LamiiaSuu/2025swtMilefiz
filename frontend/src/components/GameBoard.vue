@@ -15,8 +15,6 @@ import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler';
 import { TreesGeometry } from 'three/examples/jsm/Addons.js'
 
-import { Sizes } from '@/stores/ITreeDTD'
-
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
@@ -590,7 +588,7 @@ const connectionSegments = computed(() => {
       :position="[field.position.x, 0, field.position.y]" :type="field.type" />
 
     <!-- Pflanzen und Bäume -->
-    <Foliage :position="boardStore.board?.trees.map((tree => [tree.treePosition.x, 0, tree.treePosition.y]))" :type="Sizes.Small" />
+    <Foliage :elements="boardStore.board?.trees.map(tree => ({ position: [tree.treePosition.x, 0, tree.treePosition.y], type: tree.treeType }))" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
