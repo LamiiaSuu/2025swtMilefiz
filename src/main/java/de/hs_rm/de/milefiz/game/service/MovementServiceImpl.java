@@ -39,8 +39,6 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveWithLossEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendPlayerHasWonEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRejectedByBarrierEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent;
-import de.hs_rm.de.milefiz.game.service.DuelService;
-import de.hs_rm.de.milefiz.game.service.DuelServiceImpl;
 
 /**
  * Implementierung des {@link MovementService}, die für die komplette
@@ -79,7 +77,7 @@ public class MovementServiceImpl implements MovementService {
     private final DuelService duelService;
     private static final int LAST_MOVE = 1;
     private static final int SECOND_TO_LAST_MOVE = 2;
-    private static final boolean TESTING_LOCALLY = false; // true wenn es bei sich lokal laufen lässt, damit die
+    private static final boolean TESTING_LOCALLY = true; // true wenn es bei sich lokal laufen lässt, damit die
                                                           // barriere vorerst randomly verschoben wird.
                                                           // muss false sein für die unit tests
 
@@ -210,23 +208,6 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
         }
 
-        // SACKGASSE DURCH BARRIEREN
-        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren
-        // und/oder nicht betretbare Felder hat,
-        // wird der Zug automatisch beendet ohne dass man sich noch in Richtung der
-        // Barriere bewegen muss, außer man macht gerade seinen vorletzten Schritt,
-        // was bedeutet, dass man direkt auf der Barriere oder dem Ziel landen kann.
-        if ((hasOnlyBarrierNeighbours(nextField, currentField, board))
-                && (player.getRemainingMoves() != SECOND_TO_LAST_MOVE)) {
-            endTurnWithMove(player, meeple, nextField);
-            logger.info("All possible moves would lead into Barriers, player loses remaining Moves, turn is over");
-            return new FrontendMoveWithLossEvent(
-                    player.getId(),
-                    meeple.getId(),
-                    nextField.getId(),
-                    player.getRemainingMoves(),
-                    player.hasMoved());
-        }
 
         // BARRIERE
         // Wenn man in eine Barriere läuft, verliert man seine restlichen Schritte,
@@ -252,6 +233,24 @@ public class MovementServiceImpl implements MovementService {
                 logger.info("ran into barrier, cant go any further! (loses remaining moves)");
                 return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
             }
+        }
+
+        // SACKGASSE DURCH BARRIEREN
+        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren
+        // und/oder nicht betretbare Felder hat,
+        // wird der Zug automatisch beendet ohne dass man sich noch in Richtung der
+        // Barriere bewegen muss, außer man macht gerade seinen vorletzten Schritt,
+        // was bedeutet, dass man direkt auf der Barriere oder dem Ziel landen kann.
+        if ((hasOnlyBarrierNeighbours(nextField, currentField, board))
+                && (player.getRemainingMoves() != SECOND_TO_LAST_MOVE)) {
+            endTurnWithMove(player, meeple, nextField);
+            logger.info("All possible moves would lead into Barriers, player loses remaining Moves, turn is over");
+            return new FrontendMoveWithLossEvent(
+                    player.getId(),
+                    meeple.getId(),
+                    nextField.getId(),
+                    player.getRemainingMoves(),
+                    player.hasMoved());
         }
 
         // FELD DURCH EIGENEN MEEPLE BLOCKIERT
