@@ -284,8 +284,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
-          boardStore.updateBarrierPosition(event.barrierId, event.targetField);
+          boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
         }
+
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
           console.log("u ran into barrieeer oh no")
@@ -483,7 +484,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
     gamedata.lobby = lobbyUpdate.lobby
 
-     const boardStore = useBoardStore()
+    const boardStore = useBoardStore()
 
     if (lobbyUpdate.lobby?.board) {
       boardStore.board = lobbyUpdate.lobby.board

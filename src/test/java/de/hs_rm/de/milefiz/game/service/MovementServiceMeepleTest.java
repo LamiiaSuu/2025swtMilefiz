@@ -514,13 +514,13 @@ public class MovementServiceMeepleTest {
 
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
-        assertInstanceOf(FrontendMoveEvent.class, result);
+        assertInstanceOf(FrontendMoveWithLossEvent.class, result);
 
-        FrontendMoveEvent evt = (FrontendMoveEvent) result;
+        FrontendMoveWithLossEvent evt = (FrontendMoveWithLossEvent) result;
 
         assertEquals(nextField.getId(), evt.targetField());
 
-        assertEquals(MOVES - 1, evt.remainingMoves());
+        assertEquals(NO_MOVES, evt.remainingMoves());
     }
 
     // Duell, wenn man mit dem letzte Move auf einem Feld mit einem gegnerischen
@@ -548,11 +548,11 @@ public class MovementServiceMeepleTest {
         assertEquals(meeple.getId(), evt.firstMeepleId());
         assertEquals(rivalMeeple.getId(), evt.secondMeepleId());
         assertEquals(nextField.getId(), evt.targetField());
-        assertEquals(0, evt.remainingMoves());
+        assertEquals(NO_MOVES, evt.remainingMoves());
 
         assertEquals(nextField, meeple.getCurrentField());
 
-        assertEquals(0, player.getRemainingMoves());
+        assertEquals(NO_MOVES, player.getRemainingMoves());
     }
 
     // gegnerischer Meeple wird uebersprungen, wenn man nicht mit dem letzten Move
