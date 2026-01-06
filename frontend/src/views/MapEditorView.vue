@@ -271,7 +271,8 @@ function exportBoard(fields: BackendTile[]): BoardExport {
   return {
     id: crypto.randomUUID(),
     name: 'Board',
-    fields
+    fields,
+    trees: []
   }
 }
 

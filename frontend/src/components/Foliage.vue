@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useGLTF } from '@tresjs/cientos'
-import { ref, computed, watchEffect, watch } from 'vue'
-import { BoxGeometry, BufferGeometry, DoubleSide, DynamicDrawUsage, Material, Mesh, MeshNormalMaterial, Object3D, Sphere, Vector3 } from 'three'
+import { ref, computed, watchEffect, watch, type VNodeRef, type Ref } from 'vue'
+import { BoxGeometry, BufferGeometry, DoubleSide, DynamicDrawUsage, Material, Mesh, MeshNormalMaterial, Object3D, Quaternion, Sphere, Vector3 } from 'three'
 import { startingbaseColors } from '@/types/colorsAssets';
 
 import { Sizes }from '@/stores/ITreeDTD';
@@ -21,53 +21,85 @@ const models = {
 
 const scale = 0.5
 
-const scene = computed(() => models[type].state.value?.scene)
-const graph = useGraph(scene)
-const meshes = computed(() => graph.value?.meshes ?? [])
+const model = computed(() => models[type])
+const scene = computed(() => model.value?.state?.value?.scene ?? null)
 
-watchEffect(() => scene.value?.scale.set(scale, scale, scale))
 
-const imRef = ref()
+type Part = {
+  name: string,
+  geometry: BufferGeometry,
+  material: Material,
+  quaternion: Quaternion,
+}
+const parts = ref<Part[]>([])
+
+const imRefs = ref<any[]>([])
 const dummy = new Object3D()
 
-const mesh = scene.value?.getObjectByName('tree_1_leaf_and_grass_0') as Mesh;
-
-const count = computed(() => position?.length ?? 1)
+const count = computed(() => position?.length ?? 10)
 
 const geometry = ref<BufferGeometry>()
 const material = ref<Material>()
 
-if (mesh) {
-    geometry.value = mesh.geometry.clone() as BufferGeometry
-    geometry.value.computeVertexNormals()
-    material.value = mesh.material as Material
-}
+watchEffect(() => scene.value?.scale.set(scale, scale, scale))
 
-geometry.value = new BoxGeometry(0.5, 0.5, 0.5)
-material.value = new MeshNormalMaterial();
+watchEffect(() => {
+  parts.value = []
+  if (!scene.value) return
+  scene.value.traverse((node: Object3D) => {
+    if (node.type == "Mesh") {
+      const mesh = node as Mesh;
+       const geom = mesh.geometry.clone() as BufferGeometry
+      geom.computeVertexNormals()
+      const mat = (mesh.material as Material).clone();
+      const quat = mesh.quaternion.clone();
 
-watch(imRef, (mesh: { instanceMatrix: { setUsage: (arg0: number) => void; }; }) => {
-  mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+      if (mat.transparent) {
+      mat.depthTest = true;
+      math.alphaTest = true;
+      mat.depthWrite = true;
+      mat.polygonOffset = true;
+      mat.polygonOffsetFactor = -1;
+      mat.polygonOffsetUnits = 1;
+      }
+      parts.value.push({ name: mesh.name, geometry: geom, material: mat, quaternion: quat})
+      console.log(material)
+
+    }
+  })
+})
+
+
+watch(imRefs, (imRefs: any) => {
+  //imRefs.value.forEach((imRef: any) =>   imRef.instanceMatrix.setUsage(DynamicDrawUsage))
 });
 
 watchEffect(() => {
-  if (imRef.value && position) {
-
+  if (parts.value.length > 0 && position) {
+    parts.value.forEach((part, i) => {
+      const ref = imRefs.value[i];
+      console.log(ref)
+      if (ref) {
     position.forEach((pos : [number, number, number], i : number) => {
       dummy.position.set(...pos)
+      dummy.quaternion.copy(part.quaternion)
       dummy.updateMatrix()
-      imRef.value.setMatrixAt(i, dummy.matrix)
+      ref.setMatrixAt(i, dummy.matrix)
     })
-    imRef.value.instanceMatrix.needsUpdate = true
+    ref.instanceMatrix.needsUpdate = true
+      }
+    })
   }
 })
 
-</script>
+const getRef = (el : any, index : number) => {
+  imRefs.value[index] = el;
+  console.log(imRefs.value) 
+}
 
+</script>
 <template>
-  <TresInstancedMesh
-    ref="imRef" 
-    :args="[geometry, material, count]" 
+  <TresInstancedMesh v-for="(part, index) in parts" :ref="(el) => getRef(el, index)"
+    :args="[part.geometry, part.material, count]" 
   />
 </template>
-

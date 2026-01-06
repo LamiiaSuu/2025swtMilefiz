@@ -590,10 +590,7 @@ const connectionSegments = computed(() => {
       :position="[field.position.x, 0, field.position.y]" :type="field.type" />
 
     <!-- Pflanzen und Bäume -->
-
-        <Suspense>
     <Foliage :position="boardStore.board?.trees.map((tree => [tree.treePosition.x, 0, tree.treePosition.y]))" :type="Sizes.Small" />
-        </Suspense>
   </TresCanvas>
 
   <!-- Fadenkreuz -->
