@@ -1,0 +1,1694 @@
+{
+  "id": "74c3a6f7-fcea-4b4e-b933-6b4b70ef7e7d",
+  "name": "Board",
+  "fields": [
+    {
+      "id": "3cd379e5-a175-43d8-a229-1ffbe6d8b7fa",
+      "east": "5245e237-1161-4670-90fe-0646aa9c5df7",
+      "west": "a360b4fd-e6b0-44fb-aa2e-f4e77d444d49",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "5245e237-1161-4670-90fe-0646aa9c5df7",
+      "east": "18ad396f-0f97-4930-b00d-8fa11f43179a",
+      "west": "3cd379e5-a175-43d8-a229-1ffbe6d8b7fa",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "18ad396f-0f97-4930-b00d-8fa11f43179a",
+      "east": "1e486147-8cc5-4921-ae98-e2f128d6cd2a",
+      "south": "8f3bc4ee-afba-4244-9aff-e2e407637cff",
+      "west": "5245e237-1161-4670-90fe-0646aa9c5df7",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "1e486147-8cc5-4921-ae98-e2f128d6cd2a",
+      "east": "06c6a517-ba39-4cb7-a61e-0cd2cd4ec14c",
+      "west": "18ad396f-0f97-4930-b00d-8fa11f43179a",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "06c6a517-ba39-4cb7-a61e-0cd2cd4ec14c",
+      "north": "b22916a0-8e40-434d-b47d-e28587fce571",
+      "west": "1e486147-8cc5-4921-ae98-e2f128d6cd2a",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "a360b4fd-e6b0-44fb-aa2e-f4e77d444d49",
+      "east": "3cd379e5-a175-43d8-a229-1ffbe6d8b7fa",
+      "west": "bd6bb55c-d920-4839-b731-fe0635058b50",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "bd6bb55c-d920-4839-b731-fe0635058b50",
+      "east": "a360b4fd-e6b0-44fb-aa2e-f4e77d444d49",
+      "south": "9bd7a073-0865-4011-a3c1-805c1b00dcac",
+      "west": "5aba378e-e9f1-46ca-9d7e-b5fab8363020",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "5aba378e-e9f1-46ca-9d7e-b5fab8363020",
+      "east": "bd6bb55c-d920-4839-b731-fe0635058b50",
+      "west": "d9542d2c-4de1-4e81-84e4-d4dcc796629c",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "d9542d2c-4de1-4e81-84e4-d4dcc796629c",
+      "north": "5776f54d-c739-4ae9-b673-f8fa1673f399",
+      "east": "5aba378e-e9f1-46ca-9d7e-b5fab8363020",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 0
+      },
+      "barrier": false
+    },
+    {
+      "id": "5776f54d-c739-4ae9-b673-f8fa1673f399",
+      "south": "d9542d2c-4de1-4e81-84e4-d4dcc796629c",
+      "type": "START_RED",
+      "position": {
+        "x": -8,
+        "y": -2
+      },
+      "barrier": false
+    },
+    {
+      "id": "b22916a0-8e40-434d-b47d-e28587fce571",
+      "south": "06c6a517-ba39-4cb7-a61e-0cd2cd4ec14c",
+      "type": "START_YELLOW",
+      "position": {
+        "x": 8,
+        "y": -2
+      },
+      "barrier": false
+    },
+    {
+      "id": "9bd7a073-0865-4011-a3c1-805c1b00dcac",
+      "north": "bd6bb55c-d920-4839-b731-fe0635058b50",
+      "south": "2647a7c7-12c7-4c67-928c-b0756011f56d",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 2
+      },
+      "barrier": false
+    },
+    {
+      "id": "8f3bc4ee-afba-4244-9aff-e2e407637cff",
+      "north": "18ad396f-0f97-4930-b00d-8fa11f43179a",
+      "south": "640dfbae-021f-422f-90e8-171f67c32213",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 2
+      },
+      "barrier": false
+    },
+    {
+      "id": "2647a7c7-12c7-4c67-928c-b0756011f56d",
+      "north": "9bd7a073-0865-4011-a3c1-805c1b00dcac",
+      "east": "c583ce84-bee3-4d1e-b291-a0cfc7358c44",
+      "west": "59b2a055-dccc-4e6a-b099-e603fa170024",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 4
+      },
+      "barrier": true
+    },
+    {
+      "id": "640dfbae-021f-422f-90e8-171f67c32213",
+      "north": "8f3bc4ee-afba-4244-9aff-e2e407637cff",
+      "east": "569042be-0ddb-4f97-93be-b460d9e74940",
+      "west": "06441144-f90d-4737-a6a4-00afebb09f19",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 4
+      },
+      "barrier": true
+    },
+    {
+      "id": "c583ce84-bee3-4d1e-b291-a0cfc7358c44",
+      "east": "64ba3955-06a4-4f69-9c14-7189faf9003e",
+      "west": "2647a7c7-12c7-4c67-928c-b0756011f56d",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "64ba3955-06a4-4f69-9c14-7189faf9003e",
+      "east": "06441144-f90d-4737-a6a4-00afebb09f19",
+      "west": "c583ce84-bee3-4d1e-b291-a0cfc7358c44",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "06441144-f90d-4737-a6a4-00afebb09f19",
+      "east": "640dfbae-021f-422f-90e8-171f67c32213",
+      "west": "64ba3955-06a4-4f69-9c14-7189faf9003e",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "59b2a055-dccc-4e6a-b099-e603fa170024",
+      "east": "2647a7c7-12c7-4c67-928c-b0756011f56d",
+      "west": "8170f919-6931-4e90-a430-e4b9adaf7f93",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "8170f919-6931-4e90-a430-e4b9adaf7f93",
+      "east": "59b2a055-dccc-4e6a-b099-e603fa170024",
+      "west": "11fececd-80ce-4a80-8562-12657eea067e",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "11fececd-80ce-4a80-8562-12657eea067e",
+      "east": "8170f919-6931-4e90-a430-e4b9adaf7f93",
+      "west": "7a30bb6b-0292-440e-95f1-885315289f4e",
+      "type": "NORMAL",
+      "position": {
+        "x": -10,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "569042be-0ddb-4f97-93be-b460d9e74940",
+      "east": "8f6bc9f2-b130-4ac5-8164-c7e3ada7374b",
+      "west": "640dfbae-021f-422f-90e8-171f67c32213",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "8f6bc9f2-b130-4ac5-8164-c7e3ada7374b",
+      "east": "c95683ba-f8db-40cb-aa60-2a645121926e",
+      "west": "569042be-0ddb-4f97-93be-b460d9e74940",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "c95683ba-f8db-40cb-aa60-2a645121926e",
+      "east": "3f6b8401-eb19-4bbf-85f2-b9027a9a7c21",
+      "west": "8f6bc9f2-b130-4ac5-8164-c7e3ada7374b",
+      "type": "NORMAL",
+      "position": {
+        "x": 10,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "7a30bb6b-0292-440e-95f1-885315289f4e",
+      "east": "11fececd-80ce-4a80-8562-12657eea067e",
+      "south": "095308b1-36c1-47fa-bf80-d39f34fbcc02",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "3f6b8401-eb19-4bbf-85f2-b9027a9a7c21",
+      "south": "76f020ea-3974-49f6-994b-27b02a496eae",
+      "west": "c95683ba-f8db-40cb-aa60-2a645121926e",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 4
+      },
+      "barrier": false
+    },
+    {
+      "id": "095308b1-36c1-47fa-bf80-d39f34fbcc02",
+      "north": "7a30bb6b-0292-440e-95f1-885315289f4e",
+      "south": "76d99903-99bc-423f-a880-270d46651bda",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 6
+      },
+      "barrier": false
+    },
+    {
+      "id": "76d99903-99bc-423f-a880-270d46651bda",
+      "north": "095308b1-36c1-47fa-bf80-d39f34fbcc02",
+      "east": "980ce5e5-2cda-4134-a06e-d9a13b327f38",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 8
+      },
+      "barrier": true
+    },
+    {
+      "id": "980ce5e5-2cda-4134-a06e-d9a13b327f38",
+      "east": "f38dbe3b-33d3-42c8-bb24-b570267bfdd1",
+      "west": "76d99903-99bc-423f-a880-270d46651bda",
+      "type": "NORMAL",
+      "position": {
+        "x": -10,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "f38dbe3b-33d3-42c8-bb24-b570267bfdd1",
+      "east": "a2665bf9-a0ea-47ad-8c66-0f10f46b5195",
+      "west": "980ce5e5-2cda-4134-a06e-d9a13b327f38",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "a2665bf9-a0ea-47ad-8c66-0f10f46b5195",
+      "east": "0b98a046-1d15-4cad-a819-0847c3d4f484",
+      "west": "f38dbe3b-33d3-42c8-bb24-b570267bfdd1",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "0b98a046-1d15-4cad-a819-0847c3d4f484",
+      "east": "663e9f71-7b92-4b38-b6df-7a059c03d26f",
+      "west": "a2665bf9-a0ea-47ad-8c66-0f10f46b5195",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "76f020ea-3974-49f6-994b-27b02a496eae",
+      "north": "3f6b8401-eb19-4bbf-85f2-b9027a9a7c21",
+      "south": "f30759d7-bf80-4e16-a9eb-4c1051ec9d91",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 6
+      },
+      "barrier": false
+    },
+    {
+      "id": "f30759d7-bf80-4e16-a9eb-4c1051ec9d91",
+      "north": "76f020ea-3974-49f6-994b-27b02a496eae",
+      "west": "c0ff11e2-f3b0-4dc9-8ed1-0d8975a32437",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 8
+      },
+      "barrier": true
+    },
+    {
+      "id": "c0ff11e2-f3b0-4dc9-8ed1-0d8975a32437",
+      "east": "f30759d7-bf80-4e16-a9eb-4c1051ec9d91",
+      "west": "21ef7643-4d11-44a2-8b41-abef330a5a16",
+      "type": "NORMAL",
+      "position": {
+        "x": 10,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "21ef7643-4d11-44a2-8b41-abef330a5a16",
+      "east": "c0ff11e2-f3b0-4dc9-8ed1-0d8975a32437",
+      "west": "f07a74d5-9844-4931-9c07-5d802181fb7b",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "f07a74d5-9844-4931-9c07-5d802181fb7b",
+      "east": "21ef7643-4d11-44a2-8b41-abef330a5a16",
+      "west": "16e01bfa-89e8-4cd7-b36d-b9c3c5e54cfd",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "16e01bfa-89e8-4cd7-b36d-b9c3c5e54cfd",
+      "east": "f07a74d5-9844-4931-9c07-5d802181fb7b",
+      "west": "b8ea9a75-0b54-4cee-9f0b-a3de7eea6850",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "b8ea9a75-0b54-4cee-9f0b-a3de7eea6850",
+      "east": "16e01bfa-89e8-4cd7-b36d-b9c3c5e54cfd",
+      "west": "30fa03a3-f5ac-4a2e-b938-158b1c757035",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "30fa03a3-f5ac-4a2e-b938-158b1c757035",
+      "east": "b8ea9a75-0b54-4cee-9f0b-a3de7eea6850",
+      "south": "05eaabf2-d2a2-41eb-badd-4cc1493b9143",
+      "west": "663e9f71-7b92-4b38-b6df-7a059c03d26f",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "663e9f71-7b92-4b38-b6df-7a059c03d26f",
+      "east": "30fa03a3-f5ac-4a2e-b938-158b1c757035",
+      "west": "0b98a046-1d15-4cad-a819-0847c3d4f484",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 8
+      },
+      "barrier": false
+    },
+    {
+      "id": "05eaabf2-d2a2-41eb-badd-4cc1493b9143",
+      "north": "30fa03a3-f5ac-4a2e-b938-158b1c757035",
+      "south": "cd8ea6da-d221-4a94-8eb3-d67e7dd99e37",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 10
+      },
+      "barrier": false
+    },
+    {
+      "id": "cd8ea6da-d221-4a94-8eb3-d67e7dd99e37",
+      "north": "05eaabf2-d2a2-41eb-badd-4cc1493b9143",
+      "east": "bf66dd7a-29c5-4a9a-9d9b-e14401207d6a",
+      "west": "493a8986-ee57-43b5-ab88-279a007148ce",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 12
+      },
+      "barrier": true
+    },
+    {
+      "id": "493a8986-ee57-43b5-ab88-279a007148ce",
+      "east": "cd8ea6da-d221-4a94-8eb3-d67e7dd99e37",
+      "west": "c7951754-66d1-4992-aa4c-ae6fa1345dcf",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "c7951754-66d1-4992-aa4c-ae6fa1345dcf",
+      "east": "493a8986-ee57-43b5-ab88-279a007148ce",
+      "west": "e3dac3a8-1ed5-4c19-a800-8ba676dd07d8",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "e3dac3a8-1ed5-4c19-a800-8ba676dd07d8",
+      "east": "c7951754-66d1-4992-aa4c-ae6fa1345dcf",
+      "west": "36ea3e21-f5ba-43ce-8485-8ef23ed7a5f9",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "36ea3e21-f5ba-43ce-8485-8ef23ed7a5f9",
+      "east": "e3dac3a8-1ed5-4c19-a800-8ba676dd07d8",
+      "west": "703bf3da-d913-4b68-af7b-f9aa2e2235ca",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "703bf3da-d913-4b68-af7b-f9aa2e2235ca",
+      "east": "36ea3e21-f5ba-43ce-8485-8ef23ed7a5f9",
+      "west": "a4f04c05-236a-4eb2-afb2-ce7e8e638bf1",
+      "type": "NORMAL",
+      "position": {
+        "x": -10,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "a4f04c05-236a-4eb2-afb2-ce7e8e638bf1",
+      "east": "703bf3da-d913-4b68-af7b-f9aa2e2235ca",
+      "west": "d2554065-dca3-4e7e-bee6-888472ec9185",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "bf66dd7a-29c5-4a9a-9d9b-e14401207d6a",
+      "east": "5bf42df7-64c1-43c9-9c42-9c057301c722",
+      "west": "cd8ea6da-d221-4a94-8eb3-d67e7dd99e37",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "5bf42df7-64c1-43c9-9c42-9c057301c722",
+      "east": "8ac2a32f-4010-4633-8129-841524e8a855",
+      "west": "bf66dd7a-29c5-4a9a-9d9b-e14401207d6a",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "8ac2a32f-4010-4633-8129-841524e8a855",
+      "east": "0e0b0f83-e17b-4899-b9ba-13059f56831a",
+      "west": "5bf42df7-64c1-43c9-9c42-9c057301c722",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "0e0b0f83-e17b-4899-b9ba-13059f56831a",
+      "east": "04287b2b-c3fd-4a05-896c-9b47ad6f609b",
+      "west": "8ac2a32f-4010-4633-8129-841524e8a855",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "04287b2b-c3fd-4a05-896c-9b47ad6f609b",
+      "east": "fbcf4f19-5fe4-48b4-b48b-20b9b62647af",
+      "west": "0e0b0f83-e17b-4899-b9ba-13059f56831a",
+      "type": "NORMAL",
+      "position": {
+        "x": 10,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "fbcf4f19-5fe4-48b4-b48b-20b9b62647af",
+      "east": "5ee7cc6e-55c0-4dc5-958b-652b3d9a1dc2",
+      "west": "04287b2b-c3fd-4a05-896c-9b47ad6f609b",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "e23b9b20-ef0e-4bdd-9ba9-8a0645d2f644",
+      "east": "6d431a74-d84f-4dad-9170-35ef8c254bc9",
+      "west": "fee003a3-106a-42e0-91b4-df43f080e97a",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 18
+      },
+      "barrier": true
+    },
+    {
+      "id": "6d431a74-d84f-4dad-9170-35ef8c254bc9",
+      "east": "f4972273-8e1a-4cf6-ae6b-8b120d9e941f",
+      "west": "e23b9b20-ef0e-4bdd-9ba9-8a0645d2f644",
+      "type": "NORMAL",
+      "position": {
+        "x": -10,
+        "y": 18
+      },
+      "barrier": true
+    },
+    {
+      "id": "f4972273-8e1a-4cf6-ae6b-8b120d9e941f",
+      "north": "649ee430-03b6-4539-99b2-cd9e43e25a4f",
+      "south": "1037d89d-3319-4a3e-8f87-f6590ed3e809",
+      "west": "6d431a74-d84f-4dad-9170-35ef8c254bc9",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 18
+      },
+      "barrier": false
+    },
+    {
+      "id": "649ee430-03b6-4539-99b2-cd9e43e25a4f",
+      "east": "97311e6a-357c-4d01-8369-2557c7b96c0e",
+      "south": "f4972273-8e1a-4cf6-ae6b-8b120d9e941f",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "97311e6a-357c-4d01-8369-2557c7b96c0e",
+      "east": "d859ef16-83d8-40f6-b4e3-756d9ec1d037",
+      "west": "649ee430-03b6-4539-99b2-cd9e43e25a4f",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "1037d89d-3319-4a3e-8f87-f6590ed3e809",
+      "north": "f4972273-8e1a-4cf6-ae6b-8b120d9e941f",
+      "east": "066d2b02-9073-4bda-a7af-33ed1ec96987",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "066d2b02-9073-4bda-a7af-33ed1ec96987",
+      "east": "d8dabf70-2518-4c27-a3c4-12cbd1a77945",
+      "west": "1037d89d-3319-4a3e-8f87-f6590ed3e809",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "d8dabf70-2518-4c27-a3c4-12cbd1a77945",
+      "east": "046b4b84-0fe7-4739-bcb7-c82abf8a2676",
+      "west": "066d2b02-9073-4bda-a7af-33ed1ec96987",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "046b4b84-0fe7-4739-bcb7-c82abf8a2676",
+      "north": "14b920ed-0040-4c13-ac47-90ecfae46436",
+      "east": "2c114276-8305-462b-9017-f84723cbd9bf",
+      "west": "d8dabf70-2518-4c27-a3c4-12cbd1a77945",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "d859ef16-83d8-40f6-b4e3-756d9ec1d037",
+      "east": "560a7576-62fe-4428-b409-ea09b19a5f42",
+      "west": "97311e6a-357c-4d01-8369-2557c7b96c0e",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "560a7576-62fe-4428-b409-ea09b19a5f42",
+      "east": "41bd6678-edba-4385-90e5-b5ca84a124b1",
+      "south": "14b920ed-0040-4c13-ac47-90ecfae46436",
+      "west": "d859ef16-83d8-40f6-b4e3-756d9ec1d037",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "14b920ed-0040-4c13-ac47-90ecfae46436",
+      "north": "560a7576-62fe-4428-b409-ea09b19a5f42",
+      "east": "cde07c2b-4dd5-4fab-9a40-c8364d9f1e7b",
+      "south": "046b4b84-0fe7-4739-bcb7-c82abf8a2676",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 18
+      },
+      "barrier": true
+    },
+    {
+      "id": "cde07c2b-4dd5-4fab-9a40-c8364d9f1e7b",
+      "north": "41bd6678-edba-4385-90e5-b5ca84a124b1",
+      "east": "87d5fad6-1354-4c3a-ac98-1204da1632ea",
+      "south": "2c114276-8305-462b-9017-f84723cbd9bf",
+      "west": "14b920ed-0040-4c13-ac47-90ecfae46436",
+      "type": "END",
+      "position": {
+        "x": 0,
+        "y": 18
+      },
+      "barrier": false
+    },
+    {
+      "id": "41bd6678-edba-4385-90e5-b5ca84a124b1",
+      "east": "167c25f1-8c7a-497d-8950-77e29276f7fb",
+      "south": "cde07c2b-4dd5-4fab-9a40-c8364d9f1e7b",
+      "west": "560a7576-62fe-4428-b409-ea09b19a5f42",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 16
+      },
+      "barrier": true
+    },
+    {
+      "id": "167c25f1-8c7a-497d-8950-77e29276f7fb",
+      "east": "c4022843-5fe7-4376-b30d-14ee00bd5a08",
+      "south": "87d5fad6-1354-4c3a-ac98-1204da1632ea",
+      "west": "41bd6678-edba-4385-90e5-b5ca84a124b1",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "87d5fad6-1354-4c3a-ac98-1204da1632ea",
+      "north": "167c25f1-8c7a-497d-8950-77e29276f7fb",
+      "south": "01d0ab49-52d7-4a18-8e61-105534166d53",
+      "west": "cde07c2b-4dd5-4fab-9a40-c8364d9f1e7b",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 18
+      },
+      "barrier": true
+    },
+    {
+      "id": "2c114276-8305-462b-9017-f84723cbd9bf",
+      "north": "cde07c2b-4dd5-4fab-9a40-c8364d9f1e7b",
+      "east": "01d0ab49-52d7-4a18-8e61-105534166d53",
+      "west": "046b4b84-0fe7-4739-bcb7-c82abf8a2676",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 20
+      },
+      "barrier": true
+    },
+    {
+      "id": "01d0ab49-52d7-4a18-8e61-105534166d53",
+      "north": "87d5fad6-1354-4c3a-ac98-1204da1632ea",
+      "east": "bbeb1db7-01cd-47e8-bb82-4d103bfc6b16",
+      "west": "2c114276-8305-462b-9017-f84723cbd9bf",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "a1125e70-6fb7-4fe8-9b78-15b086d3ecc6",
+      "east": "517689bf-cf6d-4dd1-84db-3736d38495a1",
+      "west": "cdfef30b-6c82-4e8e-8049-757c099b8564",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 18
+      },
+      "barrier": true
+    },
+    {
+      "id": "cdfef30b-6c82-4e8e-8049-757c099b8564",
+      "east": "a1125e70-6fb7-4fe8-9b78-15b086d3ecc6",
+      "west": "23b93783-984f-44ac-b442-11fac4aedac8",
+      "type": "NORMAL",
+      "position": {
+        "x": 10,
+        "y": 18
+      },
+      "barrier": true
+    },
+    {
+      "id": "23b93783-984f-44ac-b442-11fac4aedac8",
+      "north": "f6668026-2f6f-47ac-8469-fa213f4574d5",
+      "east": "cdfef30b-6c82-4e8e-8049-757c099b8564",
+      "south": "5a17040d-df99-4e7e-9713-4f93cb7bafc3",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 18
+      },
+      "barrier": false
+    },
+    {
+      "id": "f6668026-2f6f-47ac-8469-fa213f4574d5",
+      "south": "23b93783-984f-44ac-b442-11fac4aedac8",
+      "west": "cc6594f4-36df-47fe-867b-5518ef2f1708",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "cc6594f4-36df-47fe-867b-5518ef2f1708",
+      "east": "f6668026-2f6f-47ac-8469-fa213f4574d5",
+      "west": "c4022843-5fe7-4376-b30d-14ee00bd5a08",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "c4022843-5fe7-4376-b30d-14ee00bd5a08",
+      "east": "cc6594f4-36df-47fe-867b-5518ef2f1708",
+      "west": "167c25f1-8c7a-497d-8950-77e29276f7fb",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "bbeb1db7-01cd-47e8-bb82-4d103bfc6b16",
+      "east": "520ef7a7-98a2-4a5b-b052-4948b1301afb",
+      "west": "01d0ab49-52d7-4a18-8e61-105534166d53",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "520ef7a7-98a2-4a5b-b052-4948b1301afb",
+      "east": "5a17040d-df99-4e7e-9713-4f93cb7bafc3",
+      "west": "bbeb1db7-01cd-47e8-bb82-4d103bfc6b16",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "5a17040d-df99-4e7e-9713-4f93cb7bafc3",
+      "north": "23b93783-984f-44ac-b442-11fac4aedac8",
+      "west": "520ef7a7-98a2-4a5b-b052-4948b1301afb",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "1cb58509-6ed5-407d-9aaf-5d9892e375ae",
+      "east": "13d0d060-490b-4811-b051-9302a3fd9a1f",
+      "west": "2260f97b-a22a-40f2-bb1c-98000e651a02",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "e7e90802-3944-4b32-9f7f-0e17b89616a0",
+      "east": "f106b439-a2dc-41b4-a947-a76eeb79a2eb",
+      "west": "97403c98-4e36-481e-afa4-ee9fa9e15205",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "13d0d060-490b-4811-b051-9302a3fd9a1f",
+      "east": "b127da3c-0cac-4b19-ba52-1435050b7310",
+      "west": "1cb58509-6ed5-407d-9aaf-5d9892e375ae",
+      "type": "NORMAL",
+      "position": {
+        "x": -10,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "b127da3c-0cac-4b19-ba52-1435050b7310",
+      "east": "edaa65e3-6e7d-4764-83e3-c770efa88835",
+      "west": "13d0d060-490b-4811-b051-9302a3fd9a1f",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "edaa65e3-6e7d-4764-83e3-c770efa88835",
+      "east": "082b12d6-f40c-478e-a78a-b1b787c20139",
+      "west": "b127da3c-0cac-4b19-ba52-1435050b7310",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "082b12d6-f40c-478e-a78a-b1b787c20139",
+      "east": "7810dfd5-ee53-44c4-8aae-f72bc2fba2c8",
+      "west": "edaa65e3-6e7d-4764-83e3-c770efa88835",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "7810dfd5-ee53-44c4-8aae-f72bc2fba2c8",
+      "east": "a00ad104-f42e-444b-884d-4c83d18264d7",
+      "west": "082b12d6-f40c-478e-a78a-b1b787c20139",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "a00ad104-f42e-444b-884d-4c83d18264d7",
+      "east": "2477d3fb-f9f1-4b37-a7e5-51000d925b30",
+      "south": "d2c5f94e-e841-4fa9-a05a-a491337fade5",
+      "west": "7810dfd5-ee53-44c4-8aae-f72bc2fba2c8",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 24
+      },
+      "barrier": true
+    },
+    {
+      "id": "2477d3fb-f9f1-4b37-a7e5-51000d925b30",
+      "east": "10947ef8-a782-44b7-b9c1-037c0577816d",
+      "west": "a00ad104-f42e-444b-884d-4c83d18264d7",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "10947ef8-a782-44b7-b9c1-037c0577816d",
+      "east": "a91a2a78-a515-49fe-89ed-63e399dfe5b4",
+      "west": "2477d3fb-f9f1-4b37-a7e5-51000d925b30",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "a91a2a78-a515-49fe-89ed-63e399dfe5b4",
+      "east": "a5af3260-64ce-42e1-973c-8e82ef986e0c",
+      "west": "10947ef8-a782-44b7-b9c1-037c0577816d",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "a5af3260-64ce-42e1-973c-8e82ef986e0c",
+      "east": "97403c98-4e36-481e-afa4-ee9fa9e15205",
+      "west": "a91a2a78-a515-49fe-89ed-63e399dfe5b4",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "97403c98-4e36-481e-afa4-ee9fa9e15205",
+      "east": "e7e90802-3944-4b32-9f7f-0e17b89616a0",
+      "west": "a5af3260-64ce-42e1-973c-8e82ef986e0c",
+      "type": "NORMAL",
+      "position": {
+        "x": 10,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "d2c5f94e-e841-4fa9-a05a-a491337fade5",
+      "north": "a00ad104-f42e-444b-884d-4c83d18264d7",
+      "south": "4ca1b423-f236-4524-8493-537a829da68c",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 26
+      },
+      "barrier": false
+    },
+    {
+      "id": "4ca1b423-f236-4524-8493-537a829da68c",
+      "north": "d2c5f94e-e841-4fa9-a05a-a491337fade5",
+      "east": "328c1315-3ed8-469e-93f0-42d98424bd50",
+      "west": "bd6c606e-cd8c-4fd5-8cf6-ea87d7891a46",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "328c1315-3ed8-469e-93f0-42d98424bd50",
+      "east": "088eea79-421d-4b28-a008-8f23bd3f82e4",
+      "west": "4ca1b423-f236-4524-8493-537a829da68c",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "088eea79-421d-4b28-a008-8f23bd3f82e4",
+      "east": "6f8ad23d-6c62-4568-9a47-f3e1bf2b3d37",
+      "west": "328c1315-3ed8-469e-93f0-42d98424bd50",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "6f8ad23d-6c62-4568-9a47-f3e1bf2b3d37",
+      "east": "6c5f89a8-f610-4a9a-9746-eabbb2ab89bd",
+      "west": "088eea79-421d-4b28-a008-8f23bd3f82e4",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "6c5f89a8-f610-4a9a-9746-eabbb2ab89bd",
+      "east": "1548a7dc-4db0-42f0-8a9f-dd9e0fb95c2d",
+      "west": "6f8ad23d-6c62-4568-9a47-f3e1bf2b3d37",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "1548a7dc-4db0-42f0-8a9f-dd9e0fb95c2d",
+      "east": "a2845da4-5728-4e2c-acad-b7c24c47eead",
+      "west": "6c5f89a8-f610-4a9a-9746-eabbb2ab89bd",
+      "type": "NORMAL",
+      "position": {
+        "x": 10,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "a2845da4-5728-4e2c-acad-b7c24c47eead",
+      "south": "de9cd32d-3c70-4260-8dd2-488e1aaf4f37",
+      "west": "1548a7dc-4db0-42f0-8a9f-dd9e0fb95c2d",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 28
+      },
+      "barrier": true
+    },
+    {
+      "id": "bd6c606e-cd8c-4fd5-8cf6-ea87d7891a46",
+      "east": "4ca1b423-f236-4524-8493-537a829da68c",
+      "west": "1e0eb665-c32a-44ad-b76f-fcdff0e72851",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "1e0eb665-c32a-44ad-b76f-fcdff0e72851",
+      "east": "bd6c606e-cd8c-4fd5-8cf6-ea87d7891a46",
+      "west": "c2951641-19c9-4100-a5b5-d3521607c1b3",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "c2951641-19c9-4100-a5b5-d3521607c1b3",
+      "east": "1e0eb665-c32a-44ad-b76f-fcdff0e72851",
+      "west": "fec54f4b-2ab5-44b7-b9bc-601a05b194b7",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "fec54f4b-2ab5-44b7-b9bc-601a05b194b7",
+      "east": "c2951641-19c9-4100-a5b5-d3521607c1b3",
+      "west": "7de91dcd-496c-4335-b816-341de7681abb",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "7de91dcd-496c-4335-b816-341de7681abb",
+      "east": "fec54f4b-2ab5-44b7-b9bc-601a05b194b7",
+      "west": "68aa3265-f22f-4b0d-a490-90953198e2cd",
+      "type": "NORMAL",
+      "position": {
+        "x": -10,
+        "y": 28
+      },
+      "barrier": false
+    },
+    {
+      "id": "68aa3265-f22f-4b0d-a490-90953198e2cd",
+      "east": "7de91dcd-496c-4335-b816-341de7681abb",
+      "south": "6104dd65-b32f-41e1-ae25-8cd3fe3b13e6",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 28
+      },
+      "barrier": true
+    },
+    {
+      "id": "6104dd65-b32f-41e1-ae25-8cd3fe3b13e6",
+      "north": "68aa3265-f22f-4b0d-a490-90953198e2cd",
+      "south": "ecd88abb-bb3f-4c21-96d3-8c389f30f261",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 30
+      },
+      "barrier": false
+    },
+    {
+      "id": "ecd88abb-bb3f-4c21-96d3-8c389f30f261",
+      "north": "6104dd65-b32f-41e1-ae25-8cd3fe3b13e6",
+      "east": "16c9effa-05a9-4130-8232-2ffad5934622",
+      "type": "NORMAL",
+      "position": {
+        "x": -12,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "16c9effa-05a9-4130-8232-2ffad5934622",
+      "east": "3ecd5702-41d1-41ee-a91f-e072b33955a9",
+      "west": "ecd88abb-bb3f-4c21-96d3-8c389f30f261",
+      "type": "NORMAL",
+      "position": {
+        "x": -10,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "3ecd5702-41d1-41ee-a91f-e072b33955a9",
+      "east": "14ad64b0-0b07-493d-b3cd-cec4881566e9",
+      "west": "16c9effa-05a9-4130-8232-2ffad5934622",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "14ad64b0-0b07-493d-b3cd-cec4881566e9",
+      "east": "ffb1dd3c-cf2e-4a21-bc12-58b18bd9ce22",
+      "west": "3ecd5702-41d1-41ee-a91f-e072b33955a9",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "ffb1dd3c-cf2e-4a21-bc12-58b18bd9ce22",
+      "east": "9125c956-49bd-4709-b09f-df263216d21e",
+      "south": "e69dd3d4-1189-489b-acc8-c648ecb78cda",
+      "west": "14ad64b0-0b07-493d-b3cd-cec4881566e9",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 32
+      },
+      "barrier": true
+    },
+    {
+      "id": "9125c956-49bd-4709-b09f-df263216d21e",
+      "east": "beefe682-33da-4a61-88f9-f26d653d4e0a",
+      "west": "ffb1dd3c-cf2e-4a21-bc12-58b18bd9ce22",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "beefe682-33da-4a61-88f9-f26d653d4e0a",
+      "east": "f3b1e336-a003-42a8-a201-8412fdadb2ee",
+      "west": "9125c956-49bd-4709-b09f-df263216d21e",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "f3b1e336-a003-42a8-a201-8412fdadb2ee",
+      "east": "c279acd9-044e-4d6c-a7d5-7a2d2cf5392c",
+      "west": "beefe682-33da-4a61-88f9-f26d653d4e0a",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "c279acd9-044e-4d6c-a7d5-7a2d2cf5392c",
+      "east": "f848161e-4408-459b-b674-be5c94e6a50d",
+      "south": "0407aa18-8208-4298-ae26-8f664b516120",
+      "west": "f3b1e336-a003-42a8-a201-8412fdadb2ee",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 32
+      },
+      "barrier": true
+    },
+    {
+      "id": "f848161e-4408-459b-b674-be5c94e6a50d",
+      "east": "244015da-f0c8-4b92-9b95-33289c7343f8",
+      "west": "c279acd9-044e-4d6c-a7d5-7a2d2cf5392c",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "de9cd32d-3c70-4260-8dd2-488e1aaf4f37",
+      "north": "a2845da4-5728-4e2c-acad-b7c24c47eead",
+      "south": "c0cd9192-33bc-4400-9008-8ac782cbb41e",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 30
+      },
+      "barrier": false
+    },
+    {
+      "id": "c0cd9192-33bc-4400-9008-8ac782cbb41e",
+      "north": "de9cd32d-3c70-4260-8dd2-488e1aaf4f37",
+      "west": "08e1db50-2a99-4505-b03a-99aa9255340f",
+      "type": "NORMAL",
+      "position": {
+        "x": 12,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "08e1db50-2a99-4505-b03a-99aa9255340f",
+      "east": "c0cd9192-33bc-4400-9008-8ac782cbb41e",
+      "west": "244015da-f0c8-4b92-9b95-33289c7343f8",
+      "type": "NORMAL",
+      "position": {
+        "x": 10,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "244015da-f0c8-4b92-9b95-33289c7343f8",
+      "east": "08e1db50-2a99-4505-b03a-99aa9255340f",
+      "west": "f848161e-4408-459b-b674-be5c94e6a50d",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 32
+      },
+      "barrier": false
+    },
+    {
+      "id": "e69dd3d4-1189-489b-acc8-c648ecb78cda",
+      "north": "ffb1dd3c-cf2e-4a21-bc12-58b18bd9ce22",
+      "south": "32733ad4-32e1-45d9-bbdb-dc020c12bde1",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 34
+      },
+      "barrier": false
+    },
+    {
+      "id": "32733ad4-32e1-45d9-bbdb-dc020c12bde1",
+      "north": "e69dd3d4-1189-489b-acc8-c648ecb78cda",
+      "east": "de21d9c0-d3f4-422f-8bad-51e3cbacb311",
+      "west": "c01bc84a-1dcc-4bb1-be17-e1ca227383a6",
+      "type": "NORMAL",
+      "position": {
+        "x": -4,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "0407aa18-8208-4298-ae26-8f664b516120",
+      "north": "c279acd9-044e-4d6c-a7d5-7a2d2cf5392c",
+      "south": "6b17e8a3-eed1-4d34-8cbf-8e5f714c37b2",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 34
+      },
+      "barrier": false
+    },
+    {
+      "id": "6b17e8a3-eed1-4d34-8cbf-8e5f714c37b2",
+      "north": "0407aa18-8208-4298-ae26-8f664b516120",
+      "east": "6076cc07-cdf5-43d7-a83e-2f6098765a0d",
+      "west": "93368ba1-b0f5-4c84-839d-1fc369cedaf2",
+      "type": "NORMAL",
+      "position": {
+        "x": 4,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "de21d9c0-d3f4-422f-8bad-51e3cbacb311",
+      "east": "11b8a25b-9f06-4dc8-8ad2-078ea93a1a01",
+      "west": "32733ad4-32e1-45d9-bbdb-dc020c12bde1",
+      "type": "NORMAL",
+      "position": {
+        "x": -2,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "11b8a25b-9f06-4dc8-8ad2-078ea93a1a01",
+      "east": "93368ba1-b0f5-4c84-839d-1fc369cedaf2",
+      "west": "de21d9c0-d3f4-422f-8bad-51e3cbacb311",
+      "type": "NORMAL",
+      "position": {
+        "x": 0,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "93368ba1-b0f5-4c84-839d-1fc369cedaf2",
+      "east": "6b17e8a3-eed1-4d34-8cbf-8e5f714c37b2",
+      "west": "11b8a25b-9f06-4dc8-8ad2-078ea93a1a01",
+      "type": "NORMAL",
+      "position": {
+        "x": 2,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "6076cc07-cdf5-43d7-a83e-2f6098765a0d",
+      "east": "c4cb74e0-ea7a-49b8-a1d0-b0cb755947f6",
+      "west": "6b17e8a3-eed1-4d34-8cbf-8e5f714c37b2",
+      "type": "NORMAL",
+      "position": {
+        "x": 6,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "c4cb74e0-ea7a-49b8-a1d0-b0cb755947f6",
+      "south": "e40c1993-2279-4d06-aef4-1e44c7672d91",
+      "west": "6076cc07-cdf5-43d7-a83e-2f6098765a0d",
+      "type": "NORMAL",
+      "position": {
+        "x": 8,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "c01bc84a-1dcc-4bb1-be17-e1ca227383a6",
+      "east": "32733ad4-32e1-45d9-bbdb-dc020c12bde1",
+      "west": "47b0ef53-fd87-4cad-9635-77e50deb2c71",
+      "type": "NORMAL",
+      "position": {
+        "x": -6,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "47b0ef53-fd87-4cad-9635-77e50deb2c71",
+      "east": "c01bc84a-1dcc-4bb1-be17-e1ca227383a6",
+      "south": "74783b28-31de-4e5f-acce-7e3f3b191910",
+      "type": "NORMAL",
+      "position": {
+        "x": -8,
+        "y": 36
+      },
+      "barrier": false
+    },
+    {
+      "id": "74783b28-31de-4e5f-acce-7e3f3b191910",
+      "north": "47b0ef53-fd87-4cad-9635-77e50deb2c71",
+      "type": "START_BLUE",
+      "position": {
+        "x": -8,
+        "y": 38
+      },
+      "barrier": false
+    },
+    {
+      "id": "e40c1993-2279-4d06-aef4-1e44c7672d91",
+      "north": "c4cb74e0-ea7a-49b8-a1d0-b0cb755947f6",
+      "type": "START_GREEN",
+      "position": {
+        "x": 8,
+        "y": 38
+      },
+      "barrier": false
+    },
+    {
+      "id": "2260f97b-a22a-40f2-bb1c-98000e651a02",
+      "north": "c075cda0-ea15-4822-9be1-0a7f15052d03",
+      "east": "1cb58509-6ed5-407d-9aaf-5d9892e375ae",
+      "type": "NORMAL",
+      "position": {
+        "x": -14,
+        "y": 24
+      },
+      "barrier": false
+    },
+    {
+      "id": "c075cda0-ea15-4822-9be1-0a7f15052d03",
+      "north": "83bf3b86-df3d-4e39-9bd8-0358301fc7e2",
+      "south": "2260f97b-a22a-40f2-bb1c-98000e651a02",
+      "type": "NORMAL",
+      "position": {
+        "x": -14,
+        "y": 22
+      },
+      "barrier": false
+    },
+    {
+      "id": "83bf3b86-df3d-4e39-9bd8-0358301fc7e2",
+      "north": "fee003a3-106a-42e0-91b4-df43f080e97a",
+      "south": "c075cda0-ea15-4822-9be1-0a7f15052d03",
+      "type": "NORMAL",
+      "position": {
+        "x": -14,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "fee003a3-106a-42e0-91b4-df43f080e97a",
+      "north": "2c08b0af-51ad-4999-b474-830eb8b31f93",
+      "east": "e23b9b20-ef0e-4bdd-9ba9-8a0645d2f644",
+      "south": "83bf3b86-df3d-4e39-9bd8-0358301fc7e2",
+      "type": "NORMAL",
+      "position": {
+        "x": -14,
+        "y": 18
+      },
+      "barrier": false
+    },
+    {
+      "id": "2c08b0af-51ad-4999-b474-830eb8b31f93",
+      "north": "8e51f7d0-7f02-4cfc-8129-21dd7ca221f9",
+      "south": "fee003a3-106a-42e0-91b4-df43f080e97a",
+      "type": "NORMAL",
+      "position": {
+        "x": -14,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "8e51f7d0-7f02-4cfc-8129-21dd7ca221f9",
+      "north": "d2554065-dca3-4e7e-bee6-888472ec9185",
+      "south": "2c08b0af-51ad-4999-b474-830eb8b31f93",
+      "type": "NORMAL",
+      "position": {
+        "x": -14,
+        "y": 14
+      },
+      "barrier": false
+    },
+    {
+      "id": "d2554065-dca3-4e7e-bee6-888472ec9185",
+      "east": "a4f04c05-236a-4eb2-afb2-ce7e8e638bf1",
+      "south": "8e51f7d0-7f02-4cfc-8129-21dd7ca221f9",
+      "type": "NORMAL",
+      "position": {
+        "x": -14,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "5ee7cc6e-55c0-4dc5-958b-652b3d9a1dc2",
+      "south": "6d9b4dd4-f314-4102-a87a-b080c0398880",
+      "west": "fbcf4f19-5fe4-48b4-b48b-20b9b62647af",
+      "type": "NORMAL",
+      "position": {
+        "x": 14,
+        "y": 12
+      },
+      "barrier": false
+    },
+    {
+      "id": "6d9b4dd4-f314-4102-a87a-b080c0398880",
+      "north": "5ee7cc6e-55c0-4dc5-958b-652b3d9a1dc2",
+      "south": "0d1ffa0e-946d-44df-b44d-07ee71b75e8d",
+      "type": "NORMAL",
+      "position": {
+        "x": 14,
+        "y": 14
+      },
+      "barrier": false
+    },
+    {
+      "id": "0d1ffa0e-946d-44df-b44d-07ee71b75e8d",
+      "north": "6d9b4dd4-f314-4102-a87a-b080c0398880",
+      "south": "517689bf-cf6d-4dd1-84db-3736d38495a1",
+      "type": "NORMAL",
+      "position": {
+        "x": 14,
+        "y": 16
+      },
+      "barrier": false
+    },
+    {
+      "id": "517689bf-cf6d-4dd1-84db-3736d38495a1",
+      "north": "0d1ffa0e-946d-44df-b44d-07ee71b75e8d",
+      "south": "5dec4fa2-641f-4d6f-a605-c98b765a9b05",
+      "west": "a1125e70-6fb7-4fe8-9b78-15b086d3ecc6",
+      "type": "NORMAL",
+      "position": {
+        "x": 14,
+        "y": 18
+      },
+      "barrier": false
+    },
+    {
+      "id": "5dec4fa2-641f-4d6f-a605-c98b765a9b05",
+      "north": "517689bf-cf6d-4dd1-84db-3736d38495a1",
+      "south": "c049bacd-bca6-4fdb-be4a-eba2207a6a0f",
+      "type": "NORMAL",
+      "position": {
+        "x": 14,
+        "y": 20
+      },
+      "barrier": false
+    },
+    {
+      "id": "c049bacd-bca6-4fdb-be4a-eba2207a6a0f",
+      "north": "5dec4fa2-641f-4d6f-a605-c98b765a9b05",
+      "south": "f106b439-a2dc-41b4-a947-a76eeb79a2eb",
+      "type": "NORMAL",
+      "position": {
+        "x": 14,
+        "y": 22
+      },
+      "barrier": false
+    },
+    {
+      "id": "f106b439-a2dc-41b4-a947-a76eeb79a2eb",
+      "north": "c049bacd-bca6-4fdb-be4a-eba2207a6a0f",
+      "west": "e7e90802-3944-4b32-9f7f-0e17b89616a0",
+      "type": "NORMAL",
+      "position": {
+        "x": 14,
+        "y": 24
+      },
+      "barrier": false
+    }
+  ],
+  "assets": [
+    {
+      
+    }
+  ]
+}
