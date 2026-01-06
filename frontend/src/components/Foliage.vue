@@ -26,8 +26,8 @@ const { elements } = defineProps<{ elements?: Element[] }>()
 /* Modelle */
 const models = {
   [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1 },
-  [Sizes.Medium]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1 },
-  [Sizes.Small]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100 },
+    [Sizes.Medium]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100 },
+  [Sizes.Small]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1 }
 
 }
 
@@ -114,5 +114,5 @@ const getRef = (el: any, index: number) => {
 </script>
 <template>
   <TresInstancedMesh v-for="(part, index) in parts" :ref="(el) => getRef(el, index)"
-    :args="[part.geometry, part.material, (elements?.filter(e => e.type === part.type))?.length ?? 1]" />
+    :args="[part.geometry, part.material, (elements?.filter(e => e.type === part.type))?.length ?? 0]" />
 </template>
