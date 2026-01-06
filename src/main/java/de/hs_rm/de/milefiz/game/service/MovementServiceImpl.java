@@ -78,9 +78,10 @@ public class MovementServiceImpl implements MovementService {
     private final DuelService duelService;
     private static final int LAST_MOVE = 1;
     private static final int SECOND_TO_LAST_MOVE = 2;
-    private final boolean TESTING_LOCALLY; 
+    private final boolean TESTING_LOCALLY;
 
-    public MovementServiceImpl(LobbyManager lobbyManager, DuelService duelService, @Value("${testing.locally:false}") boolean TESTING_LOCALLY) {
+    public MovementServiceImpl(LobbyManager lobbyManager, DuelService duelService,
+            @Value("${testing.locally:false}") boolean TESTING_LOCALLY) {
         this.lobbyManager = lobbyManager;
         this.duelService = duelService;
         this.TESTING_LOCALLY = TESTING_LOCALLY;
@@ -208,7 +209,6 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
         }
 
-
         // BARRIERE
         // Wenn man in eine Barriere läuft, verliert man seine restlichen Schritte,
         // außer man landet genau darauf
@@ -228,29 +228,15 @@ public class MovementServiceImpl implements MovementService {
                             tempBarrier.getId());
                 }
                 // ansonsten wird der zug beendet
-                player.setRemainingMoves(0);
-                meeple.clearLastField();
-                logger.info("ran into barrier, cant go any further! (loses remaining moves)");
-                return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
+                // player.setRemainingMoves(0);
+                // meeple.clearLastField();
+                // logger.info("ran into barrier, cant go any further! (loses remaining
+                // moves)");
+                // return new FrontendRejectedByBarrierEvent(player.getId(),
+                // player.getRemainingMoves());
+                logger.info("Cant enter End with remaining moves");
+                return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
             }
-        }
-
-        // SACKGASSE DURCH BARRIEREN
-        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren
-        // und/oder nicht betretbare Felder hat,
-        // wird der Zug automatisch beendet ohne dass man sich noch in Richtung der
-        // Barriere bewegen muss, außer man macht gerade seinen vorletzten Schritt,
-        // was bedeutet, dass man direkt auf der Barriere oder dem Ziel landen kann.
-        if ((hasOnlyBarrierNeighbours(nextField, currentField, board))
-                && (player.getRemainingMoves() != SECOND_TO_LAST_MOVE)) {
-            endTurnWithMove(player, meeple, nextField);
-            logger.info("All possible moves would lead into Barriers, player loses remaining Moves, turn is over");
-            return new FrontendMoveWithLossEvent(
-                    player.getId(),
-                    meeple.getId(),
-                    nextField.getId(),
-                    player.getRemainingMoves(),
-                    player.hasMoved());
         }
 
         // FELD DURCH EIGENEN MEEPLE BLOCKIERT
@@ -286,13 +272,32 @@ public class MovementServiceImpl implements MovementService {
             }
         }
 
+        // SACKGASSE DURCH BARRIEREN
+        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren
+        // und/oder nicht betretbare Felder hat,
+        // wird der Zug automatisch beendet ohne dass man sich noch in Richtung der
+        // Barriere bewegen muss, außer man macht gerade seinen vorletzten Schritt,
+        // was bedeutet, dass man direkt auf der Barriere oder dem Ziel landen kann.
+        if ((hasOnlyBarrierNeighbours(nextField, currentField, board))
+                && (player.getRemainingMoves() > SECOND_TO_LAST_MOVE)) {
+            endTurnWithMove(player, meeple, nextField);
+            logger.info("All possible moves would lead into Barriers, player loses remaining Moves, turn is over");
+            return new FrontendMoveWithLossEvent(
+                    player.getId(),
+                    meeple.getId(),
+                    nextField.getId(),
+                    player.getRemainingMoves(),
+                    player.hasMoved());
+        }
+
         // DUELL
         // Sonderfaelle wenn es sich um den letzten Zug handelt
         if (player.getRemainingMoves() == LAST_MOVE) {
 
             for (Player rivalPlayer : lobby.getPlayers()) {
 
-                if (player.equals(rivalPlayer)) continue;
+                if (player.equals(rivalPlayer))
+                    continue;
 
                 for (Meeple rivalMeeple : rivalPlayer.getMeeples()) {
 
@@ -302,9 +307,8 @@ public class MovementServiceImpl implements MovementService {
                             logger.info("Move blocked — rival meeple {} is already in a duel", rivalMeeple.getId());
 
                             return new FrontendMoveRejectedEvent(
-                                player.getId(),
-                                "MEEPLE_IN_DUEL"
-                            );
+                                    player.getId(),
+                                    "MEEPLE_IN_DUEL");
                         }
 
                         meeple.setCurrentField(nextField);
@@ -312,18 +316,16 @@ public class MovementServiceImpl implements MovementService {
                         player.setActiveMeeple(meeple);
                         player.useMove();
 
-                        logger.info("Initiating duel between meeple {} and meeple {}", 
+                        logger.info("Initiating duel between meeple {} and meeple {}",
                                 meeple.getId(), rivalMeeple.getId());
 
                         var duel = duelService.createDuel(
                                 player.getId(),
                                 rivalPlayer.getId(),
                                 meeple.getId(),
-                                rivalMeeple.getId()
-                        );
+                                rivalMeeple.getId());
 
                         var miniGame = duelService.assignRandomGameToDuel(duel.getId());
-
 
                         if (miniGame instanceof DiceGame dice) {
                             dice.initPlayers(player.getId(), rivalPlayer.getId());
@@ -337,12 +339,11 @@ public class MovementServiceImpl implements MovementService {
                                 rivalMeeple.getId(),
                                 nextField.getId(),
                                 player.getRemainingMoves(),
-                                miniGame
-                        );
+                                miniGame);
                     }
                 }
             }
-        }    
+        }
 
         // Spielfeld-Zustand aktualisieren
         // lastField wird jetzt im Meeple.setCurrentField aktualisiert
@@ -433,10 +434,11 @@ public class MovementServiceImpl implements MovementService {
      * @param lastField       das zuletzt betretene Feld,
      *                        oder {@code null}, falls keines existiert
      * @param remainingMoves  die Anzahl der noch verfügbaren Schritte
-     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeples besetzt sind
-     *                                              
+     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeples besetzt
+     *                        sind
+     * 
      * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
-     *                        
+     * 
      * @return {@code true}, wenn innerhalb der verbleibenden Schritte mindestens
      *         ein legales Stopfeld erreichbar ist, andernfalls {@code false}
      *
@@ -673,7 +675,7 @@ public class MovementServiceImpl implements MovementService {
 
         barrier.setCurrentField(targetField);
 
-        return new FrontendMoveBarrierEvent(barrier.getId(),currentField.getId(), targetField.getId());
+        return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
     }
 
     /**
