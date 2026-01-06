@@ -268,7 +268,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
-          boardStore.updateBarrierPosition(event.barrierId, event.currentField, event.targetField);
+          boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
         }
 
         if (event.type === "REJECTED_BY_BARRIER") {
