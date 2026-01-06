@@ -77,7 +77,7 @@ public class MovementServiceImpl implements MovementService {
     private final DuelService duelService;
     private static final int LAST_MOVE = 1;
     private static final int SECOND_TO_LAST_MOVE = 2;
-    private static final boolean TESTING_LOCALLY = false; // true wenn es bei sich lokal laufen lässt, damit die
+    private static final boolean TESTING_LOCALLY = true; // true wenn es bei sich lokal laufen lässt, damit die
                                                           // barriere vorerst randomly verschoben wird.
                                                           // muss false sein für die unit tests
 
@@ -638,6 +638,7 @@ public class MovementServiceImpl implements MovementService {
 
         Board board = lobby.getBoard();
         Meeple barrier = board.getBarrierById(moveBarrCmd.barrierId());
+        Field currentField = barrier.getCurrentField();
 
         // ⚠️ Temporärer Testcode:
         // zu testzwecken greifen wir auf ein zufälliges feld zurück um die checks
@@ -672,7 +673,7 @@ public class MovementServiceImpl implements MovementService {
 
         barrier.setCurrentField(targetField);
 
-        return new FrontendMoveBarrierEvent(barrier.getId(), targetField.getId());
+        return new FrontendMoveBarrierEvent(barrier.getId(),currentField.getId(), targetField.getId());
     }
 
     /**
