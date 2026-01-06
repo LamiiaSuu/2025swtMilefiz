@@ -158,6 +158,13 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_MOVES_LEFT");
         }
 
+        // Spieler hat schon gemoved in diesem Zug und versucht einen anderen Meeple zu
+        // bewegen
+        if (player.hasMoved() && player.getActiveMeeple() != null && !player.getActiveMeeple().equals(meeple)) {
+            logger.info("Attempt to switch Meeple during move failed.");
+            return new FrontendCheatedEvent(player.getId(), "Attempt to switch Meeple during move failed.");
+        }
+
         // Ziel-Feld anhand der Bewegungsrichtung bestimmen
         Field nextField = switch (direction) {
             case NORTH -> currentField.getNorth();
@@ -245,13 +252,6 @@ public class MovementServiceImpl implements MovementService {
                 logger.info("ran into barrier, cant go any further! (loses remaining moves)");
                 return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
             }
-        }
-
-        // Spieler hat schon gemoved in diesem Zug und versucht einen anderen Meeple zu
-        // bewegen
-        if (player.hasMoved() && player.getActiveMeeple() != null && !player.getActiveMeeple().equals(meeple)) {
-            logger.info("Attempt to switch Meeple during move failed.");
-            return new FrontendCheatedEvent(player.getId(), "Attempt to switch Meeple during move failed.");
         }
 
         // FELD DURCH EIGENEN MEEPLE BLOCKIERT
@@ -343,14 +343,7 @@ public class MovementServiceImpl implements MovementService {
                     }
                 }
             }
-        }
-
-
-        //Spieler hat schon gemoved in diesem Zug und versucht einen anderen Meeple zu bewegen
-        if (player.hasMoved() && player.getActiveMeeple() != null && !player.getActiveMeeple().equals(meeple)) {
-            logger.info("Attempt to switch Meeple during move failed.");
-            return new FrontendCheatedEvent(player.getId(), "Attempt to switch Meeple during move failed.");
-        }
+        }    
 
         // Spielfeld-Zustand aktualisieren
         // lastField wird jetzt im Meeple.setCurrentField aktualisiert
