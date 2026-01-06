@@ -15,10 +15,7 @@ const props = defineProps<{
   selectedFieldId: string | null
 }>()
 
-console.log("occupancy keys:", Object.keys(props.occupancyByFieldId).length)
-console.log("first field id:", props.board.fields[0]?.id)
-/* console.log("occupancy for first:", props.occupancyByFieldId[props.board.fields[0]?.id])
- */
+
 const emit = defineEmits<{
   (e: "select", fieldId: string): void
 }>()
@@ -101,6 +98,7 @@ function isFree(fieldId: string) {
 function onClickField(fieldId: string) {
   if (!isFree(fieldId)) return
   emit("select", fieldId)
+  console.log("Selected Field: " + fieldId)
 }
 
 /**
@@ -122,14 +120,9 @@ function isSelected(fieldId: string) {
 </script>
 
 <template>
-  <svg
-    class="minimap-svg"
-    :viewBox="`0 0 ${svgSize.w} ${svgSize.h}`"
-    width="100%"
-    height="100%"
-    preserveAspectRatio="xMidYMid meet"
-  >
-    <!-- Drop Shadow Filter (leichter "Wireframe"-Look) -->
+  <svg class="minimap-svg" :viewBox="`0 0 ${svgSize.w} ${svgSize.h}`" width="100%" height="100%"
+    preserveAspectRatio="xMidYMid meet">
+    <!-- Drop Shadow Filter -->
     <defs>
       <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
         <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.25" />
@@ -139,80 +132,36 @@ function isSelected(fieldId: string) {
     <!-- Kanten: nur east + south zeichnen, um Duplikate zu vermeiden -->
     <g class="edges">
       <template v-for="f in props.board.fields" :key="f.id">
-        <line
-          v-if="f.east && fieldById.get(f.east)"
-          :x1="cx(f.position.x)"
-          :y1="cy(f.position.y)"
-          :x2="cx(fieldById.get(f.east)!.position.x)"
-          :y2="cy(fieldById.get(f.east)!.position.y)"
-          class="edge"
-        />
-        <line
-          v-if="f.south && fieldById.get(f.south)"
-          :x1="cx(f.position.x)"
-          :y1="cy(f.position.y)"
-          :x2="cx(fieldById.get(f.south)!.position.x)"
-          :y2="cy(fieldById.get(f.south)!.position.y)"
-          class="edge"
-        />
+        <line v-if="f.east && fieldById.get(f.east)" :x1="cx(f.position.x)" :y1="cy(f.position.y)"
+          :x2="cx(fieldById.get(f.east)!.position.x)" :y2="cy(fieldById.get(f.east)!.position.y)" class="edge" />
+        <line v-if="f.south && fieldById.get(f.south)" :x1="cx(f.position.x)" :y1="cy(f.position.y)"
+          :x2="cx(fieldById.get(f.south)!.position.x)" :y2="cy(fieldById.get(f.south)!.position.y)" class="edge" />
       </template>
     </g>
 
     <!-- Nodes -->
     <g class="nodes">
-      <g
-        v-for="f in props.board.fields"
-        :key="f.id"
-        class="node"
-        :class="{
-          clickable: isFree(f.id),
-          locked: !isFree(f.id),
-        }"
-        @click="onClickField(f.id)"
-      >
+      <g v-for="f in props.board.fields" :key="f.id" class="node" :class="{
+        clickable: isFree(f.id),
+        locked: !isFree(f.id),
+      }">
         <!-- Grundkreis (Outline) -->
-        <circle
-          :cx="cx(f.position.x)"
-          :cy="cy(f.position.y)"
-          :r="R"
-          class="node-circle"
-          filter="url(#nodeShadow)"
-        />
+        <circle :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R" class="node-circle" filter="url(#nodeShadow)"
+          @click="onClickField(f.id)" />
 
         <!-- OWN (roter Kreis) -->
-        <circle
-          v-if="occ(f.id) ==='OWN_MEEPLE'"
-          :cx="cx(f.position.x)"
-          :cy="cy(f.position.y)"
-          :r="R - 3"
-          class="node-own"
-        />
+        <circle v-if="isOwn(f.id)" :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R - 3" class="node-own" />
 
         <!-- SELECTED (schwarzer Kreis) -->
-        <circle
-          v-else-if="isSelected(f.id)"
-          :cx="cx(f.position.x)"
-          :cy="cy(f.position.y)"
-          :r="R - 3"
-          class="node-selected"
-        />
+        <circle v-else-if="isSelected(f.id)" :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R - 3"
+          class="node-selected" />
 
         <!-- OCCUPIED (X im Kreis) -->
-        <g v-else-if="occ(f.id) === 'OCCUPIED'" class="node-x">
-          <line
-            :x1="cx(f.position.x) - (R - 6)"
-            :y1="cy(f.position.y) - (R - 6)"
-            :x2="cx(f.position.x) + (R - 6)"
-            :y2="cy(f.position.y) + (R - 6)"
-            class="x-line"
-          />
-          <line
-            :x1="cx(f.position.x) + (R - 6)"
-            :y1="cy(f.position.y) - (R - 6)"
-            :x2="cx(f.position.x) - (R - 6)"
-            :y2="cy(f.position.y) + (R - 6)"
-            class="x-line"
-          />
+        <g v-else-if="isOccupied(f.id)" class="node-x">
+          <line :x1="cx(f.position.x) - (R - 6)" :y1="cy(f.position.y) - (R - 6)" :x2="cx(f.position.x) + (R - 6)"
+            :y2="cy(f.position.y) + (R - 6)" class="x-line" />
+          <line :x1="cx(f.position.x) + (R - 6)" :y1="cy(f.position.y) - (R - 6)" :x2="cx(f.position.x) - (R - 6)"
+            :y2="cy(f.position.y) + (R - 6)" class="x-line" />
         </g>
       </g>
     </g>
@@ -255,20 +204,24 @@ function isSelected(fieldId: string) {
 /* X Mark */
 .x-line {
   stroke: rgba(0, 0, 0, 0.85);
-  stroke-width: 4;
+  stroke-width: 8;
   stroke-linecap: round;
 }
 
-/* Interaktion */
-.node.clickable {
+.node-circle {
+  pointer-events: all;
+}
+
+.node.clickable .node-circle {
   cursor: pointer;
 }
-.node.locked {
+
+.node.locked .node-circle {
   cursor: not-allowed;
 }
 
-/* Hover nur für freie Felder */
-.node.clickable:hover .node-circle {
+/* Hover direkt am Kreis */
+.node.clickable .node-circle:hover {
   stroke-width: 6;
 }
 </style>

@@ -39,7 +39,7 @@ onUnmounted(() => {
       </header>
 
       <section class="content">
-        <!-- Zentraler Map Bereich -->
+        <!-- Map Bereich -->
         <div class="map-area">
           <div class="map-slot">
             <slot name="map" />
@@ -71,7 +71,7 @@ onUnmounted(() => {
 
         <!-- Bestätigen Button -->
         <div class="actions">
-          <button type="button" class="btn primary" @click="emit('confirm')">
+          <button type="button" class="btn primary" @click="console.log('CONFIRM CLICK'); emit('confirm')">
             Bestätigen
           </button>
         </div>
@@ -89,9 +89,11 @@ onUnmounted(() => {
   place-items: center;
   padding: 24px;
   z-index: 9999;
+  pointer-events: auto;
 }
 
 .dialog {
+  position: relative;
   width: min(980px, 100%);
   background: #f7f7f7;
   border: 1px solid rgba(0, 0, 0, 0.35);
@@ -121,9 +123,13 @@ onUnmounted(() => {
   padding: 12px 0 70px 0;
   display: flex;
   justify-content: center;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .map-slot {
+  position: relative;
+  overflow: hidden;
   width: min(520px, 100%);
   height: 340px;
   border: 1px solid rgba(0, 0, 0, 0.25);
@@ -131,6 +137,14 @@ onUnmounted(() => {
   background: #fff;
   display: grid;
   place-items: center;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.map-slot :deep(svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .legend {
@@ -167,7 +181,7 @@ onUnmounted(() => {
 }
 
 .swatch-own {
-  background: #e11; 
+  background: #e11;
   border-color: #e11;
 }
 
@@ -189,6 +203,7 @@ onUnmounted(() => {
   margin-top: 12px;
   display: flex;
   justify-content: center;
+  z-index: 1000;
 }
 
 .btn {
@@ -201,7 +216,7 @@ onUnmounted(() => {
 }
 
 .btn.primary {
-  background: #111;
+  background: #234420;
   color: #fff;
 }
 
