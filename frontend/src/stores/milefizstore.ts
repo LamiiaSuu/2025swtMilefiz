@@ -692,7 +692,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       { occupiedCount: occupied.length, ownCount: own.length }
     )
 
-    useBoardStore().logOccupancySnapshot()
   }
 
 
