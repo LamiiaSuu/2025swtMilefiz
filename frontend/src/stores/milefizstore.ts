@@ -275,6 +275,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = false;
             //TODO minimap öffnen
             openMinimap(event.barrierId, event.playerId)
           }
@@ -481,6 +482,24 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (lobbyUpdate.ownPlayerId) gamedata.playerId = lobbyUpdate.ownPlayerId
     if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
     gamedata.lobby = lobbyUpdate.lobby
+
+     const boardStore = useBoardStore()
+
+    if (lobbyUpdate.lobby?.board) {
+      boardStore.board = lobbyUpdate.lobby.board
+      boardStore.ok = true
+
+      // Meeple-Positionen neu setzen
+      boardStore.meeplePositions = {}
+
+      for (const player of lobbyUpdate.lobby.players ?? []) {
+        for (const meeple of player.meeples ?? []) {
+          if (meeple.currentFieldId) {
+            boardStore.meeplePositions[meeple.id] = meeple.currentFieldId
+          }
+        }
+      }
+    }
   }
 
   /**

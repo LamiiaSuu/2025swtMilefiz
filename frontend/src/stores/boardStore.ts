@@ -30,7 +30,13 @@ export const useBoardStore = defineStore('board', {
     async getBoard() {
       console.log('Start receiving Gameboard Data...')
       try {
-        const resp = await fetch('/api/game/getBoard')
+        const milefizStore = useMilefizStore()
+        const lobbyId = milefizStore.gamedata.lobby?.id
+        if (!lobbyId) {
+          console.error("Keine Lobby ID - Board kann nicht geladen werden")
+          return
+        }
+        const resp = await fetch(`/api/lobby/${lobbyId}/board/get`)
         if (!resp.ok) {
           console.error('Error while recieving Data:\n', resp.statusText)
           throw new Error(resp.statusText)
