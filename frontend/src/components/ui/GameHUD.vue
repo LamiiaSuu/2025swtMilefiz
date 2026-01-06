@@ -21,6 +21,12 @@ import { useBoardStore } from '@/stores/boardStore';
 const milefizStore = useMilefizStore()
 const boardStore = useBoardStore()
 const { board, ok } = storeToRefs(boardStore)
+
+
+function colorToCss(c: string) {
+  return { RED:"#e11", GREEN:"#2a6", BLUE:"#16f", YELLOW:"#fc0" }[c] ?? "#e11"
+}
+
 </script>
 
 
@@ -31,7 +37,8 @@ const { board, ok } = storeToRefs(boardStore)
       <MiniMapPopUp :is-open="milefizStore.minimap.isMiniMapOpen"
         :selected-field-id="milefizStore.minimap.selectedFieldId"
         :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
-        @confirm="milefizStore.confirmMinimapSelection">
+        @confirm="milefizStore.confirmMinimapSelection" 
+        :style="{ '--own-color': colorToCss(milefizStore.minimap.ownColor) }">
         <template #map>
           <MiniMapGraph v-if="board" :board="board" :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
             :selected-field-id="milefizStore.minimap.selectedFieldId" @select="milefizStore.selectMinimapField" />

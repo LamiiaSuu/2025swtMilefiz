@@ -145,18 +145,18 @@ function isSelected(fieldId: string) {
         clickable: isFree(f.id),
         locked: !isFree(f.id),
       }">
-        <!-- Grundkreis (Outline) -->
+        <!-- Grundkreis -->
         <circle :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R" class="node-circle" filter="url(#nodeShadow)"
           @click="onClickField(f.id)" />
 
-        <!-- OWN (roter Kreis) -->
+        <!-- OWN roter Kreis -->
         <circle v-if="isOwn(f.id)" :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R - 3" class="node-own" />
 
-        <!-- SELECTED (schwarzer Kreis) -->
+        <!-- SELECTED schwarzer Kreis)-->
         <circle v-else-if="isSelected(f.id)" :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R - 3"
           class="node-selected" />
 
-        <!-- OCCUPIED (X im Kreis) -->
+        <!-- OCCUPIED X -->
         <g v-else-if="isOccupied(f.id)" class="node-x">
           <line :x1="cx(f.position.x) - (R - 6)" :y1="cy(f.position.y) - (R - 6)" :x2="cx(f.position.x) + (R - 6)"
             :y2="cy(f.position.y) + (R - 6)" class="x-line" />
@@ -189,7 +189,7 @@ function isSelected(fieldId: string) {
 
 /* OWN Meeple*/
 .node-own {
-  fill: #e11;
+  fill: var(--own-color, #e11);
   stroke: rgba(0, 0, 0, 0.85);
   stroke-width: 2;
 }
@@ -201,7 +201,6 @@ function isSelected(fieldId: string) {
   stroke-width: 2;
 }
 
-/* X Mark */
 .x-line {
   stroke: rgba(0, 0, 0, 0.85);
   stroke-width: 8;
@@ -220,7 +219,6 @@ function isSelected(fieldId: string) {
   cursor: not-allowed;
 }
 
-/* Hover direkt am Kreis */
 .node.clickable .node-circle:hover {
   stroke-width: 6;
 }

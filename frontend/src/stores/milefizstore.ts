@@ -72,16 +72,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   /**
    * TODO doc
    */
-  const minimap = reactive<{
-    isMiniMapOpen: boolean,
-    fields: Array<string>,
-    selectedFieldId: string,
-    occupancyByFieldId: Record<string, Occupancy>,
-  }>({
+  const minimap = reactive({
     isMiniMapOpen: false,
-    fields: [],
-    selectedFieldId: '',
-    occupancyByFieldId: {},
+    selectedFieldId: "",
+    occupancyByFieldId: {} as Record<string, Occupancy>,
+    ownColor: "RED" as "RED" | "GREEN" | "BLUE" | "YELLOW",
   })
 
 
@@ -281,7 +276,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             //TODO minimap öffnen
-            openMinimap(event.barrierId)
+            openMinimap(event.barrierId, event.playerId)
           }
 
           //moveBarrier(event.barrierId, crypto.randomUUID())
@@ -657,14 +652,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     return occ
   }
 
-  //TODO
-  function openMinimap(barrierId: string) {
+
+  function openMinimap(barrierId: string, playerId: string) {
+    minimap.ownColor = (getPlayerColor(playerId) ?? "RED") as any
     minimap.isMiniMapOpen = true;
     minimap.selectedFieldId = ''
 
     minimap.occupancyByFieldId = buildOccupancySnapshot()
 
-    // Debug: Überblick
+
     const occupied = Object.entries(minimap.occupancyByFieldId)
       .filter(([, v]) => v === 'OCCUPIED')
       .map(([k]) => k)
@@ -680,15 +676,21 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     useBoardStore().logOccupancySnapshot()
   }
 
-  //TODO
+
   function confirmMinimapSelection() {
     minimap.isMiniMapOpen = false
 
   }
 
-  //TODO
+
   function selectMinimapField(fieldId: string) {
     minimap.selectedFieldId = fieldId
+  }
+
+  function getPlayerColor(playerId: string): string | null {
+    const lobby = gamedata.lobby
+    if (!lobby) return null
+    return lobby.players.find(p => p.id === playerId)?.color ?? null
   }
 
   function sendRollDice() {

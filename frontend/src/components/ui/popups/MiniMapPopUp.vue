@@ -54,7 +54,7 @@ onUnmounted(() => {
 
             <div class="legend-row">
               <span class="legend-swatch swatch-own" aria-hidden="true"></span>
-              <span class="legend-label">Eigene Figur</span>
+              <span class="legend-label">Eigenes Meeple</span>
             </div>
 
             <div class="legend-row">
@@ -64,14 +64,14 @@ onUnmounted(() => {
 
             <div class="legend-row">
               <span class="legend-swatch swatch-free" aria-hidden="true"></span>
-              <span class="legend-label">frei</span>
+              <span class="legend-label">Frei</span>
             </div>
           </aside>
         </div>
 
         <!-- Bestätigen Button -->
         <div class="actions">
-          <button type="button" class="btn primary" @click="console.log('CONFIRM CLICK'); emit('confirm')">
+          <button type="button" class="btn primary" @click="emit('confirm')">
             Bestätigen
           </button>
         </div>
