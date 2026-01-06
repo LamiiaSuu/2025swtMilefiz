@@ -279,8 +279,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             //TODO minimap öffnen
             openMinimap(event.barrierId, event.playerId)
           }
-
-          //moveBarrier(event.barrierId, crypto.randomUUID())
+          moveBarrier(event.barrierId, crypto.randomUUID())
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);

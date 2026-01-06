@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
@@ -77,13 +78,12 @@ public class MovementServiceImpl implements MovementService {
     private final DuelService duelService;
     private static final int LAST_MOVE = 1;
     private static final int SECOND_TO_LAST_MOVE = 2;
-    private static final boolean TESTING_LOCALLY = false; // true wenn es bei sich lokal laufen lässt, damit die
-                                                          // barriere vorerst randomly verschoben wird.
-                                                          // muss false sein für die unit tests
+    private final boolean TESTING_LOCALLY; 
 
-    public MovementServiceImpl(LobbyManager lobbyManager, DuelService duelService) {
+    public MovementServiceImpl(LobbyManager lobbyManager, DuelService duelService, @Value("${testing.locally:false}") boolean TESTING_LOCALLY) {
         this.lobbyManager = lobbyManager;
         this.duelService = duelService;
+        this.TESTING_LOCALLY = TESTING_LOCALLY;
     }
 
     /**

@@ -61,7 +61,7 @@ public class MovementServiceMeepleTest {
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
         duelService = new DuelServiceImpl(lobbyManager, messaging);
-        movementService = new MovementServiceImpl(lobbyManager, duelService);
+        movementService = new MovementServiceImpl(lobbyManager, duelService, false);
 
         // Felder
         currentField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 0));
