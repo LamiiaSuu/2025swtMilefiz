@@ -53,7 +53,7 @@ public class MovementServiceBarrierTest {
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        movementService = new MovementServiceImpl(lobbyManager, duelService);
+        movementService = new MovementServiceImpl(lobbyManager, duelService, false);
 
         // Felder
         startField = new Field(UUID.randomUUID(), FieldType.START_GREEN, new Position(0, 0));

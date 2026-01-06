@@ -48,25 +48,6 @@ public class GameController {
     }
 
     /**
-     * Gibt das aktuelle Test-Board als DTO zurück.
-     *
-     * <p>
-     * Diese Methode lädt das Test-Board vom GameService und konvertiert es zu
-     * einem BoardDTO für die Frontend-Kommunikation.
-     * </p>
-     *
-     * @return BoardDTO mit allen Board-Informationen einschließlich Fields,
-     *         Connections, Positionen und Field-Types
-     * @see GameService#getTestBoard()
-     * @see BoardMapper#mapToDTO(Board)
-     */
-    @GetMapping(path = "/getBoard")
-    public BoardDTO getBoard() {
-        Board board = gameService.getTestBoard();
-        return BoardMapper.mapToDTO(board);
-    }
-
-    /**
      * Validiert ein übergebenes Board
      *
      * @param boardDTO

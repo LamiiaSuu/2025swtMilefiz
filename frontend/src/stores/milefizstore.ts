@@ -10,6 +10,8 @@ import { generateUUID } from 'three/src/math/MathUtils.js';
 import { useErrorHandler } from '@/composables/useErrorHandler';
 import { startingbaseColors, playerColors } from '@/types/colorsAssets';
 import { useAudioStore } from '@/stores/audioStore'
+import { string } from 'three/tsl';
+import { getAutomaticTypeDirectiveNames } from 'typescript';
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
@@ -64,6 +66,19 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   */
   const popUpMenuOpen = ref(false)
   const popUpSettingsOpen = ref(false)
+
+
+  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE'
+  /**
+   * TODO doc
+   */
+  const minimap = reactive({
+    isMiniMapOpen: false,
+    selectedFieldId: "",
+    occupancyByFieldId: {} as Record<string, Occupancy>,
+    ownColor: "RED" as "RED" | "GREEN" | "BLUE" | "YELLOW",
+  })
+
 
   // Beispiele für Daten
   const gamedata = reactive<{
@@ -185,7 +200,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             else if (event.msg === "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE") {
               showWarning("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE")
             }
-            else if( event.msg === "MEEPLE_IN_DUEL"){
+            else if (event.msg === "MEEPLE_IN_DUEL") {
               showWarning("MEEPLE_IN_DUEL")
             }
             return
@@ -257,18 +272,20 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "TRIGGER_BARRIER_MOVE") {
           //TODO verschieben der barriere implementieren
-          //aktuell einfach random platzhalter uuid
-          moveBarrier(event.barrierId, crypto.randomUUID())
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            gamedata.moved = false;
+            //TODO minimap öffnen
+            openMinimap(event.barrierId, event.playerId)
           }
-
+          moveBarrier(event.barrierId, crypto.randomUUID())
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
-          boardStore.updateBarrierPosition(event.barrierId, event.targetField);
+          boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
         }
+
         if (event.type === "REJECTED_BY_BARRIER") {
           //TODO rennen in Barriere visualisieren
           console.log("u ran into barrieeer oh no")
@@ -287,25 +304,25 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = false;
           }
-          if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId ){
-          activeDuels[event.duelId] = {
-            duelId: event.duelId,
+          if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId) {
+            activeDuels[event.duelId] = {
+              duelId: event.duelId,
 
-            firstMeeple: event.firstMeepleId,
-            secondMeeple: event.secondMeepleId,
-            targetField: event.targetField,
+              firstMeeple: event.firstMeepleId,
+              secondMeeple: event.secondMeepleId,
+              targetField: event.targetField,
 
-            miniGameId: event.miniGameId,
-            miniGameName: event.miniGameName,
-            miniGameType: event.miniGameType,
+              miniGameId: event.miniGameId,
+              miniGameName: event.miniGameName,
+              miniGameType: event.miniGameType,
 
-            timeOut: event.timeOut,
+              timeOut: event.timeOut,
 
-            state: {}
+              state: {}
+            }
+            document.exitPointerLock()
           }
-          document.exitPointerLock()
-        }
-          
+
         }
         if (event.type === "DICE_GAME_UPDATE") {
 
@@ -465,6 +482,24 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     if (lobbyUpdate.ownPlayerId) gamedata.playerId = lobbyUpdate.ownPlayerId
     if (lobbyUpdate.playerToken) gamedata.playerToken = lobbyUpdate.playerToken
     gamedata.lobby = lobbyUpdate.lobby
+
+    const boardStore = useBoardStore()
+
+    if (lobbyUpdate.lobby?.board) {
+      boardStore.board = lobbyUpdate.lobby.board
+      boardStore.ok = true
+
+      // Meeple-Positionen neu setzen
+      boardStore.meeplePositions = {}
+
+      for (const player of lobbyUpdate.lobby.players ?? []) {
+        for (const meeple of player.meeples ?? []) {
+          if (meeple.currentFieldId) {
+            boardStore.meeplePositions[meeple.id] = meeple.currentFieldId
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -585,6 +620,95 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     } catch (err) {
       console.error("Error sending move:", err)
     }
+  }
+
+  function buildOccupancySnapshot(): Record<string, Occupancy> {
+    const boardStore = useBoardStore()
+    const board = boardStore.board
+    const lobby = gamedata.lobby
+
+    if (!board) {
+      console.log('[minimap] buildOccupancySnapshot: board not loaded.')
+      return {}
+    }
+
+    // Alle Felder zunächst auf FREE setzen
+    const occ: Record<string, Occupancy> = Object.fromEntries(
+      board.fields.map(f => [f.id, 'FREE' as Occupancy])
+    )
+
+    // Barrieren als OCCUPIED setzen
+    for (const f of board.fields) {
+      if (f.barrier) occ[f.id] = 'OCCUPIED'
+    }
+
+    // Wenn lobby fehlt, können own vs foreign meeples nicht unterschieden werden -> nur Barrieren markieren
+    if (!lobby) {
+      console.log('[minimap] buildOccupancySnapshot: lobby not available.')
+      return occ
+    }
+
+    // Eigene Meeples auf OWN_MEEPLE setzen
+    const ownPlayer = lobby.players.find(p => p.id === gamedata.playerId)
+    const ownMeepleIds = new Set<string>(
+      (ownPlayer!.meeples ?? []).map(m => m.id)
+    )
+
+    // Meeples auf Felder aus BoardStore abbilden
+    for (const [meepleId, fieldId] of Object.entries(boardStore.meeplePositions)) {
+      if (!fieldId) continue
+      if (!(fieldId in occ)) continue //Falls FieldId nicht im Board existiert
+
+      if (ownMeepleIds.has(meepleId)) {
+        occ[fieldId] = 'OWN_MEEPLE'
+      } else {
+        if (occ[fieldId] !== 'OWN_MEEPLE') {
+          occ[fieldId] = 'OCCUPIED'
+        }
+      }
+    }
+
+    return occ
+  }
+
+
+  function openMinimap(barrierId: string, playerId: string) {
+    minimap.ownColor = (getPlayerColor(playerId) ?? "RED") as any
+    minimap.isMiniMapOpen = true;
+    minimap.selectedFieldId = ''
+
+    minimap.occupancyByFieldId = buildOccupancySnapshot()
+
+
+    const occupied = Object.entries(minimap.occupancyByFieldId)
+      .filter(([, v]) => v === 'OCCUPIED')
+      .map(([k]) => k)
+
+    const own = Object.entries(minimap.occupancyByFieldId)
+      .filter(([, v]) => v === 'OWN_MEEPLE')
+      .map(([k]) => k)
+
+    console.log('[minimap] snapshot built',
+      { occupiedCount: occupied.length, ownCount: own.length }
+    )
+
+  }
+
+
+  function confirmMinimapSelection() {
+    minimap.isMiniMapOpen = false
+
+  }
+
+
+  function selectMinimapField(fieldId: string) {
+    minimap.selectedFieldId = fieldId
+  }
+
+  function getPlayerColor(playerId: string): string | null {
+    const lobby = gamedata.lobby
+    if (!lobby) return null
+    return lobby.players.find(p => p.id === playerId)?.color ?? null
   }
 
   function sendRollDice() {
@@ -841,5 +965,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     openPopUpSettings,
     closePopUpSettings,
     activeDuels,
+    minimap,
+    confirmMinimapSelection,
+    selectMinimapField,
   }
 })

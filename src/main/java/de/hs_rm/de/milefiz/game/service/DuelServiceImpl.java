@@ -8,18 +8,18 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import de.hs_rm.de.milefiz.game.model.MiniGame;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Lobby;
+import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
-import de.hs_rm.de.milefiz.game.model.minigames.DummyGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
-
-import org.springframework.stereotype.Service;
 
 @Service
 public class DuelServiceImpl implements DuelService {
@@ -45,8 +45,15 @@ public class DuelServiceImpl implements DuelService {
     private final LobbyManager lobbyManager;
     private final FrontendMessagingService messaging;
 
+    /**
+     * Die Timeouts aus den Spring application properties werden hier
+     * gesammelt und gesetzt.
+     */
+    @Value("${minigame.dicegame.timeout}")
+    private int diceGameTimeout;
+
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
-        gameFactories.add(DiceGame::new);
+        gameFactories.add(() -> new DiceGame(diceGameTimeout+1));
         //gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
         //gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
         this.lobbyManager = lobbyManager;

@@ -71,7 +71,7 @@ const onMouseMove = (e: MouseEvent) => {
   if (!props.useFirstPerson) return // Keine Maussteurung
 
   // PointerLock verlassen, wenn ein PopUp offen ist
-  if (milefizStore.popUpMenuOpen || milefizStore.popUpSettingsOpen || milefizStore.gameFinished) {
+  if (milefizStore.popUpMenuOpen || milefizStore.popUpSettingsOpen || milefizStore.gameFinished || milefizStore.minimap.isMiniMapOpen) {
     if (document.pointerLockElement) {
       document.exitPointerLock()
     }
@@ -111,7 +111,7 @@ onMounted(() => {
   // Direkt Pointer Lock versuchen
   if (props.useFirstPerson) {
     const requestLock = () => {
-      if (!document.pointerLockElement && !milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.gameFinished && props.useFirstPerson && globalThis.location.pathname === '/game') {
+      if (!document.pointerLockElement && !milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.minimap.isMiniMapOpen && !milefizStore.gameFinished && props.useFirstPerson && globalThis.location.pathname === '/game') {
         document.body.requestPointerLock()
       }
     }
