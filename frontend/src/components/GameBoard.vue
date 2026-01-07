@@ -12,6 +12,7 @@ import type { Direction } from "@/types/movement"
 import { Vector3 } from 'three'
 import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler';
+import AssetSprite from './ui/AssetSprite.vue'
 
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
@@ -533,6 +534,84 @@ const connectionSegments = computed(() => {
   return out
 })
 
+// ...existing code...
+
+// ...existing code...
+
+// ...existing code...
+
+// ...existing code...
+
+// ...existing code...
+
+// ...existing code...
+
+// ...existing code...
+
+// ...existing code...
+
+const mountains = [
+  // Norden (oben) - 12 Berge weit hinten bei z = -200 (Spielfeld-Rand)
+  { x: -180, y: -3, z: -200, variant: 'mountain_1', scale: 19, rotation: 180 },
+  { x: -150, y: -5, z: -200, variant: 'mountain_1', scale: 17, rotation: 165 },
+  { x: -120, y: -2, z: -200, variant: 'mountain_1', scale: 20, rotation: 175 },
+  { x: -90, y: -4, z: -200, variant: 'mountain_1', scale: 22, rotation: 190 },
+  { x: -60, y: -6, z: -200, variant: 'mountain_1', scale: 18, rotation: 170 },
+  { x: -30, y: -3, z: -200, variant: 'mountain_1', scale: 21, rotation: 185 },
+  { x: 0, y: 0, z: -200, variant: 'mountain_1', scale: 25, rotation: 180 },
+  { x: 30, y: -4, z: -200, variant: 'mountain_1', scale: 19, rotation: 175 },
+  { x: 60, y: -3, z: -200, variant: 'mountain_1', scale: 21, rotation: 195 },
+  { x: 90, y: -5, z: -200, variant: 'mountain_1', scale: 18, rotation: 185 },
+  { x: 120, y: -6, z: -200, variant: 'mountain_1', scale: 20, rotation: 170 },
+  { x: 150, y: -4, z: -200, variant: 'mountain_1', scale: 16, rotation: 180 },
+  { x: 180, y: -5, z: -200, variant: 'mountain_1', scale: 17, rotation: 175 },
+  
+  // Westen (links) - 11 Berge weit links bei x = -200 (Spielfeld-Rand)
+  { x: -200, y: -5, z: -180, variant: 'mountain_1', scale: 19, rotation: 90 },
+  { x: -200, y: -3, z: -150, variant: 'mountain_1', scale: 20, rotation: 85 },
+  { x: -200, y: -6, z: -120, variant: 'mountain_1', scale: 18, rotation: 95 },
+  { x: -200, y: -2, z: -90, variant: 'mountain_1', scale: 21, rotation: 80 },
+  { x: -200, y: -5, z: -60, variant: 'mountain_1', scale: 19, rotation: 100 },
+  { x: -200, y: 0, z: -30, variant: 'mountain_1', scale: 23, rotation: 90 },
+  { x: -200, y: -4, z: 0, variant: 'mountain_1', scale: 20, rotation: 85 },
+  { x: -200, y: -3, z: 30, variant: 'mountain_1', scale: 19, rotation: 95 },
+  { x: -200, y: -6, z: 60, variant: 'mountain_1', scale: 21, rotation: 90 },
+  { x: -200, y: -4, z: 90, variant: 'mountain_1', scale: 22, rotation: 95 },
+  { x: -200, y: -5, z: 120, variant: 'mountain_1', scale: 18, rotation: 85 },
+  { x: -200, y: -3, z: 150, variant: 'mountain_1', scale: 19, rotation: 90 },
+  { x: -200, y: -6, z: 180, variant: 'mountain_1', scale: 20, rotation: 95 },
+  
+  // Osten (rechts) - 11 Berge weit rechts bei x = 200 (Spielfeld-Rand)
+  { x: 200, y: -4, z: -180, variant: 'mountain_1', scale: 20, rotation: -90 },
+  { x: 200, y: -3, z: -150, variant: 'mountain_1', scale: 21, rotation: -85 },
+  { x: 200, y: -6, z: -120, variant: 'mountain_1', scale: 18, rotation: -95 },
+  { x: 200, y: -2, z: -90, variant: 'mountain_1', scale: 22, rotation: -80 },
+  { x: 200, y: -5, z: -60, variant: 'mountain_1', scale: 19, rotation: -100 },
+  { x: 200, y: 0, z: -30, variant: 'mountain_1', scale: 22, rotation: -90 },
+  { x: 200, y: -4, z: 0, variant: 'mountain_1', scale: 21, rotation: -85 },
+  { x: 200, y: -3, z: 30, variant: 'mountain_1', scale: 20, rotation: -95 },
+  { x: 200, y: -6, z: 60, variant: 'mountain_1', scale: 24, rotation: -90 },
+  { x: 200, y: -5, z: 90, variant: 'mountain_1', scale: 23, rotation: -85 },
+  { x: 200, y: -4, z: 120, variant: 'mountain_1', scale: 19, rotation: -90 },
+  { x: 200, y: -3, z: 150, variant: 'mountain_1', scale: 18, rotation: -95 },
+  { x: 200, y: -6, z: 180, variant: 'mountain_1', scale: 20, rotation: -90 },
+  
+  // Süden (unten) - 12 Berge weit vorne bei z = 200 (Spielfeld-Rand)
+  { x: -180, y: -5, z: 200, variant: 'mountain_1', scale: 19, rotation: 0 },
+  { x: -150, y: -2, z: 200, variant: 'mountain_1', scale: 21, rotation: 15 },
+  { x: -120, y: -5, z: 200, variant: 'mountain_1', scale: 18, rotation: -10 },
+  { x: -90, y: -3, z: 200, variant: 'mountain_1', scale: 21, rotation: 5 },
+  { x: -60, y: -6, z: 200, variant: 'mountain_1', scale: 19, rotation: -15 },
+  { x: -30, y: -4, z: 200, variant: 'mountain_1', scale: 22, rotation: 10 },
+  { x: 0, y: 0, z: 200, variant: 'mountain_1', scale: 24, rotation: 0 },
+  { x: 30, y: -6, z: 200, variant: 'mountain_1', scale: 18, rotation: 10 },
+  { x: 60, y: -2, z: 200, variant: 'mountain_1', scale: 22, rotation: -5 },
+  { x: 90, y: -4, z: 200, variant: 'mountain_1', scale: 21, rotation: 20 },
+  { x: 120, y: -5, z: 200, variant: 'mountain_1', scale: 20, rotation: -12 },
+  { x: 150, y: -3, z: 200, variant: 'mountain_1', scale: 19, rotation: 8 },
+  { x: 180, y: -6, z: 200, variant: 'mountain_1', scale: 17, rotation: 5 },
+]
+
 </script>
 
 <template>
@@ -550,9 +629,8 @@ const connectionSegments = computed(() => {
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
      vertikal ist -->
     <TresMesh :rotation="[-Math.PI / 2, 0, 0]">
-      <TresPlaneGeometry :args="[500, 500]" />
+      <TresPlaneGeometry :args="[400, 400]" />
       <TresMeshStandardMaterial :color="0x4FA200" />
-
     </TresMesh>
 
     <!-- Grundbeleuchtung der Szene (75% Intensität) -->
@@ -563,6 +641,17 @@ const connectionSegments = computed(() => {
 
     <!-- Directional Licht von "vorne rechts" 200%-->
     <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" />
+
+    <!-- Berge am Horizont hinzugefügt-->
+    <AssetSprite
+      v-for="(mountain, index) in mountains"
+      :key="`mountain-${index}`"
+      type="mountains"
+      :variant="mountain.variant"
+      :position="[mountain.x, mountain.y, mountain.z]"
+      :scale="mountain.scale"
+      :rotation="mountain.rotation"
+    />
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
     <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="el => registerGameCharRefFromTemplate(id, el)"
