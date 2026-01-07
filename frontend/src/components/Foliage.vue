@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useGLTF } from '@tresjs/cientos'
 import { ref, watchEffect, watch } from 'vue'
-import { BufferGeometry, DynamicDrawUsage, InstancedMesh, Material, Mesh, Object3D, Quaternion } from 'three'
+import { BufferGeometry, DynamicDrawUsage, InstancedMesh, Material, Mesh, Object3D, Quaternion, Vector3 } from 'three'
 
 import { Sizes } from '@/stores/ITreeDTD';
 
@@ -25,7 +25,7 @@ const { elements } = defineProps<{ elements?: Element[] }>()
 
 /* Modelle */
 const models = {
-  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1 },
+  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.5 },
     [Sizes.Medium]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100 },
   [Sizes.Small]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1 }
 
@@ -98,6 +98,7 @@ watchEffect(() => {
           dummy.quaternion.copy(part.quaternion)
           const scale = models[part.type].scale as number
           dummy.scale.set(scale, scale, scale)
+          dummy.rotateOnWorldAxis(new Vector3( 0, 1, 0 ), Math.floor(Math.random() * 361))
           dummy.updateMatrix()
           ref.setMatrixAt(i, dummy.matrix)
         })

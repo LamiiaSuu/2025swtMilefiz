@@ -17,6 +17,7 @@ import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.game.service.BoardService;
 import de.hs_rm.de.milefiz.game.service.BoardValidateException;
 import de.hs_rm.de.milefiz.game.service.GameService;
+import de.hs_rm.de.milefiz.game.service.PlantingService;
 
 /**
  * REST Controller für Spiel-bezogene Operationen.
@@ -34,6 +35,7 @@ public class GameController {
 
     private final GameService gameService;
     private final BoardService boardService;
+    private final PlantingService plantingService;
 
     private final Logger LOGGER = LoggerFactory.getLogger(GameController.class);
 
@@ -42,9 +44,10 @@ public class GameController {
      *
      * @param gameService Service für Spieloperationen
      */
-    public GameController(GameService gameService, BoardService boardService) {
+    public GameController(GameService gameService, BoardService boardService, PlantingService plantingService) {
         this.gameService = gameService;
         this.boardService = boardService;
+        this.plantingService = plantingService;
     }
 
     /**
@@ -64,6 +67,13 @@ public class GameController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
         return ok("Board ist valide");
+    }
+
+    @PostMapping("/board/generate")
+    public BoardDTO generateTrees(@RequestBody BoardDTO boardDTO) {
+                LOGGER.debug("Generiere Bäume für Board: " + boardDTO.toString());
+                boardDTO = this.plantingService.plantTrees(boardDTO, 0.1f);
+                return boardDTO;
     }
 
 }
