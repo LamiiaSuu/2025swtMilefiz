@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="loading">
 
-    <!-- Header – exakt wie auf Home -->
+    <!-- Header -->
     <Header overlay></Header>
 
     <!-- Inhalt in der Mitte -->
