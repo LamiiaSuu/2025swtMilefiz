@@ -1,5 +1,10 @@
 <template>
-  <div v-if="show" class="overlay">
+  <div v-if="show" class="loading">
+
+    <!-- Header – exakt wie auf Home -->
+    <Header overlay></Header>
+
+    <!-- Inhalt in der Mitte -->
     <div class="content">
       <div class="spinner"></div>
 
@@ -7,65 +12,81 @@
         {{ currentTip }}
       </p>
     </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, watch, onUnmounted } from "vue"
+import Header from "@/components/ui/pages/Header.vue"
 
 const props = defineProps({
   show: Boolean,
-  tips: {
-    type: Array,
-    default: () => [
-      "Tipp: Speichere regelmäßig!",
-      "Tipp: Nutze die DevTools für Debugging.",
-      "Tipp: Komponenten klein und wiederverwendbar halten.",
-      "Tipp: Computed statt überflüssiger Watcher."
-    ]
-  },
   interval: {
     type: Number,
     default: 2000
   }
 })
 
-const currentTip = ref("")
+const currentTip = ref("Vergiss Tips.")
 let timer = null
 
 function chooseRandomTip() {
-  const index = Math.floor(Math.random() * props.tips.length)
-  currentTip.value = props.tips[index]
+
 }
 
-watch(
-  () => props.show,
-  (val) => {
-    if (val) {
-      chooseRandomTip()
-      timer = setInterval(chooseRandomTip, props.interval)
-    } else {
-      clearInterval(timer)
-    }
+watch(() => props.show, val => {
+  if (val) {
+    chooseRandomTip()
+    timer = setInterval(chooseRandomTip, props.interval)
+  } else {
+    clearInterval(timer)
   }
-)
+})
 
 onUnmounted(() => clearInterval(timer))
 </script>
 
 <style scoped>
-.overlay {
+/* entspricht */
+.loading {
   position: fixed;
   inset: 0;
-  background: #0d1117dd;
-  color: #fff;
+
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+
+  width: 100vw;
+  height: 100vh;
+
+  overflow: hidden;
+  padding-bottom: 4rem;
+
+  color: white;
   z-index: 9999;
 }
 
+/* Hintergrund */
+.loading::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: url("/backgrounds/BackgroundTest.webp");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  filter: blur(4px);
+  filter: brightness(0.6);
+  border: 1px solid black;
+  z-index: -1;
+}
+
+/* Loading-Inhalt */
 .content {
+  margin-top: 10vh;
   text-align: center;
 }
 
@@ -80,8 +101,8 @@ onUnmounted(() => clearInterval(timer))
 }
 
 .tip {
-  font-size: 1.1rem;
-  opacity: .9;
+  font-size: 1.2rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,.6);
 }
 
 @keyframes spin {
