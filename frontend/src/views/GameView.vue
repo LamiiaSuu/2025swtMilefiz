@@ -85,7 +85,7 @@ onBeforeUnmount(() => {
     />
 
     <!-- HUD (Spielstatus, Buttons etc.) -->
-    <GameHUD />
+    <GameHUD v-if="!loading"/>
 
     <!-- Spielfeld -->
     <GameBoard />
