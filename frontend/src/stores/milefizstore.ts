@@ -64,6 +64,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   */
   const popUpMenuOpen = ref(false)
   const popUpSettingsOpen = ref(false)
+  const popUpTutorialOpen = ref(false)
 
   // Beispiele für Daten
   const gamedata = reactive<{
@@ -788,6 +789,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     popUpSettingsOpen.value = false
   }
 
+    // Oeffnet PopUp Tutorial
+  function openPopUpTutorial() {
+    popUpTutorialOpen.value = true
+  }
+
+  // Schließt PopUp Tutorial
+  function closePopUpTutorial() {
+    popUpTutorialOpen.value = false
+  }
+
   /**
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
@@ -855,10 +866,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     getWinnerColor,
     popUpMenuOpen,
     popUpSettingsOpen,
+    popUpTutorialOpen,
     openPopUpMenu,
     closePopUpMenu,
     openPopUpSettings,
     closePopUpSettings,
+    openPopUpTutorial,
+    closePopUpTutorial,
     activeDuels,
   }
 })
