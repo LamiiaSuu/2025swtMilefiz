@@ -74,6 +74,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    */
   const minimap = reactive({
     isMiniMapOpen: false,
+    selectedBarrierId:"",
     selectedFieldId: "",
     occupancyByFieldId: {} as Record<string, Occupancy>,
     ownColor: "RED" as "RED" | "GREEN" | "BLUE" | "YELLOW",
@@ -283,7 +284,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
-          boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
+            boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
         }
 
         if (event.type === "REJECTED_BY_BARRIER") {
@@ -345,9 +346,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           console.warn("Barriermove rejected:", event.msg)
           if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
             showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
+            minimap.isMiniMapOpen = true
           }
           else if (event.msg === "MOVE_BARRIER_OCCUPIED") {
             showWarning("MOVE_BARRIER_OCCUPIED")
+            minimap.isMiniMapOpen = true
           }
         }
 
@@ -673,29 +676,33 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
 
   function openMinimap(barrierId: string, playerId: string) {
-    minimap.ownColor = (getPlayerColor(playerId) ?? "RED") as any
-    minimap.isMiniMapOpen = true;
-    minimap.selectedFieldId = ''
+      if (playerId === gamedata.playerId) {
+        minimap.ownColor = (getPlayerColor(playerId) ?? "RED") as any
+        minimap.isMiniMapOpen = true;
+        minimap.selectedFieldId = ''
+        minimap.selectedBarrierId = barrierId
 
-    minimap.occupancyByFieldId = buildOccupancySnapshot()
+        minimap.occupancyByFieldId = buildOccupancySnapshot()
 
 
-    const occupied = Object.entries(minimap.occupancyByFieldId)
-      .filter(([, v]) => v === 'OCCUPIED')
-      .map(([k]) => k)
+        const occupied = Object.entries(minimap.occupancyByFieldId)
+          .filter(([, v]) => v === 'OCCUPIED')
+          .map(([k]) => k)
 
-    const own = Object.entries(minimap.occupancyByFieldId)
-      .filter(([, v]) => v === 'OWN_MEEPLE')
-      .map(([k]) => k)
+        const own = Object.entries(minimap.occupancyByFieldId)
+          .filter(([, v]) => v === 'OWN_MEEPLE')
+          .map(([k]) => k)
 
-    console.log('[minimap] snapshot built',
-      { occupiedCount: occupied.length, ownCount: own.length }
-    )
+        console.log('[minimap] snapshot built',
+          { occupiedCount: occupied.length, ownCount: own.length }
+      )
+    }
 
   }
 
 
   function confirmMinimapSelection() {
+    moveBarrier(minimap.selectedBarrierId, minimap.selectedFieldId)
     minimap.isMiniMapOpen = false
 
   }
