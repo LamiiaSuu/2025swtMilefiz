@@ -74,8 +74,10 @@ public class GameServiceImpl implements GameService {
 
         try {
             BoardDTO testBoardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
-            if (!testBoardDTO.hasTrees())
-                logger.warn("Test board has no trees");
+            if (!testBoardDTO.hasTrees()) {
+                logger.warn("Test board has no trees, Generating local trees...");
+                testBoardDTO = plantingService.plantTrees(testBoardDTO, 0.1f); // TODO: test
+            }
             testBoard = BoardMapper.mapToBoard(testBoardDTO);
             logger.info("Test board loaded successfully from: {}", BOARD_PATH);
         } finally {
