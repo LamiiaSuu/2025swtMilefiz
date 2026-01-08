@@ -2,6 +2,7 @@ package de.hs_rm.de.milefiz.game.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import static org.springframework.http.ResponseEntity.ok;
@@ -37,6 +38,9 @@ public class GameController {
     private final BoardService boardService;
     private final PlantingService plantingService;
 
+    @Value("${board.planting.density}")
+    private float defaultPlantingDensity;
+
     private final Logger LOGGER = LoggerFactory.getLogger(GameController.class);
 
     /**
@@ -69,10 +73,16 @@ public class GameController {
         return ok("Board ist valide");
     }
 
+    /**
+     * Generiere Bäume auf übergebenes Board
+     * 
+     * @param boardDTO
+     * @return BoardDTO mit generierten Bäumen
+     */
     @PostMapping("/board/generate")
     public BoardDTO generateTrees(@RequestBody BoardDTO boardDTO) {
                 LOGGER.debug("Generiere Bäume für Board: " + boardDTO.toString());
-                boardDTO = this.plantingService.plantTrees(boardDTO, 0.1f);
+                boardDTO = this.plantingService.plantTrees(boardDTO, defaultPlantingDensity);
                 return boardDTO;
     }
 

@@ -74,8 +74,9 @@ public class GameServiceImpl implements GameService {
 
         try {
             BoardDTO testBoardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
-            BoardDTO plantedBoardDTO = this.plantingService.plantTrees(testBoardDTO, 0.1f); // TODO: testweise implementiert für Test-Board
-            testBoard = BoardMapper.mapToBoard(plantedBoardDTO);
+            if (!testBoardDTO.hasTrees())
+                logger.warn("Test board has no trees");
+            testBoard = BoardMapper.mapToBoard(testBoardDTO);
             logger.info("Test board loaded successfully from: {}", BOARD_PATH);
         } finally {
             inputStream.close();
