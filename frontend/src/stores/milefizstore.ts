@@ -280,11 +280,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             //TODO minimap öffnen
             openMinimap(event.barrierId, event.playerId)
           }
-          moveBarrier(event.barrierId, crypto.randomUUID())
+          //moveBarrier(event.barrierId, crypto.randomUUID())
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
-            boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
+          boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
         }
 
         if (event.type === "REJECTED_BY_BARRIER") {
@@ -343,14 +343,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           winnerColor.value = event.playerColor
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
-          console.warn("Barriermove rejected:", event.msg)
-          if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
-            showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
-            minimap.isMiniMapOpen = true
-          }
-          else if (event.msg === "MOVE_BARRIER_OCCUPIED") {
-            showWarning("MOVE_BARRIER_OCCUPIED")
-            minimap.isMiniMapOpen = true
+          if (event.playerId === gamedata.playerId) {
+            console.warn("Barriermove rejected:", event.msg)
+            if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
+              showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
+                minimap.isMiniMapOpen = true
+            }
+            else if (event.msg === "MOVE_BARRIER_OCCUPIED") {
+              showWarning("MOVE_BARRIER_OCCUPIED")
+                minimap.isMiniMapOpen = true
+            }
           }
         }
 
