@@ -70,14 +70,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
   type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE'
   /**
-   * TODO doc
+   * Reactive state für die MiniMap-Komponente.
+   * Verwaltet die Anzeige und Interaktion mit der Barrieren-Verschiebungs-Map.
    */
   const minimap = reactive({
-    isMiniMapOpen: false,
-    selectedBarrierId:"",
-    selectedFieldId: "",
-    occupancyByFieldId: {} as Record<string, Occupancy>,
-    ownColor: "RED" as "RED" | "GREEN" | "BLUE" | "YELLOW",
+    isMiniMapOpen: false, // Ist MiniMap aktuell geöffnet
+    selectedBarrierId:"", // Welche Barriere wird verschoben
+    selectedFieldId: "", // Zielfeld für Verschiebung
+    isMovingBarrier:false, // Verschiebt der Spieler, der in die Barrier gelaufen ist gerade? (für Event-Filter)
+    occupancyByFieldId: {} as Record<string, Occupancy>, // Belegungsstatus aller Felder
+    ownColor: "RED" as "RED" | "GREEN" | "BLUE" | "YELLOW", //Farbe des Spielers
   })
 
 
@@ -285,6 +287,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
           boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
+
+          if (minimap.isMovingBarrier && minimap.selectedBarrierId === event.id) {
+            minimap.isMovingBarrier = false
+          }
         }
 
         if (event.type === "REJECTED_BY_BARRIER") {
@@ -343,7 +349,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           winnerColor.value = event.playerColor
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
-          if (event.playerId === gamedata.playerId) {
+          if (minimap.isMovingBarrier){
             console.warn("Barriermove rejected:", event.msg)
             if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
               showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
@@ -683,6 +689,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         minimap.isMiniMapOpen = true;
         minimap.selectedFieldId = ''
         minimap.selectedBarrierId = barrierId
+        minimap.isMovingBarrier = true
 
         minimap.occupancyByFieldId = buildOccupancySnapshot()
 
@@ -704,6 +711,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
 
   function confirmMinimapSelection() {
+    if (!minimap.selectedFieldId) return
+
     moveBarrier(minimap.selectedBarrierId, minimap.selectedFieldId)
     minimap.isMiniMapOpen = false
 
