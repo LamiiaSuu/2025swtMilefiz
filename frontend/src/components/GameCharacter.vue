@@ -197,7 +197,7 @@ const animateCustomJump = (
 }
 
 const jump = () => {
-  if (!isJumpAllowed.value) return //Nur dann Jump Animation starten, wenn Sprung auch erlaubt ist, also Spieler maxEnergy gesammelt hat
+  console.log("jump wird erreicht")
   if (isJumping.value) return
   audioEngine.play3D('meepleJump', {
     x: currentPosition.value[0],

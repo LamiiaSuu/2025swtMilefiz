@@ -49,6 +49,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     isEnergyFresh: false,
   })
 
+  // UI/Animation Trigger: GameBoard kann darauf reagieren und jump() aufrufen
+  const jumpTrigger = ref<{ meepleId: string; nonce: number } | null>(null)
+
+  function triggerJumpLocally(meepleId: string) {
+    jumpTrigger.value = { meepleId, nonce: Date.now() }
+  }
+
   /** 
    * Gewinndialog
    * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
@@ -252,6 +259,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId == gamedata.playerId) {
             gamedata.energy = event.energy
             energy.isEnergyFull = event.hasFullEnergy
+          }
+          //TODO: Sprung triggern (event.meepleId)
+          if (event.meepleId) {
+            triggerJumpLocally(event.meepleId)
           }
         } else if (event.type === 'CONSUME_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
@@ -785,7 +796,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
-    const energySaveCommand: EnergyCommand = { playerId: gamedata.playerId }
+    const energySaveCommand: EnergyCommand = { playerId: gamedata.playerId, meepleId: "" }
 
     const body = JSON.stringify(energySaveCommand)
 
@@ -819,7 +830,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    *
   * @author Kevin Tran
    */
-  function sendEnergyConsume() {
+  function sendEnergyConsume(meepleId: string) {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot save energy: STOMP client not connected.')
       return
@@ -829,7 +840,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       console.error('Cannot save energy: Missing lobbyId or playerId')
       return
     }
-    const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId }
+    const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId, meepleId: meepleId }
     const body = JSON.stringify(energyConsumeCommand)
 
     const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
@@ -968,5 +979,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     minimap,
     confirmMinimapSelection,
     selectMinimapField,
+    jumpTrigger,
+    triggerJumpLocally,
   }
 })

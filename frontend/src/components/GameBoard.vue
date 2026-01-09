@@ -160,6 +160,22 @@ watchEffect(() => {
   }
 })
 
+watch(
+  () => milefizStore.jumpTrigger,
+  (t) => {
+    const meepleId = t?.meepleId
+    console.log("Meeple in jump:")
+    console.log(meepleId)
+    if (!meepleId) return
+
+    const ref = gameCharRefs[meepleId]
+    const inst: any = ref?.value
+    if (inst?.jump) inst.jump()
+    console.log("instanz im watcher: " + inst)
+  },
+  { deep: true }
+)
+
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
   // Cast the template ref value to TresObject | null in a type-safe place
   registerGameCharRef(id, el as unknown as TresObject | null)
@@ -277,7 +293,6 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
   
   toggleCamera(e)
-  handleJump(e)
   handleMoveKeys(e)
   handleMeepleSelectionKeydown(e)
 }
@@ -346,19 +361,6 @@ function selectMeepleByIndex(index: number) {
 
   me.activeMeeple = meeple
   console.log('Selected meeple ->', meeple.id)
-}
-
-const handleJump = (e: KeyboardEvent) => {
-  if (e.code === 'Space') {
-    e.preventDefault()
-    const id = selectedMeepleId.value
-    if (!id) return
-    const ref = gameCharRefs[id]
-    if (!ref || !ref.value) return
-    if (ref.value && ref.value.jump) {
-      ref.value.jump()
-    }
-  }
 }
 
 // Keyboard toggle listener

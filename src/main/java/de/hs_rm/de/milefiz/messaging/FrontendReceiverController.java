@@ -504,7 +504,7 @@ public class FrontendReceiverController {
                         e);
             }
 
-            return new FrontendConsumeEnergyEvent(player.getId(), player.getEnergy(), player.hasFullEnergy());
+            return new FrontendConsumeEnergyEvent(player.getId(),command.meepleId(), player.getEnergy(), player.hasFullEnergy());
         }
 
         return new FrontendConsumeEnergyRejectedEvent(player.getId(), "Nicht genug Energie für einen Sprung!");
