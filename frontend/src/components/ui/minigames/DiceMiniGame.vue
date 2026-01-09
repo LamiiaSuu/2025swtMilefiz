@@ -1,5 +1,5 @@
 <template>
-  <div class="dice-card">
+  <div class="dice-card no-select">
     <h2 class="dice-title">
       {{ tUI('MINIGAME_DICE_TITLE') }}
     </h2>
@@ -313,5 +313,13 @@ button {
 .winner-text,
 .loser-text {
   font-family: "Acme", sans-serif;
+}
+
+.no-select {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  -webkit-user-drag: none;
 }
 </style>
