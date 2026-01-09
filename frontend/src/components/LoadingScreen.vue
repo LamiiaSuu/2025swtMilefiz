@@ -24,12 +24,13 @@
 <script setup>
 import { ref, watch, onUnmounted } from "vue"
 import Header from "@/components/ui/pages/Header.vue"
+import { tRandomTip } from '@/i18n'
 
 const props = defineProps({
   show: Boolean,
   interval: {
     type: Number,
-    default: 2000
+    default: 2500
   },
   duration: {
     type: Number,
@@ -50,7 +51,7 @@ let tipTimer = null
 
 
 function chooseRandomTip() {
-
+  currentTip.value = tRandomTip()
 }
 
 function startLoading() {
@@ -94,11 +95,20 @@ watch(
   () => props.show,
   (val) => {
     if (val) {
-      chooseRandomTip()
+
+      currentTip.value = tRandomTip()
       startLoading()
 
       clearInterval(tipTimer)
-      tipTimer = setInterval(chooseRandomTip, props.interval)
+
+      tipTimer = setTimeout(() => {
+        currentTip.value = tRandomTip()
+
+        tipTimer = setInterval(() => {
+          currentTip.value = tRandomTip()
+        }, props.interval)
+      }, props.interval)
+
     } else {
       clearInterval(progressTimer)
       clearInterval(tipTimer)
@@ -106,6 +116,7 @@ watch(
   },
   { immediate: true }
 )
+
 
 
 
