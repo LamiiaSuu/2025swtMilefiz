@@ -30,7 +30,7 @@ const activeDuels = store.activeDuels
 const loading = ref(true)
 
 /**
- * Startet den Loading Screen für 6 Sekunden
+ * Startet den Loading Screen für 7 Sekunden
  * Startet Ambient- und Musik-Playlists,
  * sobald die Spielansicht geladen ist.
  * 

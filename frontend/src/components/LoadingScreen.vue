@@ -25,6 +25,15 @@
 import { ref, watch, onUnmounted } from "vue"
 import Header from "@/components/ui/pages/Header.vue"
 import { tRandomTip } from '@/i18n'
+/**
+ * tRandomTip
+ * Wählt einen zufälligen Lade-Tipp in der aktuell aktiven Sprache
+ * und setzt ihn als angezeigten Text.
+ *
+ * Die eigentliche Lokalisierung und Zufallsauswahl
+ * erfolgt zentral über das i18n-System (`tRandomTip`).
+ */
+
 
 const props = defineProps({
   show: Boolean,
@@ -50,37 +59,58 @@ let progressTimer = null
 let tipTimer = null
 
 
-function chooseRandomTip() {
-  currentTip.value = tRandomTip()
-}
-
+/**
+ * Startet die Ladebalken-Animation.
+ *
+ * Der Fortschritt basiert auf einer Zeitkurve (`duration`),
+ * wird jedoch absichtlich nicht linear dargestellt:
+ *
+ * - Fortschritt nähert sich einem zeitabhängigen Zielwert
+ * - einzelne Ticks können zufällig übersprungen werden
+ * - der Balken erreicht 100 % bewusst etwas früher
+ *
+ * Dadurch wirkt der Ladevorgang natürlicher
+ * und vermeidet starre, mechanische Bewegungen.
+ */
 function startLoading() {
   progress.value = 0
   startTime = Date.now()
 
+  // Sicherheitsreset, falls der Loader erneut gestartet wird
   clearInterval(progressTimer)
 
   progressTimer = setInterval(() => {
+
+    // Vergangene Zeit seit Start des Loadings
     const elapsed = Date.now() - startTime
+
+    // Effektive Dauer, damit der Balken vor dem Screen-Ende voll ist
     const effectiveDuration = Math.max(props.duration - FINISH_EARLY_MS, 1)
+
+    // Normalisierte Zeit (0.0 – 1.0)
     const t = Math.min(elapsed / effectiveDuration, 1)
 
-
+    // Zielwert, dem sich der Fortschritt annähert
     const target = t * 100
 
+    // Zufälliges Überspringen einzelner Ticks,
+    // außer kurz vor dem Abschluss
     if (Math.random() < SKIP_CHANCE && t < 0.95) {
       return
     }
 
+    // Sanfte Annäherung an den Zielwert mit Zufallsfaktor
     const delta =
       (target - progress.value) *
       (0.15 + Math.random() * 0.35)
 
+    // Fortschritt erhöhen, mit minimalem Schritt
     progress.value = Math.min(
       100,
       progress.value + Math.max(delta, 0.15)
     )
 
+    // Abschlussbedingung
     if (progress.value >= 100 || t >= 1) {
       progress.value = 100
       clearInterval(progressTimer)
@@ -88,9 +118,13 @@ function startLoading() {
   }, PROGRESS_TICK)
 }
 
-
-
-
+/**
+ * Beobachtet die Sichtbarkeit des Loading Screens.
+ *
+ * - Startet Ladebalken und Tip-Rotation beim Einblenden
+ * - Stoppt alle Timer beim Ausblenden
+ * - `immediate: true`, damit Initialzustände korrekt behandelt werden
+ */
 watch(
   () => props.show,
   (val) => {
