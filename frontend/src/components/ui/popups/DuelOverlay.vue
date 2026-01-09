@@ -1,5 +1,5 @@
 <template>
-  <div class="overlay">
+  <div class="overlay no-select">
     <div class="duel-container">
 
       <div
@@ -66,5 +66,13 @@ function resolveComponent(duel: any) {
   color: white;
   min-width: 340px;
   box-shadow: 0 10px 32px rgba(0,0,0,.35);
+}
+
+.no-select {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  -webkit-user-drag: none;
 }
 </style>
