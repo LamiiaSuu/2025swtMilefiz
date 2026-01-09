@@ -42,9 +42,14 @@ watchEffect(() => {
   const l = audioEngine.context.listener
 
   // Position setzen
-  l.positionX.value = cameraPosition.value[0]
-  l.positionY.value = cameraPosition.value[1]
-  l.positionZ.value = cameraPosition.value[2]
+  if (l.positionX) {
+    l.positionX.value = cameraPosition.value[0]
+    l.positionY.value = cameraPosition.value[1]
+    l.positionZ.value = cameraPosition.value[2]
+  } else {
+    l.setPosition(cameraPosition.value[0], cameraPosition.value[1], cameraPosition.value[2]);
+  }
+
 
   // Forward / Blickrichtung setzen
   // z.B. berechne aus horizontalRotation + verticalRotation
@@ -52,13 +57,17 @@ watchEffect(() => {
   const dirY = Math.sin(verticalRotation.value)
   const dirZ = Math.cos(horizontalRotation.value) * Math.cos(verticalRotation.value)
 
-  l.forwardX.value = dirX
-  l.forwardY.value = dirY
-  l.forwardZ.value = dirZ
+  if (l.forwardX && l.upX) {
+    l.forwardX.value = dirX
+    l.forwardY.value = dirY
+    l.forwardZ.value = dirZ
 
-  l.upX.value = 0
-  l.upY.value = 1
-  l.upZ.value = 0
+    l.upX.value = 0
+    l.upY.value = 1
+    l.upZ.value = 0
+  } else {
+    l.setOrientation(dirX, dirY, dirZ, 0, 1, 0)
+  }
 })
 
 // Berechnete Rotation der Kamera neu, wenn sie sich ändert
