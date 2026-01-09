@@ -30,7 +30,7 @@ const props = defineProps({
   show: Boolean,
   interval: {
     type: Number,
-    default: 2500
+    default: 3250
   },
   duration: {
     type: Number,
@@ -198,8 +198,9 @@ onUnmounted(() => {
 
 
 .tip {
-  font-size: 1.2rem;
-  text-shadow: 0 2px 6px rgba(0,0,0,.6);
+  font-size: 3.6vh;
+  font-family: 'Acme', sans-serif;
+  text-shadow: 0 2px 6px rgba(0,0,0,.9);
 }
 
 </style>
