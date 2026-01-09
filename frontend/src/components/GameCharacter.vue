@@ -165,11 +165,40 @@ watch(
   { immediate: true }
 )
 
+let targetRotation = 0
+let isRotating = false
 
-// Updated die Rotation des Charakters
-const setRotation = (yRotation: number) => {
-  characterRotation.value = yRotation
+const lerp = (a: number, b: number, t: number) => {
+  return a + (b - a) * t
 }
+
+const animateRotation = () => {
+  if (!isRotating) return
+
+  characterRotation.value = lerp(
+    characterRotation.value,
+    targetRotation,
+    0.065 // smoothing factor (niedriger = langsamer, smoother)
+  )
+
+  // Stop wenn nah genug am Wert
+  if (Math.abs(characterRotation.value - targetRotation) < 0.001) {
+    characterRotation.value = targetRotation
+    isRotating = false
+    return
+  }
+
+  requestAnimationFrame(animateRotation)
+}
+
+const setRotation = (yRotation: number) => {
+  targetRotation = yRotation
+  if (!isRotating) {
+    isRotating = true
+    requestAnimationFrame(animateRotation)
+  }
+}
+
 
 // Sprung-Animation
 const animateCustomJump = (
