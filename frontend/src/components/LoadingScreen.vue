@@ -6,7 +6,12 @@
 
     <!-- Inhalt in der Mitte -->
     <div class="content">
-      <div class="spinner"></div>
+      <div class="progress-container">
+        <div
+          class="progress-bar"
+          :style="{ width: progress + '%' }"> 
+        </div>
+      </div>
 
       <p class="tip">
         {{ currentTip }}
@@ -25,26 +30,90 @@ const props = defineProps({
   interval: {
     type: Number,
     default: 2000
+  },
+  duration: {
+    type: Number,
+    default: 6000
   }
 })
 
+const PROGRESS_TICK = 320 // ms für Loading-Balken Tick
+const SKIP_CHANCE = 0.3 // 30% skip chance beim Progress-Tick (Ladebalken)
+const FINISH_EARLY_MS = 750 // 0.75s früher fertig als der Loading Screen weg geht (Ladebalken)
+
+const progress = ref(0)
 const currentTip = ref("Vergiss Tips.")
-let timer = null
+
+let startTime = null
+let progressTimer = null
+let tipTimer = null
+
 
 function chooseRandomTip() {
 
 }
 
-watch(() => props.show, val => {
-  if (val) {
-    chooseRandomTip()
-    timer = setInterval(chooseRandomTip, props.interval)
-  } else {
-    clearInterval(timer)
-  }
+function startLoading() {
+  progress.value = 0
+  startTime = Date.now()
+
+  clearInterval(progressTimer)
+
+  progressTimer = setInterval(() => {
+    const elapsed = Date.now() - startTime
+    const effectiveDuration = Math.max(props.duration - FINISH_EARLY_MS, 1)
+    const t = Math.min(elapsed / effectiveDuration, 1)
+
+
+    const target = t * 100
+
+    if (Math.random() < SKIP_CHANCE && t < 0.95) {
+      return
+    }
+
+    const delta =
+      (target - progress.value) *
+      (0.15 + Math.random() * 0.35)
+
+    progress.value = Math.min(
+      100,
+      progress.value + Math.max(delta, 0.15)
+    )
+
+    if (progress.value >= 100 || t >= 1) {
+      progress.value = 100
+      clearInterval(progressTimer)
+    }
+  }, PROGRESS_TICK)
+}
+
+
+
+
+watch(
+  () => props.show,
+  (val) => {
+    if (val) {
+      chooseRandomTip()
+      startLoading()
+
+      clearInterval(tipTimer)
+      tipTimer = setInterval(chooseRandomTip, props.interval)
+    } else {
+      clearInterval(progressTimer)
+      clearInterval(tipTimer)
+    }
+  },
+  { immediate: true }
+)
+
+
+
+onUnmounted(() => {
+  clearInterval(progressTimer)
+  clearInterval(tipTimer)
 })
 
-onUnmounted(() => clearInterval(timer))
 </script>
 
 <style scoped>
@@ -78,9 +147,7 @@ onUnmounted(() => clearInterval(timer))
   background-repeat: no-repeat;
   background-position: center;
 
-  filter: blur(4px);
-  filter: brightness(0.6);
-  border: 1px solid black;
+  filter: blur(4px) brightness(0.6);
   z-index: -1;
 }
 
@@ -90,22 +157,37 @@ onUnmounted(() => clearInterval(timer))
   text-align: center;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #999;
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
+.progress-container {
+  width: 320px;
+  height: 18px;
+
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  overflow: hidden;
+
+  margin: 0 auto 1.5rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.6);
 }
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+
+  background: linear-gradient(
+    90deg,
+    #0f3d1e,
+    #1f6b3a,
+    #2e8b57
+  );
+
+  transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 6px rgba(46, 139, 87, 0.6);
+}
+
 
 .tip {
   font-size: 1.2rem;
   text-shadow: 0 2px 6px rgba(0,0,0,.6);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
 </style>
