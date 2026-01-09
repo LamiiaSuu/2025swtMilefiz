@@ -2,7 +2,7 @@ import { reactive, readonly, computed, ref } from 'vue'
 import router from '@/router'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
-import type { Direction, MoveBarrierCommand, MovementCommand } from "@/types/movement";
+import type { Direction, MoveBarrierCommand, MovementCommand, RotationCommand } from "@/types/movement";
 import type { EnergyCommand } from '@/types/energy'
 import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdate";
 import { useBoardStore } from "./boardStore"
@@ -260,7 +260,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.energy = event.energy
             energy.isEnergyFull = event.hasFullEnergy
           }
-          //TODO: Sprung triggern (event.meepleId)
           if (event.meepleId) {
             triggerJumpLocally(event.meepleId)
           }
@@ -295,6 +294,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
           boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
+        }
+
+        if (event.type === "ROTATE") {
+          boardStore.updateMeepleRotation(event.meepleId, event.rotation)
         }
 
         if (event.type === "REJECTED_BY_BARRIER") {
@@ -550,6 +553,47 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /**
+ * Sendet eine Rotationsänderung eines Meeples an den Spielserver.
+ *
+ * Diese Funktion wird aufgerufen, wenn sich die Blickrichtung des
+ * aktiven Meeples ändert.
+ *
+ * Die Rotation wird als RotationCommand an den Server gesendet
+ * und anschließend an alle Clients der Lobby weiterverteilt,
+ * um die Blickrichtung des Meeples visuell zu synchronisieren.
+ *
+ * Ablauf:
+ * 1. Prüft, ob der STOMP-Client verbunden ist
+ * 2. Erstellt ein RotationCommand mit Meeple-ID und Y-Rotation
+ * 3. Serialisiert das Kommando als JSON
+ * 4. Sendet die Nachricht an den WebSocket-Endpunkt /rotate
+ *
+ * @param meepleId  die eindeutige ID des Meeples, dessen Rotation geändert wurde
+ * @param rotation die neue Y-Rotation des Meeples
+ */
+  function sendMeepleRotation(meepleId: string, rotation: number) {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot send move: STOMP client not connected.')
+      return
+    }
+
+    const rtnCmd: RotationCommand = { meepleId, rotation }
+
+    const body = JSON.stringify(rtnCmd)
+
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
+
+    try {
+      stompclient.publish({
+        destination: DEST_APP + '/rotate',
+        body,
+      })
+      console.log('Meeple rotated:', body)
+    } catch (err) {
+      console.error('Error rotating:', err)
+    }
+  }
 
   /**
    * Sendet eine Bewegungsaktion (Move) an den Spielserver.
@@ -612,7 +656,27 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     }
   }
-  //TODO tatsächliches moven der Barrier implementieren
+
+  /**
+   * Sendet ein Kommando zum Verschieben einer Barriere an den Spielserver.
+   *
+   * Diese Funktion wird aufgerufen, wenn ein Spieler eine Barriere
+   * auf ein anderes Spielfeld bewegen möchte.
+   *
+   * Das MoveBarrierCommand wird an den Server gesendet und dort
+   * validiert. Bei Erfolg wird die Barrierenbewegung an alle Clients
+   * der Lobby broadcastet.
+   *
+   * Ablauf:
+   * 1. Prüft, ob der STOMP-Client verbunden ist
+   * 2. Erstellt ein MoveBarrierCommand mit Barrieren-ID und Ziel-Feld-ID
+   * 3. Serialisiert das Kommando als JSON
+   * 4. Sendet die Nachricht an den WebSocket-Endpunkt /movebarrier
+   *
+   * @param barrierId     die eindeutige ID der zu bewegenden Barriere
+   * @param targetFieldId die ID des Spielfelds, auf das die Barriere
+   *                      verschoben werden soll
+   */
   function moveBarrier(barrierId: string, targetFieldId: string) {
     if (!stompclient || !stompclient.connected) {
       console.error("Cannot send move: STOMP client not connected.")
@@ -981,5 +1045,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     selectMinimapField,
     jumpTrigger,
     triggerJumpLocally,
+    sendMeepleRotation,
   }
 })

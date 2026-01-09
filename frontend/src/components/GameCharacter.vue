@@ -250,20 +250,15 @@ let moveAnimationFrame: number | null = null
 /**
  * Animiert die Bewegung des Charakters zu einer Zielposition auf dem Spielfeld.
  *
- * - inkl. Sprung und Drehung
- *
  * Ablauf:
  * 1. Vorherige Bewegungsanimation (falls vorhanden) wird abgebrochen.
- * 2. Charakter wird in Richtung des Ziels gedreht (`rotateToward`).
- * 3. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.
- * 4. Die Position wird frameweise geglättet interpoliert, bis das Ziel erreicht ist.
+ * 2. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.
+ * 3. Die Position wird frameweise geglättet interpoliert, bis das Ziel erreicht ist.
  *
  * @param target - Zielkoordinaten im 3D-Raum [x, y, z], zu denen sich der Charakter bewegen soll
  */
 const animateTo = (target: [number, number, number]) => {
   if (moveAnimationFrame) cancelAnimationFrame(moveAnimationFrame)
-
-  rotateToward(target)
 
   if (!isJumping.value) {
     isJumping.value = true
@@ -304,61 +299,6 @@ const animateTo = (target: [number, number, number]) => {
       // Wenn Sprung beendet oder das Ziel erreicht ist, Position fixieren
       animatedPosition.value = target
       moveAnimationFrame = null
-    }
-  }
-
-  animate()
-}
-
-/**
- * Dreht den Charakter sanft in Richtung einer Zielposition.
- *
- * Berechnet den Winkel zwischen der aktuellen Position und der Zielposition
- * und interpoliert die Y-Rotation über eine kurze Zeitspanne, um
- * eine fließende Drehbewegung zu erzeugen.
- *
- * - wählt immer den kürzesten Drehweg
- * - Verwendet `Math.atan2()` zur Winkelberechnung im XZ-Raum.
- * - Normalisiert Winkel auf den Bereich [-π, π], um Sprünge zu vermeiden.
- * - Führt die Drehung innerhalb von ~200 ms aus (Ease-in/Ease-out Kurve).
- *
- * @param target - Zielkoordinaten [x, y, z], in deren Richtung der Charakter schauen soll
- */
-const rotateToward = (target: [number, number, number]) => {
-  const [x, , z] = animatedPosition.value
-  const [tx, , tz] = target
-
-  const dx = tx - x
-  const dz = tz - z
-
-  const targetRotation = Math.atan2(dx, dz)
-  let startRotation = characterRotation.value
-
-  // --- beide Winkel normalisieren auf [-π, π] ---
-  const normalize = (angle: number) => ((angle + Math.PI) % (2 * Math.PI)) - Math.PI
-  startRotation = normalize(startRotation)
-  const normalizedTarget = normalize(targetRotation)
-
-  // --- Differenz auf kürzesten Weg ---
-  let diff = normalizedTarget - startRotation
-  if (diff > Math.PI) diff -= 2 * Math.PI
-  if (diff < -Math.PI) diff += 2 * Math.PI
-
-  const duration = 200
-  const startTime = Date.now()
-
-  const animate = () => {
-    const elapsed = Date.now() - startTime
-    const progress = Math.min(elapsed / duration, 1)
-
-    // weiches Interpolieren (Ease in/out optional)
-    const easedProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI)
-    characterRotation.value = startRotation + diff * easedProgress
-
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    } else {
-      characterRotation.value = normalizedTarget
     }
   }
 

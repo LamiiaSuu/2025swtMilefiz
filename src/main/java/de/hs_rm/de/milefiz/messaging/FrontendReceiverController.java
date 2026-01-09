@@ -25,6 +25,7 @@ import de.hs_rm.de.milefiz.messaging.commands.EnergyCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.commands.RollDiceCommand;
+import de.hs_rm.de.milefiz.messaging.commands.RotationCommand;
 import de.hs_rm.de.milefiz.messaging.commands.UpdateLobbySettingsCommand;
 import de.hs_rm.de.milefiz.messaging.commands.UpdatePlayerNameCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendConsumeEnergyEvent;
@@ -38,6 +39,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRotateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyRejectedEvent;
 
@@ -59,6 +61,37 @@ public class FrontendReceiverController {
         this.lobbyMapper = lobbyMapper;
         this.messagingTemplate = messagingTemplate;
         this.messagingService = frontendMessagingServiceImpl;
+    }
+
+    /**
+     * WebSocket Message Handler für Rotations-Updates eines Meeples in einer Lobby.
+     *
+     * Diese Methode verarbeitet eingehende Rotationsbefehle aus dem Frontend,
+     * die durch Kamerabewegungen eines Spielers entstehen.
+     *
+     * Ablauf:
+     * 1. Client sendet ein RotationCommand an den WebSocket-Endpunkt
+     * 2. Die Rotation wird mit Spieler-ID, Meeple-ID und Rotationswert geloggt
+     * 3. Es wird ein FrontendRotateEvent erzeugt
+     * 4. Das Event wird an alle Clients der Lobby gesendet
+     *
+     * @param lobbyId die UUID der Lobby, in der die Rotation stattfindet
+     * @param rtnCmd  das Rotationskommando mit Meeple-ID und Y-Rotation
+     * @param player  der authentifizierte Spieler, der die Rotation ausgelöst hat
+     *
+     * @return FrontendRotateEvent zur Synchronisation der Meeple-Rotation
+     *         auf allen Clients der Lobby
+     */
+
+    @MessageMapping("/milefiz/lobby/{lobbyId}/rotate")
+    @SendTo("/topic/milefiz/lobby/{lobbyId}")
+    public FrontendEvent handleRotate(
+            @DestinationVariable("lobbyId") UUID lobbyId,
+            RotationCommand rtnCmd,
+            Player player) {
+        logger.info("Rotate from player {} meeple {} rotation {}", player.getId(), rtnCmd.meepleId(),
+                rtnCmd.rotation());
+        return new FrontendRotateEvent(player.getId(), rtnCmd.meepleId(), rtnCmd.rotation());
     }
 
     /**
@@ -504,7 +537,8 @@ public class FrontendReceiverController {
                         e);
             }
 
-            return new FrontendConsumeEnergyEvent(player.getId(),command.meepleId(), player.getEnergy(), player.hasFullEnergy());
+            return new FrontendConsumeEnergyEvent(player.getId(), command.meepleId(), player.getEnergy(),
+                    player.hasFullEnergy());
         }
 
         return new FrontendConsumeEnergyRejectedEvent(player.getId(), "Nicht genug Energie für einen Sprung!");

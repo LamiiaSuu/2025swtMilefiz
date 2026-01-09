@@ -154,6 +154,27 @@ watch(() => boardStore.meeplePositions, (val) => {
   console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
 }, { deep: true })
 
+// Rotation-Updates aus dem Store auf die GameCharacter anwenden
+const _prevMeepleRotations = new Map<string, number>()
+watch(
+  () => boardStore.meepleRotations,
+  (rots) => {
+    for (const [id, rot] of Object.entries(rots)) {
+      const prev = _prevMeepleRotations.get(id)
+      if (prev !== undefined && Math.abs(prev - rot) < 1e-6) continue
+
+      const ref = gameCharRefs[id]
+      const inst: any = ref?.value
+      if (inst && typeof inst.setRotation === 'function') {
+        inst.setRotation(rot)
+      }
+
+      _prevMeepleRotations.set(id, rot)
+    }
+  },
+  { deep: true, immediate: true }
+)
+
 watchEffect(() => {
   if (milefizStore.gameFinished) {
     useFirstPerson.value = false
@@ -267,7 +288,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (milefizStore.popUpMenuOpen) {
       milefizStore.closePopUpMenu()
       return
-    } 
+    }
     else { // Oeffnet das PopUp-Menu
       milefizStore.openPopUpMenu()
       return
@@ -280,7 +301,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     e.preventDefault()
     return
   }
-  
+
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
     e.preventDefault()
@@ -291,7 +312,7 @@ const handleKeydown = (e: KeyboardEvent) => {
     cycleSelection(e.shiftKey ? -1 : 1)
     return
   }
-  
+
   toggleCamera(e)
   handleMoveKeys(e)
   handleMeepleSelectionKeydown(e)
@@ -441,13 +462,23 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   milefizStore.sendMove(meepleId, direction)
 }
 
-// Updated Rotation vom Charakter für First Person Kamera
+
+let lastRotSent = 0
+const ROT_SEND_MS = 80 
+
+// Updated die Rotation vom Meeple
 const onRotateCharacter = (yRotation: number) => {
   const id = selectedMeepleId.value
   if (!id) return
   const ref = gameCharRefs[id]
   if (!ref || !ref.value) return
-  ref.value.setRotation(yRotation)
+  boardStore.updateMeepleRotation(id, yRotation)
+  // in bestimmten Zeitabständen an alle clients senden
+  const now = performance.now()
+  if (now - lastRotSent >= ROT_SEND_MS) {
+    lastRotSent = now
+    milefizStore.sendMeepleRotation(id, yRotation)
+  }
 }
 
 onMounted(() => {

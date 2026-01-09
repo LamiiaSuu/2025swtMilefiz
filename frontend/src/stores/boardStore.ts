@@ -21,6 +21,8 @@ export const useBoardStore = defineStore('board', {
     meeplePositions: {} as Record<string, string>,
     //testMeepleId: '123e4567-e89b-12d3-a456-426614174000' as string,
     lastFields: {} as Record<string, string | null>,
+    /** meeple rotationen */
+    meepleRotations: {} as Record<string, number>,
   }),
   actions: {
     /**
@@ -61,6 +63,7 @@ export const useBoardStore = defineStore('board', {
                   this.meeplePositions[meeple.id] = meeple.currentFieldId
                 }
                 this.lastFields[meeple.id] = null
+                this.meepleRotations[meeple.id] ??= 0
               }
               // Debug: Meeple Positionen loggen nach assignment
               console.log('boardStore.getBoard: meeplePositions after init:', JSON.stringify(this.meeplePositions))
@@ -80,6 +83,7 @@ export const useBoardStore = defineStore('board', {
       this.board = null
       this.meeplePositions = {}
       this.lastFields = {}
+      this.meepleRotations = {}
     },
 
     // meeple bewegen und letztes Feld merken
@@ -89,6 +93,10 @@ export const useBoardStore = defineStore('board', {
         this.lastFields[meepleId] = previousField
       }
       this.meeplePositions[meepleId] = fieldId
+    },
+
+    updateMeepleRotation(meepleId: string, rotation: number) {
+      this.meepleRotations[meepleId] = rotation
     },
 
     updateBarrierPosition(barrierId: string, currentFieldId: string, targetFieldId: string) {
