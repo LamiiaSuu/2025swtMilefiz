@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useMilefizStore } from '@/stores/milefizstore'
 import GameBoard from '@/components/GameBoard.vue'
-import { onMounted, onBeforeUnmount, computed } from 'vue'
+import { onMounted, onBeforeUnmount, computed, ref } from 'vue'
 import GameHUD from '@/components/ui/GameHUD.vue'
 import { audioEngine } from '@/composables/audioEngine'
 import DuelOverlay from '@/components/ui/popups/DuelOverlay.vue'
+import LoadingScreen from '@/components/LoadingScreen.vue'
 
 /**
  * Spielansicht (In-Game Screen).
@@ -26,13 +27,19 @@ const store = useMilefizStore()
 
 const activeDuels = store.activeDuels
 
+const loading = ref(true)
+
 /**
+ * Startet den Loading Screen für 7 Sekunden
  * Startet Ambient- und Musik-Playlists,
  * sobald die Spielansicht geladen ist.
  * 
  * Die Playlists sind in einer Schleife. Sie können individuell angepasst werden mit den Keys aus audioStore.ts.
  */
 onMounted(() => {
+  setTimeout(() => {
+    loading.value = false
+  
   audioEngine.playAmbientPlaylist([
     'ambientForest04',
     'ambientForest05',
@@ -51,6 +58,7 @@ onMounted(() => {
     'wanderersTale',
     'whisperingWoods',
   ], true)
+  }, 7000)
 })
 
 /**
@@ -66,6 +74,9 @@ onBeforeUnmount(() => {
 
 <template>
   <main >
+    <!-- LoadingScreen -->
+    <LoadingScreen :show="loading" />
+
     <!-- Duelle -->
     <DuelOverlay
       v-if="Object.keys(activeDuels).length > 0"
@@ -74,7 +85,7 @@ onBeforeUnmount(() => {
     />
 
     <!-- HUD (Spielstatus, Buttons etc.) -->
-    <GameHUD />
+    <GameHUD v-if="!loading"/>
 
     <!-- Spielfeld -->
     <GameBoard />
