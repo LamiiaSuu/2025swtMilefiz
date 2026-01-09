@@ -4,7 +4,7 @@
     <!-- Header -->
     <Header overlay></Header>
 
-    <!-- Inhalt in der Mitte -->
+    <!-- Progress bar -->
     <div class="content">
       <div class="progress-container">
         <div
@@ -12,7 +12,7 @@
           :style="{ width: progress + '%' }"> 
         </div>
       </div>
-
+      <!-- Tip -->
       <p class="tip">
         {{ currentTip }}
       </p>
@@ -33,7 +33,7 @@ const props = defineProps({
   },
   duration: {
     type: Number,
-    default: 6000
+    default: 7000
   }
 })
 
@@ -117,7 +117,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* entspricht */
 .loading {
   position: fixed;
   inset: 0;
@@ -133,7 +132,7 @@ onUnmounted(() => {
   padding-bottom: 4rem;
 
   color: white;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 /* Hintergrund */
@@ -158,15 +157,15 @@ onUnmounted(() => {
 }
 
 .progress-container {
-  width: 320px;
-  height: 18px;
-
+  width: min(90vw, 720px);
+  height: 40px;
+  padding: 0px;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 10px;
   overflow: hidden;
 
   margin: 0 auto 1.5rem;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,.6);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,1);
 }
 
 .progress-bar {
@@ -181,7 +180,9 @@ onUnmounted(() => {
   );
 
   transition: width 0.6s cubic-bezier(.4,0,.2,1);
-  box-shadow: 0 0 6px rgba(46, 139, 87, 0.6);
+  box-shadow:
+    0 0 14px rgba(46, 139, 87, 0.6),
+    inset 0 1px 2px rgba(255,255,255,0.15);
 }
 
 

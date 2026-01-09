@@ -58,7 +58,7 @@ onMounted(() => {
     'wanderersTale',
     'whisperingWoods',
   ], true)
-  }, 6000)
+  }, 7000)
 })
 
 /**
