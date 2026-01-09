@@ -63,7 +63,7 @@ function onHover() {
         <div class="game-container">
           <div class="game-label">{{ tUI('USERNAME') }}</div>
           <div class="username-input game-content">
-            <input type="text" v-model="username" :placeholder="tUI('USERNAME') "></div>
+            <input type="text" v-model="username" :placeholder="tUI('USERNAME') " maxlength="16"></div>
         </div>
         <div class="game-container">
           <div class="game-label">{{ tUI('SEARCH') }}</div>

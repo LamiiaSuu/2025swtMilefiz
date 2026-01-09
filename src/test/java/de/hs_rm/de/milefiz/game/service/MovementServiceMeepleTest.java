@@ -329,28 +329,6 @@ public class MovementServiceMeepleTest {
         assertInstanceOf(FrontendMoveEvent.class, result);
     }
 
-    // Verlust der restlichen Moves, wenn man in eine Barriere rennt
-    @Test
-    void moveMeepleRunsIntoBarrierLosesRemainingMoves() {
-
-        Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
-        nextField.addNeighbour(dummyField, Direction.NORTH);
-
-        Meeple barrier = new Meeple(true);
-        barrier.setCurrentField(nextField);
-        board.addBarrier(barrier);
-
-        MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
-
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
-
-        assertInstanceOf(FrontendRejectedByBarrierEvent.class, result);
-
-        assertEquals(currentField, meeple.getCurrentField());
-
-        assertEquals(0, player.getRemainingMoves());
-    }
-
     // Wenn man genau auf einer Barriere landet, darf man sie verschieben
     @Test
     void moveMeepleHitsBarrierOnLastMoveTriggersBarrierMove() {

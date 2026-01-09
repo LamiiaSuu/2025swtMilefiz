@@ -53,7 +53,7 @@ public class BoardMapper {
             boolean isBarrier = false;
 
             for (Meeple barrier : board.getBarriers()) {
-                if (barrier.getCurrentField().equals(node)) {
+                if (node.equals(barrier.getCurrentField())) {
                     isBarrier = true;
                 }
             }

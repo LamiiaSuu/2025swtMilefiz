@@ -599,7 +599,7 @@ const connectionSegments = computed(() => {
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
     <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="el => registerGameCharRefFromTemplate(id, el)"
-      :meepleId="id" :playerColor="meepleColorMap.get(id)" />
+      :meepleId="id" :playerColor="meepleColorMap.get(id)" :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)"/>
 
     <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"

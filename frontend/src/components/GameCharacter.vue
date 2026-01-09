@@ -5,6 +5,7 @@ import { watchEffect, watch, ref, computed, onMounted } from 'vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { getPlayerColors } from '@/types/colorsAssets';
 import { audioEngine } from '@/composables/audioEngine'
+import type { TresObject } from '@tresjs/core'
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -20,10 +21,11 @@ const props = defineProps<{
   meepleId: string
   barrier?: boolean
   playerColor?:  string
+  hidden?: boolean
 }>()
 
 const characterRotation = ref(0)
-const characterPosition = ref(null)
+const characterPosition = ref<TresObject | null>(null)
 
 //Variablen für Anpassung des Sprungs definiert
 const jumpOffset = ref(0)
@@ -152,6 +154,17 @@ watchEffect(async () => {
     animate()
   }
 })
+
+watch(
+  () => props.hidden,
+  (hidden) => {
+    if (characterPosition.value) {
+      characterPosition.value.visible = !hidden
+    }
+  },
+  { immediate: true }
+)
+
 
 // Updated die Rotation des Charakters
 const setRotation = (yRotation: number) => {

@@ -13,7 +13,7 @@ export const ERRORS_EN: Record<ErrorCode, string> = {
     MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE: 'Space already occupied by your own meeple!',
     MOVE_BARRIER_REJECTED_START_OR_END: 'Barrier cannot be placed on start or goal spaces',
     MOVE_BARRIER_OCCUPIED: 'Barrier cannot be placed on an occupied space',
-    REJECTED_BY_BARRIER: 'Ouch! That looked painful - remaining moves lost!',
+    REJECTED_BY_BARRIER: 'Ouch! That looked painful...',
     SAVE_ENERGY_ERROR: 'Maximum energy reached or meeple already moved!',
     CONSUME_ENERGY_ERROR: 'Not enough energy for a jump!',
     NO_LOBBY_FOUND: 'Lobby not found!',
