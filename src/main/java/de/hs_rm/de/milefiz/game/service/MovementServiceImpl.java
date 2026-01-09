@@ -232,10 +232,9 @@ public class MovementServiceImpl implements MovementService {
                 // meeple.clearLastField();
                 // logger.info("ran into barrier, cant go any further! (loses remaining
                 // moves)");
-                // return new FrontendRejectedByBarrierEvent(player.getId(),
-                // player.getRemainingMoves());
-                logger.info("Cant enter End with remaining moves");
-                return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
+                return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
+                //logger.info("Cant enter End with remaining moves");
+                //return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
             }
         }
 
