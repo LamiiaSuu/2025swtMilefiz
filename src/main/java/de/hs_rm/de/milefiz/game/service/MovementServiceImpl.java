@@ -646,7 +646,7 @@ public class MovementServiceImpl implements MovementService {
         // TODO: Block aus !TESTING Übernehmen und TESTING streichen
         /**********************************************************************************************************************/
 
-        Field targetField = board.getFieldById(getRandomField(board));
+        Field targetField = board.getFieldById(moveBarrCmd.targetFieldId());
 
         if (!TESTING_LOCALLY) {
             targetField = board.getFieldById(moveBarrCmd.targetFieldId());
