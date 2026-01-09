@@ -9,4 +9,4 @@ import java.util.UUID;
  * @author Elisabeth Gehdt
  */
 
-public record EnergyCommand(UUID playerId) {}
+public record EnergyCommand(UUID playerId, UUID meepleId) {}

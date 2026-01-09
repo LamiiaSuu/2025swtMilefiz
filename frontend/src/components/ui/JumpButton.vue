@@ -7,7 +7,7 @@ import { useAudioStore } from "@/stores/audioStore";
 const milefizStore = useMilefizStore()
 const audio = useAudioStore()
 
-const isEnergyFull = computed(()=> milefizStore.energy.isEnergyFull);
+const isEnergyFull = computed(() => milefizStore.energy.isEnergyFull);
 
 /**
  * - Registriert EventListener für Keyboard Input 
@@ -20,7 +20,7 @@ onMounted(() => {
  * Beim unmounten wird Listener removed
  */
 onUnmounted(() => {
-  window.removeEventListener("keydown", onKeypress)
+    window.removeEventListener("keydown", onKeypress)
 })
 
 /**
@@ -30,6 +30,15 @@ onUnmounted(() => {
 const disabled = computed(() =>
     !isEnergyFull.value
 )
+
+// activeMeeple merken
+const selectedMeepleId = computed(() => {
+    const lobby = milefizStore.gamedata.lobby
+    const myId = milefizStore.gamedata.playerId
+    if (!lobby || !myId) return null
+    const me = lobby.players.find((p) => p.id === myId)
+    return (me?.activeMeeple?.id) ?? null
+})
 
 
 /* Hüpfen Hotkey Mapping auf Key " " (Spacebar)*/
@@ -50,9 +59,11 @@ function jump() {
         console.log("Hüpfen nicht erlaubt!")
         triggerErrorAnimation()
     }
-    
+
     console.log("Hüpfen Request gesendet.")
-    milefizStore.sendEnergyConsume()
+    if (selectedMeepleId.value) {
+        milefizStore.sendEnergyConsume(selectedMeepleId.value)
+    }
     /* Press Animation für den Button*/
     triggerPressAnimation();
 }
@@ -80,7 +91,7 @@ function triggerErrorAnimation() {
 
 </script>
 <template>
-    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled, error: isError}">
+    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled, error: isError }">
         <img src="@/assets/hud/JumpingMeeple.png" class="action-icon" />
         <img src="@/assets/hud/spacebar_icon_light.png" class="hotkey-space" />
     </div>

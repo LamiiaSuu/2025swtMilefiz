@@ -18,4 +18,5 @@ public enum EventType {
     WIN,
     CHEATED,
     DICE_GAME_UPDATE,
+    ROTATE
 }

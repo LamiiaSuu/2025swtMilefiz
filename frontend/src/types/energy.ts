@@ -1,6 +1,7 @@
 
 export interface EnergyCommand {
   playerId: string;
+  meepleId: string;
 }
 
 export interface FrontendEnergyEvent {
