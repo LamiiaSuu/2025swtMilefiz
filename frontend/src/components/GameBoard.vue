@@ -464,7 +464,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
 
 
 let lastRotSent = 0
-const ROT_SEND_MS = 80 
+const ROT_SEND_MS = 40
 
 // Updated die Rotation vom Meeple
 const onRotateCharacter = (yRotation: number) => {
