@@ -4,6 +4,11 @@
     <!-- Header -->
     <Header overlay></Header>
 
+    <!-- Tip -->
+    <p class="tip">
+      {{ currentTip }}
+    </p>
+
     <!-- Progress bar -->
     <div class="content">
       <div class="progress-container">
@@ -12,10 +17,7 @@
           :style="{ width: progress + '%' }"> 
         </div>
       </div>
-      <!-- Tip -->
-      <p class="tip">
-        {{ currentTip }}
-      </p>
+
     </div>
 
   </div>
@@ -174,7 +176,7 @@ onUnmounted(() => {
   height: 100vh;
 
   overflow: hidden;
-  padding-bottom: 4rem;
+  padding-bottom: 4vh;
 
   color: white;
   z-index: 999999;
@@ -197,14 +199,14 @@ onUnmounted(() => {
 
 /* Loading-Inhalt */
 .content {
-  margin-top: 10vh;
+  margin-top: 5vh;
   text-align: center;
 }
 
 .progress-container {
   width: min(90vw, 720px);
-  height: 40px;
-  padding: 0px;
+  height: 55px;
+  padding: 10px;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 10px;
   overflow: hidden;
@@ -216,6 +218,7 @@ onUnmounted(() => {
 .progress-bar {
   height: 100%;
   width: 0%;
+  border-radius: 5px;
 
   background: linear-gradient(
     90deg,
@@ -232,9 +235,13 @@ onUnmounted(() => {
 
 
 .tip {
+  margin-top: 20vh;
   font-size: 3.6vh;
   font-family: 'Acme', sans-serif;
   text-shadow: 0 2px 6px rgba(0,0,0,.9);
+  z-index: 849028314;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 7px black;
 }
 
 </style>
