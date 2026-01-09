@@ -1,10 +1,12 @@
 package de.hs_rm.de.milefiz.messaging.events;
 
 import java.util.UUID;
+
 /**
  * Frontend-Event, das gesendet wird, wenn eine Barriere verschoben wurde.
  *
- * Dieses Ereignis wird nach dem erfolgreichen Abschluss der Barrierenverschiebung
+ * Dieses Ereignis wird nach dem erfolgreichen Abschluss der
+ * Barrierenverschiebung
  * vom Backend an das Frontend übermittelt,
  * um den neuen Zustand des Spielfelds zu synchronisieren.
  *
@@ -17,11 +19,12 @@ import java.util.UUID;
  * @param id          ID der Barriere, die verschoben wurde
  * @param targetField ID des Feldes, auf das die Barriere gesetzt wurde
  *
- * Author: Maximilian Ressel
+ *                    Author: Maximilian Ressel
  */
-public record FrontendMoveBarrierEvent(String type, UUID id, UUID targetField) implements FrontendEvent {
+public record FrontendMoveBarrierEvent(String type, UUID id, UUID currentField, UUID targetField)
+        implements FrontendEvent {
 
-    public FrontendMoveBarrierEvent(UUID id, UUID targetField) {
-        this(EventType.MOVE_BARRIER.name(), id, targetField);
+    public FrontendMoveBarrierEvent(UUID id, UUID currentField, UUID targetField) {
+        this(EventType.MOVE_BARRIER.name(), id, currentField, targetField);
     }
 }

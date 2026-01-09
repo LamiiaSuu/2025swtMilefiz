@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.hs_rm.de.milefiz.game.model.Board;
-import de.hs_rm.de.milefiz.game.model.BoardDTO;
-import de.hs_rm.de.milefiz.game.model.BoardMapper;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.game.service.BoardService;
 import de.hs_rm.de.milefiz.game.service.BoardValidateException;
 import de.hs_rm.de.milefiz.game.service.GameService;
@@ -23,7 +23,8 @@ import de.hs_rm.de.milefiz.game.service.GameService;
  *
  * <p>
  * Stellt HTTP-Endpoints für das Frontend bereit und delegiert Business Logic an
- * den {@link GameService}.</p>
+ * den {@link GameService}.
+ * </p>
  *
  * @author Leon Schäfer / Thilo Wittmer
  */
@@ -47,29 +48,11 @@ public class GameController {
     }
 
     /**
-     * Gibt das aktuelle Test-Board als DTO zurück.
-     *
-     * <p>
-     * Diese Methode lädt das Test-Board vom GameService und konvertiert es zu
-     * einem BoardDTO für die Frontend-Kommunikation.</p>
-     *
-     * @return BoardDTO mit allen Board-Informationen einschließlich Fields,
-     * Connections, Positionen und Field-Types
-     * @see GameService#getTestBoard()
-     * @see BoardMapper#mapToDTO(Board)
-     */
-    @GetMapping(path = "/getBoard")
-    public BoardDTO getBoard() {
-        Board board = gameService.getTestBoard();
-        return BoardMapper.mapToDTO(board);
-    }
-
-    /**
      * Validiert ein übergebenes Board
      *
      * @param boardDTO
      * @return 200 OK, wenn alles stimmt | 400 BAD REQUEST, wenn nicht
-     * validierbar
+     *         validierbar
      */
     @PostMapping("/board/validate")
     public ResponseEntity<String> validateBoard(@RequestBody BoardDTO boardDTO) {

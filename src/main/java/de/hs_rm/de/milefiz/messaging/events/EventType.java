@@ -16,5 +16,6 @@ public enum EventType {
     MOVE_WITH_LOSS,
     MEEPLE_REACHED_END,
     WIN,
-    CHEATED
+    CHEATED,
+    DICE_GAME_UPDATE,
 }

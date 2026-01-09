@@ -63,7 +63,7 @@ function onHover() {
         <div class="game-container">
           <div class="game-label">{{ tUI('USERNAME') }}</div>
           <div class="username-input game-content">
-            <input type="text" v-model="username" :placeholder="tUI('USERNAME') "></div>
+            <input type="text" v-model="username" :placeholder="tUI('USERNAME') " maxlength="16"></div>
         </div>
         <div class="game-container">
           <div class="game-label">{{ tUI('SEARCH') }}</div>
@@ -125,6 +125,7 @@ function onHover() {
   font-size: 1.3rem;
   cursor: pointer;
   transition: background-color 0.2s;
+    font-family: "AcmeFont", sans-serif;
 }
 
 .start-game-button:hover {

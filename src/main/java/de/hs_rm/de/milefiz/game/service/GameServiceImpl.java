@@ -17,12 +17,12 @@ import java.security.Principal;
 import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
-import de.hs_rm.de.milefiz.game.model.BoardDTO;
-import de.hs_rm.de.milefiz.game.model.BoardMapper;
 
 /**
  * Standard-Implementierung des GameService Interface.
@@ -111,7 +111,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Board getTestBoard() {
-        return testBoard;
+        return new Board(testBoard);
     }
 
     @Override

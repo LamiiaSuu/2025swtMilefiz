@@ -42,5 +42,16 @@ export const UI_EN: Record<UIKey, string> = {
     WAITING_FOR_LEADER: 'Waiting for Leader...',
     BACK_TO_MAIN_MENU_CONFIRMATION: 'Do you really want to return to the main menu?',
     BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR: 'Do you really want to return to the main menu? Unsaved changes will be lost.',
+    BACK_TO_MAIN_MENU_CONFIRMATION_INGAME: 'Do you really want to leave the game?',
     CANCEL: 'Cancel',
+    CONTINUE: 'Continue',
+    LEAVE_GAME: 'Leave Game',
+    POPUP_MENU: 'Menu',
+    CONTROLS: 'Controls',
+    LANGUAGE: 'Language',
+    TUTORIAL: 'Tutorial',
+    DUEL_WON: '🎉 You won! 🎉',
+    DUEL_LOST: '😵 You lost… 😵',
+    MINIGAME_DICE_TITLE: 'Dice Game',
+
 }

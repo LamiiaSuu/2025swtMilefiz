@@ -27,6 +27,7 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.Position;
+import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
@@ -42,6 +43,8 @@ public class MovementServiceMeepleTest {
 
     @Mock
     private LobbyManager lobbyManager;
+    private DuelService duelService;
+    FrontendMessagingService messaging;
 
     private MovementService movementService;
     private Lobby lobby;
@@ -57,7 +60,8 @@ public class MovementServiceMeepleTest {
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        movementService = new MovementServiceImpl(lobbyManager);
+        duelService = new DuelServiceImpl(lobbyManager, messaging);
+        movementService = new MovementServiceImpl(lobbyManager, duelService, false);
 
         // Felder
         currentField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 0));
@@ -510,13 +514,13 @@ public class MovementServiceMeepleTest {
 
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
-        assertInstanceOf(FrontendMoveEvent.class, result);
+        assertInstanceOf(FrontendMoveWithLossEvent.class, result);
 
-        FrontendMoveEvent evt = (FrontendMoveEvent) result;
+        FrontendMoveWithLossEvent evt = (FrontendMoveWithLossEvent) result;
 
         assertEquals(nextField.getId(), evt.targetField());
 
-        assertEquals(MOVES - 1, evt.remainingMoves());
+        assertEquals(NO_MOVES, evt.remainingMoves());
     }
 
     // Duell, wenn man mit dem letzte Move auf einem Feld mit einem gegnerischen
@@ -544,11 +548,11 @@ public class MovementServiceMeepleTest {
         assertEquals(meeple.getId(), evt.firstMeepleId());
         assertEquals(rivalMeeple.getId(), evt.secondMeepleId());
         assertEquals(nextField.getId(), evt.targetField());
-        assertEquals(0, evt.remainingMoves());
+        assertEquals(NO_MOVES, evt.remainingMoves());
 
         assertEquals(nextField, meeple.getCurrentField());
 
-        assertEquals(0, player.getRemainingMoves());
+        assertEquals(NO_MOVES, player.getRemainingMoves());
     }
 
     // gegnerischer Meeple wird uebersprungen, wenn man nicht mit dem letzten Move

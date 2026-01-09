@@ -79,8 +79,8 @@
 
   color: white;
   font-size: 3.5vh;
-  min-width: 35vw;
-  min-height: 9vh;
+  width: 30vw;
+  height: 8.5vh;
   outline: none;
 
   padding-bottom: 1vh;
@@ -132,4 +132,9 @@ form label {
     0 0 5px rgba(0, 0, 0, 0.5);
     
   paint-order: stroke fill;
+}
+
+
+button:hover {
+  filter: brightness(1.1);
 }
