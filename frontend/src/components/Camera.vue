@@ -111,7 +111,7 @@ onMounted(() => {
   // Direkt Pointer Lock versuchen
   if (props.useFirstPerson) {
     const requestLock = () => {
-      if (!document.pointerLockElement && !milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.minimap.isMiniMapOpen && !milefizStore.gameFinished && props.useFirstPerson && globalThis.location.pathname === '/game') {
+      if (!document.pointerLockElement && !milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.minimap.isMiniMapOpen && !milefizStore.gameFinished && props.useFirstPerson && globalThis.location.pathname === '/game' && Object.keys(milefizStore.activeDuels).length < 1) {
         document.body.requestPointerLock()
       }
     }
