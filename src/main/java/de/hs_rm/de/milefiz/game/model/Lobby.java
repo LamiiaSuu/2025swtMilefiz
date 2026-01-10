@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyJoinException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
+import de.hs_rm.de.milefiz.game.service.NamingService;
 
 public class Lobby {
 
@@ -20,7 +21,7 @@ public class Lobby {
     public Lobby() {
         id = UUID.randomUUID();
         players = new ArrayList<>();
-        lobbyName = "Neue Lobby";
+        lobbyName = NamingService.generateRandomLobbyName();
         maxPlayers = Color.values().length;
         gameStarted = false;
     }
