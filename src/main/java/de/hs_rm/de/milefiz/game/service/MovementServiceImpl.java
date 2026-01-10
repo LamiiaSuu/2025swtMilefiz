@@ -145,6 +145,8 @@ public class MovementServiceImpl implements MovementService {
         Field currentField = meeple.getCurrentField();
         Field lastField = meeple.getLastField();
         Direction direction = moveCmd.direction();
+        Set<Meeple> rivalMeeples = getRivalMeeples(lobby, player);
+        Set<Field> rivalMeepleFields = getRivalMeepleFields(lobby, player);
         Set<Field> barrierFields = getBarrierFields(board);
         Set<Field> ownMeepleFields = getOwnMeepleFields(player);
         ownMeepleFields.remove(currentField);
@@ -233,8 +235,9 @@ public class MovementServiceImpl implements MovementService {
                 // logger.info("ran into barrier, cant go any further! (loses remaining
                 // moves)");
                 return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
-                //logger.info("Cant enter End with remaining moves");
-                //return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
+                // logger.info("Cant enter End with remaining moves");
+                // return new FrontendMoveRejectedEvent(player.getId(),
+                // "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
             }
         }
 
@@ -246,16 +249,16 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE");
         }
 
-        // SACKGASSE DURCH EIGENE MEEPLE
+        // SACKGASSE DURCH EIGENE MEEPLE ODER DUELLIERENDE MEEPLE
         // Ueberpruefen, ob sich der Spieler,
         // abgesehen vom aktuellen Feld,
         // in eine Sackgasse aus eigenen Meeplen bewegt
         if (player.getRemainingMoves() > LAST_MOVE) {
 
             if (!existsLegalStopWithinRemainingMoves(nextField, currentField, player.getRemainingMoves() - 1,
-                    ownMeepleFields, barrierFields)) {
+                    ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
 
-                if (ownMeepleFields.contains(nextField)) {
+                if (ownMeepleFields.contains(nextField) || isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields)) {
                     logger.info("No valid Fields to End this Meeples run in this Direction");
                     return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_VALID_FIELDS");
                 }
@@ -444,10 +447,12 @@ public class MovementServiceImpl implements MovementService {
      * @author Maximilian Ressel
      */
     private boolean existsLegalStopWithinRemainingMoves(Field startingField, Field lastField, int remainingMoves,
-            Set<Field> ownMeepleFields, Set<Field> barrierFields) {
+            Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
+            Set<Field> rivalMeepleFields) {
         Map<String, Boolean> memo = new HashMap<>();
         return existsLegalStopWithinRemainingMovesDfs(
-                startingField, lastField, remainingMoves, ownMeepleFields, barrierFields, memo);
+                startingField, lastField, remainingMoves, ownMeepleFields, barrierFields, rivalMeeples,
+                rivalMeepleFields, memo);
     }
 
     /**
@@ -493,7 +498,8 @@ public class MovementServiceImpl implements MovementService {
      */
 
     private boolean existsLegalStopWithinRemainingMovesDfs(Field startingField, Field lastField, int remainingMoves,
-            Set<Field> ownMeepleFields, Set<Field> barrierFields, Map<String, Boolean> memo) {
+            Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
+            Set<Field> rivalMeepleFields, Map<String, Boolean> memo) {
 
         if (remainingMoves == 0) {
             return false;
@@ -517,16 +523,17 @@ public class MovementServiceImpl implements MovementService {
                 continue;
             }
 
-            if (!isLegalTarget(neighbourField, lastField, remainingMoves, ownMeepleFields, barrierFields)) {
+            if (!isLegalTarget(neighbourField, lastField, remainingMoves, ownMeepleFields, barrierFields, rivalMeeples,
+                    rivalMeepleFields)) {
                 continue;
             }
 
-            if (!ownMeepleFields.contains(neighbourField)) {
+            if (!ownMeepleFields.contains(neighbourField) && !isOccupiedByDuelingMeeples(neighbourField, rivalMeeples, rivalMeepleFields)) {
                 return true;
             }
 
             if (existsLegalStopWithinRemainingMovesDfs(neighbourField, startingField, remainingMoves - 1,
-                    ownMeepleFields, barrierFields, memo)) {
+                    ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, memo)) {
                 memo.put(key, true);
                 return true;
             }
@@ -556,7 +563,8 @@ public class MovementServiceImpl implements MovementService {
      * @author Maximilian Ressel
      */
     private boolean isLegalTarget(Field nextField, Field lastField, int remainingMoves,
-            Set<Field> ownMeepleFields, Set<Field> barrierFields) {
+            Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
+            Set<Field> rivalMeepleFields) {
 
         // FELD EXISTIERT NICHT
         if (nextField == null) {
@@ -594,7 +602,24 @@ public class MovementServiceImpl implements MovementService {
             return false;
         }
 
+        // DUELL ZWISCHEN ZWEI ANDEREN MEEPLE
+        if (isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields) && remainingMoves == LAST_MOVE){
+            logger.info("Field blocked by dueling Meeple!");
+            return false;
+        }
         return true;
+    }
+
+    private boolean isOccupiedByDuelingMeeples(Field targetField, Set<Meeple> rivalMeeples, Set<Field> rivalMeepleFields) {
+        if (!rivalMeepleFields.contains(targetField)){
+            return false;
+        }
+        for (Meeple meeple : rivalMeeples){
+            if (meeple.getCurrentField().equals(targetField) && duelService.isMeepleInDuel(meeple.getId())){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
