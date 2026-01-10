@@ -258,13 +258,42 @@ public class MovementServiceImpl implements MovementService {
             if (!existsLegalStopWithinRemainingMoves(nextField, currentField, player.getRemainingMoves() - 1,
                     ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
 
-                if (ownMeepleFields.contains(nextField) || isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields)) {
+                if (ownMeepleFields.contains(nextField)
+                        || isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields)) {
                     logger.info("No valid Fields to End this Meeples run in this Direction");
                     return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_VALID_FIELDS");
                 }
 
                 endTurnWithMove(player, meeple, nextField);
                 logger.info("No further possible Fields within reach - turn ends");
+                if (rivalMeepleFields.contains(nextField)) {
+
+                    Meeple rivalMeeple = getRivalMeepleByField(nextField, rivalMeeples);
+
+                    Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
+
+                    var duel = duelService.createDuel(
+                            player.getId(),
+                            rivalPlayer.getId(),
+                            meeple.getId(),
+                            rivalMeeple.getId());
+
+                    var miniGame = duelService.assignRandomGameToDuel(duel.getId());
+
+                    if (miniGame instanceof DiceGame dice) {
+                        dice.initPlayers(player.getId(), rivalPlayer.getId());
+                    }
+
+                    return new FrontendDuelEvent(
+                            duel.getId(),
+                            player.getId(),
+                            rivalPlayer.getId(),
+                            meeple.getId(),
+                            rivalMeeple.getId(),
+                            nextField.getId(),
+                            player.getRemainingMoves(),
+                            miniGame);
+                }
                 return new FrontendMoveWithLossEvent(
                         player.getId(),
                         meeple.getId(),
@@ -284,6 +313,34 @@ public class MovementServiceImpl implements MovementService {
                 && (player.getRemainingMoves() > SECOND_TO_LAST_MOVE)) {
             endTurnWithMove(player, meeple, nextField);
             logger.info("All possible moves would lead into Barriers, player loses remaining Moves, turn is over");
+            if (rivalMeepleFields.contains(nextField)) {
+
+                Meeple rivalMeeple = getRivalMeepleByField(nextField, rivalMeeples);
+
+                Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
+
+                var duel = duelService.createDuel(
+                        player.getId(),
+                        rivalPlayer.getId(),
+                        meeple.getId(),
+                        rivalMeeple.getId());
+
+                var miniGame = duelService.assignRandomGameToDuel(duel.getId());
+
+                if (miniGame instanceof DiceGame dice) {
+                    dice.initPlayers(player.getId(), rivalPlayer.getId());
+                }
+
+                return new FrontendDuelEvent(
+                        duel.getId(),
+                        player.getId(),
+                        rivalPlayer.getId(),
+                        meeple.getId(),
+                        rivalMeeple.getId(),
+                        nextField.getId(),
+                        player.getRemainingMoves(),
+                        miniGame);
+            }
             return new FrontendMoveWithLossEvent(
                     player.getId(),
                     meeple.getId(),
@@ -528,7 +585,8 @@ public class MovementServiceImpl implements MovementService {
                 continue;
             }
 
-            if (!ownMeepleFields.contains(neighbourField) && !isOccupiedByDuelingMeeples(neighbourField, rivalMeeples, rivalMeepleFields)) {
+            if (!ownMeepleFields.contains(neighbourField)
+                    && !isOccupiedByDuelingMeeples(neighbourField, rivalMeeples, rivalMeepleFields)) {
                 return true;
             }
 
@@ -603,19 +661,20 @@ public class MovementServiceImpl implements MovementService {
         }
 
         // DUELL ZWISCHEN ZWEI ANDEREN MEEPLE
-        if (isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields) && remainingMoves == LAST_MOVE){
+        if (isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields) && remainingMoves == LAST_MOVE) {
             logger.info("Field blocked by dueling Meeple!");
             return false;
         }
         return true;
     }
 
-    private boolean isOccupiedByDuelingMeeples(Field targetField, Set<Meeple> rivalMeeples, Set<Field> rivalMeepleFields) {
-        if (!rivalMeepleFields.contains(targetField)){
+    private boolean isOccupiedByDuelingMeeples(Field targetField, Set<Meeple> rivalMeeples,
+            Set<Field> rivalMeepleFields) {
+        if (!rivalMeepleFields.contains(targetField)) {
             return false;
         }
-        for (Meeple meeple : rivalMeeples){
-            if (meeple.getCurrentField().equals(targetField) && duelService.isMeepleInDuel(meeple.getId())){
+        for (Meeple meeple : rivalMeeples) {
+            if (meeple.getCurrentField().equals(targetField) && duelService.isMeepleInDuel(meeple.getId())) {
                 return true;
             }
         }
@@ -807,6 +866,23 @@ public class MovementServiceImpl implements MovementService {
                 .map(Meeple::getCurrentField)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+    }
+
+    private Meeple getRivalMeepleByField(Field field, Set<Meeple> rivalMeeples) {
+        return rivalMeeples.stream()
+                .filter(m -> field.equals(m.getCurrentField()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Player getPlayerByMeeple(Lobby lobby, Meeple meeple) {
+        if (meeple == null)
+            return null;
+        return lobby.getPlayers().stream()
+                .filter(p -> Arrays.stream(p.getMeeples())
+                        .anyMatch(m -> m.getId().equals(meeple.getId())))
+                .findFirst()
+                .orElse(null);
     }
 
 }
