@@ -22,4 +22,5 @@ export const ERRORS_EN: Record<ErrorCode, string> = {
     BOARD_SUCCESSFULLY_IMPORTED: 'Map imported successfully!',
     BOARD_COULD_NOT_BE_IMPORTED: 'Map could not be imported: ',
     MEEPLE_IN_DUEL: 'The opposing meeple is already in a duel. Please wait until the duel is finished!',
+    MOVE_ERROR_NO_VALID_FIELDS: 'There are no valid moves possible in this direction',
 }
