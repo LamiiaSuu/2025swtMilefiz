@@ -19,7 +19,7 @@ import java.util.Random;
  * </p>
  * <ul>
  *   <li>{@link #generateRandomName()} für Spielernamen</li>
- *   <li>{@link #generateRandomLobbyName()} für Lobby- bzw. Karten­namen</li>
+ *   <li>{@link #generateRandomLobbyName()} für Lobby- bzw. Kartennamen</li>
  * </ul>
  *
  * <p>
@@ -107,7 +107,7 @@ public class NamingService {
     );
 
     /**
-     * Adjektive zur Erzeugung von Lobby- oder Karten­namen.
+     * Adjektive zur Erzeugung von Lobby- oder Kartennamen.
      *
      * <p>
      * Diese Adjektive beschreiben Umgebungen, Orte oder Stimmungen
@@ -133,7 +133,7 @@ public class NamingService {
     );
 
     /**
-     * Nomen zur Erzeugung von Lobby- oder Karten­namen.
+     * Nomen zur Erzeugung von Lobby- oder Kartennamen.
      *
      * <p>
      * Die Nomen stehen für Orte, Bauwerke oder Biome,
@@ -198,9 +198,9 @@ public class NamingService {
                 ? "Spieler"
                 : validNames.get(RANDOM.nextInt(validNames.size()));
     }
-    
+
     /**
-     * Erzeugt einen zufälligen Lobby- oder Karten­namen.
+     * Erzeugt einen zufälligen Lobby- oder Kartennamen.
      *
      * <p>
      * Der Name setzt sich aus einem Adjektiv aus {@link #LOBBY_ADJECTIVES}
