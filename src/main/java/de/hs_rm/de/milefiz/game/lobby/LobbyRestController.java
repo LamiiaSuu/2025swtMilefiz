@@ -23,6 +23,7 @@ import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
 import de.hs_rm.de.milefiz.game.service.BoardService;
 import de.hs_rm.de.milefiz.game.service.BoardValidateException;
 import de.hs_rm.de.milefiz.game.service.GameService;
+import de.hs_rm.de.milefiz.game.service.NamingService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingServiceImpl;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
@@ -72,7 +73,7 @@ public class LobbyRestController {
     public ResponseEntity<LobbyJoinEvent> joinCreateLobby() throws LobbyNotFoundException {
         // Join Random lobby
         Lobby lobby = lobbyManager.createLobby();
-        return joinLobby(lobby.getId(), "Anonymer Kek");
+        return joinLobby(lobby.getId(), NamingService.generateRandomName());
     }
 
     /**
@@ -111,7 +112,7 @@ public class LobbyRestController {
         if(!username.isBlank()){
             player.setPlayerName(username);
         }else{
-            player.setPlayerName("Anonymer Kek");
+            player.setPlayerName(NamingService.generateRandomName());
         }
         
 
