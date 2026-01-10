@@ -471,6 +471,12 @@ public class MovementServiceImpl implements MovementService {
      * 
      * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
      * 
+     * @param rivalMeeples      alle gegnerischen Meeples, die im Spiel vorhanden
+     *                          sind
+     * @param rivalMeepleFields Menge der Felder, auf denen gegnerische Meeples
+     *                          aktuell stehen;
+     *                          dient als Optimierung zur schnellen Vorprüfung
+     * 
      * @return {@code true}, wenn innerhalb der verbleibenden Schritte mindestens
      *         ein legales Stopfeld erreichbar ist, andernfalls {@code false}
      *
