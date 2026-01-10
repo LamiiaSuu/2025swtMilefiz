@@ -3,19 +3,15 @@ package de.hs_rm.de.milefiz.game.service;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
-import java.util.Random;
+
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
@@ -77,14 +73,10 @@ public class MovementServiceImpl implements MovementService {
     private LobbyManager lobbyManager;
     private final DuelService duelService;
     private static final int LAST_MOVE = 1;
-    private static final int SECOND_TO_LAST_MOVE = 2;
-    private final boolean TESTING_LOCALLY;
 
-    public MovementServiceImpl(LobbyManager lobbyManager, DuelService duelService,
-            @Value("${testing.locally:false}") boolean TESTING_LOCALLY) {
+    public MovementServiceImpl(LobbyManager lobbyManager, DuelService duelService) {
         this.lobbyManager = lobbyManager;
         this.duelService = duelService;
-        this.TESTING_LOCALLY = TESTING_LOCALLY;
     }
 
     /**
@@ -229,15 +221,7 @@ public class MovementServiceImpl implements MovementService {
                             player.getRemainingMoves(),
                             tempBarrier.getId());
                 }
-                // ansonsten wird der zug beendet
-                // player.setRemainingMoves(0);
-                // meeple.clearLastField();
-                // logger.info("ran into barrier, cant go any further! (loses remaining
-                // moves)");
                 return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
-                // logger.info("Cant enter End with remaining moves");
-                // return new FrontendMoveRejectedEvent(player.getId(),
-                // "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
             }
         }
 
@@ -249,10 +233,11 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE");
         }
 
-        // SACKGASSE DURCH EIGENE MEEPLE ODER DUELLIERENDE MEEPLE
+        // SACKGASSE DURCH EIGENE MEEPLE ,BARRIEREN ODER DUELLIERENDE MEEPLE
         // Ueberpruefen, ob sich der Spieler,
         // abgesehen vom aktuellen Feld,
-        // in eine Sackgasse aus eigenen Meeplen bewegt
+        // in eine Sackgasse aus eigenen Meeplen, Barrieren oder sich duellierenden
+        // gegnerischen Meeplen bewegt
         if (player.getRemainingMoves() > LAST_MOVE) {
 
             if (!existsLegalStopWithinRemainingMoves(nextField, currentField, player.getRemainingMoves() - 1,
@@ -301,52 +286,6 @@ public class MovementServiceImpl implements MovementService {
                         player.getRemainingMoves(),
                         player.hasMoved());
             }
-        }
-
-        // SACKGASSE DURCH BARRIEREN
-        // Wenn man ein Feld betritt, das als einzig angrenzende Felder Barrieren
-        // und/oder nicht betretbare Felder hat,
-        // wird der Zug automatisch beendet ohne dass man sich noch in Richtung der
-        // Barriere bewegen muss, außer man macht gerade seinen vorletzten Schritt,
-        // was bedeutet, dass man direkt auf der Barriere oder dem Ziel landen kann.
-        if ((hasOnlyBarrierNeighbours(nextField, currentField, board))
-                && (player.getRemainingMoves() > SECOND_TO_LAST_MOVE)) {
-            endTurnWithMove(player, meeple, nextField);
-            logger.info("All possible moves would lead into Barriers, player loses remaining Moves, turn is over");
-            if (rivalMeepleFields.contains(nextField)) {
-
-                Meeple rivalMeeple = getRivalMeepleByField(nextField, rivalMeeples);
-
-                Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
-
-                var duel = duelService.createDuel(
-                        player.getId(),
-                        rivalPlayer.getId(),
-                        meeple.getId(),
-                        rivalMeeple.getId());
-
-                var miniGame = duelService.assignRandomGameToDuel(duel.getId());
-
-                if (miniGame instanceof DiceGame dice) {
-                    dice.initPlayers(player.getId(), rivalPlayer.getId());
-                }
-
-                return new FrontendDuelEvent(
-                        duel.getId(),
-                        player.getId(),
-                        rivalPlayer.getId(),
-                        meeple.getId(),
-                        rivalMeeple.getId(),
-                        nextField.getId(),
-                        player.getRemainingMoves(),
-                        miniGame);
-            }
-            return new FrontendMoveWithLossEvent(
-                    player.getId(),
-                    meeple.getId(),
-                    nextField.getId(),
-                    player.getRemainingMoves(),
-                    player.hasMoved());
         }
 
         // DUELL
@@ -435,27 +374,65 @@ public class MovementServiceImpl implements MovementService {
     }
 
     /**
-     * Prüft, ob das angegebene Zielfeld ausschließlich Nachbarfelder besitzt,
-     * die entweder Felder mit Barrieren sind oder nicht betretbare Felder sind.
+     * Verschiebt eine bestehende Barriere auf ein anderes Feld des Spielfelds.
+     * 
+     * Die Methode verarbeitet einen {@link MoveBarrierCommand} und prüft,
+     * ob die gewünschte Zielposition gültig ist. Eine Barriere darf weder
+     * auf ein Start- noch auf ein Zielfeld gesetzt werden und das Zielfeld
+     * darf nicht bereits durch einen Meeple oder eine andere Barriere belegt sein.
+     * 
+     * Bei einem ungültigen Zug wird ein {@link FrontendMoveBarrierRejectedEvent}
+     * zurückgegeben. Ist der Zug gültig, wird die Barriere auf das Zielfeld gesetzt
+     * und ein {@link FrontendMoveBarrierEvent} erzeugt.
      *
-     * @param nextField    das Feld, auf das sich der Meeple bewegen möchte
-     * @param currentField das Feld, auf dem sich der Meeple aktuell befindet
-     * @param board        das aktuelle Spielfeld, das alle Barrieren kennt
-     * @return true, wenn alle Nachbarfelder des Zielfelds entweder
-     *         Felder mit Barrieren sind oder nicht betretbar sind,
-     *         andernfalls false
+     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere bewegt
+     *                    wird
+     * @param moveBarrCmd das Kommando mit Informationen zur Barriere und zum
+     *                    Zielfeld
+     * @param player      der Spieler, der die Aktion ausführt
+     *
+     * @return ein {@link FrontendEvent}, das entweder die erfolgreiche
+     *         Barrierenbewegung oder die Ablehnung des Zuges repräsentiert
      *
      * @author Maximilian Ressel
      */
-    private boolean hasOnlyBarrierNeighbours(Field nextField, Field currentField, Board board) {
-        return nextField.getNeighbours().values().stream().allMatch(
-                neighbour -> neighbour.equals(currentField)
-                        || neighbour.getType().isStart()
-                        || neighbour.getType().isEnd()
-                        || board.getBarriers().stream()
-                                .map(Meeple::getCurrentField)
-                                .filter(Objects::nonNull)
-                                .anyMatch(neighbour::equals));
+    @Override
+    public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Player player) {
+
+        logger.info(
+                "Moving Barrier {} in lobby {} by player '{}' to field {} (sessionId={})",
+                moveBarrCmd.barrierId(),
+                lobbyId,
+                player != null ? player.getName() : "anonymous",
+                moveBarrCmd.targetFieldId());
+
+        Lobby lobby = null;
+        try {
+            lobby = lobbyManager.getLobby(lobbyId);
+        } catch (LobbyNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Board board = lobby.getBoard();
+        Meeple barrier = board.getBarrierById(moveBarrCmd.barrierId());
+        Field currentField = barrier.getCurrentField();
+        Field targetField = board.getFieldById(moveBarrCmd.targetFieldId());
+
+        // Fehler, wenn es sich um ein Startfeld oder das Ende handelt
+        if (targetField.getType().isEnd() || targetField.getType().isStart()) {
+            logger.info("Cant place a barrier on Start or End");
+            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_REJECTED_START_OR_END");
+        }
+
+        // Fehler wenn das Feld besetzt ist
+        if (isOccupied(lobby, board, targetField)) {
+            logger.info("Cant place a barrier on an occupied Field");
+            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_OCCUPIED");
+        }
+
+        barrier.setCurrentField(targetField);
+
+        return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
     }
 
     /**
@@ -479,10 +456,6 @@ public class MovementServiceImpl implements MovementService {
     }
 
     /**
-     * Prüft, ob von einem gegebenen Startfeld aus innerhalb der angegebenen
-     * Anzahl an verbleibenden Schritten mindestens ein legales Stopfeld
-     * erreichbar ist.
-     *
      * Diese Methode dient als öffentlicher Einstiegspunkt für die rekursive
      * Tiefensuche und initialisiert die benötigte Memoisierung.
      * Die eigentliche Logik der Pfadsuche ist in
@@ -521,7 +494,8 @@ public class MovementServiceImpl implements MovementService {
      * d.h. ein Feld, das:
      * über ausschließlich legale Zwischenschritte erreichbar ist
      * (gemäß {@link #isLegalTarget(Field, Field, int, Set, Set)})
-     * und nicht von einem eigenen Meeple besetzt ist.
+     * und nicht von einem eigenen Meeple oder sich duellierenden
+     * gegnerischen Meeplen besetzt ist.
      *
      * Die Methode durchsucht den Bewegungsraum per Tiefensuche (DFS) und
      * verwendet Memoisierung, um bereits geprüfte Zustände zu cachen.
@@ -535,25 +509,30 @@ public class MovementServiceImpl implements MovementService {
      * Wird innerhalb der verfügbaren Schritte kein solches Feld erreicht,
      * liefert die Methode {@code false}.
      *
-     * @param startingField   das Feld, von dem aus die Suche gestartet wird
-     * @param lastField       das zuletzt betretene Feld (zur Erkennung von
-     *                        Richtungswechseln),
-     *                        oder {@code null}, falls keines existiert
-     * @param remainingMoves  die Anzahl der noch verfügbaren Schritte
-     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeples besetzt
-     *                        sind
+     * @param startingField     das Feld, von dem aus die Suche gestartet wird
+     * @param lastField         das zuletzt betretene Feld (zur Erkennung von
+     *                          Richtungswechseln),
+     *                          oder {@code null}, falls keines existiert
+     * @param remainingMoves    die Anzahl der noch verfügbaren Schritte
+     * @param ownMeepleFields   alle Felder, die aktuell von eigenen Meeples besetzt
+     *                          sind
      * 
-     * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
+     * @param barrierFields     alle Felder, die aktuell von Barrieren besetzt sind
      * 
-     * @param memo            Cache zur Memoisierung bereits geprüfter Zustände
-     *                        (Key: Feld + letztes Feld + verbleibende Schritte)
+     * @param rivalMeeples      alle gegnerischen Meeples, die im Spiel vorhanden
+     *                          sind
+     * @param rivalMeepleFields Menge der Felder, auf denen gegnerische Meeples
+     *                          aktuell stehen;
+     *                          dient als Optimierung zur schnellen Vorprüfung
+     * 
+     * @param memo              Cache zur Memoisierung bereits geprüfter Zustände
+     *                          (Key: Feld + letztes Feld + verbleibende Schritte)
      *
      * @return {@code true}, wenn innerhalb der verbleibenden Schritte mindestens
      *         ein legales Stopfeld erreichbar ist, andernfalls {@code false}
      *
      * @author Maximilian Ressel
      */
-
     private boolean existsLegalStopWithinRemainingMovesDfs(Field startingField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
             Set<Field> rivalMeepleFields, Map<String, Boolean> memo) {
@@ -604,16 +583,22 @@ public class MovementServiceImpl implements MovementService {
     /**
      * Prüft, ob ein bestimmtes Feld als nächstes Zielfeld betreten werden darf.
      *
-     * @param nextField       das Feld, das als nächstes betreten werden soll
-     * @param lastField       das zuvor betretene Feld (zur Erkennung von
-     *                        Richtungswechseln),
-     *                        oder {@code null}, falls keiner existiert
-     * @param remainingMoves  die Anzahl der verbleibenden Moves
+     * @param nextField         das Feld, das als nächstes betreten werden soll
+     * @param lastField         das zuvor betretene Feld (zur Erkennung von
+     *                          Richtungswechseln),
+     *                          oder {@code null}, falls keiner existiert
+     * @param remainingMoves    die Anzahl der verbleibenden Moves
      * 
-     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeplen besetzt
-     *                        sind
+     * @param ownMeepleFields   alle Felder, die aktuell von eigenen Meeplen besetzt
+     *                          sind
      * 
-     * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
+     * @param barrierFields     alle Felder, die aktuell von Barrieren besetzt sind
+     * 
+     * @param rivalMeeples      alle gegnerischen Meeples, die im Spiel vorhanden
+     *                          sind
+     * @param rivalMeepleFields Menge der Felder, auf denen gegnerische Meeples
+     *                          aktuell stehen;
+     *                          dient als Optimierung zur schnellen Vorprüfung
      * 
      * @return {@code true}, wenn das Zielfeld unter den gegebenen Bedingungen
      *         betreten werden darf, andernfalls {@code false}
@@ -668,6 +653,22 @@ public class MovementServiceImpl implements MovementService {
         return true;
     }
 
+    /**
+     * Prüft, ob das angegebene Feld durch einen gegnerischen Meeple belegt ist,
+     * der sich aktuell in einem Duell befindet.
+     *
+     * @param targetField       das Feld, das auf eine Belegung durch duellierende
+     *                          gegnerische Meeples geprüft werden soll
+     * @param rivalMeeples      alle gegnerischen Meeples, die im Spiel vorhanden
+     *                          sind
+     * @param rivalMeepleFields Menge der Felder, auf denen gegnerische Meeples
+     *                          aktuell stehen;
+     *                          dient als Optimierung zur schnellen Vorprüfung
+     * @return true, wenn das Feld durch einen gegnerischen Meeple belegt ist,
+     *         der sich in einem Duell befindet, sonst false
+     *
+     * @author Maximilian Ressel
+     */
     private boolean isOccupiedByDuelingMeeples(Field targetField, Set<Meeple> rivalMeeples,
             Set<Field> rivalMeepleFields) {
         if (!rivalMeepleFields.contains(targetField)) {
@@ -679,86 +680,6 @@ public class MovementServiceImpl implements MovementService {
             }
         }
         return false;
-    }
-
-    /**
-     * Verschiebt eine bestehende Barriere auf ein anderes Feld des Spielfelds.
-     * 
-     * Die Methode verarbeitet einen {@link MoveBarrierCommand} und prüft,
-     * ob die gewünschte Zielposition gültig ist. Eine Barriere darf weder
-     * auf ein Start- noch auf ein Zielfeld gesetzt werden und das Zielfeld
-     * darf nicht bereits durch einen Meeple oder eine andere Barriere belegt sein.
-     * 
-     * Bei einem ungültigen Zug wird ein {@link FrontendMoveBarrierRejectedEvent}
-     * zurückgegeben. Ist der Zug gültig, wird die Barriere auf das Zielfeld gesetzt
-     * und ein {@link FrontendMoveBarrierEvent} erzeugt.
-     *
-     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere bewegt
-     *                    wird
-     * @param moveBarrCmd das Kommando mit Informationen zur Barriere und zum
-     *                    Zielfeld
-     * @param player      der Spieler, der die Aktion ausführt
-     *
-     * @return ein {@link FrontendEvent}, das entweder die erfolgreiche
-     *         Barrierenbewegung oder die Ablehnung des Zuges repräsentiert
-     *
-     * @author Maximilian Ressel
-     */
-    @Override
-    public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Player player) {
-
-        logger.info(
-                "Moving Barrier {} in lobby {} by player '{}' to field {} (sessionId={})",
-                moveBarrCmd.barrierId(),
-                lobbyId,
-                player != null ? player.getName() : "anonymous",
-                moveBarrCmd.targetFieldId());
-
-        Lobby lobby = null;
-        try {
-            lobby = lobbyManager.getLobby(lobbyId);
-        } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        Board board = lobby.getBoard();
-        Meeple barrier = board.getBarrierById(moveBarrCmd.barrierId());
-        Field currentField = barrier.getCurrentField();
-
-        // ⚠️ Temporärer Testcode:
-        // zu testzwecken greifen wir auf ein zufälliges feld zurück um die checks
-        // testen zu können.
-        // TODO: Block aus !TESTING Übernehmen und TESTING streichen
-        /**********************************************************************************************************************/
-
-        Field targetField = board.getFieldById(moveBarrCmd.targetFieldId());
-
-        if (!TESTING_LOCALLY) {
-            targetField = board.getFieldById(moveBarrCmd.targetFieldId());
-        }
-        if (TESTING_LOCALLY) {
-            while (targetField.getType().isEnd() || targetField.getType().isStart()
-                    || isOccupied(lobby, board, targetField)) {
-                targetField = board.getFieldById(getRandomField(board));
-            }
-        }
-        /**********************************************************************************************************************/
-
-        // Fehler, wenn es sich um ein Startfeld oder das Ende handelt
-        if (targetField.getType().isEnd() || targetField.getType().isStart()) {
-            logger.info("Cant place a barrier on Start or End");
-            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_REJECTED_START_OR_END");
-        }
-
-        // Fehler wenn das Feld besetzt ist
-        if (isOccupied(lobby, board, targetField)) {
-            logger.info("Cant place a barrier on an occupied Field");
-            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_OCCUPIED");
-        }
-
-        barrier.setCurrentField(targetField);
-
-        return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
     }
 
     /**
@@ -791,50 +712,9 @@ public class MovementServiceImpl implements MovementService {
     }
 
     /**
-     * // ⚠️ Temporärer Testcode:
-     * Wählt zufällig ein Feld des Spielfelds aus, das über die Startfelder des
-     * Boards erreichbar ist.
-     * 
-     * Diese Methode dient ausschließlich zu Testzwecken, um Bewegungen oder
-     * Barrierenverschiebungen simulieren zu können, solange das Frontend noch keine
-     * gültigen Feld-IDs übermittelt.
-     *
-     * @param board das aktuelle Spielfeld
-     * @return die ID eines zufällig gewählten Feldes, das vom Start aus erreichbar
-     *         ist
-     *
-     * @author Maximilian Ressel
+     * Ermittelt alle Felder, die aktuell von eigenen Meeples des Spielers belegt
+     * sind.
      */
-    private UUID getRandomField(Board board) {
-        Set<Field> visited = new HashSet<>();
-        Queue<Field> queue = new LinkedList<>();
-
-        List<Field> starts = List.of(
-                board.getStartGreen(),
-                board.getStartYellow(),
-                board.getStartBlue(),
-                board.getStartRed());
-
-        queue.addAll(starts);
-        visited.addAll(starts);
-
-        while (!queue.isEmpty()) {
-            Field current = queue.poll();
-            for (Field neighbour : current.getNeighbours().values()) {
-                if (neighbour != null && !visited.contains(neighbour)) {
-                    visited.add(neighbour);
-                    queue.add(neighbour);
-                }
-            }
-        }
-
-        List<UUID> fieldIds = visited.stream()
-                .map(Field::getId)
-                .toList();
-
-        return fieldIds.get(new Random().nextInt(fieldIds.size()));
-    }
-
     private Set<Field> getOwnMeepleFields(Player player) {
         return Arrays.stream(player.getMeeples())
                 .map(Meeple::getCurrentField)
@@ -842,6 +722,9 @@ public class MovementServiceImpl implements MovementService {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Ermittelt alle gegnerischen Meeples in der angegebenen Lobby.
+     */
     private Set<Meeple> getRivalMeeples(Lobby lobby, Player player) {
         Set<Meeple> rivalMeeples = new HashSet<>();
         for (Player rivalPlayer : lobby.getPlayers()) {
@@ -855,12 +738,18 @@ public class MovementServiceImpl implements MovementService {
         return rivalMeeples;
     }
 
+    /**
+     * Ermittelt alle Felder, die aktuell von gegnerischen Meeples belegt sind.
+     */
     private Set<Field> getRivalMeepleFields(Lobby lobby, Player player) {
         return getRivalMeeples(lobby, player).stream()
                 .map(Meeple::getCurrentField).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Ermittelt alle Felder, die aktuell von Barrieren belegt sind.
+     */
     private Set<Field> getBarrierFields(Board board) {
         return board.getBarriers().stream()
                 .map(Meeple::getCurrentField)
@@ -868,6 +757,9 @@ public class MovementServiceImpl implements MovementService {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Liefert den gegnerischen Meeple, der sich auf dem angegebenen Feld befindet.
+     */
     private Meeple getRivalMeepleByField(Field field, Set<Meeple> rivalMeeples) {
         return rivalMeeples.stream()
                 .filter(m -> field.equals(m.getCurrentField()))
@@ -875,6 +767,9 @@ public class MovementServiceImpl implements MovementService {
                 .orElse(null);
     }
 
+    /**
+     * Ermittelt den Spieler, zu dem das angegebene Meeple gehört.
+     */
     private Player getPlayerByMeeple(Lobby lobby, Meeple meeple) {
         if (meeple == null)
             return null;
