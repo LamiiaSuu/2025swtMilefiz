@@ -253,7 +253,10 @@ watch(isFinished, (finished) => {
   position: relative;
   width: 125px;
   height: 150px;
-  margin: 10px auto 0;
+  border: 3px solid white;
+  background: white;
+  border-radius: 8px;
+  padding: 5px;
 }
 
 .balloon-image {
