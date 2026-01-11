@@ -69,14 +69,11 @@ public class PlantingServiceImpl implements PlantingService {
         final double LESS_TREES_ON_BORDER = 0.8;
 
         final int NO_OF_TYPES = TreeType.values().length;
-        logger.info("no of types: " + NO_OF_TYPES);
         boardDTO.deleteAllTrees();
 
         int[] minPos = getMinPos(boardDTO);
         int[] maxPos = getMaxPos(boardDTO);
 
-        logger.info("min pos before: " + minPos[0] + " | " + minPos[1]);
-        logger.info("max pos before: " + maxPos[0] + " | " + maxPos[1]);
         // ursprung des koordinatensystems auf 0 und lässt einen rand um die
         // felder
         for (FieldDTO field : boardDTO.getFields()) {
@@ -86,8 +83,6 @@ public class PlantingServiceImpl implements PlantingService {
         }
         minPos = getMinPos(boardDTO);
         maxPos = getMaxPos(boardDTO);
-        logger.info("min pos afer: " + minPos[0] + " | " + minPos[1]);
-        logger.info("max pos afer: " + maxPos[0] + " | " + maxPos[1]);
 
         int[][] blockedByPath = getBlockedPositions(boardDTO, maxPos);
         maxPos[0] = (maxPos[0] + TREE_BORDER) * TREES_PER_COORD;
