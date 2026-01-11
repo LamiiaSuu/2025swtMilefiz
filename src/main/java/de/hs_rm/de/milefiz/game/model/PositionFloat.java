@@ -28,4 +28,9 @@ public class PositionFloat {
         this.y = y;
     }
 
+    @Override
+    public String toString() {
+        return "PositionFloat [x=" + x + ", y=" + y + "]";
+    }
+
 }
