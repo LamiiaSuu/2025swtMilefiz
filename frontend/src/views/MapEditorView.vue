@@ -271,7 +271,8 @@ function exportBoard(fields: BackendTile[]): BoardExport {
   return {
     id: crypto.randomUUID(),
     name: 'Board',
-    fields
+    fields,
+    trees: []
   }
 }
 
@@ -360,15 +361,33 @@ async function handleSave() {
     showError("Fehler bei der Validierung: " + err)
     return
   }
+  try {
+    const response = await fetch("/api/game/board/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(board),
+    })
 
-  const json = JSON.stringify(board, null, 2)
-  const blob = new Blob([json], { type: "application/json" })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement("a")
-  link.href = url
-  link.download = `${board.name}.json`
-  link.click()
-  URL.revokeObjectURL(url)
+    if (!response.ok) {
+      console.error("Fehler beim generieren der Bäume")
+      showError("Fehler beim generieren der Bäume")
+      return
+    }
+
+    const boardWithTrees: BoardExport = await response.json();
+
+    const json = JSON.stringify(boardWithTrees, null, 2)
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${boardWithTrees.name}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+
+  } catch (err) {
+    console.log("Fehler beim generieren der Bäume ", err)
+  }
 }
 
 /**

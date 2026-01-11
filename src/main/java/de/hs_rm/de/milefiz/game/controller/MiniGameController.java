@@ -135,38 +135,48 @@ public class MiniGameController {
                 Field start2 = lobby.getBoard().getStartField(
                                 lobby.getPlayer(p2).getColor());
 
-                // Spieler 1 verliert?
-                if (winner == null || !winner.equals(p1)) {
-
-                        messaging.sendEvent(new LobbyMessage(
-                                        lobby,
-                                        new FrontendMoveEvent(
-                                                        p1,
-                                                        m1.getId(),
-                                                        start1.getId(),
-                                                        lobby.getPlayer(p1).getRemainingMoves(),
-                                                        lobby.getPlayer(p1).hasMoved())));
-
-                        m1.setCurrentField(start1);
-                        m1.clearLastField();
-                }
-
-                // Spieler 2 verliert?
-                if (winner == null || !winner.equals(p2)) {
-
-                        messaging.sendEvent(new LobbyMessage(
-                                        lobby,
-                                        new FrontendMoveEvent(
-                                                        p2,
-                                                        m2.getId(),
-                                                        start2.getId(),
-                                                        lobby.getPlayer(p2).getRemainingMoves(),
-                                                        lobby.getPlayer(p2).hasMoved())));
-
-                        m2.setCurrentField(start2);
-                        m2.clearLastField();
-                }
+        // Spieler 1 verliert?
+        if (winner == null || !winner.equals(p1)) {
+                lobby.getPlayer(p1).setMoved(false);
+                //if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
+                //        lobby.getPlayer(p1).setRemainingMoves(0);
+                //}
+                messaging.sendEvent(new LobbyMessage(
+                        lobby,
+                        new FrontendMoveEvent(
+                                p1,
+                                m1.getId(),
+                                start1.getId(),
+                                lobby.getPlayer(p1).getRemainingMoves(),
+                                lobby.getPlayer(p1).hasMoved()
+                        )
+                ));
+            
+                m1.setCurrentField(start1);
+                m1.clearLastField();
         }
+
+        // Spieler 2 verliert?
+        if (winner == null || !winner.equals(p2)) {
+            lobby.getPlayer(p2).setMoved(false);
+            //if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
+            //    lobby.getPlayer(p2).setRemainingMoves(0);
+            //}
+            messaging.sendEvent(new LobbyMessage(
+                    lobby,
+                    new FrontendMoveEvent(
+                            p2,
+                            m2.getId(),
+                            start2.getId(),
+                            lobby.getPlayer(p2).getRemainingMoves(),
+                            lobby.getPlayer(p2).hasMoved()
+                    )
+            ));
+            
+            m2.setCurrentField(start2);
+            m2.clearLastField();
+        }
+    }
 
         /**
          * Sendet den aktuellen Status des Würfel-Minigames an alle Clients der Lobby.

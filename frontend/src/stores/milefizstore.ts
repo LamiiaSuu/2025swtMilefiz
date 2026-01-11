@@ -466,11 +466,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
    * @param username String des username des Spielers
    */
-  async function joinLobby(lobbyId: string = 'random', username: string = 'ANONYMOUS') {
+  async function joinLobby(lobbyId: string = 'random', username: string = '') {
     console.log('Start receiving Gameboard Data...')
     try {
       if (lobbyId == null) lobbyId = 'random'
-      const url = '/api/lobby/join/' + lobbyId + '?username=' + encodeURIComponent(username ?? '')
+      const url = '/api/lobby/join/' + lobbyId + '?username=' + encodeURIComponent(username)
       const resp = await fetch(url)
       if (!resp.ok) {
         console.error('Error while recieving Data:\n', resp.statusText)
