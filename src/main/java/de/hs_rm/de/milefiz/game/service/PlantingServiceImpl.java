@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import de.hs_rm.de.milefiz.game.model.Position;
@@ -33,8 +35,13 @@ import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
 @Service
 public class PlantingServiceImpl implements PlantingService {
 
+    private final Logger logger = LoggerFactory.getLogger(PlantingService.class);
+
     /**
      * pflanzt bäume auf das BoardDTO mit der angegebene density.
+     * 
+     * Es gibt in der Methode noch ein paar parameter, die das Verhalten
+     * beeinflussen
      * 
      * @param boardDTO das BoardDTO, wo Bäume gepflanzt werden sollen
      * @param density  die Dichte mit der Bäume gepflanzt werden sollen
@@ -43,52 +50,83 @@ public class PlantingServiceImpl implements PlantingService {
      */
     @Override
     public BoardDTO plantTrees(BoardDTO boardDTO, float density) {
+
+        logger.info("start planting trees");
+
+        // Parameter die noch angepasst werden können
+
+        // Rand um die Felder herum, wo noch Bäume gepflanzt werden sollen
+        final int TREE_BORDER = 10;
+
+        // wieviele Bäume können innerhalb einer koordinaten einheit stehen. bestimmt,
+        // wie nah Bäume beieinander stehen
+        // dadurch werden auch die menge der Bäume geändert: je näher die Bäume
+        // beieinander stehen können, desto mehr wird es geben
+        final int TREES_PER_COORD = 2;
+
+        // wert zwischen 0 und 1. wieviel weniger Bäume sollen am rand stehen?
+        // 0.5 == 50% weniger
+        final double LESS_TREES_ON_BORDER = 0.8;
+
+        final int NO_OF_TYPES = TreeType.values().length;
+        logger.info("no of types: " + NO_OF_TYPES);
         boardDTO.deleteAllTrees();
 
         int[] minPos = getMinPos(boardDTO);
+        int[] maxPos = getMaxPos(boardDTO);
 
-        // ursprung des koordinatensystems auf 0 und lässt einen rand von 2 um die
+        logger.info("min pos before: " + minPos[0] + " | " + minPos[1]);
+        logger.info("max pos before: " + maxPos[0] + " | " + maxPos[1]);
+        // ursprung des koordinatensystems auf 0 und lässt einen rand um die
         // felder
         for (FieldDTO field : boardDTO.getFields()) {
             Position p = field.getPosition();
-            field.setPosition(new Position(p.getX() + 2 - minPos[0], p.getY() + 2 - minPos[1]));
+            field.setPosition(new Position(p.getX() + TREE_BORDER - minPos[0], p.getY() + TREE_BORDER - minPos[1]));
 
         }
-        int[] maxPos = getMaxPos(boardDTO);
+        minPos = getMinPos(boardDTO);
+        maxPos = getMaxPos(boardDTO);
+        logger.info("min pos afer: " + minPos[0] + " | " + minPos[1]);
+        logger.info("max pos afer: " + maxPos[0] + " | " + maxPos[1]);
+
         int[][] blockedByPath = getBlockedPositions(boardDTO, maxPos);
-        maxPos[0] *= 5;
-        maxPos[1] *= 5;
-        int[][] blueNoise = generateBlueNoiseVoidCluster(density, maxPos[0] + 2, maxPos[1] + 2);
+        maxPos[0] = (maxPos[0] + TREE_BORDER) * TREES_PER_COORD;
+        maxPos[1] = (maxPos[1] + TREE_BORDER) * TREES_PER_COORD;
+        int[][] blueNoise = generateBlueNoiseVoidCluster(density, maxPos[0], maxPos[1]);
 
         for (int i = 0; i < blueNoise.length; i++) {
             for (int j = 0; j < blueNoise[0].length; j++) {
                 if (blueNoise[i][j] == 1) {
-                    float x = (i / 5f);
-                    float y = (j / 5f);
+                    float x = (j / (float) TREES_PER_COORD);
+                    float y = (i / (float) TREES_PER_COORD);
                     int xFloor = (int) Math.floor(x);
                     int xCeil = (int) Math.ceil(x);
                     int yFloor = (int) Math.floor(y);
                     int yCeil = (int) Math.ceil(y);
 
-                    if (blockedByPath.length <= xCeil || blockedByPath.length <= xFloor
-                            || blockedByPath[0].length <= yCeil || blockedByPath[0].length <= yFloor) {
-                        continue;
+                    // auf feld blockierung überprüfen
+                    if (!(blockedByPath.length <= xCeil || blockedByPath.length <= xFloor
+                            || blockedByPath[0].length <= yCeil || blockedByPath[0].length <= yFloor)) {
+                        int isBlocked = blockedByPath[xFloor][yFloor] + blockedByPath[xFloor][yCeil]
+                                + blockedByPath[xCeil][yFloor] + blockedByPath[xCeil][yCeil];
+                        if (isBlocked > 0) {
+                            continue;
+                        }
                     }
-                    int isBlocked = blockedByPath[xFloor][yFloor] + blockedByPath[xFloor][yCeil]
-                            + blockedByPath[xCeil][yFloor] + blockedByPath[xCeil][yCeil];
-                    if (isBlocked > 0) {
-                        continue;
+                    // am rand weniger bäume pflanzen
+                    if (j < (TREE_BORDER * 2) || i < (TREE_BORDER * 2) || blockedByPath.length <= xCeil + 4
+                            || blockedByPath.length <= xFloor + 4
+                            || blockedByPath[0].length <= yCeil + 4 || blockedByPath[0].length <= yFloor + 4) {
+                        double rand = Math.random();
+                        if (rand < LESS_TREES_ON_BORDER) {
+                            continue;
+                        }
                     }
 
                     double rand = Math.random();
                     TreeType treeType;
-                    if (rand < (1d / 3d)) {
-                        treeType = TreeType.SMALL;
-                    } else if (rand < (2d / 3d)) {
-                        treeType = TreeType.MEDIUM;
-                    } else {
-                        treeType = TreeType.LARGE;
-                    }
+                    int typeInd = (int) (rand * NO_OF_TYPES);
+                    treeType = TreeType.values()[typeInd];
                     boardDTO.addTree(new PositionFloat(x, y), treeType);
                 }
             }
@@ -109,13 +147,18 @@ public class PlantingServiceImpl implements PlantingService {
      *         sind
      */
     private int[][] getBlockedPositions(BoardDTO boardDTO, int[] boundingBox) {
-        int[][] res = new int[boundingBox[0] + 1][boundingBox[1] + 1];
+        int[][] res = new int[boundingBox[0] + 4][boundingBox[1] + 4];
 
         for (FieldDTO field : boardDTO.getFields()) {
             Position p = field.getPosition();
             int x = p.getX();
             int y = p.getY();
             res[x][y] = 1;
+
+            if (field.getType().isStart() || field.getType().isEnd()) {
+                res = blockSourrounding(2, x, y, res);
+                continue;
+            }
 
             if (field.getNorth() != null && res[x].length > (y + 1)) {
                 res[x][y + 1] = 1;
@@ -131,6 +174,26 @@ public class PlantingServiceImpl implements PlantingService {
             }
         }
 
+        return res;
+    }
+
+    private int[][] blockSourrounding(int dist, int x, int y, int[][] res) {
+        if (res == null || res.length == 0 || res[0] == null)
+            return res;
+
+        final int width = res.length;
+        final int height = res[0].length;
+
+        int xStart = Math.max(0, x - dist);
+        int xEnd = Math.min(width - 1, x + dist);
+        int yStart = Math.max(0, y - dist);
+        int yEnd = Math.min(height - 1, y + dist);
+
+        for (int xi = xStart; xi <= xEnd; xi++) {
+            for (int yi = yStart; yi <= yEnd; yi++) {
+                res[xi][yi] = 1;
+            }
+        }
         return res;
     }
 
@@ -191,7 +254,8 @@ public class PlantingServiceImpl implements PlantingService {
      * @param density      gewünschter Anteil an gesetzten Pixeln in [0,1]
      * @param width        Bildbreite > 0
      * @param height       Bildhöhe > 0
-     * @param kernelRadius Nachbarschaftsradius; falls kleiner gleich 0 wird eine Heuristik
+     * @param kernelRadius Nachbarschaftsradius; falls kleiner gleich 0 wird eine
+     *                     Heuristik
      *                     genutzt
      * @param seed         RNG-Seed (für reproduzierbare Ergebnisse)
      * @return int[height][width] mit 0/1 Blue-Noise-Muster
