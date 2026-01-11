@@ -6,12 +6,14 @@ import GameCharacter from './GameCharacter.vue'
 import { useBoardStore } from '@/stores/boardStore'
 import Tile from './Tile.vue'
 import Path from './Path.vue'
+import Foliage from './Foliage.vue'
 import Camera from './Camera.vue'
 import { useMilefizStore } from "@/stores/milefizstore"
 import type { Direction } from "@/types/movement"
 import { Vector3 } from 'three'
 import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler';
+import { TreesGeometry } from 'three/examples/jsm/Addons.js'
 
 const milefizStore = useMilefizStore();
 const fpsCamera = shallowRef<any | null>(null)
@@ -612,6 +614,9 @@ const connectionSegments = computed(() => {
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
       :position="[field.position.x, 0, field.position.y]" :type="field.type" />
+
+    <!-- Pflanzen und Bäume -->
+    <Foliage :elements="boardStore.board?.trees.map(tree => ({ position: [tree.treePosition.x, 0, tree.treePosition.y], type: tree.treeType }))" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
