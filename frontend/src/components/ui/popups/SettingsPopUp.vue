@@ -51,7 +51,6 @@ const onBackClick = () => {
                 </div>
             </div>
 
-
             <div class="button-container">
                 <button class="back-button" @mouseenter="onHover" @click="onBackClick()">{{ tUI('BACK') }}</button>
             </div>
