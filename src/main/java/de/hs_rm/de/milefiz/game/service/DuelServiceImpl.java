@@ -55,7 +55,7 @@ public class DuelServiceImpl implements DuelService {
     private int diceGameTimeout;
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
-        //gameFactories.add(() -> new DiceGame(diceGameTimeout+1));
+        gameFactories.add(() -> new DiceGame(diceGameTimeout+1));
         gameFactories.add(() -> new BalloonGame(15));
         //gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
         //gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
@@ -160,6 +160,29 @@ public class DuelServiceImpl implements DuelService {
         return duel;
     }
 
+
+    /**
+     * Wird automatisch aufgerufen, wenn ein Mini-Game beendet ist.
+     * <p>
+     * Diese Methode:
+     * <ul>
+     *   <li>sendet das finale Update-Event an alle Clients</li>
+     *   <li>setzt Verlierer-Meeples zurück zur Startposition</li>
+     * </ul>
+     *
+     * <p>
+     * Unterstützte Mini-Games:
+     * <ul>
+     *   <li>{@link DiceGame} - Würfelspiel</li>
+     *   <li>{@link BalloonGame} - Ballon-Klickspiel</li>
+     * </ul>
+     *
+     * <p>
+     * Der Callback wird durch {@link MiniGame#setOnFinished(Runnable)} registriert
+     * und automatisch bei Spielende (Timeout oder Gewinner) ausgelöst.
+     *
+     * @param duel das beendete Duell
+     */
     private void handleMiniGameFinished(Duel duel) {
 
         MiniGame game = duel.getMiniGame();

@@ -1,22 +1,27 @@
 <script setup lang="ts">
+
 import { tUI } from '@/i18n'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { computed, onMounted, ref, watch } from 'vue'
 import CountdownBar from '../CountdownBar.vue'
 
 const props = defineProps<{
-  duel: any
+  duel: any // Duel-Objekt mit state, firstMeeple, secondMeeple, timeOut, etc.
 }>()
 
 const emit = defineEmits<{
-  (e: 'close'): void
+  (e: 'close'): void // Wird aufgerufen wenn das Spiel beendet ist
 }>()
 
 const store = useMilefizStore()
-const myLocalClicks = ref(0)
-const showInstructions = ref(true)
-const timerStarted = ref(false)
+const myLocalClicks = ref(0) // Lokaler Click-Counter (optional für UI)
+const showInstructions = ref(true) // Zeigt Instructions-Overlay
+const timerStarted = ref(false) // Flag ob Timer sichtbar sein soll
 
+/**
+ * Startet das Spiel nach 2 Sekunden (nach Instructions).
+ * Blendet Instructions aus und startet den Countdown-Timer.
+ */
 onMounted(() => {
   setTimeout(() => {
     showInstructions.value = false
@@ -25,7 +30,11 @@ onMounted(() => {
 })
 
 /**
- * Findet die PlayerId zu einer gegebenen MeepleId
+ * Findet die PlayerId zu einer gegebenen MeepleId.
+ * Durchsucht alle Spieler in der Lobby nach der MeepleId.
+ * 
+ * @param meepleId - Die ID des Meeples
+ * @returns PlayerId oder null falls nicht gefunden
  */
 function getPlayerIdByMeeple(meepleId: string): string | null {
   const lobby = store.gamedata.lobby
@@ -39,35 +48,58 @@ function getPlayerIdByMeeple(meepleId: string): string | null {
   return null
 }
 
+/**
+ * Prüft ob der aktuelle Spieler der erste Duellant ist.
+ * Wichtig für die korrekte Anzeige von myPhase/rivalPhase.
+ */
 const isPlayer1 = computed(() => {
   const firstPlayerId = getPlayerIdByMeeple(props.duel?.firstMeeple)
   return firstPlayerId === store.gamedata.playerId
 })
 
+/**
+ * Aktuelle Phase des eigenen Ballons (0-4).
+ */
 const myPhase = computed(() => {
   const state = props.duel?.state
   if (!state) return 0
   
   const phase = isPlayer1.value ? state.phasePlayer1 : state.phasePlayer2
-  return phase ?? 0  // Falls undefined/null → 0
+  return phase ?? 0  // Fallback auf 0 falls undefined
 })
 
+/**
+ * Aktuelle Phase des gegnerischen Ballons (0-4).
+ */
 const rivalPhase = computed(() => {
   const state = props.duel?.state
   if (!state) return 0
 
   const phase = isPlayer1.value ? state.phasePlayer2 : state.phasePlayer1
-  return phase ?? 0  // Falls undefined/null → 0
+  return phase ?? 0  // Fallback auf 0 falls undefined
 })
 
+/**
+ * Prüft ob der aktuelle Spieler gewonnen hat.
+ * Vergleicht duel.state.winner mit der eigenen PlayerId.
+ */
 const isWinner = computed(() => {
   return props.duel?.state?.winner === store.gamedata.playerId
 })
 
+/**
+ * Prüft ob das Spiel beendet ist (Gewinner oder Timeout).
+ */
 const isFinished = computed(() => {
   return props.duel?.state?.finished ?? false
 })
 
+/**
+ * Holt den Spielernamen zur gegebenen MeepleId.
+ * 
+ * @param meepleId - Die ID des Meeples
+ * @returns Spielername oder '?' falls nicht gefunden
+ */
 function getPlayerNameByMeeple(meepleId: string) {
   const lobby = store.gamedata.lobby
   if (!lobby) return '?'
@@ -80,6 +112,12 @@ function getPlayerNameByMeeple(meepleId: string) {
   return '?'
 }
 
+/**
+ * Holt die Spielerfarbe zur gegebenen MeepleId.
+ * 
+ * @param meepleId - Die ID des Meeples
+ * @returns Farbe (z.B. 'RED', 'BLUE') oder 'RED' als Fallback
+ */
 function getPlayerColorByMeeple(meepleId: string) {
   const lobby = store.gamedata.lobby
   if (!lobby) return 'RED'
@@ -92,22 +130,39 @@ function getPlayerColorByMeeple(meepleId: string) {
   return 'RED'
 }
 
+/**
+ * Generiert den Bildpfad für den Ballon basierend auf Farbe und Phase.
+ * Beispiel: /balloonMinigame/RED_LVL2.jpg
+ * 
+ * @param meepleId - Die ID des Meeples
+ * @param phase - Die aktuelle Phase (0-4)
+ * @returns Bildpfad
+ */
 function getBalloonImage(meepleId: string, phase: number) {
   const color = getPlayerColorByMeeple(meepleId)
   return `/balloonMinigame/${color}_LVL${phase}.jpg`
 }
 
+/**
+ * Verarbeitet einen Klick auf den Button.
+ * Sendet eine WebSocket-Message an das Backend (/balloon/click).
+ * Erhöht den lokalen Click-Counter (optional für UI-Feedback).
+ */
 const handleClick = () => {
   if (isFinished.value || showInstructions.value) return
 
-  myLocalClicks.value++
+  myLocalClicks.value++ // Optional: Lokaler Counter
 
+  // WebSocket-Message an Backend senden
   store.sendLobbyMessage(
     `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/balloon/click`,
     { id: store.gamedata.playerId }
   )
 }
 
+/**
+ * Schließt das Minigame-Popup automatisch 2 Sekunden nach Spielende.
+ */
 watch(isFinished, (finished) => {
   if (finished) {
     setTimeout(() => {
@@ -119,19 +174,20 @@ watch(isFinished, (finished) => {
 
 <template>
   <div class="dice-card no-select">
+    <!-- Titel -->
     <h2 class="dice-title">
       {{ tUI('MINIGAME_BALLOON_TITLE') }}
     </h2>
 
-     <!-- COUNTDOWN - nur anzeigen wenn Timer gestartet-->
+    <!-- COUNTDOWN - nur anzeigen wenn Timer gestartet -->
     <CountdownBar v-if="timerStarted" :seconds="duel.timeOut" />
 
-    <!-- Platzhalter wenn Timer noch nicht läuft-->
+    <!-- Platzhalter wenn Timer noch nicht läuft (verhindert Layout-Shift) -->
     <div v-else class="countdown-placeholder"></div>
 
     <!-- Spieler & Ballons -->
     <div class="players">
-      <!-- Spieler 1 -->
+      <!-- Spieler 1 (firstMeeple) -->
       <div class="player">
         <div class="balloon-wrapper">
           <img
@@ -145,7 +201,7 @@ watch(isFinished, (finished) => {
         </h3>
       </div>
 
-      <!-- Spieler 2 -->
+      <!-- Spieler 2 (secondMeeple) -->
       <div class="player">
         <div class="balloon-wrapper">
           <img
@@ -160,7 +216,7 @@ watch(isFinished, (finished) => {
       </div>
     </div>
 
-    <!-- Klick-Button -->
+    <!-- Klick-Button (nur sichtbar während des Spiels) -->
     <button
       v-if="!isFinished"
       class="dice-roll-button"
@@ -170,7 +226,7 @@ watch(isFinished, (finished) => {
       {{ tUI('MINIGAME_BALLOON_CLICK') }}
     </button>
 
-    <!-- GEWINNER -->
+    <!-- GEWINNER/VERLIERER Anzeige -->
     <div v-if="isFinished" class="winner-big">
       <span v-if="isWinner" class="winner-text">
         {{ tUI('DUEL_WON') }}
@@ -181,7 +237,7 @@ watch(isFinished, (finished) => {
       </span>
     </div>
 
-    <!-- INSTRUCTIONS OVERLAY -->
+    <!-- INSTRUCTIONS OVERLAY (erste 2 Sekunden) -->
     <div v-if="showInstructions" class="instructions-overlay">
       <div class="instructions-popup">
         <p class="instruction-text">{{ tUI('MINIGAME_BALLOON_INSTRUCTION') }}</p>
@@ -191,6 +247,7 @@ watch(isFinished, (finished) => {
 </template>
 
 <style scoped>
+/* Instructions Overlay - Vollbild-Popup */
 .instructions-overlay {
   position: absolute;
   top: 0;
@@ -224,6 +281,7 @@ watch(isFinished, (finished) => {
   margin: 0;
 }
 
+/* Spieler-Grid: Zwei Spalten nebeneinander */
 .players {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -232,6 +290,7 @@ watch(isFinished, (finished) => {
   gap: 12px;
 }
 
+/* Einzelner Spieler: Zentriert Ballon + Name */
 .player {
   text-align: center;
   display: flex;
@@ -258,6 +317,7 @@ watch(isFinished, (finished) => {
   max-width: 100%;
 }
 
+/* Ballon-Container mit weißem Rahmen */
 .balloon-wrapper {
   position: relative;
   width: 125px;
@@ -271,14 +331,16 @@ watch(isFinished, (finished) => {
 .balloon-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: contain; /* Bild proportional skalieren */
 }
 
+/* Platzhalter für CountdownBar (verhindert Layout-Shift) */
 .countdown-placeholder {
   height: 30px;
   margin-bottom: 10px;
 }
 
+/* Gewinner/Verlierer Text */
 .winner-big {
   margin-top: 18px;
   text-align: center;
@@ -295,6 +357,7 @@ watch(isFinished, (finished) => {
   margin: 0 0 8px 0;
 }
 
+/* Klick-Button Styling */
 .dice-roll-button {
   font-family: 'Acme', sans-serif;
   font-weight: 900;
@@ -317,6 +380,7 @@ watch(isFinished, (finished) => {
   font-family: 'Acme', sans-serif;
 }
 
+/* Verhindert Text-Selektion und Bild-Drag */
 .no-select {
   -webkit-user-select: none;
   -ms-user-select: none;

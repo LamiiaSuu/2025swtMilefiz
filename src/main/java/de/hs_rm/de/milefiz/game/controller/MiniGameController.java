@@ -25,7 +25,12 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 /**
  * Controller für die Mini-Spiele innerhalb eines Duells.
  * <p>
- * Aktuell wird hier nur das Würfel-Minigame verarbeitet.
+ * Verarbeitet zwei verschiedene Mini-Games:
+ * <ul>
+ * <li>Würfel-Minigame (DiceGame)</li>
+ * <li>Ballon-Minigame (BalloonGame)</li>
+ * </ul>
+ * 
  * Der Controller:
  * <ul>
  * <li>empfängt Würfelaktionen vom Client</li>
@@ -201,6 +206,29 @@ public class MiniGameController {
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }
 
+        /**
+         * Verarbeitet einen Klick im Ballon-Minigame.
+         *
+         * <p>
+         * Ablauf:
+         * <ol>
+         * <li>Lobby wird geladen</li>
+         * <li>BalloonGame des Duells wird geholt</li>
+         * <li>Klick wird verarbeitet (erhöht Click-Counter und Phase)</li>
+         * <li>Falls Phase sich geändert hat -> Frontend erhält Update</li>
+         * <li>Falls Spiel beendet -> Loser-Meeples werden zurück in die Basis
+         * gesetzt</li>
+         * </ol>
+         *
+         * <p>
+         * Ein Spieler gewinnt, wenn er Phase 4 erreicht (30+ Klicks).
+         * Bei Timeout verlieren beide Spieler.
+         *
+         * @param lobbyId ID der Lobby
+         * @param duelId  ID des Duells
+         * @param player  Spieler, der gerade geklickt hat
+         * @throws LobbyNotFoundException wenn die Lobby nicht gefunden wird
+         */
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/balloon/click")
         public void handleBalloonClick(@DestinationVariable UUID lobbyId,
                         @DestinationVariable UUID duelId,
@@ -215,21 +243,54 @@ public class MiniGameController {
                         broadcastBalloonUpdate(lobby, duelId, game);
                 }
 
-                if (game.isFinished()){
+                if (game.isFinished()) {
                         sendLoserHome(lobby, duelId, game);
                 }
         }
 
-        public void broadcastBalloonUpdate(Lobby lobby, UUID duelId, BalloonGame game){
+        /**
+         * Sendet den aktuellen Status des Ballon-Minigames an alle Clients der Lobby.
+         *
+         * <p>
+         * Diese Methode wird immer dann aufgerufen, wenn sich der Zustand des
+         * BalloonGames ändert – z. B. nach einem Phasenwechsel oder nach Ablauf des Timeouts.
+         *
+         * <p>
+         * Das Frontend erhält dadurch:
+         * <ul>
+         * <li>die IDs beider Spieler</li>
+         * <li>die aktuellen Phasen beider Spieler (0-4)</li>
+         * <li>den Gewinner (falls bereits ermittelt)</li>
+         * <li>den Finished-Status</li>
+         * </ul>
+         *
+         * <p>
+         * Phasen-System:
+         * <ul>
+         * <li>Phase 0: Ballon unaufgeblasen (0 Klicks)</li>
+         * <li>Phase 1: Leicht aufgeblasen (1-9 Klicks)</li>
+         * <li>Phase 2: Mittel aufgeblasen (10-19 Klicks)</li>
+         * <li>Phase 3: Stark aufgeblasen (20-29 Klicks)</li>
+         * <li>Phase 4: Ballon geplatzt (30+ Klicks → Gewinner!)</li>
+         * </ul>
+         *
+         * Das Frontend aktualisiert daraufhin die Ballon-Bilder und zeigt ggf.
+         * das Ergebnis an.
+         *
+         * @param lobby  die Lobby, in der das Duell stattfindet
+         * @param duelId ID des Duells
+         * @param game   aktueller Zustand des Ballon-Minigames
+         */
+        public void broadcastBalloonUpdate(Lobby lobby, UUID duelId, BalloonGame game) {
                 var event = new FrontendBalloonGameUpdateEvent(
-                        duelId,
-                        game.getPlayer1(),
-                        game.getPlayer2(),
-                        game.getPhasePlayer1(),
-                        game.getPhasePlayer2(),
-                        game.getWinner(),
-                        game.isFinished());
+                                duelId,
+                                game.getPlayer1(),
+                                game.getPlayer2(),
+                                game.getPhasePlayer1(),
+                                game.getPhasePlayer2(),
+                                game.getWinner(),
+                                game.isFinished());
 
-        messaging.sendEvent(new LobbyMessage(lobby, event));
+                messaging.sendEvent(new LobbyMessage(lobby, event));
         }
 }
