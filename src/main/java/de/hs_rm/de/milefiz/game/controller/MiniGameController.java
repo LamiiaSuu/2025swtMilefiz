@@ -135,9 +135,9 @@ public class MiniGameController {
         // Spieler 1 verliert?
         if (winner == null || !winner.equals(p1)) {
                 lobby.getPlayer(p1).setMoved(false);
-                if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
-                        lobby.getPlayer(p1).setRemainingMoves(0);
-                }
+                //if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
+                //        lobby.getPlayer(p1).setRemainingMoves(0);
+                //}
                 messaging.sendEvent(new LobbyMessage(
                         lobby,
                         new FrontendMoveEvent(
@@ -156,9 +156,9 @@ public class MiniGameController {
         // Spieler 2 verliert?
         if (winner == null || !winner.equals(p2)) {
             lobby.getPlayer(p2).setMoved(false);
-            if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
-                lobby.getPlayer(p2).setRemainingMoves(0);
-            }
+            //if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
+            //    lobby.getPlayer(p2).setRemainingMoves(0);
+            //}
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
