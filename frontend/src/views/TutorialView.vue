@@ -3,7 +3,9 @@ import { useRouter } from 'vue-router'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
 import LanguageSelection from '@/components/ui/LanguageSelection.vue'
-import TutorialPopUp from '@/components/ui/popups/TutorialPopUp.vue'
+import Tutorial from '@/components/ui/Tutorial.vue'
+import BackButton from '@/components/ui/pages/BackButton.vue'
+import Header from '@/components/ui/pages/Header.vue'
 
 const router = useRouter()
 const audio = useAudioStore()
@@ -13,13 +15,20 @@ const audio = useAudioStore()
 <template>
   <div class="home">
 
+    <!--MI'lefiz Header -->
+    <Header overlay>{{ tUI('TUTORIAL') }}</Header>
+
     <!-- Language Selection-->
     <LanguageSelection></LanguageSelection>
 
-    
-    <!-- Tutorial PopUp -->
-    <TutorialPopUp></TutorialPopUp>
+    <div class="content">
+      <!-- Tutorial-->
+      <Tutorial></Tutorial>
+    </div>
 
+    <div class="button-container">
+      <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
+    </div>
 
   </div>
 </template>
@@ -50,5 +59,19 @@ const audio = useAudioStore()
   background-position: center;
   filter: blur(4px);
   z-index: -1;
+}
+
+.content {
+  margin-top: -10vh;
+}
+
+.button-container {
+  position: absolute;
+  top: 38px;
+  left: 43px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
 }
 </style>
