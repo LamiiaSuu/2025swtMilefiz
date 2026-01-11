@@ -26,8 +26,8 @@ const emit = defineEmits<{
 
 function resolveComponent(duel: any) {
   switch (duel.miniGameType) {
-    //case 'DiceGame':
-      //return DiceMiniGame
+    case 'DiceGame':
+      return DiceMiniGame
     case 'BalloonGame':
       return BalloonMinigame
     default:
