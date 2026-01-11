@@ -21,5 +21,6 @@ export const ERRORS_DE: Record<ErrorCode, string> = {
     NO_FILE_CHOSEN: 'Keine Datei ausgewählt!',
     BOARD_INVALID: 'Map Validierung fehlgeschlagen: Eine Map brauch 4 Startfelder verbunden mit mindestens einem Zielfeld.',
     BOARD_SUCCESSFULLY_IMPORTED: 'Map erfolgreich importiert!',
-    BOARD_COULD_NOT_BE_IMPORTED: 'Map konnte nicht importiert werden: '
+    BOARD_COULD_NOT_BE_IMPORTED: 'Map konnte nicht importiert werden: ',
+    MOVE_ERROR_NO_VALID_FIELDS: 'Keine gültigen Züge in diese Richtung möglich',
 }

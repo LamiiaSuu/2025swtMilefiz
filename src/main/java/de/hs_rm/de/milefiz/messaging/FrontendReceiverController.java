@@ -89,7 +89,8 @@ public class FrontendReceiverController {
             @DestinationVariable("lobbyId") UUID lobbyId,
             RotationCommand rtnCmd,
             Player player) {
-        logger.info("Rotate from player {} meeple {} rotation {}", player.getId(), rtnCmd.meepleId(),
+
+        logger.debug("Rotate from player {} meeple {} rotation {}", player.getId(), rtnCmd.meepleId(),
                 rtnCmd.rotation());
         return new FrontendRotateEvent(player.getId(), rtnCmd.meepleId(), rtnCmd.rotation());
     }

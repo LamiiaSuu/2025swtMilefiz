@@ -56,7 +56,6 @@ const getPartsForType = (type: Sizes) => {
   if (!scene) return partsT
   scene.traverse((node: Object3D) => {
     if ((node as Mesh).isMesh) {
-      console.log(node)
       const mesh = node as Mesh;
       const geom = mesh.geometry.clone() as BufferGeometry
       const mat = (mesh.material as Material).clone();

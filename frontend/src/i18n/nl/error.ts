@@ -22,4 +22,5 @@ export const ERRORS_NL: Record<ErrorCode, string> = {
     BOARD_SUCCESSFULLY_IMPORTED: 'Map succesvol geïmporteerd!',
     BOARD_COULD_NOT_BE_IMPORTED: 'Map kon niet worden geïmporteerd: ',
     MEEPLE_IN_DUEL: 'De tegenstander zit al in een duel. Wacht tot het duel is afgelopen!',
+    MOVE_ERROR_NO_VALID_FIELDS: 'Er zijn geen geldige treinen mogelijk in deze richting',
 }

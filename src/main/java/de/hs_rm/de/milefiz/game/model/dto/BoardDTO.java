@@ -88,6 +88,8 @@ public class BoardDTO {
         private PositionFloat treePosition;
         private TreeType treeType;
 
+        public TreeDTO() {}
+
         public TreeDTO(PositionFloat treePosition, TreeType treeType) {
             this.treePosition = treePosition;
             this.treeType = treeType;
