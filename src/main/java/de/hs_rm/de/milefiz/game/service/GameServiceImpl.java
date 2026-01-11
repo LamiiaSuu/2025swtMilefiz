@@ -118,7 +118,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Board getTestBoard() {
-        return testBoard;
+        return new Board(testBoard);
     }
 
     @Override

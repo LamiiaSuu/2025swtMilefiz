@@ -2,7 +2,7 @@ import { reactive, readonly, computed, ref } from 'vue'
 import router from '@/router'
 import { defineStore } from 'pinia'
 import { Client, type Message } from '@stomp/stompjs'
-import type { Direction, MoveBarrierCommand, MovementCommand } from "@/types/movement";
+import type { Direction, MoveBarrierCommand, MovementCommand, RotationCommand } from "@/types/movement";
 import type { EnergyCommand } from '@/types/energy'
 import type { LobbyUpdateEvent, Lobby, Player, Meeple } from "@/types/lobbyupdate";
 import { useBoardStore } from "./boardStore"
@@ -49,6 +49,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     isEnergyFresh: false,
   })
 
+  // UI/Animation Trigger: GameBoard kann darauf reagieren und jump() aufrufen
+  const jumpTrigger = ref<{ meepleId: string; nonce: number } | null>(null)
+
+  function triggerJumpLocally(meepleId: string) {
+    jumpTrigger.value = { meepleId, nonce: Date.now() }
+  }
+
   /** 
    * Gewinndialog
    * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
@@ -70,13 +77,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
   type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE'
   /**
-   * TODO doc
+   * Reactive state für die MiniMap-Komponente.
+   * Verwaltet die Anzeige und Interaktion mit der Barrieren-Verschiebungs-Map.
    */
   const minimap = reactive({
-    isMiniMapOpen: false,
-    selectedFieldId: "",
-    occupancyByFieldId: {} as Record<string, Occupancy>,
-    ownColor: "RED" as "RED" | "GREEN" | "BLUE" | "YELLOW",
+    isMiniMapOpen: false, // Ist MiniMap aktuell geöffnet
+    selectedBarrierId: "", // Welche Barriere wird verschoben
+    selectedFieldId: "", // Zielfeld für Verschiebung
+    isMovingBarrier: false, // Verschiebt der Spieler, der in die Barrier gelaufen ist gerade? (für Event-Filter)
+    occupancyByFieldId: {} as Record<string, Occupancy>, // Belegungsstatus aller Felder
+    ownColor: "RED" as "RED" | "GREEN" | "BLUE" | "YELLOW", //Farbe des Spielers
   })
 
 
@@ -185,6 +195,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             if (event.msg === "MOVE_ERROR_INTO_START") {
               showWarning("MOVE_ERROR_INTO_START")
             }
+            else if (event.msg === "MOVE_ERROR_NO_VALID_FIELDS") {
+              showWarning("MOVE_ERROR_NO_VALID_FIELDS")
+            }
             else if (event.msg === "MOVE_ERROR_NO_FIELD_IN_DIRECTION") {
               showWarning("MOVE_ERROR_NO_FIELD_IN_DIRECTION")
             }
@@ -253,6 +266,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.energy = event.energy
             energy.isEnergyFull = event.hasFullEnergy
           }
+          if (event.meepleId) {
+            triggerJumpLocally(event.meepleId)
+          }
         } else if (event.type === 'CONSUME_ENERGY_ERROR') {
           if (event.playerId == gamedata.playerId) {
             console.warn('Consume energy rejected:', event.msg)
@@ -279,11 +295,19 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             //TODO minimap öffnen
             openMinimap(event.barrierId, event.playerId)
           }
-          moveBarrier(event.barrierId, crypto.randomUUID())
+          //moveBarrier(event.barrierId, crypto.randomUUID())
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
           boardStore.updateBarrierPosition(event.id, event.currentField, event.targetField);
+
+          if (minimap.isMovingBarrier && minimap.selectedBarrierId === event.id) {
+            minimap.isMovingBarrier = false
+          }
+        }
+
+        if (event.type === "ROTATE") {
+          boardStore.updateMeepleRotation(event.meepleId, event.rotation)
         }
 
         if (event.type === "REJECTED_BY_BARRIER") {
@@ -342,12 +366,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           winnerColor.value = event.playerColor
         }
         if (event.type === "BARRIER_MOVE_ERROR") {
-          console.warn("Barriermove rejected:", event.msg)
-          if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
-            showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
-          }
-          else if (event.msg === "MOVE_BARRIER_OCCUPIED") {
-            showWarning("MOVE_BARRIER_OCCUPIED")
+          if (minimap.isMovingBarrier) {
+            console.warn("Barriermove rejected:", event.msg)
+            if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
+              showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
+              minimap.isMiniMapOpen = true
+            }
+            else if (event.msg === "MOVE_BARRIER_OCCUPIED") {
+              showWarning("MOVE_BARRIER_OCCUPIED")
+              minimap.isMiniMapOpen = true
+            }
           }
         }
 
@@ -427,7 +455,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * @param lobbyId UUID der beizutretenen Lobby. 'random', um einer zufälligen Lobby beizutreten oder eine neue zu erstellen, sollte keine freie verfügbar sein.
    * @param username String des username des Spielers
    */
-  async function joinLobby(lobbyId: string = 'random', username: string = 'Anonymer Kek') {
+  async function joinLobby(lobbyId: string = 'random', username: string = 'ANONYMOUS') {
     console.log('Start receiving Gameboard Data...')
     try {
       if (lobbyId == null) lobbyId = 'random'
@@ -539,6 +567,47 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /**
+ * Sendet eine Rotationsänderung eines Meeples an den Spielserver.
+ *
+ * Diese Funktion wird aufgerufen, wenn sich die Blickrichtung des
+ * aktiven Meeples ändert.
+ *
+ * Die Rotation wird als RotationCommand an den Server gesendet
+ * und anschließend an alle Clients der Lobby weiterverteilt,
+ * um die Blickrichtung des Meeples visuell zu synchronisieren.
+ *
+ * Ablauf:
+ * 1. Prüft, ob der STOMP-Client verbunden ist
+ * 2. Erstellt ein RotationCommand mit Meeple-ID und Y-Rotation
+ * 3. Serialisiert das Kommando als JSON
+ * 4. Sendet die Nachricht an den WebSocket-Endpunkt /rotate
+ *
+ * @param meepleId  die eindeutige ID des Meeples, dessen Rotation geändert wurde
+ * @param rotation die neue Y-Rotation des Meeples
+ */
+  function sendMeepleRotation(meepleId: string, rotation: number) {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot send move: STOMP client not connected.')
+      return
+    }
+
+    const rtnCmd: RotationCommand = { meepleId, rotation }
+
+    const body = JSON.stringify(rtnCmd)
+
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
+
+    try {
+      stompclient.publish({
+        destination: DEST_APP + '/rotate',
+        body,
+      })
+      console.log('Meeple rotated:', body)
+    } catch (err) {
+      console.error('Error rotating:', err)
+    }
+  }
 
   /**
    * Sendet eine Bewegungsaktion (Move) an den Spielserver.
@@ -601,7 +670,27 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     }
   }
-  //TODO tatsächliches moven der Barrier implementieren
+
+  /**
+   * Sendet ein Kommando zum Verschieben einer Barriere an den Spielserver.
+   *
+   * Diese Funktion wird aufgerufen, wenn ein Spieler eine Barriere
+   * auf ein anderes Spielfeld bewegen möchte.
+   *
+   * Das MoveBarrierCommand wird an den Server gesendet und dort
+   * validiert. Bei Erfolg wird die Barrierenbewegung an alle Clients
+   * der Lobby broadcastet.
+   *
+   * Ablauf:
+   * 1. Prüft, ob der STOMP-Client verbunden ist
+   * 2. Erstellt ein MoveBarrierCommand mit Barrieren-ID und Ziel-Feld-ID
+   * 3. Serialisiert das Kommando als JSON
+   * 4. Sendet die Nachricht an den WebSocket-Endpunkt /movebarrier
+   *
+   * @param barrierId     die eindeutige ID der zu bewegenden Barriere
+   * @param targetFieldId die ID des Spielfelds, auf das die Barriere
+   *                      verschoben werden soll
+   */
   function moveBarrier(barrierId: string, targetFieldId: string) {
     if (!stompclient || !stompclient.connected) {
       console.error("Cannot send move: STOMP client not connected.")
@@ -673,29 +762,36 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
 
   function openMinimap(barrierId: string, playerId: string) {
-    minimap.ownColor = (getPlayerColor(playerId) ?? "RED") as any
-    minimap.isMiniMapOpen = true;
-    minimap.selectedFieldId = ''
+    if (playerId === gamedata.playerId) {
+      minimap.ownColor = (getPlayerColor(playerId) ?? "RED") as any
+      minimap.isMiniMapOpen = true;
+      minimap.selectedFieldId = ''
+      minimap.selectedBarrierId = barrierId
+      minimap.isMovingBarrier = true
 
-    minimap.occupancyByFieldId = buildOccupancySnapshot()
+      minimap.occupancyByFieldId = buildOccupancySnapshot()
 
 
-    const occupied = Object.entries(minimap.occupancyByFieldId)
-      .filter(([, v]) => v === 'OCCUPIED')
-      .map(([k]) => k)
+      const occupied = Object.entries(minimap.occupancyByFieldId)
+        .filter(([, v]) => v === 'OCCUPIED')
+        .map(([k]) => k)
 
-    const own = Object.entries(minimap.occupancyByFieldId)
-      .filter(([, v]) => v === 'OWN_MEEPLE')
-      .map(([k]) => k)
+      const own = Object.entries(minimap.occupancyByFieldId)
+        .filter(([, v]) => v === 'OWN_MEEPLE')
+        .map(([k]) => k)
 
-    console.log('[minimap] snapshot built',
-      { occupiedCount: occupied.length, ownCount: own.length }
-    )
+      console.log('[minimap] snapshot built',
+        { occupiedCount: occupied.length, ownCount: own.length }
+      )
+    }
 
   }
 
 
   function confirmMinimapSelection() {
+    if (!minimap.selectedFieldId) return
+
+    moveBarrier(minimap.selectedBarrierId, minimap.selectedFieldId)
     minimap.isMiniMapOpen = false
 
   }
@@ -785,7 +881,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
-    const energySaveCommand: EnergyCommand = { playerId: gamedata.playerId }
+    const energySaveCommand: EnergyCommand = { playerId: gamedata.playerId, meepleId: "" }
 
     const body = JSON.stringify(energySaveCommand)
 
@@ -819,7 +915,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    *
   * @author Kevin Tran
    */
-  function sendEnergyConsume() {
+  function sendEnergyConsume(meepleId: string) {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot save energy: STOMP client not connected.')
       return
@@ -829,7 +925,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       console.error('Cannot save energy: Missing lobbyId or playerId')
       return
     }
-    const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId }
+    const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId, meepleId: meepleId }
     const body = JSON.stringify(energyConsumeCommand)
 
     const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
@@ -968,5 +1064,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     minimap,
     confirmMinimapSelection,
     selectMinimapField,
+    jumpTrigger,
+    triggerJumpLocally,
+    sendMeepleRotation,
   }
 })

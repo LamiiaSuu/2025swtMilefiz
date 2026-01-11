@@ -224,7 +224,10 @@ public class DuelServiceImpl implements DuelService {
         );
 
         if (winner == null || !winner.equals(p1)) {
-
+            lobby.getPlayer(p1).setMoved(false);
+            //if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
+            //        lobby.getPlayer(p1).setRemainingMoves(0);
+            //}
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
@@ -241,7 +244,10 @@ public class DuelServiceImpl implements DuelService {
         }
 
         if (winner == null || !winner.equals(p2)) {
-
+            lobby.getPlayer(p2).setMoved(false);
+            //if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
+            //    lobby.getPlayer(p2).setRemainingMoves(0);
+            //}
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(

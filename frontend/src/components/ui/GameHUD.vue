@@ -8,6 +8,7 @@ import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
 import EnergyBar from './EnergyBar.vue';
 import MeepleBar from './MeepleBar.vue';
+import SpielerListe from './SpielerListe.vue'
 import SaveEnergyButton from './SaveEnergyButton.vue';
 import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
@@ -69,6 +70,11 @@ function colorToCss(c: string) {
       <MeepleBar />
     </div>
 
+    <!-- Spielerliste -->
+    <div class="spielerliste-container">
+      <SpielerListe />
+    </div>
+
     <!-- Würfelergebnis -->
     <div class="dice-counter-container">
       <DiceCounter />
@@ -112,6 +118,12 @@ function colorToCss(c: string) {
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.spielerliste-container {
+  position: absolute;
+  top: 2 vw;
+  left: 0;
 }
 
 .error-message-container {

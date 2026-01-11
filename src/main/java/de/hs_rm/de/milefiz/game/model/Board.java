@@ -32,6 +32,23 @@ public class Board {
         this(UUID.randomUUID(), name, startGreen, startYellow, startBlue, startRed);
     }
 
+    public Board(Board other) {
+        this(
+            UUID.randomUUID(),
+            other.getName(),
+            other.getStartGreen(),
+            other.getStartYellow(),
+            other.getStartBlue(),
+            other.getStartRed()
+        );
+
+        this.barriers = other.barriers.stream()
+        .map(Meeple::new) 
+        .toList();
+    }
+
+
+
     public Board(UUID id, String name, Field startGreen, Field startYellow, Field startBlue, Field startRed) {
         this.id = id;
         this.name = name;
