@@ -59,6 +59,7 @@ public class BoardDTO {
         sb.append("id=").append(id);
         sb.append(", name=").append(name);
         sb.append(", fields=").append(fields);
+        sb.append(", trees=").append(trees);
         sb.append('}');
         return sb.toString();
     }
@@ -71,8 +72,16 @@ public class BoardDTO {
         trees.add(new TreeDTO(treePosition, treeType));
     }
 
+    public void addTrees(List<TreeDTO> treeList) {
+        trees.addAll(treeList);
+    }
+
     public void deleteAllTrees() {
         trees.clear();
+    }
+
+    public boolean hasTrees() {
+        return !trees.isEmpty();
     }
 
     public static class TreeDTO {
@@ -98,6 +107,11 @@ public class BoardDTO {
 
         public void setTreeType(TreeType treeType) {
             this.treeType = treeType;
+        }
+
+        @Override
+        public String toString() {
+            return "FieldDTO [treePosition=" + treePosition + ", treeType=" + treeType + "]";
         }
 
     }
