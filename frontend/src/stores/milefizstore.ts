@@ -75,7 +75,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const popUpSettingsOpen = ref(false)
 
 
-  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE'
+  /**
+   * Beschreibt, wie ein Feld besetzt ist:
+   *  - FREE: Sperre kann auf diesem Feld platziert werden
+   *  - OCCUPIED: Feld ist durch Gegner oder Sperre besetzt
+   *  - OWN_MEEPLE: Ein eigenes Meeple steht auf diesem Feld
+   *  - INVALID: Feld ist nicht für eine Sperre auswählbar (Start-/Zielfeld)
+   */
+  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE' | 'INVALID_END' | 'INVALID_START'
   /**
    * Reactive state für die MiniMap-Komponente.
    * Verwaltet die Anzeige und Interaktion mit der Barrieren-Verschiebungs-Map.
@@ -726,9 +733,17 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       board.fields.map(f => [f.id, 'FREE' as Occupancy])
     )
 
-    // Barrieren als OCCUPIED setzen
+    // Zunächst Start und Zielfelder als INVALID markieren, dann überprüfen, ob ein Feld bereits durch eine Sperre oder fremdes Meeple besetzt ist 
     for (const f of board.fields) {
-      if (f.barrier) occ[f.id] = 'OCCUPIED'
+      if (f.type != 'NORMAL') {
+        if (f.type == 'END') {
+          occ[f.id] = 'INVALID_END'
+        } else {
+          occ[f.id] = 'INVALID_START'
+        }
+      }
+      if ((occ[f.id] != 'INVALID_END' || occ[f.id] != 'INVALID_START') && f.barrier) occ[f.id] = 'OCCUPIED'
+
     }
 
     // Wenn lobby fehlt, können own vs foreign meeples nicht unterschieden werden -> nur Barrieren markieren

@@ -5,7 +5,7 @@ import type { IBoardDTD } from "@/stores/IBoardDTD";
 
 
 
-type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE"
+type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE" | "INVALID_END" | "INVALID_START"
 
 
 
@@ -103,7 +103,7 @@ function onClickField(fieldId: string) {
 
 /**
  * Zustände:
- * - OWN_MEEPLE: roter gefüllter Kreis
+ * - OWN_MEEPLE: in Meeple Farbe gefärbter Kreis
  * - SELECTED (Barriere-Ziel): schwarzer gefüllter Kreis
  * - OCCUPIED: leerer Kreis + X
  * - FREE: leerer Kreis
@@ -116,6 +116,12 @@ function isOwn(fieldId: string) {
 }
 function isSelected(fieldId: string) {
   return props.selectedFieldId === fieldId
+}
+function isInvalidStart(fieldId: string) {
+  return occ(fieldId) === "INVALID_START"
+}
+function isInvalidEnd(fieldId: string) {
+  return occ(fieldId) === "INVALID_END"
 }
 </script>
 
@@ -149,7 +155,7 @@ function isSelected(fieldId: string) {
         <circle :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R" class="node-circle" filter="url(#nodeShadow)"
           @click="onClickField(f.id)" />
 
-        <!-- OWN roter Kreis -->
+        <!-- OWN meeple-farbener Kreis -->
         <circle v-if="isOwn(f.id)" :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R - 3" class="node-own" />
 
         <!-- SELECTED schwarzer Kreis)-->
@@ -163,6 +169,19 @@ function isSelected(fieldId: string) {
           <line :x1="cx(f.position.x) + (R - 6)" :y1="cy(f.position.y) - (R - 6)" :x2="cx(f.position.x) - (R - 6)"
             :y2="cy(f.position.y) + (R - 6)" class="x-line" />
         </g>
+
+        <!-- INVALID_END -->
+
+        <!-- INVALID_START -->
+        <image
+          v-if="isInvalidStart(f.id)"
+          href="/mapEditorIcons/base.png"
+          :x="cx(f.position.x) - (R)"
+          :y="cy(f.position.y) - (R)"
+          :width="R * 2"
+          :heigth="R * 2"
+        />
+
       </g>
     </g>
   </svg>
