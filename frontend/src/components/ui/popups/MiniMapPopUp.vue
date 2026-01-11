@@ -129,7 +129,7 @@ onUnmounted(() => {
 
 .map-slot {
   position: relative;
-  overflow: hidden;
+  overflow: auto;
   width: min(520px, 100%);
   height: 340px;
   border: 1px solid rgba(0, 0, 0, 0.25);
