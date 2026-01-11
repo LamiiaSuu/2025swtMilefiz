@@ -45,6 +45,8 @@ public class Board {
         this.barriers = other.barriers.stream()
         .map(Meeple::new) 
         .toList();
+
+        this.trees = other.getTrees();
     }
 
 
