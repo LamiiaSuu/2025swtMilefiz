@@ -37,6 +37,7 @@ public class BalloonGame extends MiniGame {
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private boolean timeoutStarted = false;
+    private final int INSTRUCTION_DELAY_SECONDS = 2;
 
     private UUID player1;
     private UUID player2;
@@ -65,7 +66,7 @@ public class BalloonGame extends MiniGame {
         if (!timeoutStarted) {
             timeoutStarted = true;
 
-            scheduler.schedule(this::handleTimeout, getTimeOut(), TimeUnit.SECONDS);
+            scheduler.schedule(this::handleTimeout, getTimeOut() + INSTRUCTION_DELAY_SECONDS, TimeUnit.SECONDS);
         }
     }
 
@@ -76,6 +77,7 @@ public class BalloonGame extends MiniGame {
             setFinished(true);
             notifyFinished();
         }
+        scheduler.shutdown();
     }
 
     public synchronized boolean processClick(UUID playerId) {

@@ -15,10 +15,12 @@ const emit = defineEmits<{
 const store = useMilefizStore()
 const myLocalClicks = ref(0)
 const showInstructions = ref(true)
+const timerStarted = ref(false)
 
 onMounted(() => {
   setTimeout(() => {
     showInstructions.value = false
+    timerStarted.value = true
   }, 2000)
 })
 
@@ -121,8 +123,11 @@ watch(isFinished, (finished) => {
       {{ tUI('MINIGAME_BALLOON_TITLE') }}
     </h2>
 
-    <!-- COUNTDOWN -->
-    <CountdownBar :seconds="duel.timeOut" />
+     <!-- COUNTDOWN - nur anzeigen wenn Timer gestartet-->
+    <CountdownBar v-if="timerStarted" :seconds="duel.timeOut" />
+
+    <!-- Platzhalter wenn Timer noch nicht läuft-->
+    <div v-else class="countdown-placeholder"></div>
 
     <!-- Spieler & Ballons -->
     <div class="players">
@@ -229,12 +234,15 @@ watch(isFinished, (finished) => {
 
 .player {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .player h3 {
   font-size: 1.8rem;
   font-weight: 900;
-  margin: 0px 0 6px 0;
+  margin: 8px 0 0 0;
 
   text-shadow:
     0 0 1px rgba(0, 0, 0, 0.95),
@@ -247,6 +255,7 @@ watch(isFinished, (finished) => {
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: 'Acme', sans-serif;
+  max-width: 100%;
 }
 
 .balloon-wrapper {
@@ -263,6 +272,11 @@ watch(isFinished, (finished) => {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.countdown-placeholder {
+  height: 30px;
+  margin-bottom: 10px;
 }
 
 .winner-big {
