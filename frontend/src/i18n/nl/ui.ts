@@ -53,5 +53,13 @@ export const UI_NL: Record<UIKey, string> = {
     DUEL_WON: '🎉 Je hebt gewonnen! 🎉',
     DUEL_LOST: '😵 Je hebt verloren… 😵',
     MINIGAME_DICE_TITLE: 'Dobbelspel',
-
+    WINNING_TAB: '',
+    WINNING_TUTORIAL: '',
+    JUMPING_TAB: '',
+    JUMPING_TUTORIAL: '',
+    DUEL_TAB: '',
+    DUEL_TUTORIAL: '',
+    ROLL_DICE_TAB: '',
+    ROLL_DICE_TUTORIAL: '',
+    CONTROLS_TUTORIAL: '',
 }

@@ -53,4 +53,13 @@ export const UI_DE: Record<UIKey, string> = {
     DUEL_WON: '🎉 Du hast gewonnen! 🎉',
     DUEL_LOST: '😵 Du hast verloren… 😵',
     MINIGAME_DICE_TITLE: 'Würfel-Spiel',
+    WINNING_TAB: 'Gewinnen',
+    WINNING_TUTORIAL: '',
+    JUMPING_TAB: 'Hüpfen',
+    JUMPING_TUTORIAL: 'Zum Hüpfen brauchst du 6 Energiepunkte',
+    DUEL_TAB: 'Duellieren',
+    DUEL_TUTORIAL: '',
+    ROLL_DICE_TAB: 'Würfeln',
+    ROLL_DICE_TUTORIAL: '',
+    CONTROLS_TUTORIAL: '',
 }
