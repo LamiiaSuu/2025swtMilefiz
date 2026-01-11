@@ -53,4 +53,7 @@ export const UI_DE: Record<UIKey, string> = {
     DUEL_WON: '🎉 Du hast gewonnen! 🎉',
     DUEL_LOST: '😵 Du hast verloren… 😵',
     MINIGAME_DICE_TITLE: 'Würfel-Spiel',
+    MINIGAME_SLOT_TITLE: 'Einarmiger Bandit',
+    MINIGAME_SLOT_BUTTON: 'ziehen',
+    MINIGAME_SLOT_COMP: 'System',
 }
