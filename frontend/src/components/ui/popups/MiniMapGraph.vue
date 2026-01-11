@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, ref, onMounted, nextTick } from "vue"
 import type { IBoardDTD } from "@/stores/IBoardDTD";
 
 
@@ -7,65 +7,147 @@ import type { IBoardDTD } from "@/stores/IBoardDTD";
 
 type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE" | "INVALID_END" | "INVALID_START"
 
-
-
 const props = defineProps<{
   board: IBoardDTD
   occupancyByFieldId: Record<string, Occupancy>
   selectedFieldId: string | null
 }>()
 
+const currentField = computed(() => {
+  const own = props.board.fields.find(f => isOwn(f.id))
+  if (own) return own
+})
+
+function centerOnField(field: IBoardDTD["fields"][number], targetZoom:number) {
+  const z = Math.max(MIN_ZOOM, Math.min(maxZoom.value, targetZoom))
+  
+  const viewW = svgSize.value.w
+  const viewH = svgSize.value.h
+
+  const fieldCx = cx(field.position.x)
+  const fieldCy = cy(field.position.y)
+
+  panX.value = viewW / 2 - fieldCx * z
+  panY.value = viewH / 2 - fieldCy * z
+
+  zoom.value = z
+}
+
+const INTIAL_ZOOM = 15.0
+onMounted(async () => {
+  await nextTick()
+
+  const field = currentField.value
+  if(!field) return
+
+  centerOnField(field, INTIAL_ZOOM)
+})
+
+const svgRef = ref<SVGSVGElement | null>(null)
+
 // Zoom-State
 const zoom = ref(1)
-const MIN_ZOOM = 0.5
-const MAX_ZOOM = 2.5
-const ZOOM_STEP = 0.1
+const MIN_ZOOM = 1.0
+const maxZoom = ref(3)
+const ZOOM_STEP = 1.5
 
 const panX = ref(0)
 const panY = ref(0)
+
+function recomputeMaxZoom() {
+  const svg = svgRef.value
+  if (!svg) return
+
+  const rect = svg.getBoundingClientRect()
+
+  const viewH = svgSize.value.h
+
+  // Skala bei zoom = 1 (Pixel pro SVG-Einheit, hier Höhe als Basis)
+  const scaleAt1 = rect.height / viewH
+
+  // Wie groß darf ein Node-Radius maximal in Pixeln werden?
+  const desiredMaxNodeRadiusPx = 20
+
+  const maxZoomLocal = desiredMaxNodeRadiusPx / (R * scaleAt1)
+
+  // nie kleiner als MIN_ZOOM
+  maxZoom.value = Math.max(MIN_ZOOM, maxZoomLocal)
+}
+
+onMounted(() => {
+  nextTick(() => {
+    recomputeMaxZoom()
+  })
+})
+
 
 function onWheel(e: WheelEvent) {
   e.preventDefault()
 
   const svg = e.currentTarget as SVGSVGElement | null
   if (!svg) return
-  
-  // Zoomrichtung
-  const direction = e.deltaY > 0 ? -1:1
-  let newZoom = zoom.value + direction * ZOOM_STEP
-  newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom))
 
-  // Wenn am Limit
-  if (newZoom === zoom.value){
-    return // nichts tun
+  // deltaY > 0  => rauszoomen
+  // deltaY <= 0 => reinzoomen
+  const direction = e.deltaY > 0 ? -1 : 1
+
+  let newZoom = zoom.value + direction * ZOOM_STEP
+
+  if (newZoom < MIN_ZOOM) newZoom = MIN_ZOOM
+  if (newZoom > maxZoom.value) newZoom = maxZoom.value
+
+  if (newZoom === zoom.value) {
+    return
   }
 
-  // Bounding Rectangle des SVG in CSS Pixeln
+  // Sichtbare Größe des SVG
   const rect = svg.getBoundingClientRect()
 
-  // Mauspostion relativ zum SVG in CSS-Pixeln
-  const mousePxX = e.clientX - rect.left
-  const mousePxY = e.clientY - rect.top
+  // viewBox-Größe
+  const viewW = svgSize.value.w
+  const viewH = svgSize.value.h
 
-  // Umrechnung in SVG-Koordinaten (in viewbox-Einheiten)
-  const scaleX = svgSize.value.w / rect.width
-  const scaleY = svgSize.value.h / rect.height
+  if (direction > 0) {// ZOOM IN -> um Mausposition
+    const mousePxX = e.clientX - rect.left
+    const mousePxY = e.clientY - rect.top
 
-  const mouseSvgX = mousePxX * scaleX
-  const mouseSvgY = mousePxY * scaleY
+    // Umrechnungsfaktoren von CSS-Pixeln -> viewBox-Koordinaten
+    const scaleX = viewW / rect.width
+    const scaleY = viewH / rect.height
 
-  // Weltkoordinaten vor Zoom 
-  const worldX = (mouseSvgX - panX.value) / zoom.value
-  const worldY = (mouseSvgY - panY.value) / zoom.value
+    const mouseSvgX = mousePxX * scaleX
+    const mouseSvgY = mousePxY * scaleY
 
-  // pan so anpassen, dass worldX/worldY nahc dem Zom wieder unter der Muas liegen
-  panX.value = mouseSvgX - worldX * newZoom
-  panY.value = mouseSvgY - worldY * newZoom
+    // Weltkoordinaten des Punkts unter der Maus vor dem Zoom
+    const worldX = (mouseSvgX - panX.value) / zoom.value
+    const worldY = (mouseSvgY - panY.value) / zoom.value
 
-  // Zoom setzen
+    // pan so anpassen, dass worldX/worldY nach dem neuen Zoom wieder unter der Maus liegen
+    panX.value = mouseSvgX - worldX * newZoom
+    panY.value = mouseSvgY - worldY * newZoom
+
+  } else {// ZOOM OUT -> um tatsächliche Mitte des SVG-Graphen
+   // Logisches Zentrum des Graphen in SVG-Koordinaten
+    const centerSvgX = viewW / 2
+    const centerSvgY = viewH / 2
+
+    // Weltkoordinaten dieses Zentrums vor dem Zoom
+    const worldCenterX = (centerSvgX - panX.value) / zoom.value
+    const worldCenterY = (centerSvgY - panY.value) / zoom.value
+
+    // pan so anpassen, dass dieses Zentrum in SVG-Koordinaten
+    // am selben Ort relativ zum Graphen skaliert wird
+    panX.value = centerSvgX - worldCenterX * newZoom
+    panY.value = centerSvgY - worldCenterY * newZoom
+  }
+
+  // komplett rausgezoomt -> zurück zur initialen Zentrierung
+  if (newZoom === MIN_ZOOM) {
+    panX.value = 0
+    panY.value = 0
+  }
+
   zoom.value = newZoom
-
-
 }
 
 const transform = computed(() => {
@@ -83,13 +165,12 @@ const emit = defineEmits<{
  * - R bestimmt Kreisradius
  * - PADDING sorgt für Rand im SVG
  */
-const SPACING = 70
-const R = 20
-const PADDING = 28
+const SPACING = 100
+const R = 80
+const PADDING = 200
 
 /**
  * Bounds: Board-Positionen als Layout-Hints
- * Negative Koordinaten sind erlaubt ->  normalisieren über minX/minY.
  */
 const bounds = computed(() => {
   const xs = props.board.fields.map(f => f.position?.x).filter(n => Number.isFinite(n)) as number[]
@@ -183,7 +264,7 @@ function isInvalidEnd(fieldId: string) {
 </script>
 
 <template>
-  <svg class="minimap-svg" :viewBox="`0 0 ${svgSize.w} ${svgSize.h}`" width="100%" height="100%"
+  <svg ref="svgRef" class="minimap-svg" :viewBox="`0 0 ${svgSize.w} ${svgSize.h}`" width="100%" height="100%"
     preserveAspectRatio="xMidYMid meet" @wheel.prevent="onWheel">
     <!-- Drop Shadow Filter -->
     <defs>
@@ -250,35 +331,35 @@ function isInvalidEnd(fieldId: string) {
 
 
 .edge {
-  stroke: rgba(0, 0, 0, 0.6);
-  stroke-width: 4;
+  stroke: rgba(0, 0, 0);
+  stroke-width: 10;
   stroke-linecap: round;
 }
 
 
 .node-circle {
   fill: #fff;
-  stroke: rgba(0, 0, 0, 0.85);
-  stroke-width: 4;
+  stroke: rgba(0, 0, 0);
+  stroke-width: 10;
 }
 
 /* OWN Meeple*/
 .node-own {
   fill: var(--own-color, #e11);
-  stroke: rgba(0, 0, 0, 0.85);
+  stroke: rgba(0, 0, 0);
   stroke-width: 2;
 }
 
 /* Selected Barrier */
 .node-selected {
-  fill: #000;
-  stroke: rgba(0, 0, 0, 0.85);
+  fill: rgb(87, 40, 2);
+  stroke: rgb(87, 40, 2);
   stroke-width: 2;
 }
 
 .x-line {
-  stroke: rgba(0, 0, 0, 0.85);
-  stroke-width: 8;
+  stroke: rgba(0, 0, 0);
+  stroke-width: 20;
   stroke-linecap: round;
 }
 
