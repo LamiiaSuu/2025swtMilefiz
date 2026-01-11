@@ -201,7 +201,7 @@ async function importAndSetBoard() {
                                 <button type="button" class="map-button" :disabled="mapMode === 'standard'"
                                     :class="{ active: mapMode === 'import' }" @mouseenter="onHover"
                                     @click="importAndSetBoard">
-                                    {{ tUI('IMPORT') }}
+                                    {{ tUI('UPLOAD') }}
                                 </button>
                             </div>
                         </div>
@@ -376,17 +376,14 @@ select {
     min-width: 0;
 }
 
-.map-button.active {
+.map-button.active, .file-input {
     background: rgba(40, 60, 35, 0.92);
 }
-
-
 
 .file-input {
     padding: 8px;
     font-size: 1rem;
     color: white;
-    background-image: var(--button-gradient-green);
 }
 
 .file-input:disabled {
