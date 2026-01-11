@@ -106,7 +106,7 @@ public class BalloonGame extends MiniGame {
 
         int oldPhase;
 
-        if (playerId == player1) {
+        if (playerId.equals(player1)) {
             oldPhase = phasePlayer1;
             clicksPlayer1++;
             phasePlayer1 = calculatePhase(clicksPlayer1);
@@ -116,7 +116,7 @@ public class BalloonGame extends MiniGame {
             }
             return phasePlayer1 != oldPhase;
 
-        } else if (playerId == player2) {
+        } else if (playerId.equals(player2)) {
             oldPhase = phasePlayer2;
             clicksPlayer2++;
             phasePlayer2 = calculatePhase(clicksPlayer2);

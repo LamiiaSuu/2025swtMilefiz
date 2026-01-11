@@ -54,9 +54,15 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.dicegame.timeout}")
     private int diceGameTimeout;
 
+    /**
+     * Timeout für BalloonGame aus application.properties.
+     */
+    @Value("${minigame.balloongame.timeout}")
+    private int balloonGameTimeout;
+
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout+1));
-        gameFactories.add(() -> new BalloonGame(15));
+        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         //gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
         //gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
         this.lobbyManager = lobbyManager;
