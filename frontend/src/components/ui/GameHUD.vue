@@ -12,6 +12,7 @@ import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
 import MenuPopUp from './popups/MenuPopUp.vue';
 import SettingsPopUp from './popups/SettingsPopUp.vue';
+import TutorialPopUp from './popups/TutorialPopUp.vue';
 
 const milefizStore = useMilefizStore()
 
@@ -28,12 +29,17 @@ import ErrorMessage from './ErrorMessage.vue';
 
     <!-- Menu Popup -->
     <transition name="fade">
-      <MenuPopUp v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen" />
+      <MenuPopUp v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.popUpTutorialOpen" />
     </transition>
 
     <!-- Settings Popup -->
     <transition name="fade">
       <SettingsPopUp v-if="milefizStore.popUpSettingsOpen" />
+    </transition>
+
+    <!-- Tutorial Popup -->
+    <transition name="fade">
+      <TutorialPopUp v-if="milefizStore.popUpTutorialOpen" />
     </transition>
 
     <!-- Meeple Bar -->
