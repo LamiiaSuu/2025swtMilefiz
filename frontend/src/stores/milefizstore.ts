@@ -1035,6 +1035,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     popUpMenuOpen.value = false
     popUpSettingsOpen.value = false
 
+    // Minimap State zurücksetzen
+    minimap.isMiniMapOpen = false
+    minimap.isMovingBarrier = false
+    minimap.selectedBarrierId = ""
+    minimap.selectedFieldId = ""
+    minimap.occupancyByFieldId = {}
+    minimap.ownColor = "RED"
+
     Object.keys(activeDuels).forEach(key => {
       delete activeDuels[key]
     })
