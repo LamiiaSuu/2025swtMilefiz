@@ -17,3 +17,8 @@ export interface FrontendMoveEvent {
   remainingMoves?: number; 
   moved: boolean;
 }
+
+export interface RotationCommand{
+  meepleId: string;
+  rotation: number;
+}

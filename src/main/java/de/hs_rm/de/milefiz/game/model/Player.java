@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import de.hs_rm.de.milefiz.game.service.NamingService;
+
 public class Player implements Principal {
 
     private UUID id;
@@ -23,7 +25,7 @@ public class Player implements Principal {
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
         isLeader = false;
-        playerName = "Anonymer Kek";
+        playerName = NamingService.generateRandomName();
         id = UUID.randomUUID();
         for (int i = 0; i < noOfMeeples; i++) {
             meeples[i] = new Meeple(false);

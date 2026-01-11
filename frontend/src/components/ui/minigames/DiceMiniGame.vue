@@ -1,13 +1,13 @@
 <template>
-  <div class="dice-card">
+  <div class="dice-card no-select">
     <h2 class="dice-title">
       {{ tUI('MINIGAME_DICE_TITLE') }}
     </h2>
 
     <!-- COUNTDOWN -->
-    <div v-if="countdown !== null" class="big-countdown">
-      {{ countdown }}
-    </div>
+    <CountdownBar
+      :seconds="duel.timeOut"
+    />
 
     <div class="players">
       <!-- Spieler 1 -->
@@ -89,8 +89,7 @@
 import { ref, watch } from "vue"
 import { useMilefizStore } from "@/stores/milefizstore"
 import { tUI } from "@/i18n";
-
-const countdown = ref<number | null>(null)
+import CountdownBar from "./CountdownBar.vue"
 
 const props = defineProps<{
   duel: any
@@ -134,30 +133,6 @@ watch(
   finished => {
     if (finished) setTimeout(() => emit("close"), 1500)
   }
-)
-
-// countdown FRONTEND
-watch(
-  () => props.duel?.timeOut,
-  timeOut => {
-    if (!timeOut) return
-
-    countdown.value = timeOut - 1
-
-    const interval = setInterval(() => {
-      if (countdown.value === null) {
-        clearInterval(interval)
-        return
-      }
-
-      countdown.value--
-
-      if (countdown.value <= 0) {
-        clearInterval(interval)
-      }
-    }, 1000)
-  },
-  { immediate: true }
 )
 
 function getPlayerColorByMeeple(meepleId: string) {
@@ -313,5 +288,13 @@ button {
 .winner-text,
 .loser-text {
   font-family: "Acme", sans-serif;
+}
+
+.no-select {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  -webkit-user-drag: none;
 }
 </style>

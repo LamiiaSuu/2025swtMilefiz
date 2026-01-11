@@ -2,26 +2,55 @@
  und enthält momentan nur den "Würfeln" Button -->
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import DiceButton from './DiceButton.vue'
 import DiceCounter from './DiceCounter.vue';
 import JumpButton from './JumpButton.vue';
 import EnergyBar from './EnergyBar.vue';
 import MeepleBar from './MeepleBar.vue';
+import SpielerListe from './SpielerListe.vue'
 import SaveEnergyButton from './SaveEnergyButton.vue';
 import { useMilefizStore } from '@/stores/milefizstore'
 import WinPopUp from './popups/WinPopUp.vue';
 import MenuPopUp from './popups/MenuPopUp.vue';
 import SettingsPopUp from './popups/SettingsPopUp.vue';
+import MiniMapPopUp from './popups/MiniMapPopUp.vue';
+import MiniMapGraph from './popups/MiniMapGraph.vue';
+import ErrorMessage from './ErrorMessage.vue';
+import { useBoardStore } from '@/stores/boardStore';
 import TutorialPopUp from './popups/TutorialPopUp.vue';
 
 const milefizStore = useMilefizStore()
+const boardStore = useBoardStore()
+const { board, ok } = storeToRefs(boardStore)
 
-import ErrorMessage from './ErrorMessage.vue';
+
+function colorToCss(c: string) {
+  return { RED:"#e11", GREEN:"#2a6", BLUE:"#16f", YELLOW:"#fc0" }[c] ?? "#e11"
+}
+
 </script>
 
 
 <template>
   <div class="hud-container">
+    <!-- Minimap Popup-->
+    <transition name="fade">
+      <MiniMapPopUp :is-open="milefizStore.minimap.isMiniMapOpen"
+        :selected-field-id="milefizStore.minimap.selectedFieldId"
+        :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
+        @confirm="milefizStore.confirmMinimapSelection" 
+        :style="{ '--own-color': colorToCss(milefizStore.minimap.ownColor) }">
+        <template #map>
+          <MiniMapGraph v-if="board" :board="board" :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
+            :selected-field-id="milefizStore.minimap.selectedFieldId" @select="milefizStore.selectMinimapField" />
+          <div v-else style="display:grid; place-items:center; width:100%; height:100%;">
+            Board lädt…
+          </div>
+        </template>
+
+      </MiniMapPopUp>
+    </transition>
     <!-- Win Popup -->
     <transition name="fade">
       <WinPopUp v-if="milefizStore.gameFinished" />
@@ -45,6 +74,11 @@ import ErrorMessage from './ErrorMessage.vue';
     <!-- Meeple Bar -->
     <div style="position: absolute; top: 2vw; right: 0px;" class="meeple-icon-bar">
       <MeepleBar />
+    </div>
+
+    <!-- Spielerliste -->
+    <div class="spielerliste-container">
+      <SpielerListe />
     </div>
 
     <!-- Würfelergebnis -->
@@ -90,6 +124,12 @@ import ErrorMessage from './ErrorMessage.vue';
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.spielerliste-container {
+  position: absolute;
+  top: 2 vw;
+  left: 0;
 }
 
 .error-message-container {
