@@ -22,10 +22,7 @@ const onContinueClick = () => {
 
 const onTutorialClick = () => {
     audio.playSfx('click')
-}
-
-const onControlsClick = () => {
-    audio.playSfx('click')
+    milefizStore.openPopUpTutorial()
 }
 
 const onSettingsClick = () => {
@@ -46,7 +43,7 @@ const onBackClick = () => {
         <Header>{{ tUI('POPUP_MENU') }}</Header>
 
         <!-- Close Button -->
-        <PopUpCloseButton></PopUpCloseButton>
+        <PopUpCloseButton>(Esc)</PopUpCloseButton>
 
         <div class="popup">
 
