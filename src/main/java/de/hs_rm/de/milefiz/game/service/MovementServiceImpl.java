@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,6 +21,7 @@ import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
@@ -267,6 +267,9 @@ public class MovementServiceImpl implements MovementService {
 
                     if (miniGame instanceof DiceGame dice) {
                         dice.initPlayers(player.getId(), rivalPlayer.getId());
+                    }
+                    if (miniGame instanceof BalloonGame game){
+                        game.initPlayers(player.getId(), rivalPlayer.getId());
                     }
 
                     return new FrontendDuelEvent(
