@@ -359,7 +359,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.finished = event.finished
         }
 
-        if (event.type === "BALLON_GAME_UPDATE") {
+        if (event.type === "BALLOON_GAME_UPDATE") {
           const duel = activeDuels[event.duelId]
           if (!duel) return
 

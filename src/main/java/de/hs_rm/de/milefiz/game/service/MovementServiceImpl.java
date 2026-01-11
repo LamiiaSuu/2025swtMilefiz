@@ -268,7 +268,7 @@ public class MovementServiceImpl implements MovementService {
                     if (miniGame instanceof DiceGame dice) {
                         dice.initPlayers(player.getId(), rivalPlayer.getId());
                     }
-                    if (miniGame instanceof BalloonGame game){
+                    if (miniGame instanceof BalloonGame game) {
                         game.initPlayers(player.getId(), rivalPlayer.getId());
                     }
 
@@ -330,6 +330,9 @@ public class MovementServiceImpl implements MovementService {
 
                         if (miniGame instanceof DiceGame dice) {
                             dice.initPlayers(player.getId(), rivalPlayer.getId());
+                        }
+                        if (miniGame instanceof BalloonGame game) {
+                            game.initPlayers(player.getId(), rivalPlayer.getId());
                         }
 
                         return new FrontendDuelEvent(
@@ -465,14 +468,14 @@ public class MovementServiceImpl implements MovementService {
      * {@link #existsLegalStopWithinRemainingMovesDfs(Field, Field, int, Set, Set, Map)}
      * implementiert.
      *
-     * @param startingField   das Feld, von dem aus die Suche gestartet wird
-     * @param lastField       das zuletzt betretene Feld,
-     *                        oder {@code null}, falls keines existiert
-     * @param remainingMoves  die Anzahl der noch verfügbaren Schritte
-     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeples besetzt
-     *                        sind
+     * @param startingField     das Feld, von dem aus die Suche gestartet wird
+     * @param lastField         das zuletzt betretene Feld,
+     *                          oder {@code null}, falls keines existiert
+     * @param remainingMoves    die Anzahl der noch verfügbaren Schritte
+     * @param ownMeepleFields   alle Felder, die aktuell von eigenen Meeples besetzt
+     *                          sind
      * 
-     * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
+     * @param barrierFields     alle Felder, die aktuell von Barrieren besetzt sind
      * 
      * @param rivalMeeples      alle gegnerischen Meeples, die im Spiel vorhanden
      *                          sind

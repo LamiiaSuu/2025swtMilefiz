@@ -19,7 +19,7 @@ const showInstructions = ref(true)
 onMounted(() => {
   setTimeout(() => {
     showInstructions.value = false
-  }, 3000)
+  }, 2000)
 })
 
 /**
@@ -45,20 +45,21 @@ const isPlayer1 = computed(() => {
 const myPhase = computed(() => {
   const state = props.duel?.state
   if (!state) return 0
-
-  return isPlayer1.value ? state.phasePlayer1 : state.phasePlayer2
+  
+  const phase = isPlayer1.value ? state.phasePlayer1 : state.phasePlayer2
+  return phase ?? 0  // Falls undefined/null → 0
 })
 
 const rivalPhase = computed(() => {
   const state = props.duel?.state
   if (!state) return 0
 
-  return isPlayer1.value ? state.phasePlayer2 : state.phasePlayer1
+  const phase = isPlayer1.value ? state.phasePlayer2 : state.phasePlayer1
+  return phase ?? 0  // Falls undefined/null → 0
 })
 
 const isWinner = computed(() => {
-  const winnerPlayerId = getPlayerIdByMeeple(props.duel?.state?.winner)
-  return winnerPlayerId === store.gamedata.playerId
+  return props.duel?.state?.winner === store.gamedata.playerId
 })
 
 const isFinished = computed(() => {
