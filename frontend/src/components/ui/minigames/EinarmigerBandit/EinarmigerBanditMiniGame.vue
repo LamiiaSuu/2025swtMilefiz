@@ -1,98 +1,3 @@
-<template>
-  <div class="slot-card no-select">
-    <h2 class="slot-title">
-      {{ tUI('MINIGAME_SLOT_TITLE') }}
-    </h2>
-
-    <!-- COUNTDOWN -->
-    <CountdownBar :seconds="duel.timeOut" />
-
-    <div class="players">
-      <!-- Spieler 1 -->
-      <div class="player">
-        <div class="reel-display">
-
-          <div class="slot-wrapper">
-            <Slot :class="{
-              active:
-                duel.state?.rollP1 === null ||
-                duel.state?.rollP1 === undefined ||
-                duel.state?.rollP1 === ''
-            }" />
-
-            <div class="slot-face">
-              {{ duel.state?.rollP1 ?? "" }}
-            </div>
-          </div>
-          <h3 :style="{ color: getPlayerColorByMeeple(duel.firstMeeple) }">
-            {{ getPlayerNameByMeeple(duel.firstMeeple) }}
-          </h3>
-        </div>
-        <button v-if="!duel.state?.finished" :disabled="waiting === duel.duelId || !isOwnMeeple(duel.firstMeeple)"
-          class="slot-roll-button" v-on:click="stop(false)">{{ getPlayerNameByMeeple(duel.firstMeeple) }}
-          {{ tUI('MINIGAME_SLOT_BUTTON') }}</button>
-      </div>
-
-      <!-- Spieler 2 -->
-      <div class="player">
-        <div class="reel-display">
-          <div class="slot-wrapper">
-            <Slot :class="{
-              active:
-                duel.state?.rollP2 === null ||
-                duel.state?.rollP2 === undefined ||
-                duel.state?.rollP2 === ''
-            }" />
-
-            <div class="slot-face">
-              {{ duel.state?.rollP2 ?? "" }}
-            </div>
-          </div>
-          <h3 :style="{ color: getPlayerColorByMeeple(duel.secondMeeple) }">
-            {{ getPlayerNameByMeeple(duel.secondMeeple) }}
-          </h3>
-        </div>
-        <button v-if="!duel.state?.finished" :disabled="waiting === duel.duelId || !isOwnMeeple(duel.secondMeeple)"
-          class="slot-roll-button" v-on:click="stop(false)"> {{ getPlayerNameByMeeple(duel.secondMeeple) }}
-          {{ tUI('MINIGAME_SLOT_BUTTON') }}</button>
-      </div>
-
-      <!-- Computer -->
-      <div class="computer">
-        <div class="reel-display">
-          <div class="slot-wrapper">
-            <Slot :class="{
-              active:
-                duel.state?.rollP1 === null ||
-                duel.state?.rollP1 === undefined ||
-                duel.state?.rollP1 === '' ||
-                duel.state?.rollP2 === null ||
-                duel.state?.rollP2 === undefined ||
-                duel.state?.rollP2 === ''
-            }" />
-
-            <div class="slot-face">
-              {{ duel.state?.rollP2 ?? "" }}
-            </div>
-          </div>
-          <h3>{{ tUI('MINIGAME_SLOT_COMP') }}</h3>
-        </div>
-      </div>
-    </div>
-
-    <!-- GEWINNER -->
-    <div v-if="duel.state?.finished" class="winner-big">
-      <span v-if="isWinner()" class="winner-text">
-        {{ tUI('DUEL_WON') }}
-      </span>
-
-      <span v-else class="loser-text">
-        {{ tUI('DUEL_LOST') }}
-      </span>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, watch } from "vue"
 import { useMilefizStore } from "@/stores/milefizstore"
@@ -117,20 +22,13 @@ function isWinner() {
   return props.duel.state?.winner === store.gamedata.playerId
 }
 
-function stop(isComp: boolean) {
+function stop() {
   waiting.value = props.duel.duelId
-  if (!isComp) {
-    store.sendLobbyMessage(
-      `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/slot/stop`,
-      { playerId: store.gamedata.playerId }
-    )
-  } else {
-    store.sendLobbyMessage(
-      `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/slot/stop`,
-      { playerId: "COMP" }
-    )
-  }
-
+  console.log('Sending playerId:', store.gamedata.playerId)
+  store.sendLobbyMessage(
+    `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/einarmigerBandit/stop`,
+    { playerId: store.gamedata.playerId }
+  )
 }
 
 function getPlayerNameByMeeple(meepleId: string) {
@@ -161,7 +59,7 @@ function isOwnMeeple(meepleId: string): boolean {
 watch(
   () => props.duel.state?.finished,
   finished => {
-    if (finished) setTimeout(() => emit("close"), 1500)
+    if (finished) setTimeout(() => emit("close"), 2000)
   }
 )
 
@@ -178,24 +76,83 @@ function getPlayerColorByMeeple(meepleId: string) {
   return "#ffffff"
 }
 
-// Computer zieht automatisch, wenn beide Spieler fertig sind
-watch(
-  () => [props.duel.state?.rollP1, props.duel.state?.rollP2],
-  ([rollP1, rollP2]) => {
-    const bothPlayersFinished =
-      rollP1 !== null && rollP1 !== undefined && rollP1 !== '' &&
-      rollP2 !== null && rollP2 !== undefined && rollP2 !== ''
-
-    if (bothPlayersFinished && !props.duel.state?.finished) {
-      // Computer zieht automatisch
-      stop(true)
-    }
-  }
-)
-
 </script>
 
+
+<template>
+  <div class="slot-card no-select">
+    <h2 class="slot-title" :class="{ jackpot: duel.state?.jackpot }">
+      {{ duel.state?.jackpot ? tUI('MINIGAME_SLOT_JACKPOT') : tUI('MINIGAME_SLOT_TITLE') }}
+    </h2>
+
+    <img v-if="duel.state?.jackpot" src="@/assets/winPopUpAssets/confetti_down.gif" class="confetti-gif"
+      alt="Confetti" />
+
+    <!-- COUNTDOWN -->
+    <CountdownBar :seconds="duel.timeOut" />
+
+    <div class="players">
+      <!-- Spieler 1 -->
+      <div class="player">
+        <div class="reel-display">
+
+          <div class="slot-wrapper">
+            <Slot :result="duel.state?.resultP1" />
+          </div>
+          <h3 :style="{ color: getPlayerColorByMeeple(duel.firstMeeple) }">
+            {{ getPlayerNameByMeeple(duel.firstMeeple) }}
+          </h3>
+        </div>
+        <button v-if="!duel.state?.finished" :disabled="waiting === duel.duelId || !isOwnMeeple(duel.firstMeeple)"
+          class="slot-stop-button" v-on:click="stop()">{{ getPlayerNameByMeeple(duel.firstMeeple) }}
+          {{ tUI('MINIGAME_SLOT_BUTTON') }}</button>
+      </div>
+
+      <!-- Spieler 2 -->
+      <div class="player">
+        <div class="reel-display">
+          <div class="slot-wrapper">
+            <Slot :result="duel.state?.resultP2" />
+          </div>
+          <h3 :style="{ color: getPlayerColorByMeeple(duel.secondMeeple) }">
+            {{ getPlayerNameByMeeple(duel.secondMeeple) }}
+          </h3>
+        </div>
+        <button v-if="!duel.state?.finished" :disabled="waiting === duel.duelId || !isOwnMeeple(duel.secondMeeple)"
+          class="slot-stop-button" v-on:click="stop()"> {{ getPlayerNameByMeeple(duel.secondMeeple) }}
+          {{ tUI('MINIGAME_SLOT_BUTTON') }}</button>
+      </div>
+
+      <!-- Computer -->
+      <div class="computer">
+        <div class="reel-display">
+          <div class="slot-wrapper">
+            <Slot :result="duel.state?.resultComp" />
+          </div>
+          <h3>{{ tUI('MINIGAME_SLOT_COMP') }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- GEWINNER -->
+    <div v-if="duel.state?.finished" class="winner-big">
+      <span v-if="isWinner()" class="winner-text">
+        {{ tUI('DUEL_WON') }}
+      </span>
+
+      <span v-else class="loser-text">
+        {{ tUI('DUEL_LOST') }}
+      </span>
+    </div>
+  </div>
+</template>
+
+
 <style scoped>
+.slot-card {
+  position: relative;
+}
+
 .big-countdown {
   font-family: "Acme", sans-serif;
   text-align: center;
@@ -259,28 +216,6 @@ watch(
   padding-top: 30px;
 }
 
-/* Zahl oben auf Würfel drauf, fast wie als wäre es die Augenzahl drauf */
-.slot-face {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  font-family: "Acme", sans-serif;
-  font-size: 2.2rem;
-  font-weight: 900;
-  text-shadow:
-    0 0 3px rgba(0, 0, 0, .95),
-    1px 1px 3px rgba(0, 0, 0, .95),
-    -1px -1px 3px rgba(0, 0, 0, .95),
-    2px 0 4px rgba(0, 0, 0, .9),
-    -2px 0 4px rgba(0, 0, 0, .9),
-    0 2px 4px rgba(0, 0, 0, .9),
-    0 -2px 4px rgba(0, 0, 0, .9);
-  pointer-events: none;
-
-}
-
 .winner-big {
   margin-top: 18px;
   text-align: center;
@@ -305,7 +240,7 @@ button {
   margin: 0 0 8px 0;
 }
 
-.slot-roll-button {
+.slot-stop-button {
   font-family: "Acme", sans-serif;
   font-weight: 900;
   font-size: 1.6rem;
@@ -317,9 +252,50 @@ button {
   cursor: pointer;
 }
 
+.slot-stop-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .winner-text,
 .loser-text {
   font-family: "Acme", sans-serif;
+}
+
+.slot-title.jackpot {
+  background: linear-gradient(90deg,
+      #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbow 2s ease infinite;
+  font-size: 2.2rem;
+}
+
+@keyframes rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.confetti-gif {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  object-fit: cover;
+  z-index: 10;
 }
 
 .no-select {

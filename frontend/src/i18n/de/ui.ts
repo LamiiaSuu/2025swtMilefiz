@@ -56,4 +56,5 @@ export const UI_DE: Record<UIKey, string> = {
     MINIGAME_SLOT_TITLE: 'Einarmiger Bandit',
     MINIGAME_SLOT_BUTTON: 'ziehen',
     MINIGAME_SLOT_COMP: 'System',
+    MINIGAME_SLOT_JACKPOT: 'JACKPOT',
 }

@@ -23,6 +23,7 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
+import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCheatedEvent;
@@ -267,6 +268,8 @@ public class MovementServiceImpl implements MovementService {
 
                     if (miniGame instanceof DiceGame dice) {
                         dice.initPlayers(player.getId(), rivalPlayer.getId());
+                    } else if (miniGame instanceof EinarmigerBanditGame game) {
+                        game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
                     }
 
                     return new FrontendDuelEvent(
@@ -327,6 +330,8 @@ public class MovementServiceImpl implements MovementService {
 
                         if (miniGame instanceof DiceGame dice) {
                             dice.initPlayers(player.getId(), rivalPlayer.getId());
+                        } else if (miniGame instanceof EinarmigerBanditGame game) {
+                            game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
                         }
 
                         return new FrontendDuelEvent(
@@ -348,7 +353,9 @@ public class MovementServiceImpl implements MovementService {
         meeple.setCurrentField(nextField);
 
         // der erste Zug nach dem Würfeln und mehr als 1 move verfügbar
-        if (player.getRemainingMoves() > 1 && !player.hasMoved()) {
+        if (player.getRemainingMoves() > 1 && !player.hasMoved())
+
+        {
             player.setActiveMeeple(meeple);
         }
 
@@ -462,14 +469,14 @@ public class MovementServiceImpl implements MovementService {
      * {@link #existsLegalStopWithinRemainingMovesDfs(Field, Field, int, Set, Set, Map)}
      * implementiert.
      *
-     * @param startingField   das Feld, von dem aus die Suche gestartet wird
-     * @param lastField       das zuletzt betretene Feld,
-     *                        oder {@code null}, falls keines existiert
-     * @param remainingMoves  die Anzahl der noch verfügbaren Schritte
-     * @param ownMeepleFields alle Felder, die aktuell von eigenen Meeples besetzt
-     *                        sind
+     * @param startingField     das Feld, von dem aus die Suche gestartet wird
+     * @param lastField         das zuletzt betretene Feld,
+     *                          oder {@code null}, falls keines existiert
+     * @param remainingMoves    die Anzahl der noch verfügbaren Schritte
+     * @param ownMeepleFields   alle Felder, die aktuell von eigenen Meeples besetzt
+     *                          sind
      * 
-     * @param barrierFields   alle Felder, die aktuell von Barrieren besetzt sind
+     * @param barrierFields     alle Felder, die aktuell von Barrieren besetzt sind
      * 
      * @param rivalMeeples      alle gegnerischen Meeples, die im Spiel vorhanden
      *                          sind

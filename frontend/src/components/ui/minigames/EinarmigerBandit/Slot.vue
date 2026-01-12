@@ -1,6 +1,6 @@
 <template>
     <div class="slot-container">
-        <div class="slot-reel" :class="{ spinning: isSpinning }">
+        <div class="slot-reel">
             <img v-for="(icon, index) in icons" :key="index" :class="['symbol', { active: currentIndex === index }]"
                 :src="icon" />
         </div>
@@ -10,7 +10,6 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps<{
-    offset?: number  // Startverzögerung in ms, damit Slots versetzt sind
     speed?: number   // Geschwindigkeit des Wechsels in ms
     result?: string // Das finale Ergebnis (z.B. 'BLUE', 'GREEN', etc)
 }>()
@@ -30,16 +29,13 @@ const colorToIndex: Record<string, number> = {
 }
 
 const currentIndex = ref(0)
-const isSpinning = ref(true)
 let interval: number | null = null
 
 function startRotation() {
-    // Versetzter Start durch offset
-    setTimeout(() => {
-        interval = setInterval(() => {
-            currentIndex.value = (currentIndex.value + 1) % icons.length
-        }, props.speed ?? 250)
-    }, props.offset ?? 0)
+
+    interval = setInterval(() => {
+        currentIndex.value = (currentIndex.value + 1) % icons.length //wechselt durch die einzelnen icons durch
+    }, props.speed ?? 150)
 }
 
 function stopRotation(result: string) {
@@ -47,7 +43,6 @@ function stopRotation(result: string) {
         clearInterval(interval)
         interval = null
     }
-    isSpinning.value = false
 
     //Index wird bassierend auf dem Ergebnis gesetzt
     const index = colorToIndex[result]
@@ -58,19 +53,22 @@ function stopRotation(result: string) {
 
 //result Prop überwachen
 watch(() => props.result, (newResult) => {
-    if (newResult && newResult !== '') {
+    console.log('Slot result changed:', newResult)
+    if (newResult) {
+        console.log('Stopping rotation with result:', newResult)
         stopRotation(newResult)
     }
 })
 
 onMounted(() => {
-    // Zufälliger Startindex, damit nicht alle bei 0 beginnen
-    currentIndex.value = Math.floor(Math.random() * icons.length)
+    currentIndex.value = Math.floor(Math.random() * icons.length) //setzt initial einen zufälligen index Wert, damit nicht alle Slots an gleicher stelle starten
+
+    console.log('Start rotaion')
     startRotation()
 })
 
 onUnmounted(() => {
-    if (interval) clearInterval(interval)
+    if (interval) clearInterval(interval) //ohne würde setInterval in startRotation, auch nach dem minigame weiter laufen
 })
 </script>
 
@@ -85,21 +83,6 @@ onUnmounted(() => {
     position: relative;
     width: 100%;
     height: 100%;
-}
-
-.slot-reel.spinning {
-    animation: slotSpin 0.1s linear infinite;
-    filter: blur(3px);
-}
-
-@keyframes slotSpin {
-    0% {
-        transform: translateY(20px);
-    }
-
-    100% {
-        transform: translateY(-60px);
-    }
 }
 
 .symbol {
