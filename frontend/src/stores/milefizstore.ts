@@ -729,6 +729,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     }
   }
 
+  /**
+   * Baut einen vollständigen Occupancy-Snapshot für alle Felder des Boards.
+   * Markiert:
+   * - FREE: leere Felder
+   * - INVALID_START / INVALID_END: Start- und Zielfelder
+   * - OCCUPIED: Felder mit Sperren oder fremden Meeples
+   * - OWN_MEEPLE: Felder mit eigenen Meeples
+   * @returns {Record<string, Occupancy>} Mapping von Feld-ID zu Occupancy-Status
+   */
   function buildOccupancySnapshot(): Record<string, Occupancy> {
     const boardStore = useBoardStore()
     const board = boardStore.board
@@ -786,7 +795,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     return occ
   }
 
-
+  /**
+   * Öffnet das Minimap Pop-up, um Sperren umzuplatzieren.
+   * Initialisiert Farbe, Status, ausgewählte Barrier-ID und Occupancy-Snapshot.
+   * @param {string} barrierId ID der zu verschiebenden Sperre
+   * @param {string} playerId ID des Spielers, der die Aktion ausgelöst hat
+   */
   function openMinimap(barrierId: string, playerId: string) {
     if (playerId === gamedata.playerId) {
       minimap.ownColor = (getPlayerColor(playerId) ?? "RED") as any
@@ -813,7 +827,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
   }
 
-
+  /**
+   * Bestätigt die aktuell in der Minimap gewählte Zielposition für die Sperre.
+   * Führt den Barrier-Move aus und schließt anschließend die Minimap.
+   */
   function confirmMinimapSelection() {
     if (!minimap.selectedFieldId) return
 
@@ -822,11 +839,19 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
   }
 
-
+  /**
+   * Bestätigt die aktuell in der Minimap gewählte Zielposition für die Sperre.
+   * Führt den Barrier-Move aus und schließt anschließend die Minimap.
+   */
   function selectMinimapField(fieldId: string) {
     minimap.selectedFieldId = fieldId
   }
 
+  /**
+   * Ermittelt die Spielerfarbe aus der Lobby für eine gegebene Spieler-ID.
+   * @param {string} playerId ID des Spielers
+   * @returns {string | null} Farbcode des Spielers oder null, falls nicht gefunden / Lobby nicht verfügbar
+   */
   function getPlayerColor(playerId: string): string | null {
     const lobby = gamedata.lobby
     if (!lobby) return null
