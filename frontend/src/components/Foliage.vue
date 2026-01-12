@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGLTF } from '@tresjs/cientos'
+import { useGLTF, Html } from '@tresjs/cientos'
 import { ref, watchEffect, watch, computed } from 'vue'
 import { BufferGeometry, DynamicDrawUsage, InstancedMesh, Material, Mesh, Object3D, Quaternion, Vector3 } from 'three'
 
@@ -36,6 +36,16 @@ const models = {
   [Sizes.Small]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1, variance: 0 }
 
 }
+
+// Für Debugging
+const isDebug = true;
+
+const DebugColors = {
+  [Sizes.Large]: '##34495E',  
+  [Sizes.Medium]: '#FF00BD', 
+  [Sizes.Small]: '#4B3621' 
+}
+
 const parts = ref<Part[]>([])
 const imRefs = ref<InstancedMesh[]>([])
 
@@ -122,4 +132,12 @@ const getRef = (el: any, index: number) => {
 <template>
   <TresInstancedMesh v-for="(part, index) in parts" :ref="(el) => getRef(el, index)"
     :args="[part.geometry, part.material, (elementsWithScale?.filter(e => e.type === part.type))?.length ?? 0]" />
+
+  <!-- Debugging der Positionen -->
+  <Html v-if="isDebug" v-for="element in elements" :position="element.position" center>
+    <div class="label" :style="{ color: DebugColors[element.type] }">
+      {{ element.position[0] }},{{ element.position[1] }},{{ element.position[2] }}
+    </div>
+  </Html>
+
 </template>

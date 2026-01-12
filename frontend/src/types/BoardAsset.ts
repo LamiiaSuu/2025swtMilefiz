@@ -40,4 +40,4 @@ export const standardBoardAssets: BoardAsset[] = [
 /**
  * UUID des Standard-Boards zur Identifikation
  */
-export const STANDARD_BOARD_ID = 'b0ebd429-02b1-47f4-85e0-08162bebea04'
+export const STANDARD_BOARD_ID = 'a39fb3d6-59a2-4c93-9cd9-5cd6df718b5f'
