@@ -106,12 +106,6 @@ const onBackClick = () => {
     padding-top: 5vh;
 }
 
-.settings-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2vh;
-}
-
 .button-container {
     display: flex;
     flex-direction: column;
