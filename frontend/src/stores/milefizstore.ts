@@ -358,6 +358,17 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
+
+        if (event.type === "BALLOON_GAME_UPDATE") {
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          duel.state.phasePlayer1 = event.phasePlayer1
+          duel.state.phasePlayer2 = event.phasePlayer2
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
+
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0

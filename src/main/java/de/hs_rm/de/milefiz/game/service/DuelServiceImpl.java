@@ -15,9 +15,11 @@ import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
+import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
+import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 
@@ -52,8 +54,15 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.dicegame.timeout}")
     private int diceGameTimeout;
 
+    /**
+     * Timeout für BalloonGame aus application.properties.
+     */
+    @Value("${minigame.balloongame.timeout}")
+    private int balloonGameTimeout;
+
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout+1));
+        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         //gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
         //gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
         this.lobbyManager = lobbyManager;
@@ -157,32 +166,63 @@ public class DuelServiceImpl implements DuelService {
         return duel;
     }
 
+
+    /**
+     * Wird automatisch aufgerufen, wenn ein Mini-Game beendet ist.
+     * <p>
+     * Diese Methode:
+     * <ul>
+     *   <li>sendet das finale Update-Event an alle Clients</li>
+     *   <li>setzt Verlierer-Meeples zurück zur Startposition</li>
+     * </ul>
+     *
+     * <p>
+     * Unterstützte Mini-Games:
+     * <ul>
+     *   <li>{@link DiceGame} - Würfelspiel</li>
+     *   <li>{@link BalloonGame} - Ballon-Klickspiel</li>
+     * </ul>
+     *
+     * <p>
+     * Der Callback wird durch {@link MiniGame#setOnFinished(Runnable)} registriert
+     * und automatisch bei Spielende (Timeout oder Gewinner) ausgelöst.
+     *
+     * @param duel das beendete Duell
+     */
     private void handleMiniGameFinished(Duel duel) {
 
         MiniGame game = duel.getMiniGame();
-
-        if (!(game instanceof DiceGame dice)) {
-            return;
-        }
-
-        // Lobby holen
         Lobby lobby = lobbyManager.getLobbyFromPlayerUUID(duel.getPlayer1());
 
-        // Dice Update senden 
-        var update = new FrontendDiceGameUpdateEvent(
-                duel.getId(),
-                dice.getP1(),
-                dice.getP2(),
-                dice.getRollP1(),
-                dice.getRollP2(),
-                dice.getWinner(),
-                dice.isFinished()
-        );
+        if (game instanceof DiceGame dice) {
+            var update = new FrontendDiceGameUpdateEvent(
+                    duel.getId(),
+                    dice.getP1(),
+                    dice.getP2(),
+                    dice.getRollP1(),
+                    dice.getRollP2(),
+                    dice.getWinner(),
+                    dice.isFinished()
+            );
 
-        messaging.sendEvent(new LobbyMessage(lobby, update));
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            sendLoserHome(lobby, duel, dice);
+        }
 
-        // Verlierer heimschicken
-        sendLoserHome(lobby, duel, dice);
+        else if (game instanceof BalloonGame balloon) {
+            var update = new FrontendBalloonGameUpdateEvent(
+                    duel.getId(),
+                    balloon.getPlayer1(),
+                    balloon.getPlayer2(),
+                    balloon.getPhasePlayer1(),
+                    balloon.getPhasePlayer2(),
+                    balloon.getWinner(),
+                    balloon.isFinished()
+            );
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            sendLoserHome(lobby, duel, balloon);
+        }
     }
 
     /**

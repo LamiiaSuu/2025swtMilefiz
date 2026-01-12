@@ -1,41 +1,37 @@
 <template>
   <div class="overlay no-select">
     <div class="duel-container">
-
-      <div
-        v-for="duel in duels"
-        :key="duel.duelId"
-        class="duel-card"
-      >
+      <div v-for="duel in duels" :key="duel.duelId" class="duel-card">
         <component
           :is="resolveComponent(duel)"
           :duel="duel"
           @close="() => emit('close', duel.duelId)"
         />
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import DiceMiniGame from "../minigames/DiceMiniGame.vue"
+import BalloonMinigame from '../minigames/balloonMinigame/BalloonMinigame.vue';
+import DiceMiniGame from '../minigames/DiceMiniGame.vue'
 
 const props = defineProps<{
   duels: any[]
 }>()
 
 const emit = defineEmits<{
-  (e: "close", duelId: string): void
+  (e: 'close', duelId: string): void
 }>()
 
 function resolveComponent(duel: any) {
   switch (duel.miniGameType) {
-    case "DiceGame":
+    case 'DiceGame':
       return DiceMiniGame
-
+    case 'BalloonGame':
+      return BalloonMinigame
     default:
-      return DiceMiniGame   
+      return BalloonMinigame
   }
 }
 </script>
@@ -44,7 +40,7 @@ function resolveComponent(duel: any) {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +61,7 @@ function resolveComponent(duel: any) {
   border-radius: 14px;
   color: white;
   min-width: 340px;
-  box-shadow: 0 10px 32px rgba(0,0,0,.35);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
 }
 
 .no-select {
