@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue"
 
-type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE"
 
 const props = defineProps<{
   isOpen: boolean
   selectedFieldId: string | null
-  occupancyByFieldId: Record<string, Occupancy>
 }>()
+
+const disabled = computed(() => props.selectedFieldId === "")
 
 const emit = defineEmits<{
   (e: "confirm"): void
@@ -20,6 +20,7 @@ function onKeyDown(e: KeyboardEvent) {
     emit("confirm")
   }
 }
+
 
 onMounted(() => {
   window.addEventListener("keydown", onKeyDown)
@@ -46,99 +47,50 @@ onUnmounted(() => {
           </div>
 
           <!-- Legende unten links -->
-        <aside class="legend">
-          <div class="legend-row">
-            <svg
-              class="legend-icon legend-icon--barrier"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <image
-                href="/mapEditorIcons/barrier.png"
-                x="4"
-                y="4"
-                width="16"
-                height="16"
-              />
-              <!-- <circle
+          <aside class="legend">
+            <div class="legend-row">
+              <svg class="legend-icon legend-icon--barrier" viewBox="0 0 24 24" aria-hidden="true">
+                <image href="/mapEditorIcons/barrier.png" x="4" y="4" width="16" height="16" />
+                <!-- <circle
                 cx="12"
                 cy="12"
                 r="8"
                 class="legend-circle legend-circle--barrier"
               /> -->
-            </svg>
-            <span class="legend-label">Sperre</span>
-          </div>
+              </svg>
+              <span class="legend-label">Sperre</span>
+            </div>
 
-          <div class="legend-row">
-            <svg
-              class="legend-icon legend-icon--own"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="8"
-                class="legend-circle legend-circle--own"
-              />
-            </svg>
-            <span class="legend-label">Eigenes Meeple</span>
-          </div>
+            <div class="legend-row">
+              <svg class="legend-icon legend-icon--own" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--own" />
+              </svg>
+              <span class="legend-label">Eigenes Meeple</span>
+            </div>
 
-          <div class="legend-row">
-            <svg
-              class="legend-icon legend-icon--occupied"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-            <!-- leerer Kreis -->
-              <circle
-                cx="12"
-                cy="12"
-                r="8"
-                class="legend-circle legend-circle--occupied"
-              />
-            <!-- X wie im Board -->
-              <line
-                x1="5"
-                y1="5"
-                x2="19"
-                y2="19"
-                class="legend-x-line"
-              />
-              <line
-                x1="19"
-                y1="5"
-                x2="5"
-                y2="19"
-                class="legend-x-line"
-              />
-            </svg>
-            <span class="legend-label">Besetzt</span>
-          </div>
+            <div class="legend-row">
+              <svg class="legend-icon legend-icon--occupied" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- leerer Kreis -->
+                <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--occupied" />
+                <!-- X wie im Board -->
+                <line x1="5" y1="5" x2="19" y2="19" class="legend-x-line" />
+                <line x1="19" y1="5" x2="5" y2="19" class="legend-x-line" />
+              </svg>
+              <span class="legend-label">Besetzt</span>
+            </div>
 
-          <div class="legend-row">
-            <svg
-              class="legend-icon legend-icon--free"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="8"
-                class="legend-circle legend-circle--free"
-              />
-            </svg>
-            <span class="legend-label">Frei</span>
-          </div>
-        </aside>
+            <div class="legend-row">
+              <svg class="legend-icon legend-icon--free" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--free" />
+              </svg>
+              <span class="legend-label">Frei</span>
+            </div>
+          </aside>
         </div>
 
         <!-- Bestätigen Button -->
         <div class="actions">
-          <button type="button" class="btn primary" @click="emit('confirm')">
+          <button type="button" class="btn primary" :disabled="disabled" @click="emit('confirm')">
             Bestätigen
           </button>
         </div>
@@ -285,7 +237,7 @@ onUnmounted(() => {
 
 .btn.primary:disabled {
   opacity: 0.5;
-  cursor: not-allowed;
+  pointer-events: none;
 }
 
 
