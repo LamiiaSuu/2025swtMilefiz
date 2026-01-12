@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
-import BackButton from '../pages/BackButton.vue'
 
 const router = useRouter()
 const audio = useAudioStore()
