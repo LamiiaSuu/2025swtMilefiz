@@ -53,5 +53,7 @@ export const UI_NL: Record<UIKey, string> = {
     DUEL_WON: '🎉 Je hebt gewonnen! 🎉',
     DUEL_LOST: '😵 Je hebt verloren… 😵',
     MINIGAME_DICE_TITLE: 'Dobbelspel',
-
+    MINIGAME_BALLOON_TITLE: 'Laat de ballon knallen!',
+    MINIGAME_BALLOON_INSTRUCTION: 'Maak je klaar! Druk zo snel mogelijk op de knop!',
+    MINIGAME_BALLOON_CLICK: 'Klikken!', 
 }
