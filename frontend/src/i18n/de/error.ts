@@ -23,4 +23,5 @@ export const ERRORS_DE: Record<ErrorCode, string> = {
     BOARD_SUCCESSFULLY_IMPORTED: 'Map erfolgreich importiert!',
     BOARD_COULD_NOT_BE_IMPORTED: 'Map konnte nicht importiert werden: ',
     MOVE_ERROR_NO_VALID_FIELDS: 'Keine gültigen Züge in diese Richtung möglich',
+    MINIGAME_SLOT_JACKPOT_SUCCESS_MESSAGE: 'JACKPOT!!! Deine Energie hat sich aufgefüllt!',
 }

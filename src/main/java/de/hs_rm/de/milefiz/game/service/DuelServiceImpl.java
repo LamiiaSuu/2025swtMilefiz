@@ -17,17 +17,20 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
+import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 
 @Service
 public class DuelServiceImpl implements DuelService {
 
     /**
-     * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen entstehen).
+     * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen
+     * entstehen).
      */
     private final List<Supplier<MiniGame>> gameFactories = new ArrayList<>();
 
@@ -60,11 +63,15 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.balloongame.timeout}")
     private int balloonGameTimeout;
 
+    @Value("${minigame.einarmigerBanditGame.timeout}")
+    private int einarmigerBanditGameTimeout;
+
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
-        gameFactories.add(() -> new DiceGame(diceGameTimeout+1));
+        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        //gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
-        //gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
+        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+        // gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
+        // gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
     }
@@ -87,12 +94,9 @@ public class DuelServiceImpl implements DuelService {
         return duels.values().stream()
                 // nur Duelle berücksichtigen, die noch ein aktives Mini-Game haben
                 .filter(duel -> duel.getMiniGame() != null && !duel.getMiniGame().isFinished())
-                .anyMatch(duel ->
-                        duel.getFirstMeeple().equals(meepleId)
-                    || duel.getSecondMeeple().equals(meepleId)
-                );
+                .anyMatch(duel -> duel.getFirstMeeple().equals(meepleId)
+                        || duel.getSecondMeeple().equals(meepleId));
     }
-
 
     /**
      * {@inheritDoc}
@@ -159,28 +163,26 @@ public class DuelServiceImpl implements DuelService {
 
         if (duel == null) {
             throw new IllegalArgumentException(
-                    "Duel with id " + duelId + " not found"
-            );
+                    "Duel with id " + duelId + " not found");
         }
 
         return duel;
     }
-
 
     /**
      * Wird automatisch aufgerufen, wenn ein Mini-Game beendet ist.
      * <p>
      * Diese Methode:
      * <ul>
-     *   <li>sendet das finale Update-Event an alle Clients</li>
-     *   <li>setzt Verlierer-Meeples zurück zur Startposition</li>
+     * <li>sendet das finale Update-Event an alle Clients</li>
+     * <li>setzt Verlierer-Meeples zurück zur Startposition</li>
      * </ul>
      *
      * <p>
      * Unterstützte Mini-Games:
      * <ul>
-     *   <li>{@link DiceGame} - Würfelspiel</li>
-     *   <li>{@link BalloonGame} - Ballon-Klickspiel</li>
+     * <li>{@link DiceGame} - Würfelspiel</li>
+     * <li>{@link BalloonGame} - Ballon-Klickspiel</li>
      * </ul>
      *
      * <p>
@@ -202,8 +204,7 @@ public class DuelServiceImpl implements DuelService {
                     dice.getRollP1(),
                     dice.getRollP2(),
                     dice.getWinner(),
-                    dice.isFinished()
-            );
+                    dice.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             sendLoserHome(lobby, duel, dice);
@@ -217,11 +218,31 @@ public class DuelServiceImpl implements DuelService {
                     balloon.getPhasePlayer1(),
                     balloon.getPhasePlayer2(),
                     balloon.getWinner(),
-                    balloon.isFinished()
-            );
+                    balloon.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             sendLoserHome(lobby, duel, balloon);
+        }
+
+        else if (game instanceof EinarmigerBanditGame einarmigerBandit) {
+            Integer energy = null;
+            if (game.getWinner() != null) {
+                energy = lobby.getPlayer(game.getWinner()).getEnergy();
+            }
+            var update = new FrontendEinarmigerBanditGameUpdateEvent(
+                    duel.getId(),
+                    einarmigerBandit.getP1(),
+                    einarmigerBandit.getP2(),
+                    einarmigerBandit.getResultP1(),
+                    einarmigerBandit.getResultP2(),
+                    einarmigerBandit.getResultComp(),
+                    einarmigerBandit.getWinner(),
+                    einarmigerBandit.isJackpot(),
+                    energy != null ? energy : 0,
+                    einarmigerBandit.isFinished());
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            sendLoserHome(lobby, duel, einarmigerBandit);
         }
     }
 
@@ -232,9 +253,9 @@ public class DuelServiceImpl implements DuelService {
      * <p>
      * Regeln:
      * <ul>
-     *   <li>Gewinner bleibt stehen</li>
-     *   <li>Verlierer gehen zurück in die Basis</li>
-     *   <li>Bei Unentschieden verlieren beide</li>
+     * <li>Gewinner bleibt stehen</li>
+     * <li>Verlierer gehen zurück in die Basis</li>
+     * <li>Bei Unentschieden verlieren beide</li>
      * </ul>
      *
      * <p>
@@ -256,18 +277,16 @@ public class DuelServiceImpl implements DuelService {
         var m2 = lobby.getMeepleById(duel.getSecondMeeple());
 
         var start1 = lobby.getBoard().getStartField(
-                lobby.getPlayer(p1).getColor()
-        );
+                lobby.getPlayer(p1).getColor());
 
         var start2 = lobby.getBoard().getStartField(
-                lobby.getPlayer(p2).getColor()
-        );
+                lobby.getPlayer(p2).getColor());
 
         if (winner == null || !winner.equals(p1)) {
             lobby.getPlayer(p1).setMoved(false);
-            //if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
-            //        lobby.getPlayer(p1).setRemainingMoves(0);
-            //}
+            // if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
+            // lobby.getPlayer(p1).setRemainingMoves(0);
+            // }
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
@@ -275,9 +294,7 @@ public class DuelServiceImpl implements DuelService {
                             m1.getId(),
                             start1.getId(),
                             lobby.getPlayer(p1).getRemainingMoves(),
-                            lobby.getPlayer(p1).hasMoved()
-                    )
-            ));
+                            lobby.getPlayer(p1).hasMoved())));
 
             m1.setCurrentField(start1);
             m1.clearLastField();
@@ -285,9 +302,9 @@ public class DuelServiceImpl implements DuelService {
 
         if (winner == null || !winner.equals(p2)) {
             lobby.getPlayer(p2).setMoved(false);
-            //if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
-            //    lobby.getPlayer(p2).setRemainingMoves(0);
-            //}
+            // if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
+            // lobby.getPlayer(p2).setRemainingMoves(0);
+            // }
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
@@ -295,14 +312,11 @@ public class DuelServiceImpl implements DuelService {
                             m2.getId(),
                             start2.getId(),
                             lobby.getPlayer(p2).getRemainingMoves(),
-                            lobby.getPlayer(p2).hasMoved()
-                    )
-            ));
+                            lobby.getPlayer(p2).hasMoved())));
 
             m2.setCurrentField(start2);
             m2.clearLastField();
         }
     }
-
 
 }
