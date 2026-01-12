@@ -46,27 +46,94 @@ onUnmounted(() => {
           </div>
 
           <!-- Legende unten links -->
-          <aside class="legend">
-            <div class="legend-row">
-              <span class="legend-swatch swatch-barrier" aria-hidden="true"></span>
-              <span class="legend-label">Sperre</span>
-            </div>
+        <aside class="legend">
+          <div class="legend-row">
+            <svg
+              class="legend-icon legend-icon--barrier"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <image
+                href="/mapEditorIcons/barrier.png"
+                x="4"
+                y="4"
+                width="16"
+                height="16"
+              />
+              <!-- <circle
+                cx="12"
+                cy="12"
+                r="8"
+                class="legend-circle legend-circle--barrier"
+              /> -->
+            </svg>
+            <span class="legend-label">Sperre</span>
+          </div>
 
-            <div class="legend-row">
-              <span class="legend-swatch swatch-own" aria-hidden="true"></span>
-              <span class="legend-label">Eigenes Meeple</span>
-            </div>
+          <div class="legend-row">
+            <svg
+              class="legend-icon legend-icon--own"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="8"
+                class="legend-circle legend-circle--own"
+              />
+            </svg>
+            <span class="legend-label">Eigenes Meeple</span>
+          </div>
 
-            <div class="legend-row">
-              <span class="legend-swatch swatch-occupied" aria-hidden="true">X</span>
-              <span class="legend-label">Besetzt</span>
-            </div>
+          <div class="legend-row">
+            <svg
+              class="legend-icon legend-icon--occupied"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+            <!-- leerer Kreis -->
+              <circle
+                cx="12"
+                cy="12"
+                r="8"
+                class="legend-circle legend-circle--occupied"
+              />
+            <!-- X wie im Board -->
+              <line
+                x1="5"
+                y1="5"
+                x2="19"
+                y2="19"
+                class="legend-x-line"
+              />
+              <line
+                x1="19"
+                y1="5"
+                x2="5"
+                y2="19"
+                class="legend-x-line"
+              />
+            </svg>
+            <span class="legend-label">Besetzt</span>
+          </div>
 
-            <div class="legend-row">
-              <span class="legend-swatch swatch-free" aria-hidden="true"></span>
-              <span class="legend-label">Frei</span>
-            </div>
-          </aside>
+          <div class="legend-row">
+            <svg
+              class="legend-icon legend-icon--free"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="8"
+                class="legend-circle legend-circle--free"
+              />
+            </svg>
+            <span class="legend-label">Frei</span>
+          </div>
+        </aside>
         </div>
 
         <!-- Bestätigen Button -->
@@ -163,34 +230,30 @@ onUnmounted(() => {
   align-items: center;
 }
 
-.legend-swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  border: 1px solid #111;
-  display: grid;
-  place-items: center;
-  font-size: 11px;
-  line-height: 1;
-  font-weight: 700;
+.legend-icon {
+  padding: 0px;
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
-.swatch-barrier {
-  background: #000;
-  border-color: #000;
+.legend-circle {
+  fill: #ffffff00;
+  stroke: #111;
+  stroke-width: 1.5;
 }
 
-.swatch-own {
-  background: #e11;
-  border-color: #e11;
+.legend-circle--own {
+  fill: var(--own-color, #e11);
+  stroke: #000;
 }
 
-.swatch-occupied {
-  background: #fff;
-}
 
-.swatch-free {
-  background: #fff;
+
+.legend-x-line {
+  stroke: rgba(0, 0, 0);
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 
 .legend-label {
