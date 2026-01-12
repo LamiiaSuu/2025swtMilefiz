@@ -12,6 +12,7 @@ import { startingbaseColors, playerColors } from '@/types/colorsAssets';
 import { useAudioStore } from '@/stores/audioStore'
 import { string } from 'three/tsl';
 import { getAutomaticTypeDirectiveNames } from 'typescript';
+import { tUI } from '@/i18n';
 
 // const wsurl = `ws://${window.location.host}/milefiz`
 const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`
@@ -358,6 +359,33 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
+        if (event.type === "EINARMIGER_BANDIT_GAME_UPDATE") {
+          console.log("EINARMIGER_BANDIT_GAME_UPDATE received:", event)
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) {
+            console.log("Duel not found for ID:", event.duelId)
+            return
+          }
+
+          console.log("Updating duel state:", {
+            resultP1: event.resultP1,
+            resultP2: event.resultP2,
+            resultComp: event.resultComp
+          })
+
+          duel.state.resultP1 = event.resultP1
+          duel.state.resultP2 = event.resultP2
+          duel.state.resultComp = event.resultComp
+          duel.state.winner = event.winner
+          duel.state.jackpot = event.jackpot
+          duel.state.finished = event.finished
+
+          if (gamedata.playerId === event.winner && event.jackpot) {
+            gamedata.energy = event.jackpotEnergy
+            showSuccess("MINIGAME_SLOT_JACKPOT_SUCCESS_MESSAGE")
+          }
+        }
 
         if (event.type === "BALLOON_GAME_UPDATE") {
           const duel = activeDuels[event.duelId]
@@ -417,35 +445,35 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
- * Synchronisiert energiebezogene Zustände des eigenen Spielers aus dem aktuellen Lobby-State.
- *
- * <p>
- * Diese Funktion extrahiert den eigenen Spieler aus der übergebenen {@link Lobby}
- * anhand der {@code playerId} und übernimmt dessen energierelevante Werte in den
- * lokalen Pinia-Store.
- * </p>
- *
- * <p>
- * Konkret werden:
- * <ul>
- *   <li>die maximale Energie ({@code maxEnergy}) einmalig aus dem Backend übernommen</li>
- *   <li>der Status {@code isEnergyFull} basierend auf aktueller und maximaler Energie berechnet</li>
- * </ul>
- * </p>
- *
- * <p>
- * Die Funktion wird sowohl beim initialen Lobby-Join als auch bei jedem
- * {@code LOBBY_UPDATE}-Event aufgerufen, um sicherzustellen, dass der Frontend-State
- * stets konsistent mit dem Backend bleibt.
- * </p>
- *
- * <p>
- * Falls der eigene Spieler noch nicht in der Lobby vorhanden ist (z. B. während
- * früher Initialisierungsphasen), wird die Funktion ohne Seiteneffekte beendet.
- * </p>
- *
- * @param lobby Aktueller Lobby-Zustand vom Backend
- */
+  * Synchronisiert energiebezogene Zustände des eigenen Spielers aus dem aktuellen Lobby-State.
+  *
+  * <p>
+  * Diese Funktion extrahiert den eigenen Spieler aus der übergebenen {@link Lobby}
+  * anhand der {@code playerId} und übernimmt dessen energierelevante Werte in den
+  * lokalen Pinia-Store.
+  * </p>
+  *
+  * <p>
+  * Konkret werden:
+  * <ul>
+  *   <li>die maximale Energie ({@code maxEnergy}) einmalig aus dem Backend übernommen</li>
+  *   <li>der Status {@code isEnergyFull} basierend auf aktueller und maximaler Energie berechnet</li>
+  * </ul>
+  * </p>
+  *
+  * <p>
+  * Die Funktion wird sowohl beim initialen Lobby-Join als auch bei jedem
+  * {@code LOBBY_UPDATE}-Event aufgerufen, um sicherzustellen, dass der Frontend-State
+  * stets konsistent mit dem Backend bleibt.
+  * </p>
+  *
+  * <p>
+  * Falls der eigene Spieler noch nicht in der Lobby vorhanden ist (z. B. während
+  * früher Initialisierungsphasen), wird die Funktion ohne Seiteneffekte beendet.
+  * </p>
+  *
+  * @param lobby Aktueller Lobby-Zustand vom Backend
+  */
   function syncOwnPlayerEnergy(lobby: Lobby) {
     const ownPlayer = lobby.players.find(
       p => p.id === gamedata.playerId
@@ -579,24 +607,24 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   /**
- * Sendet eine Rotationsänderung eines Meeples an den Spielserver.
- *
- * Diese Funktion wird aufgerufen, wenn sich die Blickrichtung des
- * aktiven Meeples ändert.
- *
- * Die Rotation wird als RotationCommand an den Server gesendet
- * und anschließend an alle Clients der Lobby weiterverteilt,
- * um die Blickrichtung des Meeples visuell zu synchronisieren.
- *
- * Ablauf:
- * 1. Prüft, ob der STOMP-Client verbunden ist
- * 2. Erstellt ein RotationCommand mit Meeple-ID und Y-Rotation
- * 3. Serialisiert das Kommando als JSON
- * 4. Sendet die Nachricht an den WebSocket-Endpunkt /rotate
- *
- * @param meepleId  die eindeutige ID des Meeples, dessen Rotation geändert wurde
- * @param rotation die neue Y-Rotation des Meeples
- */
+  * Sendet eine Rotationsänderung eines Meeples an den Spielserver.
+  *
+  * Diese Funktion wird aufgerufen, wenn sich die Blickrichtung des
+  * aktiven Meeples ändert.
+  *
+  * Die Rotation wird als RotationCommand an den Server gesendet
+  * und anschließend an alle Clients der Lobby weiterverteilt,
+  * um die Blickrichtung des Meeples visuell zu synchronisieren.
+  *
+  * Ablauf:
+  * 1. Prüft, ob der STOMP-Client verbunden ist
+  * 2. Erstellt ein RotationCommand mit Meeple-ID und Y-Rotation
+  * 3. Serialisiert das Kommando als JSON
+  * 4. Sendet die Nachricht an den WebSocket-Endpunkt /rotate
+  *
+  * @param meepleId  die eindeutige ID des Meeples, dessen Rotation geändert wurde
+  * @param rotation die neue Y-Rotation des Meeples
+  */
   function sendMeepleRotation(meepleId: string, rotation: number) {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot send move: STOMP client not connected.')
