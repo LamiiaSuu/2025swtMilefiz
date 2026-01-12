@@ -56,7 +56,7 @@ public class PlantingServiceImpl implements PlantingService {
         // Parameter die noch angepasst werden können
 
         // Rand um die Felder herum, wo noch Bäume gepflanzt werden sollen
-        final int TREE_BORDER = 80;
+        final int TREE_BORDER = 65;
 
         // wieviele Bäume können innerhalb einer koordinaten einheit stehen. bestimmt,
         // wie nah Bäume beieinander stehen
