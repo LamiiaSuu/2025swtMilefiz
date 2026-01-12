@@ -29,12 +29,15 @@ const onBackClick = () => {
         <!-- Close Button -->
         <PopUpCloseButton></PopUpCloseButton>
 
+        <div class="header">
+            <button class="menu-button" disabled>{{ tUI('SETTINGS') }}</button>
+        </div>
+
         <div class="popup">
 
             <div class="language">
 
                 <h1>{{ tUI('LANGUAGE') }}</h1>
-
 
                 <div class="language-wrapper">
                     <!-- LANGUAGE SETTINGS -->
@@ -76,6 +79,10 @@ const onBackClick = () => {
     -webkit-backdrop-filter: blur(4px);
 }
 
+.header {
+    margin-bottom: -4vh;
+}
+
 .popup {
     display: flex;
     flex-direction: column;
@@ -114,7 +121,7 @@ const onBackClick = () => {
     align-items: center;
     position: relative;
     z-index: 10;
-    
+
     margin-top: -1vh;
 }
 

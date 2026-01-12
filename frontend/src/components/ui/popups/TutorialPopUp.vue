@@ -26,6 +26,10 @@ const onBackClick = () => {
         <!-- Close Button -->
         <PopUpCloseButton></PopUpCloseButton>
 
+        <div class="header">
+            <button class="menu-button" disabled>{{ tUI('TUTORIAL') }}</button>
+        </div>
+
         <div class="popup">
             <!-- Tutorial-->
             <Tutorial></Tutorial>
@@ -56,11 +60,16 @@ const onBackClick = () => {
     -webkit-backdrop-filter: blur(4px);
 }
 
-.popup {
-    margin-top: 10vh;
+
+.header {
+    margin-top: 15vh;
+    margin-bottom: -13vh;
 }
 
-
+.popup {
+    
+    margin-top: 7vh;
+}
 
 .button-container {
     display: flex;
