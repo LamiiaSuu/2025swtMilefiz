@@ -80,7 +80,13 @@ const onBackClick = () => {
 }
 
 .header {
-    margin-bottom: -4vh;
+    margin-bottom: -6vh;
+    z-index: 99999;
+}
+
+.menu-button:disabled {
+    cursor: default;
+    pointer-events: none;
 }
 
 .popup {

@@ -63,8 +63,15 @@ const onBackClick = () => {
 
 .header {
     margin-top: 15vh;
-    margin-bottom: -13vh;
+    margin-bottom: -15vh;
+    z-index: 99999;
 }
+
+.menu-button:disabled {
+    cursor: default;
+    pointer-events: none;
+}
+
 
 .popup {
     
