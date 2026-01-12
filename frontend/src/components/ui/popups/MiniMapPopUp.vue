@@ -46,17 +46,11 @@ onUnmounted(() => {
             <slot name="map" />
           </div>
 
-          <!-- Legende unten links -->
+          <!-- Legende -->
           <aside class="legend">
             <div class="legend-row">
               <svg class="legend-icon legend-icon--barrier" viewBox="0 0 24 24" aria-hidden="true">
                 <image href="/mapEditorIcons/barrier.png" x="4" y="4" width="16" height="16" />
-                <!-- <circle
-                cx="12"
-                cy="12"
-                r="8"
-                class="legend-circle legend-circle--barrier"
-              /> -->
               </svg>
               <span class="legend-label">Sperre</span>
             </div>
@@ -72,7 +66,7 @@ onUnmounted(() => {
               <svg class="legend-icon legend-icon--occupied" viewBox="0 0 24 24" aria-hidden="true">
                 <!-- leerer Kreis -->
                 <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--occupied" />
-                <!-- X wie im Board -->
+                <!-- X -->
                 <line x1="5" y1="5" x2="19" y2="19" class="legend-x-line" />
                 <line x1="19" y1="5" x2="5" y2="19" class="legend-x-line" />
               </svg>

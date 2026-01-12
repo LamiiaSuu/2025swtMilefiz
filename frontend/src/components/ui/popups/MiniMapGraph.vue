@@ -2,10 +2,24 @@
 import { computed, ref, onMounted, nextTick } from "vue"
 import type { IBoardDTD } from "@/stores/IBoardDTD";
 
-
-
-
 type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE" | "INVALID_END" | "INVALID_START"
+
+// Zoom-State
+const zoom = ref(1)
+const MIN_ZOOM = 1.0
+const maxZoom = ref(3)
+const ZOOM_STEP = 0.1
+
+const INTIAL_ZOOM = 10.0
+
+const panX = ref(0)
+const panY = ref(0)
+
+// Drag-State
+const isDragging = ref(false)
+let lastMouseX = 0
+let lastMouseY = 0
+let dragMoved = false
 
 const props = defineProps<{
   board: IBoardDTD
@@ -33,7 +47,7 @@ function centerOnField(field: IBoardDTD["fields"][number], targetZoom: number) {
   zoom.value = z
 }
 
-const INTIAL_ZOOM = 15.0
+
 onMounted(async () => {
   await nextTick()
 
@@ -45,14 +59,7 @@ onMounted(async () => {
 
 const svgRef = ref<SVGSVGElement | null>(null)
 
-// Zoom-State
-const zoom = ref(1)
-const MIN_ZOOM = 1.0
-const maxZoom = ref(3)
-const ZOOM_STEP = 1.5
 
-const panX = ref(0)
-const panY = ref(0)
 
 function recomputeMaxZoom() {
   const svg = svgRef.value
@@ -62,15 +69,12 @@ function recomputeMaxZoom() {
 
   const viewH = svgSize.value.h
 
-  // Skala bei zoom = 1 (Pixel pro SVG-Einheit, hier Höhe als Basis)
   const scaleAt1 = rect.height / viewH
 
-  // Wie groß darf ein Node-Radius maximal in Pixeln werden?
   const desiredMaxNodeRadiusPx = 20
 
   const maxZoomLocal = desiredMaxNodeRadiusPx / (R * scaleAt1)
 
-  // nie kleiner als MIN_ZOOM
   maxZoom.value = Math.max(MIN_ZOOM, maxZoomLocal)
 }
 
@@ -111,32 +115,25 @@ function onWheel(e: WheelEvent) {
     const mousePxX = e.clientX - rect.left
     const mousePxY = e.clientY - rect.top
 
-    // Umrechnungsfaktoren von CSS-Pixeln -> viewBox-Koordinaten
     const scaleX = viewW / rect.width
     const scaleY = viewH / rect.height
 
     const mouseSvgX = mousePxX * scaleX
     const mouseSvgY = mousePxY * scaleY
 
-    // Weltkoordinaten des Punkts unter der Maus vor dem Zoom
     const worldX = (mouseSvgX - panX.value) / zoom.value
     const worldY = (mouseSvgY - panY.value) / zoom.value
 
-    // pan so anpassen, dass worldX/worldY nach dem neuen Zoom wieder unter der Maus liegen
     panX.value = mouseSvgX - worldX * newZoom
     panY.value = mouseSvgY - worldY * newZoom
 
   } else {// ZOOM OUT -> um tatsächliche Mitte des SVG-Graphen
-    // Logisches Zentrum des Graphen in SVG-Koordinaten
     const centerSvgX = viewW / 2
     const centerSvgY = viewH / 2
 
-    // Weltkoordinaten dieses Zentrums vor dem Zoom
     const worldCenterX = (centerSvgX - panX.value) / zoom.value
     const worldCenterY = (centerSvgY - panY.value) / zoom.value
 
-    // pan so anpassen, dass dieses Zentrum in SVG-Koordinaten
-    // am selben Ort relativ zum Graphen skaliert wird
     panX.value = centerSvgX - worldCenterX * newZoom
     panY.value = centerSvgY - worldCenterY * newZoom
   }
@@ -153,6 +150,52 @@ function onWheel(e: WheelEvent) {
 const transform = computed(() => {
   return `translate(${panX.value} ${panY.value}) scale(${zoom.value})`
 })
+
+function onMouseDown(e: MouseEvent) {
+  if (e.button !== 0) return //linke Maustaste
+
+  e.preventDefault()
+
+  isDragging.value = true
+  dragMoved = false
+  lastMouseX = e.clientX
+  lastMouseY = e.clientY
+}
+
+function onMouseMove(e: MouseEvent) {
+  if (!isDragging.value) return
+
+  const svg = svgRef.value
+  if (!svg) return
+
+  const rect = svg.getBoundingClientRect()
+  const viewW = svgSize.value.w
+  const viewH = svgSize.value.h
+
+  const dxPx = e.clientX - lastMouseX
+  const dyPx = e.clientY - lastMouseY
+
+  lastMouseX = e.clientX
+  lastMouseY = e.clientY
+
+  const distanceSq = dxPx * dxPx + dyPx * dyPx
+  if (distanceSq < 3 * 3) {
+    return
+  }
+
+  dragMoved = true
+
+  const scale = Math.min(rect.width / viewW, rect.height / viewH)
+  // Faktor, damit sich der Inhalt 1:1 zur Maus in Pixeln bewegt
+  const factor = 3 / (scale * zoom.value)
+
+  panX.value += dxPx * factor
+  panY.value += dyPx * factor
+}
+
+function onMouseUp() {
+  isDragging.value = false
+}
 
 
 const emit = defineEmits<{
@@ -227,13 +270,17 @@ function occ(fieldId: string): Occupancy {
 }
 
 /**
- * UI-Regel: nur FREE darf ausgewählt werden
+ * nur FREE darf ausgewählt werden
  */
 function isFree(fieldId: string) {
   return occ(fieldId) === "FREE"
 }
 
 function onClickField(fieldId: string) {
+  if (dragMoved) {
+    dragMoved = false
+    return
+  }
   if (!isFree(fieldId)) return
   emit("select", fieldId)
   console.log("Selected Field: " + fieldId)
@@ -265,8 +312,9 @@ function isInvalidEnd(fieldId: string) {
 
 <template>
   <svg ref="svgRef" class="minimap-svg" :viewBox="`0 0 ${svgSize.w} ${svgSize.h}`" width="100%" height="100%"
-    preserveAspectRatio="xMidYMid meet" @wheel.prevent="onWheel">
-    <!-- Drop Shadow Filter -->
+    preserveAspectRatio="xMidYMid meet" @wheel.prevent="onWheel" @mousedown="onMouseDown" @mousemove="onMouseMove"
+    @mouseup="onMouseUp" @mouseleave="onMouseUp">
+
     <defs>
       <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
         <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.25" />
@@ -315,11 +363,6 @@ function isInvalidEnd(fieldId: string) {
           <!-- INVALID_START -->
           <image v-else-if="isInvalidStart(f.id)" href="/mapEditorIcons/base.png" :x="cx(f.position.x) - (R)"
             :y="cy(f.position.y) - (R)" :width="R * 2" :heigth="R * 2" />
-
-          <!-- INVALID_END -->
-
-
-
         </g>
       </g>
 
