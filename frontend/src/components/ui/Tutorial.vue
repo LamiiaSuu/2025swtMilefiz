@@ -404,26 +404,33 @@ function prev() {
   opacity: 0;
 }
 
+img {
+  border-radius: 12px;
+}
+
 .img-row {
   display: flex;
   flex-direction: row;
   padding-bottom: 5vh;
-  gap: 2vw;
+  gap: 1vw;
 }
 
 .img-row .energy-bar-img,
 .img-row .energy-button-img {
-  height: 100%;
   width: auto;
-  object-fit: contain;
 }
 
 .energy-bar-img {
+  height: 80%;
   max-width: 65%;
+  border-radius: 15px;
 }
 
 .energy-button-img {
+  height: 100%;
   max-width: 30%;
+  
+  border-radius: 6px;
 }
 
 .img-row .dice-img {
