@@ -95,7 +95,7 @@ onUnmounted(() => {
 .dialog {
   position: relative;
   width: min(980px, 100%);
-  background: #f7f7f7;
+  background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.35);
   border-radius: 10px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
@@ -134,7 +134,7 @@ onUnmounted(() => {
   height: 340px;
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 8px;
-  background: #fff;
+  background: rgba(255, 243, 226, 0.5);
   display: grid;
   place-items: center;
   z-index: 1;
