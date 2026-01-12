@@ -1,4 +1,3 @@
-
 {
   "id": "a39fb3d6-59a2-4c93-9cd9-5cd6df718b5f",
   "name": "Standard-Board",
@@ -7241,13 +7240,6 @@
     },
     {
       "treePosition": {
-        "x": 13,
-        "y": 12
-      },
-      "treeType": "MEDIUM"
-    },
-    {
-      "treePosition": {
         "x": 13.5,
         "y": 12
       },
@@ -7441,13 +7433,6 @@
         "y": 12.5
       },
       "treeType": "SMALL"
-    },
-    {
-      "treePosition": {
-        "x": 13,
-        "y": 12.5
-      },
-      "treeType": "LARGE"
     },
     {
       "treePosition": {
