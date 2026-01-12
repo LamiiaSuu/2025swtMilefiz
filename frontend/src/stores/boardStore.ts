@@ -4,8 +4,11 @@ import { ref } from 'vue'
 import { useMilefizStore } from './milefizstore'
 import type { Player } from '../types/lobbyupdate'
 import type { Lobby } from '../types/lobbyupdate'
+import type { IFieldDTD } from './IFieldDTD'
+import type { ITreeDTD } from './ITreeDTD'
 
-const gameBoardTiles = ref<IBoardDTD>()
+const gameBoardTiles = ref<IFieldDTD[]>()
+const gameTrees = ref<ITreeDTD[]>()
 /**
  *
  * Pinia Store für das Spielbrett.
@@ -43,10 +46,11 @@ export const useBoardStore = defineStore('board', {
           console.error('Error while recieving Data:\n', resp.statusText)
           throw new Error(resp.statusText)
         }
-        gameBoardTiles.value = (await resp.json()) as IBoardDTD
+        this.board = (await resp.json()) as IBoardDTD
+        gameBoardTiles.value = this.board.fields
+        gameTrees.value = this.board.trees
 
         this.ok = true
-        this.board = gameBoardTiles.value
 
         console.log('GameBoard successfully loaded')
 
