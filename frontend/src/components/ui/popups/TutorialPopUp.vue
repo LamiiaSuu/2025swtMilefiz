@@ -63,9 +63,16 @@ const onBackClick = () => {
 
 .header {
     margin-top: 15vh;
-    margin-bottom: -15vh;
+    margin-bottom: -15.5vh;
     z-index: 99999;
 }
+
+.header :deep(.menu-button) {
+  background-image: url("/backgrounds/PopUpHeader.png");
+  padding-top: 1vh;
+  height: 10vh;
+}
+
 
 .menu-button:disabled {
     cursor: default;
@@ -74,8 +81,7 @@ const onBackClick = () => {
 
 
 .popup {
-    
-    margin-top: 7vh;
+    margin-top: 6vh;
 }
 
 .button-container {

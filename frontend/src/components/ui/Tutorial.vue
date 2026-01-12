@@ -296,7 +296,7 @@ function prev() {
 .menu-bar {
   display: flex;
   width: 100%;
-  margin: 2vh;
+  margin: 5vh 2vh 0.5vh 2vh;
 
   background: #3D7739;
   border: none;

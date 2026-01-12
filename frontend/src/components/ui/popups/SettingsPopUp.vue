@@ -80,8 +80,14 @@ const onBackClick = () => {
 }
 
 .header {
-    margin-bottom: -6vh;
+    margin-bottom: -8.5vh;
     z-index: 99999;
+}
+
+.header :deep(.menu-button) {
+    background-image: url("/backgrounds/PopUpHeader.png");
+    padding-top: 1vh;
+    height: 10vh;
 }
 
 .menu-button:disabled {
