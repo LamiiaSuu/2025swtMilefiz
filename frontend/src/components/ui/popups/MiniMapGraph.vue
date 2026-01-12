@@ -18,9 +18,9 @@ const currentField = computed(() => {
   if (own) return own
 })
 
-function centerOnField(field: IBoardDTD["fields"][number], targetZoom:number) {
+function centerOnField(field: IBoardDTD["fields"][number], targetZoom: number) {
   const z = Math.max(MIN_ZOOM, Math.min(maxZoom.value, targetZoom))
-  
+
   const viewW = svgSize.value.w
   const viewH = svgSize.value.h
 
@@ -38,7 +38,7 @@ onMounted(async () => {
   await nextTick()
 
   const field = currentField.value
-  if(!field) return
+  if (!field) return
 
   centerOnField(field, INTIAL_ZOOM)
 })
@@ -127,7 +127,7 @@ function onWheel(e: WheelEvent) {
     panY.value = mouseSvgY - worldY * newZoom
 
   } else {// ZOOM OUT -> um tatsächliche Mitte des SVG-Graphen
-   // Logisches Zentrum des Graphen in SVG-Koordinaten
+    // Logisches Zentrum des Graphen in SVG-Koordinaten
     const centerSvgX = viewW / 2
     const centerSvgY = viewH / 2
 
@@ -288,7 +288,7 @@ function isInvalidEnd(fieldId: string) {
       <g class="nodes">
         <g v-for="f in props.board.fields" :key="f.id" class="node" :class="{
           clickable: isFree(f.id),
-          locked: !isFree(f.id),
+          // locked: !isFree(f.id),
         }">
           <!-- Grundkreis -->
           <circle :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R" class="node-circle" filter="url(#nodeShadow)"
@@ -297,9 +297,12 @@ function isInvalidEnd(fieldId: string) {
           <!-- OWN meeple-farbener Kreis -->
           <circle v-if="isOwn(f.id)" :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R - 3" class="node-own" />
 
-          <!-- SELECTED schwarzer Kreis)-->
+          <!-- SELECTED Barrier Icon -->
+          <image v-else-if="isSelected(f.id)" href="/mapEditorIcons/barrier.png" :x="cx(f.position.x) - (R)"
+            :y="cy(f.position.y) - (R)" :width="R * 2" :heigth="R * 2" />
           <circle v-else-if="isSelected(f.id)" :cx="cx(f.position.x)" :cy="cy(f.position.y)" :r="R - 3"
             class="node-selected" />
+
 
 
           <!-- OCCUPIED X -->
@@ -352,7 +355,7 @@ function isInvalidEnd(fieldId: string) {
 
 /* Selected Barrier */
 .node-selected {
-  fill: rgb(87, 40, 2);
+  fill: rgb(154, 90, 37);
   stroke: rgb(87, 40, 2);
   stroke-width: 2;
 }
@@ -376,6 +379,7 @@ function isInvalidEnd(fieldId: string) {
 }
 
 .node.clickable .node-circle:hover {
-  stroke-width: 6;
+  stroke: #8b6f47;
+  stroke-width: 20;
 }
 </style>
