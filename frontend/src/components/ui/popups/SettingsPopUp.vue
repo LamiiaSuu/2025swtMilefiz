@@ -79,10 +79,11 @@ const onBackClick = () => {
 .popup {
     display: flex;
     flex-direction: column;
-    height: 65vh;
+    height: 68vh;
+    width: 35vw;
     text-align: center;
     position: relative;
-    padding-top: 0vh;
+    padding-top: 1vh;
 
     justify-content: center;
 
@@ -90,7 +91,6 @@ const onBackClick = () => {
     animation: fadeIn 0.3s ease;
 
     margin-top: 5vh;
-    width: 30vw;
     border-radius: 18px;
 
     background:
@@ -163,7 +163,6 @@ h1 {
     margin-bottom: 5vh;
     margin-top: 5vh;
 }
-
 
 .button-container {
     display: flex;
