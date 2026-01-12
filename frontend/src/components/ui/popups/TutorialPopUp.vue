@@ -1,13 +1,22 @@
 <script setup>
 import { useRouter } from 'vue-router'
+import { useMilefizStore } from '@/stores/milefizstore'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
 import Tutorial from '../Tutorial.vue'
 import PopUpCloseButton from './PopUpCloseButton.vue'
 import Header from '../pages/Header.vue'
 
+
+const milefizStore = useMilefizStore()
 const router = useRouter()
 const audio = useAudioStore()
+
+
+const onBackClick = () => {
+    audio.playSfx('click')
+    milefizStore.closePopUpTutorial()
+}
 
 </script>
 
