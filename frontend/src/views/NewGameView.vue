@@ -31,7 +31,7 @@ onMounted(() => {
 })
 
 function onHover() {
-  audio.playSfx('hover')
+    audio.playSfx('hover')
 }
 
 // Reaktive Leader-Prüfung
@@ -73,11 +73,11 @@ const username = ref('')
 const mapMode = ref<'standard' | 'import'>('standard')
 
 const canStartGame = computed(() => {
-  if (!isOwnLeader.value) return false
+    if (!isOwnLeader.value) return false
 
-  if (mapMode.value === 'standard') return true
+    if (mapMode.value === 'standard') return true
 
-  return importedBoardActive.value
+    return importedBoardActive.value
 })
 
 // Importierte Map Datei
@@ -96,18 +96,18 @@ const handleFileChange = (event: Event) => {
 }
 
 function resetImport() {
-  selectedFile.value = null
-  importedBoardActive.value = false
+    selectedFile.value = null
+    importedBoardActive.value = false
 
-  if (fileInputRef.value) {
-    fileInputRef.value.value = ""
-  }
+    if (fileInputRef.value) {
+        fileInputRef.value.value = ""
+    }
 }
 
 async function setDefaultBoard(lobbyId: string) {
-  await fetch(`/api/lobby/${lobbyId}/board/setDefault`, {
-    method: "POST"
-  })
+    await fetch(`/api/lobby/${lobbyId}/board/setDefault`, {
+        method: "POST"
+    })
 }
 
 async function importAndSetBoard() {
@@ -169,7 +169,7 @@ async function importAndSetBoard() {
                     <!-- Lobby-Name -->
                     <div class="form-row">
                         <label>{{ tUI('LOBBY_NAME') }}</label>
-                        <input type="text" v-model="lobbyName" class="form-input" :placeholder=" tUI('LOBBY_NAME') "
+                        <input type="text" v-model="lobbyName" class="form-input" :placeholder="tUI('LOBBY_NAME')"
                             :disabled="!isOwnLeader">
                     </div>
 
@@ -178,13 +178,14 @@ async function importAndSetBoard() {
                         <div class="form-row">
                             <label>{{ tUI('MAP') }}</label>
                             <div class="map-buttons">
-                                <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'standard' }"
+                                <button type="button" @mouseenter="onHover" class="map-button"
+                                    :class="{ active: mapMode === 'standard' }"
                                     @click="mapMode = 'standard'; setDefaultBoard(lobby?.id!); resetImport()">
                                     {{ tUI('STANDARD_MAP') }}
                                 </button>
-                                <button type="button" @mouseenter="onHover" class="map-button" :class="{ active: mapMode === 'import' }"
-                                    @click="mapMode = 'import'">
-                                    {{ tUI('IMPORT') }}
+                                <button type="button" @mouseenter="onHover" class="map-button"
+                                    :class="{ active: mapMode === 'import' }" @click="mapMode = 'import'">
+                                    {{ tUI('CUSTOM_MAP') }}
                                 </button>
                             </div>
                         </div>
@@ -194,25 +195,13 @@ async function importAndSetBoard() {
                             <label>{{ tUI('FILE') }}</label>
 
                             <div style="display: flex; gap: 10px;">
-                                <input
-                                    type="file"
-                                    ref="fileInputRef"
-                                    @mouseenter="onHover"
-                                    @change="handleFileChange"
-                                    class="file-input"
-                                    :disabled="mapMode === 'standard'"
-                                    accept=".json"
-                                >
+                                <input type="file" ref="fileInputRef" @mouseenter="onHover" @change="handleFileChange"
+                                    class="file-input" :disabled="mapMode === 'standard'" accept=".json">
 
-                                <button
-                                    type="button"
-                                    class="map-button"
-                                    :disabled="mapMode === 'standard'"
-                                    :class="{ active: mapMode === 'import' }"
-                                    @mouseenter="onHover"
-                                    @click="importAndSetBoard"
-                                >
-                                    {{ tUI('IMPORT') }}
+                                <button type="button" class="map-button" :disabled="mapMode === 'standard'"
+                                    :class="{ active: mapMode === 'import' }" @mouseenter="onHover"
+                                    @click="importAndSetBoard">
+                                    {{ tUI('UPLOAD') }}
                                 </button>
                             </div>
                         </div>
@@ -246,10 +235,10 @@ async function importAndSetBoard() {
                     <!-- Buttons -->
                     <div class="form-row">
                         <div class="button-container">
-                            <button type="button" class="start-game-button"
-                                @mouseenter="onHover" @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('joinGame') }"
+                            <button type="button" class="start-game-button" @mouseenter="onHover"
+                                @click="() => { startGameCommand(); if (isOwnLeader) $router.push({ name: 'game' }); audio.playSfx('joinGame') }"
                                 :disabled="!canStartGame" :class="{ active: canStartGame }">
-                                {{ isOwnLeader ? tUI('START_GAME')  : tUI('WAITING_FOR_LEADER') }}
+                                {{ isOwnLeader ? tUI('START_GAME') : tUI('WAITING_FOR_LEADER') }}
                             </button>
                             <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
                         </div>
@@ -381,21 +370,20 @@ select {
     padding: 10px 20px;
     font-size: 1.1rem;
     cursor: pointer;
-    background-color: var(--button-color-inactive);
+    background-image: var(--button-gradient-green);
     color: white;
     transition: background-color 0.2s;
     min-width: 0;
 }
 
-.map-button.active {
-    background-image: var(--button-gradient-green);
+.map-button.active, .file-input {
+    background: rgba(40, 60, 35, 0.92);
 }
 
 .file-input {
     padding: 8px;
     font-size: 1rem;
     color: white;
-    background-image: var(--button-gradient-green);
 }
 
 .file-input:disabled {
@@ -478,5 +466,4 @@ select {
 .tooltip-wrapper:hover .tooltip {
     opacity: 1;
 }
-
 </style>
