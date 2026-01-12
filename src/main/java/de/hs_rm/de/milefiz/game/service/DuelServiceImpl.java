@@ -22,6 +22,7 @@ import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 
 @Service
@@ -221,6 +222,27 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             sendLoserHome(lobby, duel, balloon);
+        }
+
+        else if (game instanceof EinarmigerBanditGame einarmigerBandit) {
+            Integer energy = null;
+            if (game.getWinner() != null) {
+                energy = lobby.getPlayer(game.getWinner()).getEnergy();
+            }
+            var update = new FrontendEinarmigerBanditGameUpdateEvent(
+                    duel.getId(),
+                    einarmigerBandit.getP1(),
+                    einarmigerBandit.getP2(),
+                    einarmigerBandit.getResultP1(),
+                    einarmigerBandit.getResultP2(),
+                    einarmigerBandit.getResultComp(),
+                    einarmigerBandit.getWinner(),
+                    einarmigerBandit.isJackpot(),
+                    energy != null ? energy : 0,
+                    einarmigerBandit.isFinished());
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            sendLoserHome(lobby, duel, einarmigerBandit);
         }
     }
 
