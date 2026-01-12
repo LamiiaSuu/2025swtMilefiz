@@ -2,9 +2,9 @@
 import { useRouter } from 'vue-router'
 import { useAudioStore } from '@/stores/audioStore'
 import { tUI } from '@/i18n'
-import LanguageSelection from '@/components/ui/LanguageSelection.vue'
 import Tutorial from '../Tutorial.vue'
 import PopUpCloseButton from './PopUpCloseButton.vue'
+import Header from '../pages/Header.vue'
 
 const router = useRouter()
 const audio = useAudioStore()
@@ -17,9 +17,13 @@ const audio = useAudioStore()
         <!-- Close Button -->
         <PopUpCloseButton></PopUpCloseButton>
 
-        <div class="content">
+        <div class="popup">
             <!-- Tutorial-->
             <Tutorial></Tutorial>
+
+            <div class="button-container">
+                <button class="back-button" @mouseenter="onHover" @click="onBackClick()">{{ tUI('BACK') }}</button>
+            </div>
         </div>
 
 
@@ -43,7 +47,42 @@ const audio = useAudioStore()
     -webkit-backdrop-filter: blur(4px);
 }
 
-.content {
-    margin-top: -10vh;
+.popup {
+    margin-top: 10vh;
+}
+
+
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2vh 0 6vh 0;
+}
+
+.button-container :deep(button) {
+    padding: 2vh 0;
+    width: 15vw;
+    color: white;
+    font-size: 3vh;
+    cursor: pointer;
+
+    border: 3px solid black;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+    font-family: "AcmeFont", sans-serif;
+
+    -webkit-text-stroke: 0;
+    paint-order: fill;
+    text-shadow: none;
+    font-weight: 400;
+}
+
+.back-button {
+    background-image: var(--button-gradient-green);
+}
+
+.button-container :deep(button):hover {
+    transform: scale(1.05);
 }
 </style>
