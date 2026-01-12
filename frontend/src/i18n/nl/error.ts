@@ -13,7 +13,7 @@ export const ERRORS_NL: Record<ErrorCode, string> = {
     MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE: 'Veld al bezet door je eigen meeple!',
     MOVE_BARRIER_REJECTED_START_OR_END: 'Barrier kan niet op start- of doelvelden geplaatst worden',
     MOVE_BARRIER_OCCUPIED: 'Barrier kan niet op een bezet veld geplaatst worden',
-    REJECTED_BY_BARRIER: 'Oei! Dat zag pijnlijk uit – resterende zetten verloren!',
+    REJECTED_BY_BARRIER: 'Oei! Dat zag pijnlijk uit...',
     SAVE_ENERGY_ERROR: 'Maximale energie bereikt of meeple al verplaatst!',
     CONSUME_ENERGY_ERROR: 'Niet genoeg energie voor een sprong!',
     NO_LOBBY_FOUND: 'Lobby niet gevonden!',
@@ -22,4 +22,5 @@ export const ERRORS_NL: Record<ErrorCode, string> = {
     BOARD_SUCCESSFULLY_IMPORTED: 'Map succesvol geïmporteerd!',
     BOARD_COULD_NOT_BE_IMPORTED: 'Map kon niet worden geïmporteerd: ',
     MEEPLE_IN_DUEL: 'De tegenstander zit al in een duel. Wacht tot het duel is afgelopen!',
+    MOVE_ERROR_NO_VALID_FIELDS: 'Er zijn geen geldige treinen mogelijk in deze richting',
 }

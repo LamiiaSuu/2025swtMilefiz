@@ -79,9 +79,13 @@ class AudioEngine {
    */
   setListenerPosition(x: number, y: number, z: number) {
     const l = this.context.listener
-    l.positionX.value = x
-    l.positionY.value = y
-    l.positionZ.value = z
+    if (l.positionX) {
+      l.positionX.value = x;
+      l.positionY.value = y;
+      l.positionZ.value = z;
+    } else {
+      l.setPosition(x, y, z);
+    }
   }
 
   /**

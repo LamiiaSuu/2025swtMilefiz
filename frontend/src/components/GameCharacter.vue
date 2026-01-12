@@ -5,6 +5,7 @@ import { watchEffect, watch, ref, computed, onMounted } from 'vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { getPlayerColors } from '@/types/colorsAssets';
 import { audioEngine } from '@/composables/audioEngine'
+import type { TresObject } from '@tresjs/core'
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -20,10 +21,11 @@ const props = defineProps<{
   meepleId: string
   barrier?: boolean
   playerColor?:  string
+  hidden?: boolean
 }>()
 
 const characterRotation = ref(0)
-const characterPosition = ref(null)
+const characterPosition = ref<TresObject | null>(null)
 
 //Variablen für Anpassung des Sprungs definiert
 const jumpOffset = ref(0)
@@ -153,10 +155,50 @@ watchEffect(async () => {
   }
 })
 
-// Updated die Rotation des Charakters
-const setRotation = (yRotation: number) => {
-  characterRotation.value = yRotation
+watch(
+  () => props.hidden,
+  (hidden) => {
+    if (characterPosition.value) {
+      characterPosition.value.visible = !hidden
+    }
+  },
+  { immediate: true }
+)
+
+let targetRotation = 0
+let isRotating = false
+
+const lerp = (a: number, b: number, t: number) => {
+  return a + (b - a) * t
 }
+
+const animateRotation = () => {
+  if (!isRotating) return
+
+  characterRotation.value = lerp(
+    characterRotation.value,
+    targetRotation,
+    0.065 // smoothing factor (niedriger = langsamer, smoother)
+  )
+
+  // Stop wenn nah genug am Wert
+  if (Math.abs(characterRotation.value - targetRotation) < 0.001) {
+    characterRotation.value = targetRotation
+    isRotating = false
+    return
+  }
+
+  requestAnimationFrame(animateRotation)
+}
+
+const setRotation = (yRotation: number) => {
+  targetRotation = yRotation
+  if (!isRotating) {
+    isRotating = true
+    requestAnimationFrame(animateRotation)
+  }
+}
+
 
 // Sprung-Animation
 const animateCustomJump = (
@@ -197,7 +239,7 @@ const animateCustomJump = (
 }
 
 const jump = () => {
-  if (!isJumpAllowed.value) return //Nur dann Jump Animation starten, wenn Sprung auch erlaubt ist, also Spieler maxEnergy gesammelt hat
+  console.log("jump wird erreicht")
   if (isJumping.value) return
   audioEngine.play3D('meepleJump', {
     x: currentPosition.value[0],
@@ -250,20 +292,15 @@ let moveAnimationFrame: number | null = null
 /**
  * Animiert die Bewegung des Charakters zu einer Zielposition auf dem Spielfeld.
  *
- * - inkl. Sprung und Drehung
- *
  * Ablauf:
  * 1. Vorherige Bewegungsanimation (falls vorhanden) wird abgebrochen.
- * 2. Charakter wird in Richtung des Ziels gedreht (`rotateToward`).
- * 3. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.
- * 4. Die Position wird frameweise geglättet interpoliert, bis das Ziel erreicht ist.
+ * 2. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.
+ * 3. Die Position wird frameweise geglättet interpoliert, bis das Ziel erreicht ist.
  *
  * @param target - Zielkoordinaten im 3D-Raum [x, y, z], zu denen sich der Charakter bewegen soll
  */
 const animateTo = (target: [number, number, number]) => {
   if (moveAnimationFrame) cancelAnimationFrame(moveAnimationFrame)
-
-  rotateToward(target)
 
   if (!isJumping.value) {
     isJumping.value = true
@@ -304,61 +341,6 @@ const animateTo = (target: [number, number, number]) => {
       // Wenn Sprung beendet oder das Ziel erreicht ist, Position fixieren
       animatedPosition.value = target
       moveAnimationFrame = null
-    }
-  }
-
-  animate()
-}
-
-/**
- * Dreht den Charakter sanft in Richtung einer Zielposition.
- *
- * Berechnet den Winkel zwischen der aktuellen Position und der Zielposition
- * und interpoliert die Y-Rotation über eine kurze Zeitspanne, um
- * eine fließende Drehbewegung zu erzeugen.
- *
- * - wählt immer den kürzesten Drehweg
- * - Verwendet `Math.atan2()` zur Winkelberechnung im XZ-Raum.
- * - Normalisiert Winkel auf den Bereich [-π, π], um Sprünge zu vermeiden.
- * - Führt die Drehung innerhalb von ~200 ms aus (Ease-in/Ease-out Kurve).
- *
- * @param target - Zielkoordinaten [x, y, z], in deren Richtung der Charakter schauen soll
- */
-const rotateToward = (target: [number, number, number]) => {
-  const [x, , z] = animatedPosition.value
-  const [tx, , tz] = target
-
-  const dx = tx - x
-  const dz = tz - z
-
-  const targetRotation = Math.atan2(dx, dz)
-  let startRotation = characterRotation.value
-
-  // --- beide Winkel normalisieren auf [-π, π] ---
-  const normalize = (angle: number) => ((angle + Math.PI) % (2 * Math.PI)) - Math.PI
-  startRotation = normalize(startRotation)
-  const normalizedTarget = normalize(targetRotation)
-
-  // --- Differenz auf kürzesten Weg ---
-  let diff = normalizedTarget - startRotation
-  if (diff > Math.PI) diff -= 2 * Math.PI
-  if (diff < -Math.PI) diff += 2 * Math.PI
-
-  const duration = 200
-  const startTime = Date.now()
-
-  const animate = () => {
-    const elapsed = Date.now() - startTime
-    const progress = Math.min(elapsed / duration, 1)
-
-    // weiches Interpolieren (Ease in/out optional)
-    const easedProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI)
-    characterRotation.value = startRotation + diff * easedProgress
-
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    } else {
-      characterRotation.value = normalizedTarget
     }
   }
 

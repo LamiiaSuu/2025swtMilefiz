@@ -16,6 +16,7 @@ import GameCharacter from './GameCharacter.vue'
 import { useBoardStore } from '@/stores/boardStore'
 import Tile from './Tile.vue'
 import Path from './Path.vue'
+import Foliage from './Foliage.vue'
 import Camera from './Camera.vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import type { Direction } from '@/types/movement'
@@ -24,6 +25,7 @@ import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import AssetSprite from './ui/AssetSprite.vue'
 import { standardBoardAssets, STANDARD_BOARD_ID } from '@/types/BoardAsset.ts'
+import { TreesGeometry } from 'three/examples/jsm/Addons.js'
 
 const milefizStore = useMilefizStore()
 const fpsCamera = shallowRef<any | null>(null)
@@ -169,19 +171,31 @@ watch(
   { deep: true },
 )
 
-watch(
-  () => boardStore.meeplePositions,
-  (val) => {
-    console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
-  },
-  { deep: true },
-)
+watch(() => boardStore.meeplePositions, (val) => {
+  console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
+}, { deep: true })
 
 watchEffect(() => {
   if (milefizStore.gameFinished) {
     useFirstPerson.value = false
   }
 })
+
+watch(
+  () => milefizStore.jumpTrigger,
+  (t) => {
+    const meepleId = t?.meepleId
+    console.log("Meeple in jump:")
+    console.log(meepleId)
+    if (!meepleId) return
+
+    const ref = gameCharRefs[meepleId]
+    const inst: any = ref?.value
+    if (inst?.jump) inst.jump()
+    console.log("instanz im watcher: " + inst)
+  },
+  { deep: true }
+)
 
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
   // Cast the template ref value to TresObject | null in a type-safe place
@@ -277,8 +291,8 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (milefizStore.popUpMenuOpen) {
       milefizStore.closePopUpMenu()
       return
-    } else {
-      // Oeffnet das PopUp-Menu
+    } 
+    else { // Oeffnet das PopUp-Menu
       milefizStore.openPopUpMenu()
       return
     }
@@ -302,7 +316,6 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 
   toggleCamera(e)
-  handleJump(e)
   handleMoveKeys(e)
   handleMeepleSelectionKeydown(e)
 }
@@ -371,19 +384,6 @@ function selectMeepleByIndex(index: number) {
 
   me.activeMeeple = meeple
   console.log('Selected meeple ->', meeple.id)
-}
-
-const handleJump = (e: KeyboardEvent) => {
-  if (e.code === 'Space') {
-    e.preventDefault()
-    const id = selectedMeepleId.value
-    if (!id) return
-    const ref = gameCharRefs[id]
-    if (!ref || !ref.value) return
-    if (ref.value && ref.value.jump) {
-      ref.value.jump()
-    }
-  }
 }
 
 // Keyboard toggle listener
@@ -464,13 +464,23 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   milefizStore.sendMove(meepleId, direction)
 }
 
-// Updated Rotation vom Charakter für First Person Kamera
+
+let lastRotSent = 0
+const ROT_SEND_MS = 80
+
+// Updated die Rotation vom Meeple
 const onRotateCharacter = (yRotation: number) => {
   const id = selectedMeepleId.value
   if (!id) return
   const ref = gameCharRefs[id]
   if (!ref || !ref.value) return
-  ref.value.setRotation(yRotation)
+  boardStore.updateMeepleRotation(id, yRotation)
+  // in bestimmten Zeitabständen an alle clients senden
+  const now = performance.now()
+  if (now - lastRotSent >= ROT_SEND_MS) {
+    lastRotSent = now
+    milefizStore.sendMeepleRotation(id, yRotation)
+  }
 }
 
 onMounted(() => {
@@ -696,13 +706,8 @@ const additionalAssets = computed(() => {
     />
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
-    <GameCharacter
-      v-for="id in allMeepleIds"
-      :key="id"
-      :ref="(el) => registerGameCharRefFromTemplate(id, el)"
-      :meepleId="id"
-      :playerColor="meepleColorMap.get(id)"
-    />
+    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="el => registerGameCharRefFromTemplate(id, el)"
+      :meepleId="id" :playerColor="meepleColorMap.get(id)" />
 
     <!--Spawnen von Barrieren-->
     <GameCharacter
@@ -725,13 +730,8 @@ const additionalAssets = computed(() => {
     />
 
     <!-- Spielfeldtiles rendern -->
-    <Tile
-      v-for="field in boardStore.board?.fields"
-      :key="field.id"
-      :id="field.id"
-      :position="[field.position.x, 0, field.position.y]"
-      :type="field.type"
-    />
+    <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
+      :position="[field.position.x, 0, field.position.y]" :type="field.type" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->

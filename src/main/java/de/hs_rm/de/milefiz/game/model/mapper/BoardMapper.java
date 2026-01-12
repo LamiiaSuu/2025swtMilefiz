@@ -11,8 +11,10 @@ import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Direction;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Meeple;
+import de.hs_rm.de.milefiz.game.model.Tree;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.TreeDTO;
 
 /**
  * Mapper Klasse, die zwischen {@link Board} und {@link BoardDTO} mappt.
@@ -32,6 +34,10 @@ public class BoardMapper {
         Stack<Field> remaining = new Stack<>();
         Map<Direction, Field> currentNeighbours;
         List<Field> visited = new ArrayList<>();
+
+        List<Tree> trees = board.getTrees();
+        List<TreeDTO> treeDTOs;
+
         BoardDTO out = new BoardDTO(board.getId(), board.getName());
 
         remaining.add(startField);
@@ -53,7 +59,7 @@ public class BoardMapper {
             boolean isBarrier = false;
 
             for (Meeple barrier : board.getBarriers()) {
-                if (barrier.getCurrentField().equals(node)) {
+                if (node.equals(barrier.getCurrentField())) {
                     isBarrier = true;
                 }
             }
@@ -67,6 +73,9 @@ public class BoardMapper {
                 }
             }
         }
+
+        treeDTOs = trees.stream().map(tree -> new TreeDTO(tree.getPosition(), tree.getType())).toList();
+        out.addTrees(treeDTOs);
 
         return out;
     }
@@ -88,6 +97,10 @@ public class BoardMapper {
         List<Field> fields = new ArrayList<>();
         FieldDTO startDTO = fieldDTOs.removeFirst();
         Field startField = new Field(startDTO.getId(), startDTO.getType(), startDTO.getPosition());
+
+        List<TreeDTO> treeDTOs = boardDTO.getTrees();
+        List<Tree> trees;
+
         Board board = new Board(boardDTO.getId(), boardDTO.getName(), null, null, null, null);
 
         fields.add(startField);
@@ -136,6 +149,9 @@ public class BoardMapper {
 
             fields.add(field);
         }
+
+        trees = treeDTOs.stream().map(treeDTO -> new Tree(treeDTO.getTreeType(), treeDTO.getTreePosition())).toList();
+        board.addTrees(trees);
 
         return board;
     }

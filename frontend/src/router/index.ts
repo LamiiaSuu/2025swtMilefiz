@@ -55,7 +55,7 @@ const router = createRouter({
         // warten bis lobby gejoint
         if (id) {
           //username aus query
-          const username = (to.query.username as string | undefined) ?? 'Anonymer Kek'
+          const username = (to.query.username as string | undefined) ?? ''
           console.log(`joine mit ${id} (username=${username})`);
           await joinLobby(id, username)
         }

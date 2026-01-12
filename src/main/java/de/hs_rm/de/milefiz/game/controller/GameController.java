@@ -2,6 +2,7 @@ package de.hs_rm.de.milefiz.game.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import static org.springframework.http.ResponseEntity.ok;
@@ -17,6 +18,7 @@ import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.game.service.BoardService;
 import de.hs_rm.de.milefiz.game.service.BoardValidateException;
 import de.hs_rm.de.milefiz.game.service.GameService;
+import de.hs_rm.de.milefiz.game.service.PlantingService;
 
 /**
  * REST Controller für Spiel-bezogene Operationen.
@@ -34,6 +36,10 @@ public class GameController {
 
     private final GameService gameService;
     private final BoardService boardService;
+    private final PlantingService plantingService;
+
+    @Value("${board.planting.density}")
+    private float defaultPlantingDensity;
 
     private final Logger LOGGER = LoggerFactory.getLogger(GameController.class);
 
@@ -42,9 +48,10 @@ public class GameController {
      *
      * @param gameService Service für Spieloperationen
      */
-    public GameController(GameService gameService, BoardService boardService) {
+    public GameController(GameService gameService, BoardService boardService, PlantingService plantingService) {
         this.gameService = gameService;
         this.boardService = boardService;
+        this.plantingService = plantingService;
     }
 
     /**
@@ -64,6 +71,19 @@ public class GameController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
         return ok("Board ist valide");
+    }
+
+    /**
+     * Generiere Bäume auf übergebenes Board
+     * 
+     * @param boardDTO
+     * @return BoardDTO mit generierten Bäumen
+     */
+    @PostMapping("/board/generate")
+    public BoardDTO generateTrees(@RequestBody BoardDTO boardDTO) {
+                LOGGER.debug("Generiere Bäume für Board: " + boardDTO.toString());
+                boardDTO = this.plantingService.plantTrees(boardDTO, defaultPlantingDensity);
+                return boardDTO;
     }
 
 }

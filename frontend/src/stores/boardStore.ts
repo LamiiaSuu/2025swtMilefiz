@@ -2,10 +2,13 @@ import { defineStore } from 'pinia'
 import type { IBoardDTD } from './IBoardDTD'
 import { ref } from 'vue'
 import { useMilefizStore } from './milefizstore'
-import type {Player} from '../types/lobbyupdate'
-import type {Lobby} from '../types/lobbyupdate'
+import type { Player } from '../types/lobbyupdate'
+import type { Lobby } from '../types/lobbyupdate'
+import type { IFieldDTD } from './IFieldDTD'
+import type { ITreeDTD } from './ITreeDTD'
 
-const gameBoardTiles = ref<IBoardDTD>()
+const gameBoardTiles = ref<IFieldDTD[]>()
+const gameTrees = ref<ITreeDTD[]>()
 /**
  *
  * Pinia Store für das Spielbrett.
@@ -21,6 +24,8 @@ export const useBoardStore = defineStore('board', {
     meeplePositions: {} as Record<string, string>,
     //testMeepleId: '123e4567-e89b-12d3-a456-426614174000' as string,
     lastFields: {} as Record<string, string | null>,
+    /** meeple rotationen */
+    meepleRotations: {} as Record<string, number>,
   }),
   actions: {
     /**
@@ -41,10 +46,11 @@ export const useBoardStore = defineStore('board', {
           console.error('Error while recieving Data:\n', resp.statusText)
           throw new Error(resp.statusText)
         }
-        gameBoardTiles.value = (await resp.json()) as IBoardDTD
+        this.board = (await resp.json()) as IBoardDTD
+        gameBoardTiles.value = this.board.fields
+        gameTrees.value = this.board.trees
 
         this.ok = true
-        this.board = gameBoardTiles.value
 
         console.log('GameBoard successfully loaded')
 
@@ -57,13 +63,14 @@ export const useBoardStore = defineStore('board', {
             const players: Player[] = lobby.players
             for (const player of players) {
               for (const meeple of player.meeples) {
-                if(meeple.currentFieldId) {
+                if (meeple.currentFieldId) {
                   this.meeplePositions[meeple.id] = meeple.currentFieldId
                 }
                 this.lastFields[meeple.id] = null
+                this.meepleRotations[meeple.id] ??= 0
               }
-                // Debug: Meeple Positionen loggen nach assignment
-                console.log('boardStore.getBoard: meeplePositions after init:', JSON.stringify(this.meeplePositions))
+              // Debug: Meeple Positionen loggen nach assignment
+              console.log('boardStore.getBoard: meeplePositions after init:', JSON.stringify(this.meeplePositions))
             }
           }
         }
@@ -80,6 +87,7 @@ export const useBoardStore = defineStore('board', {
       this.board = null
       this.meeplePositions = {}
       this.lastFields = {}
+      this.meepleRotations = {}
     },
 
     // meeple bewegen und letztes Feld merken
@@ -91,21 +99,25 @@ export const useBoardStore = defineStore('board', {
       this.meeplePositions[meepleId] = fieldId
     },
 
-    updateBarrierPosition(barrierId: string, fieldId: string) {
+    updateMeepleRotation(meepleId: string, rotation: number) {
+      this.meepleRotations[meepleId] = rotation
+    },
+
+    updateBarrierPosition(barrierId: string, currentFieldId: string, targetFieldId: string) {
       if (!this.board) return;
 
       //Alte Barriere entfernen
-      const oldField = this.board.fields.find(f => f.barrier);
+      const oldField = this.board.fields.find(f => f.id === currentFieldId);
       if (oldField) {
         oldField.barrier = false;
       }
 
       //Neue Barriere setzen
-      const newField = this.board.fields.find(f => f.id === fieldId);
+      const newField = this.board.fields.find(f => f.id === targetFieldId);
       if (newField) {
         newField.barrier = true;
       } else {
-        console.warn(`Barrier target field ${fieldId} not found.`);
+        console.warn(`Barrier target field ${targetFieldId} not found.`);
         return;
       }
 
@@ -115,7 +127,7 @@ export const useBoardStore = defineStore('board', {
         fields: [...this.board.fields],
       };
 
-      console.log(`Barrier moved to field ${fieldId}`);
+      console.log(`Barrier moved to field ${targetFieldId}`);
     }
   },
   // Getter um alle Barriere-Meeple ans Frontend zu übergeben
