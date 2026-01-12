@@ -60,11 +60,6 @@ const bounds = computed(() => {
   const xs = props.board.fields.map(f => f.position?.x).filter(n => Number.isFinite(n)) as number[]
   const ys = props.board.fields.map(f => f.position?.y).filter(n => Number.isFinite(n)) as number[]
 
-  // Fallback, falls Daten kaputt/leer sind
-  if (xs.length === 0 || ys.length === 0) {
-    return { minX: 0, maxX: 0, minY: 0, maxY: 0 }
-  }
-
   return {
     minX: Math.min(...xs),
     maxX: Math.max(...xs),
@@ -199,7 +194,7 @@ function isInvalidEnd(fieldId: string) {
 }
 
 /**
- * Liefert das Feld auf dem das eigene Meeple steht.
+ * Liefert das Feld auf dem das eigene aktive Meeple steht.
  * @returns {IBoardDTD['fields'][number] | undefined}
  */
 const currentField = computed(() => {
@@ -398,6 +393,15 @@ function onMouseUp() {
   isDragging.value = false
 }
 
+function onMiddleClick(e: MouseEvent) {
+  e.preventDefault()
+
+  const field = currentField.value
+  if(!field) return
+
+  centerOnField(field, INTIAL_ZOOM)
+}
+
 
 /**
  * Selektiert ein Feld, wenn kein Drag stattgefunden hat.
@@ -419,7 +423,7 @@ function onClickField(fieldId: string) {
 <template>
   <svg ref="svgRef" class="minimap-svg" :viewBox="`0 0 ${svgSize.w} ${svgSize.h}`" width="100%" height="100%"
     preserveAspectRatio="xMidYMid meet" @wheel.prevent="onWheel" @mousedown="onMouseDown" @mousemove="onMouseMove"
-    @mouseup="onMouseUp" @mouseleave="onMouseUp">
+    @mouseup="onMouseUp" @mouseleave="onMouseUp" @click.middle.stop.prevent="onMiddleClick">
 
     <defs>
       <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
