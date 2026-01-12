@@ -23,4 +23,5 @@ export const ERRORS_NL: Record<ErrorCode, string> = {
     BOARD_COULD_NOT_BE_IMPORTED: 'Map kon niet worden geïmporteerd: ',
     MEEPLE_IN_DUEL: 'De tegenstander zit al in een duel. Wacht tot het duel is afgelopen!',
     MOVE_ERROR_NO_VALID_FIELDS: 'Er zijn geen geldige treinen mogelijk in deze richting',
+    MINIGAME_SLOT_JACKPOT_SUCCESS_MESSAGE: 'JACKPOT!!! Je energie is weer opgeladen!'
 }
