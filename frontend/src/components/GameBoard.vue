@@ -171,9 +171,13 @@ watch(
   { deep: true },
 )
 
-watch(() => boardStore.meeplePositions, (val) => {
-  console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
-}, { deep: true })
+watch(
+  () => boardStore.meeplePositions,
+  (val) => {
+    console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
+  },
+  { deep: true },
+)
 
 watchEffect(() => {
   if (milefizStore.gameFinished) {
@@ -185,16 +189,16 @@ watch(
   () => milefizStore.jumpTrigger,
   (t) => {
     const meepleId = t?.meepleId
-    console.log("Meeple in jump:")
+    console.log('Meeple in jump:')
     console.log(meepleId)
     if (!meepleId) return
 
     const ref = gameCharRefs[meepleId]
     const inst: any = ref?.value
     if (inst?.jump) inst.jump()
-    console.log("instanz im watcher: " + inst)
+    console.log('instanz im watcher: ' + inst)
   },
-  { deep: true }
+  { deep: true },
 )
 
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
@@ -291,8 +295,8 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (milefizStore.popUpMenuOpen) {
       milefizStore.closePopUpMenu()
       return
-    } 
-    else { // Oeffnet das PopUp-Menu
+    } else {
+      // Oeffnet das PopUp-Menu
       milefizStore.openPopUpMenu()
       return
     }
@@ -463,7 +467,6 @@ const handleMoveKeys = (e: KeyboardEvent) => {
 
   milefizStore.sendMove(meepleId, direction)
 }
-
 
 let lastRotSent = 0
 const ROT_SEND_MS = 80
@@ -706,8 +709,13 @@ const additionalAssets = computed(() => {
     />
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
-    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="el => registerGameCharRefFromTemplate(id, el)"
-      :meepleId="id" :playerColor="meepleColorMap.get(id)" />
+    <GameCharacter
+      v-for="id in allMeepleIds"
+      :key="id"
+      :ref="(el) => registerGameCharRefFromTemplate(id, el)"
+      :meepleId="id"
+      :playerColor="meepleColorMap.get(id)"
+    />
 
     <!--Spawnen von Barrieren-->
     <GameCharacter
@@ -730,8 +738,23 @@ const additionalAssets = computed(() => {
     />
 
     <!-- Spielfeldtiles rendern -->
-    <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
-      :position="[field.position.x, 0, field.position.y]" :type="field.type" />
+    <Tile
+      v-for="field in boardStore.board?.fields"
+      :key="field.id"
+      :id="field.id"
+      :position="[field.position.x, 0, field.position.y]"
+      :type="field.type"
+    />
+
+    <!-- Pflanzen und Bäume -->
+    <Foliage
+      :elements="
+        boardStore.board?.trees.map((tree) => ({
+          position: [tree.treePosition.x, 0, tree.treePosition.y],
+          type: tree.treeType,
+        }))
+      "
+    />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
