@@ -25,7 +25,6 @@ import de.hs_rm.de.milefiz.game.model.Player;
  * anhand der Häufigkeit der Farben ermittelt.
  * </p>
  * 
- * <p>
  * Regeln:
  * <ul>
  * <li>Jeder Spieler stoppt seinen Slot → erhält eine zufällige Farbe</li>
@@ -37,7 +36,6 @@ import de.hs_rm.de.milefiz.game.model.Player;
  * <li>Bei Timeout werden fehlende Slots automatisch mit der gegnerischen
  * Farbe gefüllt</li>
  * </ul>
- * </p>
  * 
  * @author Leon Schäfer
  */
