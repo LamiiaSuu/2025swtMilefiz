@@ -4,14 +4,30 @@ import type { IBoardDTD } from "@/stores/IBoardDTD";
 
 type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE" | "INVALID_END" | "INVALID_START"
 
+const props = defineProps<{
+  board: IBoardDTD
+  occupancyByFieldId: Record<string, Occupancy>
+  selectedFieldId: string | null
+}>()
+
+const emit = defineEmits<{
+  (e: "select", fieldId: string): void
+}>()
+
+const svgRef = ref<SVGSVGElement | null>(null)
+
+// 
+// STATES UND KONSTANTEN für zoom, pan und drag
+// 
+
 // Zoom-State
 const zoom = ref(1)
 const MIN_ZOOM = 1.0
 const maxZoom = ref(3)
 const ZOOM_STEP = 0.1
-
 const INTIAL_ZOOM = 10.0
 
+// Pan-State
 const panX = ref(0)
 const panY = ref(0)
 
@@ -21,17 +37,185 @@ let lastMouseX = 0
 let lastMouseY = 0
 let dragMoved = false
 
-const props = defineProps<{
-  board: IBoardDTD
-  occupancyByFieldId: Record<string, Occupancy>
-  selectedFieldId: string | null
-}>()
 
+// RENDER PARAMETER
+// - SPACING bestimmt Abstand zwischen Nodes
+// - R bestimmt Kreisradius
+// - PADDING sorgt für Rand im SVG
+
+const SPACING = 100
+const R = 80
+const PADDING = 200
+
+
+
+// BOARD GEOMETRIE / LAYOUT
+
+/**
+ * Berechnet min/max Grenzen aller Feldkoordinaten.
+ * @returns {{minX:number, maxX:number, minY:number, maxY:number}}
+ */
+
+const bounds = computed(() => {
+  const xs = props.board.fields.map(f => f.position?.x).filter(n => Number.isFinite(n)) as number[]
+  const ys = props.board.fields.map(f => f.position?.y).filter(n => Number.isFinite(n)) as number[]
+
+  // Fallback, falls Daten kaputt/leer sind
+  if (xs.length === 0 || ys.length === 0) {
+    return { minX: 0, maxX: 0, minY: 0, maxY: 0 }
+  }
+
+  return {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minY: Math.min(...ys),
+    maxY: Math.max(...ys),
+  }
+})
+
+/**
+ * Wandelt Board-X in SVG-X um (mit Spiegelung + Padding + Spacing).
+ * @param x Board-Koordinate X
+ * @returns {number}
+ */
+function cx(x: number) {
+  // X-Achse spiegeln
+  return PADDING + (bounds.value.maxX - x) * SPACING
+}
+
+/**
+ * Wandelt Board-Y in SVG-Y um (mit Spiegelung + Padding + Spacing).
+ * @param y Board-Koordinate Y
+ * @returns {number}
+ */
+function cy(y: number) {
+  // Y-Achse spiegeln
+  return PADDING + (bounds.value.maxY - y) * SPACING
+}
+
+/**
+ * Berechnet die ViewBox-Gesamtgröße der MiniMap.
+ * @returns {{w:number, h:number}}
+ */
+const svgSize = computed(() => {
+  const w = (bounds.value.maxX - bounds.value.minX) * SPACING + PADDING * 2
+  const h = (bounds.value.maxY - bounds.value.minY) * SPACING + PADDING * 2
+  // Minimum, damit bei 1 Feld nicht 0x0 entsteht
+  return { w: Math.max(w, 2 * (PADDING + R)), h: Math.max(h, 2 * (PADDING + R)) }
+})
+
+/**
+ * Map für schnellen Lookup von Feldern über ihre ID.
+ * @returns {Map<string, IBoardDTD['fields'][number]>}
+ */
+const fieldById = computed(() => {
+  const m = new Map<string, IBoardDTD["fields"][number]>()
+  for (const f of props.board.fields) m.set(f.id, f)
+  return m
+})
+
+
+
+/**
+ * Liefert die kombinierte SVG-Transformation (translate + scale).
+ * @returns {string}
+ */
+const transform = computed(() => {
+  return `translate(${panX.value} ${panY.value}) scale(${zoom.value})`
+})
+
+// 
+// OCCUPANCY + SELECTION HELPERS
+// 
+
+/**
+ * Gibt die Occupancy eines Feldes zurück.
+ * @param fieldId ID des Feldes
+ * @returns {Occupancy}
+ */
+function occ(fieldId: string): Occupancy {
+  return props.occupancyByFieldId[fieldId] ?? "FREE"
+}
+
+/**
+ * Prüft ob ein Feld auswählbar ist.
+ * @param fieldId ID des Feldes
+ * @returns {boolean}
+ */
+function isFree(fieldId: string) {
+  return occ(fieldId) === "FREE"
+}
+
+
+// Zustände:
+// - OWN_MEEPLE: in Meeple Farbe gefärbter Kreis
+// - SELECTED (Barriere-Ziel): schwarzer gefüllter Kreis
+// - OCCUPIED: leerer Kreis + X
+// - FREE: leerer Kreis
+ 
+/**
+ * Prüft ob ein Feld als besetzt markiert ist.
+ * @param fieldId ID des Feldes
+ * @returns {boolean}
+ */  
+function isOccupied(fieldId: string) {
+  return occ(fieldId) === "OCCUPIED"
+}
+
+/**
+ * Prüft ob sich ein eigenes Meeple auf dem Feld befindet.
+ * @param fieldId ID des Feldes
+ * @returns {boolean}
+ */
+function isOwn(fieldId: string) {
+  return occ(fieldId) === "OWN_MEEPLE"
+}
+
+/**
+ * Prüft ob das Feld aktuell ausgewählt ist.
+ * @param fieldId ID des Feldes
+ * @returns {boolean}
+ */
+function isSelected(fieldId: string) {
+  return props.selectedFieldId === fieldId
+}
+
+/**
+ * Prüft ob das Feld ein Startfeld ist.
+ * @param fieldId ID des Feldes
+ * @returns {boolean}
+ */
+function isInvalidStart(fieldId: string) {
+  return occ(fieldId) === "INVALID_START"
+}
+
+/**
+ * Prüft ob das Feld ein Zielfeld ist.
+ * @param fieldId ID des Feldes
+ * @returns {boolean}
+ */
+function isInvalidEnd(fieldId: string) {
+  return occ(fieldId) === "INVALID_END"
+}
+
+/**
+ * Liefert das Feld auf dem das eigene Meeple steht.
+ * @returns {IBoardDTD['fields'][number] | undefined}
+ */
 const currentField = computed(() => {
   const own = props.board.fields.find(f => isOwn(f.id))
   if (own) return own
 })
 
+// 
+// CENTERING / ZOOM-BERECHNUNG
+// 
+
+/**
+ * Zentriert die MiniMap so, dass das Feld mittig dargestellt wird.
+ * @param field Feld das fokussiert werden soll
+ * @param targetZoom Gewünschter Zoomfaktor
+ */
 function centerOnField(field: IBoardDTD["fields"][number], targetZoom: number) {
   const z = Math.max(MIN_ZOOM, Math.min(maxZoom.value, targetZoom))
 
@@ -47,20 +231,9 @@ function centerOnField(field: IBoardDTD["fields"][number], targetZoom: number) {
   zoom.value = z
 }
 
-
-onMounted(async () => {
-  await nextTick()
-
-  const field = currentField.value
-  if (!field) return
-
-  centerOnField(field, INTIAL_ZOOM)
-})
-
-const svgRef = ref<SVGSVGElement | null>(null)
-
-
-
+/**
+ * Berechnet das maximale Zoom-Level basierend auf Node-Pixeldimensionen.
+ */
 function recomputeMaxZoom() {
   const svg = svgRef.value
   if (!svg) return
@@ -78,13 +251,34 @@ function recomputeMaxZoom() {
   maxZoom.value = Math.max(MIN_ZOOM, maxZoomLocal)
 }
 
+
+// 
+// LIFE-CYLCE
+//
+
+onMounted(async () => {
+  await nextTick()
+
+  const field = currentField.value
+  if (!field) return
+
+  centerOnField(field, INTIAL_ZOOM)
+})
+
 onMounted(() => {
   nextTick(() => {
     recomputeMaxZoom()
   })
 })
 
+// 
+// INPUT HANDLER
+// 
 
+/**
+ * Zoomt in/aus der MiniMap um Mausposition oder Kartenmitte.
+ * @param e WheelEvent
+ */
 function onWheel(e: WheelEvent) {
   e.preventDefault()
 
@@ -147,10 +341,10 @@ function onWheel(e: WheelEvent) {
   zoom.value = newZoom
 }
 
-const transform = computed(() => {
-  return `translate(${panX.value} ${panY.value}) scale(${zoom.value})`
-})
-
+/**
+ * Startet einen Drag-Vorgang bei linker Maustaste.
+ * @param e MouseEvent
+ */
 function onMouseDown(e: MouseEvent) {
   if (e.button !== 0) return //linke Maustaste
 
@@ -162,6 +356,10 @@ function onMouseDown(e: MouseEvent) {
   lastMouseY = e.clientY
 }
 
+/**
+ * Verschiebt die MiniMap proportional zur Mausbewegung.
+ * @param e MouseEvent
+ */
 function onMouseMove(e: MouseEvent) {
   if (!isDragging.value) return
 
@@ -193,89 +391,18 @@ function onMouseMove(e: MouseEvent) {
   panY.value += dyPx * factor
 }
 
+/**
+ * Beendet einen aktiven Drag-Vorgang.
+ */
 function onMouseUp() {
   isDragging.value = false
 }
 
 
-const emit = defineEmits<{
-  (e: "select", fieldId: string): void
-}>()
-
 /**
- * Render-Parameter
- * - SPACING bestimmt Abstand zwischen Nodes
- * - R bestimmt Kreisradius
- * - PADDING sorgt für Rand im SVG
+ * Selektiert ein Feld, wenn kein Drag stattgefunden hat.
+ * @param fieldId ID des geklickten Feldes
  */
-const SPACING = 100
-const R = 80
-const PADDING = 200
-
-/**
- * Bounds: Board-Positionen als Layout-Hints
- */
-const bounds = computed(() => {
-  const xs = props.board.fields.map(f => f.position?.x).filter(n => Number.isFinite(n)) as number[]
-  const ys = props.board.fields.map(f => f.position?.y).filter(n => Number.isFinite(n)) as number[]
-
-  // Fallback, falls Daten kaputt/leer sind
-  if (xs.length === 0 || ys.length === 0) {
-    return { minX: 0, maxX: 0, minY: 0, maxY: 0 }
-  }
-
-  return {
-    minX: Math.min(...xs),
-    maxX: Math.max(...xs),
-    minY: Math.min(...ys),
-    maxY: Math.max(...ys),
-  }
-})
-
-/**
- * Mappt Board-Koordinaten -> SVG-Koordinaten (Zentren der Kreise).
- */
-function cx(x: number) {
-  // X-Achse spiegeln
-  return PADDING + (bounds.value.maxX - x) * SPACING
-}
-
-function cy(y: number) {
-  // Y-Achse spiegeln
-  return PADDING + (bounds.value.maxY - y) * SPACING
-}
-
-
-/**
- * viewBox-Größe: genug Raum für Kreise + padding
- */
-const svgSize = computed(() => {
-  const w = (bounds.value.maxX - bounds.value.minX) * SPACING + PADDING * 2
-  const h = (bounds.value.maxY - bounds.value.minY) * SPACING + PADDING * 2
-  // Minimum, damit bei 1 Feld nicht 0x0 entsteht
-  return { w: Math.max(w, 2 * (PADDING + R)), h: Math.max(h, 2 * (PADDING + R)) }
-})
-
-/**
- * Lookup Map für Nachbarn (für Edge-Linien)
- */
-const fieldById = computed(() => {
-  const m = new Map<string, IBoardDTD["fields"][number]>()
-  for (const f of props.board.fields) m.set(f.id, f)
-  return m
-})
-
-function occ(fieldId: string): Occupancy {
-  return props.occupancyByFieldId[fieldId] ?? "FREE"
-}
-
-/**
- * nur FREE darf ausgewählt werden
- */
-function isFree(fieldId: string) {
-  return occ(fieldId) === "FREE"
-}
-
 function onClickField(fieldId: string) {
   if (dragMoved) {
     dragMoved = false
@@ -286,28 +413,7 @@ function onClickField(fieldId: string) {
   console.log("Selected Field: " + fieldId)
 }
 
-/**
- * Zustände:
- * - OWN_MEEPLE: in Meeple Farbe gefärbter Kreis
- * - SELECTED (Barriere-Ziel): schwarzer gefüllter Kreis
- * - OCCUPIED: leerer Kreis + X
- * - FREE: leerer Kreis
- */
-function isOccupied(fieldId: string) {
-  return occ(fieldId) === "OCCUPIED"
-}
-function isOwn(fieldId: string) {
-  return occ(fieldId) === "OWN_MEEPLE"
-}
-function isSelected(fieldId: string) {
-  return props.selectedFieldId === fieldId
-}
-function isInvalidStart(fieldId: string) {
-  return occ(fieldId) === "INVALID_START"
-}
-function isInvalidEnd(fieldId: string) {
-  return occ(fieldId) === "INVALID_END"
-}
+
 </script>
 
 <template>
