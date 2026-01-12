@@ -57,8 +57,10 @@ const PADDING = 200
  */
 
 const bounds = computed(() => {
-  const xs = props.board.fields.map(f => f.position?.x).filter(n => Number.isFinite(n)) as number[]
-  const ys = props.board.fields.map(f => f.position?.y).filter(n => Number.isFinite(n)) as number[]
+  const xs = props.board.fields.map(f => f.position?.x).filter((n): n is number => isFinite(n as number))
+
+  const ys = props.board.fields.map(f => f.position?.y).filter((n): n is number => isFinite(n as number))
+
 
   return {
     minX: Math.min(...xs),
@@ -100,14 +102,12 @@ const svgSize = computed(() => {
 })
 
 /**
- * Map für schnellen Lookup von Feldern über ihre ID.
- * @returns {Map<string, IBoardDTD['fields'][number]>}
+ * Erstellt ein Lookup-Objekt für Spielfelder anhand ihrer IDs.
  */
-const fieldById = computed(() => {
-  const m = new Map<string, IBoardDTD["fields"][number]>()
-  for (const f of props.board.fields) m.set(f.id, f)
-  return m
-})
+const fieldById: Record<string, IBoardDTD["fields"][number]> = {}
+for (const f of props.board.fields) {
+  fieldById[f.id] = f
+}
 
 
 
@@ -251,18 +251,12 @@ function recomputeMaxZoom() {
 // LIFE-CYLCE
 //
 
-onMounted(async () => {
-  await nextTick()
-
-  const field = currentField.value
-  if (!field) return
-
-  centerOnField(field, INTIAL_ZOOM)
-})
-
 onMounted(() => {
   nextTick(() => {
     recomputeMaxZoom()
+
+    const field = currentField.value
+    field && centerOnField(field, INTIAL_ZOOM)
   })
 })
 
@@ -435,10 +429,10 @@ function onClickField(fieldId: string) {
       <!-- Edges: nur east + south zeichnen, um Duplikate zu vermeiden -->
       <g class="edges">
         <template v-for="f in props.board.fields" :key="f.id">
-          <line v-if="f.east && fieldById.get(f.east)" :x1="cx(f.position.x)" :y1="cy(f.position.y)"
-            :x2="cx(fieldById.get(f.east)!.position.x)" :y2="cy(fieldById.get(f.east)!.position.y)" class="edge" />
-          <line v-if="f.south && fieldById.get(f.south)" :x1="cx(f.position.x)" :y1="cy(f.position.y)"
-            :x2="cx(fieldById.get(f.south)!.position.x)" :y2="cy(fieldById.get(f.south)!.position.y)" class="edge" />
+          <line v-if="f.east && fieldById[f.east]" :x1="cx(f.position.x)" :y1="cy(f.position.y)"
+            :x2="cx(fieldById[f.east]!.position.x)" :y2="cy(fieldById[f.east]!.position.y)" class="edge" />
+          <line v-if="f.south && fieldById[f.south]" :x1="cx(f.position.x)" :y1="cy(f.position.y)"
+            :x2="cx(fieldById[f.south]!.position.x)" :y2="cy(fieldById[f.south]!.position.y)" class="edge" />
         </template>
       </g>
 

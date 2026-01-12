@@ -10,7 +10,6 @@ import { generateUUID } from 'three/src/math/MathUtils.js';
 import { useErrorHandler } from '@/composables/useErrorHandler';
 import { startingbaseColors, playerColors } from '@/types/colorsAssets';
 import { useAudioStore } from '@/stores/audioStore'
-import { string } from 'three/tsl';
 import { getAutomaticTypeDirectiveNames } from 'typescript';
 import { tUI } from '@/i18n';
 
