@@ -24,10 +24,12 @@ const emit = defineEmits<{
 }>()
 
 function resolveComponent(duel: any) {
+  console.log('Resolving component for duel:', duel)
+  console.log('miniGameType:', duel.miniGameType)
   switch (duel.miniGameType) {
     case 'DiceGame':
       return DiceMiniGame
-    case "SlotGame":
+    case "EinarmigerBanditGame":
       return EinarmigerBanditMiniGame
     case 'BalloonGame':
       return BalloonMinigame

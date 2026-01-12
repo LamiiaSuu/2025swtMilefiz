@@ -65,7 +65,7 @@ public class EinarmigerBanditGame extends MiniGame {
     private Player player2;
 
     public EinarmigerBanditGame(int timeOut) {
-        super(6, "Einarmiger-Bandit-Spiel", timeOut);
+        super(6, "Einarmiger-Bandit-Game", timeOut);
     }
 
     /**
