@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue"
+import { tUI } from '@/i18n'
 
 
 const props = defineProps<{
@@ -36,7 +37,7 @@ onUnmounted(() => {
   <div v-if="props.isOpen" class="backdrop">
     <div class="dialog" role="dialog" aria-modal="true">
       <header class="header">
-        <h2 class="title">Sperre umplatzieren</h2>
+        <h2 class="title">{{ tUI('MINIMAP_BARRIER_MOVE') }}</h2>
       </header>
 
       <section class="content">
@@ -52,14 +53,14 @@ onUnmounted(() => {
               <svg class="legend-icon legend-icon--barrier" viewBox="0 0 24 24" aria-hidden="true">
                 <image href="/mapEditorIcons/barrier.png" x="4" y="4" width="16" height="16" />
               </svg>
-              <span class="legend-label">Sperre</span>
+              <span class="legend-label">{{ tUI('BARRIER') }}</span>
             </div>
 
             <div class="legend-row">
               <svg class="legend-icon legend-icon--own" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--own" />
               </svg>
-              <span class="legend-label">Eigenes Meeple</span>
+              <span class="legend-label">{{ tUI('MINIMAP_OWN_MEEPLE') }}</span>
             </div>
 
             <div class="legend-row">
@@ -70,14 +71,14 @@ onUnmounted(() => {
                 <line x1="5" y1="5" x2="19" y2="19" class="legend-x-line" />
                 <line x1="19" y1="5" x2="5" y2="19" class="legend-x-line" />
               </svg>
-              <span class="legend-label">Besetzt</span>
+              <span class="legend-label">{{ tUI('MINIMAP_OCCUPIED') }}</span>
             </div>
 
             <div class="legend-row">
               <svg class="legend-icon legend-icon--free" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--free" />
               </svg>
-              <span class="legend-label">Frei</span>
+              <span class="legend-label">{{ tUI('MINIMAP_AVAILABLE') }}</span>
             </div>
           </aside>
         </div>
@@ -85,7 +86,7 @@ onUnmounted(() => {
         <!-- Bestätigen Button -->
         <div class="actions">
           <button type="button" class="btn primary" :disabled="disabled" @click="emit('confirm')">
-            Bestätigen
+            {{ tUI('CONFIRM') }}
           </button>
         </div>
       </section>

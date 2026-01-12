@@ -44,7 +44,7 @@ export const UI_NL: Record<UIKey, string> = {
     BACK_TO_MAIN_MENU_CONFIRMATION_MAP_EDITOR: 'Wil je echt terugkeren naar het hoofdmenu? Niet-opgeslagen wijzigingen gaan verloren.',
     BACK_TO_MAIN_MENU_CONFIRMATION_INGAME: 'Wil je het spel echt verlaten?',
     CANCEL: 'Annuleren',
-    CONTINUE:'Doorgaan',
+    CONTINUE: 'Doorgaan',
     LEAVE_GAME: 'Verlaat het spel',
     POPUP_MENU: 'Menu',
     CONTROLS: 'Sturen',
@@ -55,5 +55,10 @@ export const UI_NL: Record<UIKey, string> = {
     MINIGAME_DICE_TITLE: 'Dobbelspel',
     MINIGAME_BALLOON_TITLE: 'Laat de ballon knallen!',
     MINIGAME_BALLOON_INSTRUCTION: 'Maak je klaar! Druk zo snel mogelijk op de knop!',
-    MINIGAME_BALLOON_CLICK: 'Klikken!', 
+    MINIGAME_BALLOON_CLICK: 'Klikken!',
+    CONFIRM: "Bevestigen",
+    MINIMAP_BARRIER_MOVE: "Barrière verplaatsen",
+    MINIMAP_OWN_MEEPLE: "Eigen meeple",
+    MINIMAP_OCCUPIED: "Bezet",
+    MINIMAP_AVAILABLE: "Beschikbaar"
 }

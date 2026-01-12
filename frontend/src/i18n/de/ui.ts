@@ -45,6 +45,7 @@ export const UI_DE: Record<UIKey, string> = {
     BACK_TO_MAIN_MENU_CONFIRMATION_INGAME: 'Willst du wirklich das Spiel verlassen?',
     CANCEL: 'Abbrechen',
     CONTINUE: 'Fortsetzen',
+    CONFIRM: 'Bestätigen',
     LEAVE_GAME: 'Spiel verlassen',
     POPUP_MENU: 'Menü',
     CONTROLS: 'Steuerung',
@@ -55,5 +56,9 @@ export const UI_DE: Record<UIKey, string> = {
     MINIGAME_DICE_TITLE: 'Würfel-Spiel',
     MINIGAME_BALLOON_TITLE: 'Bring den Ballon zum Platzen!',
     MINIGAME_BALLOON_INSTRUCTION: 'Mach dich bereit! Drück den Button so schnell du kannst!',
-    MINIGAME_BALLOON_CLICK: 'Klicken!', 
+    MINIGAME_BALLOON_CLICK: 'Klicken!',
+    MINIMAP_BARRIER_MOVE: 'Sperre umplatzieren',
+    MINIMAP_OWN_MEEPLE: 'Eigenes Meeple',
+    MINIMAP_OCCUPIED: 'Besetzt',
+    MINIMAP_AVAILABLE: 'Frei'
 }
