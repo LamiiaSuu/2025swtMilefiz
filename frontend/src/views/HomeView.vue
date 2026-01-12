@@ -9,7 +9,7 @@
     <!-- Settings Button-->
     <button class="settings-button" @mouseenter="onHover" @click="goToSettings">
       <!-- cog by Fabio Nucatolo from https://thenounproject.com/browse/icons/term/cog/" - Noun Project (CC BY 3.0) -->
-      <img src="@/assets/buttons/settings_icon.png" alt="Settings"/>
+      <img src="@/assets/buttons/settings_icon.png" alt="Settings" />
     </button>
 
     <!-- Menu Buttons -->
@@ -107,8 +107,8 @@ function onHover() {
 
 .settings-button {
   position: absolute;
-  top: 4.5vh;
-  right: -22.5vh;
+  top: 5vh;
+  right: -13.5vw;
   background: none;
   border: none;
   cursor: pointer;
@@ -127,11 +127,25 @@ function onHover() {
 }
 
 @keyframes wiggle {
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(15deg); }
-  50% { transform: rotate(-10deg); }
-  75% { transform: rotate(15deg); }
-  100% { transform: rotate(0deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(15deg);
+  }
+
+  50% {
+    transform: rotate(-10deg);
+  }
+
+  75% {
+    transform: rotate(15deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 .settings-button:hover img {

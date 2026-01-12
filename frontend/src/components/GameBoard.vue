@@ -280,12 +280,6 @@ const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape' || e.key === 'm') {
     e.preventDefault()
 
-    // Schließt die PopUp-Einstellungen, wenn sie offen sind
-    if (milefizStore.popUpSettingsOpen) {
-      milefizStore.closePopUpSettings()
-      return
-    }
-
     // Schließt das PopUp-Menu, wenn es offen sind
     if (milefizStore.popUpMenuOpen) {
       milefizStore.closePopUpMenu()
@@ -296,7 +290,6 @@ const handleKeydown = (e: KeyboardEvent) => {
       return
     }
   }
-
 
   // Wenn ein Duell aktiv ist → alle Steuerungen blockieren
   if (Object.keys(milefizStore.activeDuels).length > 0) {

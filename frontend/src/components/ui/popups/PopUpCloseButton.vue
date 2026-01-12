@@ -17,6 +17,7 @@ function closePopUps() {
     audio.playSfx('click')
     milefizStore.closePopUpMenu()
     milefizStore.closePopUpSettings()
+    milefizStore.closePopUpTutorial()
 }
 
 </script>
@@ -24,37 +25,39 @@ function closePopUps() {
 <template>
     <!-- Close icons created by Rutmer Zijlstra - Flaticon: https://www.flaticon.com/free-icon/cross_9675141?term=close&page=2&position=64&origin=search&related_id=9675141 -->
     <button class="close-button" @click="closePopUps()">
-        <p class="key-text">(Esc)</p>
-        <img class="close-icon" src="@/assets/buttons/close_button_icon.png" />
+        <slot></slot>
+        <img class="close-icon" src="@/assets/buttons/close_button_icon.png" alt="X"/>
     </button>
 </template>
 
 <style scoped>
 .close-button {
-    position: absolute;
-    margin-top: -40%;
-    margin-right: -112.5%;
+    position: fixed;
+    top: 5vh;
+    right: 1vw;
+
     display: flex;
-    align-items: center; 
+    align-items: center;
+    gap: -1vh;
 
     background: transparent;
     cursor: pointer;
     border: none;
     padding: 0;
+
+    color: white;
+    font-size: 4vh;
 }
+
 
 .close-icon {
-    width: 15%;
-    height: 15%;
+    width: 10vh;
+    height: 10vh;
+
     filter: brightness(0) invert(1);
-    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
 }
 
-.key-text {
-    color: white;
-    font-size: 3vh;
-    margin-right: -0.5vw;
-}
 
 @keyframes popupIn {
     from {
