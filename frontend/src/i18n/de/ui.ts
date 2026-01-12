@@ -57,4 +57,7 @@ export const UI_DE: Record<UIKey, string> = {
     MINIGAME_SLOT_BUTTON: 'ziehen',
     MINIGAME_SLOT_COMP: 'System',
     MINIGAME_SLOT_JACKPOT: 'JACKPOT',
+    MINIGAME_BALLOON_TITLE: 'Bring den Ballon zum Platzen!',
+    MINIGAME_BALLOON_INSTRUCTION: 'Mach dich bereit! Drück den Button so schnell du kannst!',
+    MINIGAME_BALLOON_CLICK: 'Klicken!',
 }

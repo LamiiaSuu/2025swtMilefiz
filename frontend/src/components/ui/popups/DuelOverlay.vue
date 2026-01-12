@@ -6,7 +6,6 @@
         :class="['duel-card', { 'duel-card-wide': duel.miniGameType === 'SlotGame' }]">
         <component :is="resolveComponent(duel)" :duel="duel" @close="() => emit('close', duel.duelId)" />
       </div>
-
     </div>
   </div>
 </template>
@@ -14,24 +13,26 @@
 <script setup lang="ts">
 import DiceMiniGame from "../minigames/DiceMiniGame.vue"
 import EinarmigerBanditMiniGame from '@/components/ui/minigames/EinarmigerBandit/EinarmigerBanditMiniGame.vue'
+import BalloonMinigame from '../minigames/balloonMinigame/BalloonMinigame.vue';
 
 const props = defineProps<{
   duels: any[]
 }>()
 
 const emit = defineEmits<{
-  (e: "close", duelId: string): void
+  (e: 'close', duelId: string): void
 }>()
 
 function resolveComponent(duel: any) {
   switch (duel.miniGameType) {
-    case "DiceGame":
+    case 'DiceGame':
       return DiceMiniGame
     case "SlotGame":
       return EinarmigerBanditMiniGame
-
+    case 'BalloonGame':
+      return BalloonMinigame
     default:
-      return DiceMiniGame
+      return BalloonMinigame
   }
 }
 </script>
