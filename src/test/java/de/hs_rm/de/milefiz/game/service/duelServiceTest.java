@@ -146,6 +146,53 @@ class DuelServiceImplTest {
             emptyService::randomGame);
     }
 
+    @Test
+    void isMeepleInDuel_finishedGame_isIgnored() {
+        UUID p1 = UUID.randomUUID();
+        UUID p2 = UUID.randomUUID();
+        UUID m1 = UUID.randomUUID();
+        UUID m2 = UUID.randomUUID();
+
+        Duel duel = service.createDuel(p1, p2, m1, m2);
+
+        DiceGame game = mock(DiceGame.class);
+        when(game.isFinished()).thenReturn(true);
+        duel.setMiniGame(game);
+
+        assertFalse(service.isMeepleInDuel(m1));
+        assertFalse(service.isMeepleInDuel(m2));
+    }
+
+    @Test
+    void isMeepleInDuel_noMiniGame_isIgnored() {
+        Duel duel = service.createDuel(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        );
+
+        // MiniGame bewusst NICHT gesetzt
+
+        assertFalse(service.isMeepleInDuel(duel.getFirstMeeple()));
+    }
+
+    @Test
+    void assignRandomGameToDuel_registersOnFinishedCallback() {
+        Duel duel = service.createDuel(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        );
+
+        MiniGame game = service.assignRandomGameToDuel(duel.getId());
+
+        assertNotNull(game);
+
+        Object callback = ReflectionTestUtils.getField(game, "onFinished");
+        assertNotNull(callback);
+    }
 
 
 
