@@ -428,10 +428,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             if (event.msg === "MOVE_BARRIER_REJECTED_START_OR_END") {
               showWarning("MOVE_BARRIER_REJECTED_START_OR_END")
               minimap.isMiniMapOpen = true
+              minimap.selectedFieldId = ""
+              minimap.occupancyByFieldId = buildOccupancySnapshot()
             }
             else if (event.msg === "MOVE_BARRIER_OCCUPIED") {
               showWarning("MOVE_BARRIER_OCCUPIED")
               minimap.isMiniMapOpen = true
+              minimap.selectedFieldId = ""
+              minimap.occupancyByFieldId = buildOccupancySnapshot()
             }
           }
         }
@@ -583,8 +587,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         for (const meeple of player.meeples ?? []) {
           if (meeple.currentFieldId) {
             boardStore.meeplePositions[meeple.id] = meeple.currentFieldId
-            
-            if (player.id === gamedata.playerId && !foundCurrentField){
+
+            if (player.id === gamedata.playerId && !foundCurrentField) {
               gamedata.currentField = meeple.currentFieldId
               gamedata.activeMeeple = meeple.id
               foundCurrentField = true
@@ -842,7 +846,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     return occ
   }
 
-  
+
   /**
    * Öffnet das Minimap Pop-up, um Sperren umzuplatzieren.
    * Initialisiert Farbe, Status, ausgewählte Barrier-ID und Occupancy-Snapshot.
