@@ -186,7 +186,7 @@ onUnmounted(() => {
 .loading::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -12px;
 
   background-image: url("/backgrounds/BackgroundTest.webp");
   background-size: cover;
