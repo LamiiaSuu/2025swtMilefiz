@@ -186,14 +186,14 @@ onUnmounted(() => {
 .loading::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -12px;
 
   background-image: url("/backgrounds/BackgroundTest.webp");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
 
-  filter: blur(4px) brightness(0.6);
+  filter: blur(6px) brightness(0.6);
   z-index: -1;
 }
 

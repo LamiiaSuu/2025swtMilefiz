@@ -24,7 +24,7 @@ public class DiceGame extends MiniGame {
 
     private boolean timeoutStarted = false;
 
-    private final Random random = new Random();
+    private final Random random;
 
     private UUID player1;
     private UUID player2;
@@ -34,6 +34,13 @@ public class DiceGame extends MiniGame {
 
     public DiceGame(int timeOut) {
         super(1, "Würfel-Spiel", timeOut);
+        this.random = new Random();
+    }
+
+    //Für die Unit-Tests
+    DiceGame(int timeOut, Random random) {
+        super(1, "Würfel-Spiel", timeOut);
+        this.random = random;
     }
 
     /**

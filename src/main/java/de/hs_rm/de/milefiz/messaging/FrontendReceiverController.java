@@ -47,6 +47,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyRejectedEvent;
 public class FrontendReceiverController {
 
     private final Logger logger = LoggerFactory.getLogger(FrontendReceiverController.class);
+    private final String lobbyNotFound = "Lobby not found.";
     private LobbyManager lobbyManager;
     private GameService gameService;
     private LobbyMapper lobbyMapper;
@@ -256,7 +257,7 @@ public class FrontendReceiverController {
         try {
             lobby = lobbyManager.getLobby(lobbyId);
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error(lobbyNotFound, e);
         }
         if (!player.equals(lobby.getLeader())) {
             throw new PlayerHasNoPermissionException("Der Spieler ist kein Leader");
@@ -586,7 +587,7 @@ public class FrontendReceiverController {
             lobby.setMaxPlayers(lobbyUpdateSettingsCmd.maxPlayers());
             return new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Update der Einstellungen");
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error(lobbyNotFound, e);
         }
         return new FrontendLobbyUpdateEvent(null, "");
     }
@@ -625,7 +626,7 @@ public class FrontendReceiverController {
             lobby = lobbyManager.getLobby(lobbyId);
             return new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Update PlayerName");
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error(lobbyNotFound, e);
         }
         return new FrontendLobbyUpdateEvent(null, "");
 

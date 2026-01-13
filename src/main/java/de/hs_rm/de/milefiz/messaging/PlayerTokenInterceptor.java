@@ -2,6 +2,8 @@ package de.hs_rm.de.milefiz.messaging;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -20,6 +22,8 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
 
     @Autowired
     private LobbyManager lobbyManager;
+
+    private final Logger logger = LoggerFactory.getLogger(PlayerTokenInterceptor.class);
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -51,7 +55,7 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
                 accessor.getSessionAttributes().put("player-token", player.getPlayerToken());
                 accessor.getSessionAttributes().put("player", player);
             } catch (PlayerNotFoundException | IllegalArgumentException e) {
-                e.printStackTrace();
+                logger.error("Player not found", e);
                 // Verbindung ablehnen bei ungültigem Token
                 return null;
             }
@@ -73,7 +77,7 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
                 try {
                     player = lobbyManager.getPlayerByTokenFromLobbies(token);
                 } catch (PlayerNotFoundException e) {
-                    e.printStackTrace();
+                    logger.error("Player not found", e);
                 }
             }
 

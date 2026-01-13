@@ -130,7 +130,7 @@ public class MovementServiceImpl implements MovementService {
         try {
             lobby = lobbyManager.getLobby(lobbyId);
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error("Lobby not found", e);
         }
 
         Board board = lobby.getBoard();
@@ -423,7 +423,7 @@ public class MovementServiceImpl implements MovementService {
         try {
             lobby = lobbyManager.getLobby(lobbyId);
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error("Lobby not found", e);
         }
 
         Board board = lobby.getBoard();

@@ -1,16 +1,16 @@
 package de.hs_rm.de.milefiz.game.controller;
 
-import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
-import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
@@ -26,8 +26,6 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Controller für die Mini-Spiele innerhalb eines Duells.
@@ -193,7 +191,10 @@ public class MiniGameController {
 
                 // Spieler 1 verliert?
                 if (winner == null || !winner.equals(p1)) {
-
+                        if(Objects.equals(lobby.getPlayer(p1).getActiveMeeple(), m1)){
+                                lobby.getPlayer(p1).setRemainingMoves(0);
+                                lobby.getPlayer(p1).setActiveMeeple(null);
+                        }
                         messaging.sendEvent(new LobbyMessage(
                                         lobby,
                                         new FrontendMoveEvent(
@@ -209,7 +210,10 @@ public class MiniGameController {
 
                 // Spieler 2 verliert?
                 if (winner == null || !winner.equals(p2)) {
-
+                        if(Objects.equals(lobby.getPlayer(p2).getActiveMeeple(), m2)){
+                                lobby.getPlayer(p2).setRemainingMoves(0);
+                                lobby.getPlayer(p2).setActiveMeeple(null);
+                        }
                         messaging.sendEvent(new LobbyMessage(
                                         lobby,
                                         new FrontendMoveEvent(
