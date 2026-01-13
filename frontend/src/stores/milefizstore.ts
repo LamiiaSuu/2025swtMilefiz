@@ -74,6 +74,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   */
   const popUpMenuOpen = ref(false)
   const popUpSettingsOpen = ref(false)
+  const popUpTutorialOpen = ref(false)
 
 
   type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE'
@@ -1016,6 +1017,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   function closePopUpMenu() {
     popUpMenuOpen.value = false
     popUpSettingsOpen.value = false
+    popUpTutorialOpen.value = false
   }
 
   // Oeffnet PopUp Einstellungen
@@ -1026,6 +1028,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   // Schließt PopUp Einstellungen
   function closePopUpSettings() {
     popUpSettingsOpen.value = false
+  }
+
+    // Oeffnet PopUp Tutorial
+  function openPopUpTutorial() {
+    popUpTutorialOpen.value = true
+  }
+
+  // Schließt PopUp Tutorial
+  function closePopUpTutorial() {
+    popUpTutorialOpen.value = false
   }
 
   /**
@@ -1095,10 +1107,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     getWinnerColor,
     popUpMenuOpen,
     popUpSettingsOpen,
+    popUpTutorialOpen,
     openPopUpMenu,
     closePopUpMenu,
     openPopUpSettings,
     closePopUpSettings,
+    openPopUpTutorial,
+    closePopUpTutorial,
     activeDuels,
     minimap,
     confirmMinimapSelection,
