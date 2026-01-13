@@ -193,7 +193,7 @@ onUnmounted(() => {
   background-repeat: no-repeat;
   background-position: center;
 
-  filter: blur(4px) brightness(0.6);
+  filter: blur(6px) brightness(0.6);
   z-index: -1;
 }
 
