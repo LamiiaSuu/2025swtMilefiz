@@ -90,6 +90,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    */
   const minimap = reactive({
     isMiniMapOpen: false, // Ist MiniMap aktuell geöffnet
+    currentPosition: "", // Aktuelle Position des aktiven Meeples
     selectedBarrierId: "", // Welche Barriere wird verschoben
     selectedFieldId: "", // Zielfeld für Verschiebung
     isMovingBarrier: false, // Verschiebt der Spieler, der in die Barrier gelaufen ist gerade? (für Event-Filter)
@@ -105,6 +106,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy: number
     isJumping: boolean
     currentDiceRoll?: number
+    currentField: string
+    activeMeeple: string
     lobby: Lobby | null
     moved: boolean
   }>({
@@ -113,6 +116,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     energy: 0, //Energy des Spielers
     isJumping: false, //Flag, ob sich der Spieler in einer Sprungaktion befindet
     currentDiceRoll: undefined, //Würfel ergebnis
+    currentField: "",
+    activeMeeple: "",
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
     moved: false
   })
@@ -237,6 +242,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = event.moved
+            gamedata.currentField = event.targetField
+            gamedata.activeMeeple = event.id
           }
         }
         // LOBBY_UPDATE wird immer ausgerufen, wenn sich Werte der Lobby (außer das Board) geupdatet haben. Dazu zählt auch, wenn neue Spieler gejoint sind
@@ -288,6 +295,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = event.moved
+            gamedata.currentField = event.targetField
+            gamedata.activeMeeple = event.id
             showWarning(`REMAINING_MOVES_LOST`)
             //TODO moveloss animieren
             console.warn("lost remaining moves")
@@ -300,8 +309,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = false;
+            gamedata.currentField = event.targetField
+            gamedata.activeMeeple = event.id
             //TODO minimap öffnen
-            openMinimap(event.barrierId, event.playerId)
+            openMinimap(event.barrierId, event.playerId, event.currentField)
           }
           //moveBarrier(event.barrierId, crypto.randomUUID())
         }
@@ -566,10 +577,18 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       // Meeple-Positionen neu setzen
       boardStore.meeplePositions = {}
 
+      let foundCurrentField = false
+
       for (const player of lobbyUpdate.lobby.players ?? []) {
         for (const meeple of player.meeples ?? []) {
           if (meeple.currentFieldId) {
             boardStore.meeplePositions[meeple.id] = meeple.currentFieldId
+            
+            if (player.id === gamedata.playerId && !foundCurrentField){
+              gamedata.currentField = meeple.currentFieldId
+              gamedata.activeMeeple = meeple.id
+              foundCurrentField = true
+            }
           }
         }
       }
@@ -823,19 +842,21 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     return occ
   }
 
+  
   /**
    * Öffnet das Minimap Pop-up, um Sperren umzuplatzieren.
    * Initialisiert Farbe, Status, ausgewählte Barrier-ID und Occupancy-Snapshot.
    * @param {string} barrierId ID der zu verschiebenden Sperre
    * @param {string} playerId ID des Spielers, der die Aktion ausgelöst hat
    */
-  function openMinimap(barrierId: string, playerId: string) {
+  function openMinimap(barrierId: string, playerId: string, currentPositon: string) {
     if (playerId === gamedata.playerId) {
       minimap.ownColor = (getPlayerColor(playerId) ?? "RED") as any
       minimap.isMiniMapOpen = true;
       minimap.selectedFieldId = ''
       minimap.selectedBarrierId = barrierId
       minimap.isMovingBarrier = true
+      minimap.currentPosition = currentPositon
 
       minimap.occupancyByFieldId = buildOccupancySnapshot()
 
@@ -1069,7 +1090,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     popUpSettingsOpen.value = false
   }
 
-    // Oeffnet PopUp Tutorial
+  // Oeffnet PopUp Tutorial
   function openPopUpTutorial() {
     popUpTutorialOpen.value = true
   }
@@ -1163,6 +1184,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     closePopUpTutorial,
     activeDuels,
     minimap,
+    openMinimap,
     confirmMinimapSelection,
     selectMinimapField,
     jumpTrigger,

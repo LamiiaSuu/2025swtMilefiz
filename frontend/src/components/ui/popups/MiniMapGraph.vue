@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, nextTick } from "vue"
+import { computed, ref, onMounted, nextTick, watch } from "vue"
+import { useMilefizStore } from "@/stores/milefizstore";
 import type { IBoardDTD } from "@/stores/IBoardDTD";
+
+
+const milefizStore = useMilefizStore()
 
 type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE" | "INVALID_END" | "INVALID_START"
 
@@ -20,12 +24,13 @@ const svgRef = ref<SVGSVGElement | null>(null)
 // STATES UND KONSTANTEN für zoom, pan und drag
 // 
 
-// Zoom-State
-const zoom = ref(1)
-const MIN_ZOOM = 1.0
-const maxZoom = ref(3)
-const ZOOM_STEP = 0.1
-const INTIAL_ZOOM = 10.0
+// Zwei Ansichten: 'overview' und 'detail'
+type ViewMode = 'OVERVIEW' | 'DETAIL'
+const viewMode = ref<ViewMode>('OVERVIEW')
+
+// Zoom-Faktoren
+const ZOOM_FACTOR = 1.0
+const zoom = ref(ZOOM_FACTOR)
 
 // Pan-State
 const panX = ref(0)
@@ -33,10 +38,11 @@ const panY = ref(0)
 
 // Drag-State
 const isDragging = ref(false)
-let lastMouseX = 0
-let lastMouseY = 0
-let dragMoved = false
-
+let dragStartX = 0
+let dragStartY = 0
+let dragStartPanX = 0
+let dragStartPanY = 0
+let isDragMoved = false
 
 // RENDER PARAMETER
 // - SPACING bestimmt Abstand zwischen Nodes
@@ -46,7 +52,6 @@ let dragMoved = false
 const SPACING = 100
 const R = 80
 const PADDING = 200
-
 
 
 // BOARD GEOMETRIE / LAYOUT
@@ -110,14 +115,21 @@ for (const f of props.board.fields) {
 }
 
 
-
 /**
  * Liefert die kombinierte SVG-Transformation (translate + scale).
  * @returns {string}
  */
 const transform = computed(() => {
-  return `translate(${panX.value} ${panY.value}) scale(${zoom.value})`
+  if (viewMode.value === 'OVERVIEW') {
+    // In Übersicht: Kein Pan, nur Zoom
+    return `scale(${zoom.value})`
+  } else {
+    // In Detail: Pan + Zoom
+    return `translate(${panX.value} ${panY.value}) scale(${zoom.value})`
+  }
 })
+
+
 
 // 
 // OCCUPANCY + SELECTION HELPERS
@@ -147,12 +159,12 @@ function isFree(fieldId: string) {
 // - SELECTED (Barriere-Ziel): schwarzer gefüllter Kreis
 // - OCCUPIED: leerer Kreis + X
 // - FREE: leerer Kreis
- 
+
 /**
  * Prüft ob ein Feld als besetzt markiert ist.
  * @param fieldId ID des Feldes
  * @returns {boolean}
- */  
+ */
 function isOccupied(fieldId: string) {
   return occ(fieldId) === "OCCUPIED"
 }
@@ -198,226 +210,200 @@ function isInvalidEnd(fieldId: string) {
  * @returns {IBoardDTD['fields'][number] | undefined}
  */
 const currentField = computed(() => {
-  const own = props.board.fields.find(f => isOwn(f.id))
-  if (own) return own
+  // currentField aus dem milefizStore holen
+  const currentFieldId = milefizStore.gamedata.currentField
+  
+  if (!currentFieldId) return undefined
+  
+  // Feld-Objekt anhand der ID finden
+  return props.board.fields.find(f => f.id === currentFieldId)
 })
 
-// 
-// CENTERING / ZOOM-BERECHNUNG
-// 
+/**
+ * Liefert das aktuell ausgewählte Feld
+ * @return {IBoardDTD['fields'][number] | undefined}
+ */
+const selectedField = computed(() => {
+  if (!props.selectedFieldId) return undefined
+  return fieldById[props.selectedFieldId]
+})
+
+// VIEW MANAGEMENT
+/**
+ * Wechselt zur Übersichtsansicht (gesamte Map)
+ */
+function showOverview() {
+  viewMode.value = 'OVERVIEW'
+  zoom.value = ZOOM_FACTOR
+  panX.value = 0
+  panY.value = 0
+}
+
 
 /**
- * Zentriert die MiniMap so, dass das Feld mittig dargestellt wird.
- * @param field Feld das fokussiert werden soll
- * @param targetZoom Gewünschter Zoomfaktor
+ * Berechnet den optimalen Detail-Zoom basierend auf der Map-Größe
  */
-function centerOnField(field: IBoardDTD["fields"][number], targetZoom: number) {
-  const z = Math.max(MIN_ZOOM, Math.min(maxZoom.value, targetZoom))
+const computedDetailZoom = computed(() => {
+  const svg = svgRef.value
+  if (!svg) return 2.0
 
+  const rect = svg.getBoundingClientRect()
   const viewW = svgSize.value.w
   const viewH = svgSize.value.h
+  
+  // Skalierung bei 100% Zoom
+  const scaleAt100 = Math.min(rect.width / viewW, rect.height / viewH)
+  
+  // Node-Durchmesser in Pixeln bei 100% Zoom
+  const nodePxAt100 = R * 2 * scaleAt100
+  
+  // Maximal erlaubter Zoom basierend auf Node-Größe (max 60px)
+  const MAX_NODE_PX = 50
+  const maxZoomByNodeSize = MAX_NODE_PX / nodePxAt100
+  
+  // Zoom für doppelte Größe der größeren Dimension
+  const maxDimension = Math.max(viewW, viewH)
+  // Berechne Zoom so, dass die größere Dimension etwa doppelt so groß dargestellt wird
+  const baseZoom = Math.max(2.0, maxDimension / 500)
+  const maxZoom = 10.0
+  
+  // Der kleinere Wert ist der limitierende Faktor
+  const limitedZoom = Math.min(Math.min(baseZoom, maxZoom), maxZoomByNodeSize)
+  
+  // Mindestens 100% Zoom
+  return Math.max(1.0, limitedZoom)
+})
 
+/**
+ * Wechselt zur Detailansicht auf ein bestimmtes Feld
+ */
+function showDetail(field: IBoardDTD["fields"][number]) {
+  viewMode.value = 'DETAIL'
+  zoom.value = ZOOM_FACTOR * computedDetailZoom.value
+  
+  const viewW = svgSize.value.w
+  const viewH = svgSize.value.h
   const fieldCx = cx(field.position.x)
   const fieldCy = cy(field.position.y)
-
-  panX.value = viewW / 2 - fieldCx * z
-  panY.value = viewH / 2 - fieldCy * z
-
-  zoom.value = z
+  
+  // Zentriere auf das Feld
+  panX.value = viewW / 2 - fieldCx * ZOOM_FACTOR * computedDetailZoom.value
+  panY.value = viewH / 2 - fieldCy * ZOOM_FACTOR * computedDetailZoom.value
 }
 
 /**
- * Berechnet das maximale Zoom-Level basierend auf Node-Pixeldimensionen.
+ * Wechselt zur Detailansicht auf das aktuelle Feld
  */
-function recomputeMaxZoom() {
+function showDetailOnCurrentField() {
+  const field = currentField.value
+  if (field) {
+    showDetail(field)
+  }
+}
+
+
+
+// INPUT HANDLER
+function onMouseDown(e: MouseEvent) {
+  // Nur in Detail-Ansicht darf gedraggt werden
+  if (viewMode.value !== 'DETAIL') return
+  if (e.button !== 0) return // Nur linke Maustaste
+
+  e.preventDefault()
+
+  const svg = e.currentTarget as SVGSVGElement
+  
+  // Startposition in Pixel
+  dragStartX = e.clientX
+  dragStartY = e.clientY
+  dragStartPanX = panX.value
+  dragStartPanY = panY.value
+  isDragging.value = true
+  isDragMoved = false
+}
+
+function onMouseMove(e: MouseEvent) {
+  // Nur in Detail-Ansicht
+  if (!isDragging.value || viewMode.value !== 'DETAIL') return
+
+  const dx = e.clientX - dragStartX
+  const dy = e.clientY - dragStartY
+
+  // 1:1 Pixel-Drag
   const svg = svgRef.value
   if (!svg) return
 
   const rect = svg.getBoundingClientRect()
-
-  const viewH = svgSize.value.h
-
-  const scaleAt1 = rect.height / viewH
-
-  const desiredMaxNodeRadiusPx = 20
-
-  const maxZoomLocal = desiredMaxNodeRadiusPx / (R * scaleAt1)
-
-  maxZoom.value = Math.max(MIN_ZOOM, maxZoomLocal)
-}
-
-
-// 
-// LIFE-CYLCE
-//
-
-onMounted(() => {
-  nextTick(() => {
-    recomputeMaxZoom()
-
-    const field = currentField.value
-    field && centerOnField(field, INTIAL_ZOOM)
-  })
-})
-
-// 
-// INPUT HANDLER
-// 
-
-/**
- * Zoomt in/aus der MiniMap um Mausposition oder Kartenmitte.
- * @param e WheelEvent
- */
-function onWheel(e: WheelEvent) {
-  e.preventDefault()
-
-  const svg = e.currentTarget as SVGSVGElement | null
-  if (!svg) return
-
-  // deltaY > 0  => rauszoomen
-  // deltaY <= 0 => reinzoomen
-  const direction = e.deltaY > 0 ? -1 : 1
-
-  let newZoom = zoom.value + direction * ZOOM_STEP
-
-  if (newZoom < MIN_ZOOM) newZoom = MIN_ZOOM
-  if (newZoom > maxZoom.value) newZoom = maxZoom.value
-
-  if (newZoom === zoom.value) {
-    return
-  }
-
-  // Sichtbare Größe des SVG
-  const rect = svg.getBoundingClientRect()
-
-  // viewBox-Größe
   const viewW = svgSize.value.w
   const viewH = svgSize.value.h
 
-  if (direction > 0) {// ZOOM IN -> um Mausposition
-    const mousePxX = e.clientX - rect.left
-    const mousePxY = e.clientY - rect.top
+  const scale = (viewW + viewH) / (rect.width +rect.height) * 1.5
 
-    const scaleX = viewW / rect.width
-    const scaleY = viewH / rect.height
+  panX.value = dragStartPanX + dx * scale
+  panY.value = dragStartPanY + dy * scale
 
-    const mouseSvgX = mousePxX * scaleX
-    const mouseSvgY = mousePxY * scaleY
-
-    const worldX = (mouseSvgX - panX.value) / zoom.value
-    const worldY = (mouseSvgY - panY.value) / zoom.value
-
-    panX.value = mouseSvgX - worldX * newZoom
-    panY.value = mouseSvgY - worldY * newZoom
-
-  } else {// ZOOM OUT -> um tatsächliche Mitte des SVG-Graphen
-    const centerSvgX = viewW / 2
-    const centerSvgY = viewH / 2
-
-    const worldCenterX = (centerSvgX - panX.value) / zoom.value
-    const worldCenterY = (centerSvgY - panY.value) / zoom.value
-
-    panX.value = centerSvgX - worldCenterX * newZoom
-    panY.value = centerSvgY - worldCenterY * newZoom
+  // Setze isDragMoved wenn Maus bewegt wurde (Deadzone)
+  const distance = Math.sqrt(dx * dx + dy * dy)
+  if (distance > 3) { // 3 Pixel Deadzone
+    isDragMoved = true
   }
-
-  // komplett rausgezoomt -> zurück zur initialen Zentrierung
-  if (newZoom === MIN_ZOOM) {
-    panX.value = 0
-    panY.value = 0
-  }
-
-  zoom.value = newZoom
 }
 
-/**
- * Startet einen Drag-Vorgang bei linker Maustaste.
- * @param e MouseEvent
- */
-function onMouseDown(e: MouseEvent) {
-  if (e.button !== 0) return //linke Maustaste
-
-  e.preventDefault()
-
-  isDragging.value = true
-  dragMoved = false
-  lastMouseX = e.clientX
-  lastMouseY = e.clientY
-}
-
-/**
- * Verschiebt die MiniMap proportional zur Mausbewegung.
- * @param e MouseEvent
- */
-function onMouseMove(e: MouseEvent) {
+function onMouseUp(e: MouseEvent) {
   if (!isDragging.value) return
 
-  const svg = svgRef.value
-  if (!svg) return
-
-  const rect = svg.getBoundingClientRect()
-  const viewW = svgSize.value.w
-  const viewH = svgSize.value.h
-
-  const dxPx = e.clientX - lastMouseX
-  const dyPx = e.clientY - lastMouseY
-
-  lastMouseX = e.clientX
-  lastMouseY = e.clientY
-
-  const distanceSq = dxPx * dxPx + dyPx * dyPx
-  if (distanceSq < 3 * 3) {
-    return
-  }
-
-  dragMoved = true
-
-  const scale = Math.min(rect.width / viewW, rect.height / viewH)
-  // Faktor, damit sich der Inhalt 1:1 zur Maus in Pixeln bewegt
-  const factor = 3 / (scale * zoom.value)
-
-  panX.value += dxPx * factor
-  panY.value += dyPx * factor
-}
-
-/**
- * Beendet einen aktiven Drag-Vorgang.
- */
-function onMouseUp() {
   isDragging.value = false
+  const svg = e.currentTarget as SVGSVGElement
+  svg.style.userSelect = ''
+
+  isDragMoved = false
 }
 
 function onMiddleClick(e: MouseEvent) {
   e.preventDefault()
-
-  const field = currentField.value
-  if(!field) return
-
-  centerOnField(field, INTIAL_ZOOM)
+  
+  if (viewMode.value !== 'DETAIL') {
+    // In Übersicht: Wechsel zu Detail auf aktuellem Feld
+    showDetailOnCurrentField()
+  } else {
+    // In Detail: Wechsel zurück zu Übersicht
+    showOverview()
+  }
 }
 
-
-/**
- * Selektiert ein Feld, wenn kein Drag stattgefunden hat.
- * @param fieldId ID des geklickten Feldes
- */
 function onClickField(fieldId: string) {
-  if (dragMoved) {
-    dragMoved = false
+  if (isDragMoved) {
+    isDragMoved = false
     return
   }
+  
   if (!isFree(fieldId)) return
   emit("select", fieldId)
-  console.log("Selected Field: " + fieldId)
 }
 
+function onRightClick(e: MouseEvent) {
+  e.preventDefault()
+  
+  if(selectedField.value){
+    showDetail(selectedField.value)
+  }
+}
 
+// LIFE-CYCLE
+onMounted(() => {
+  nextTick(() => {
+    const field = currentField.value
+    if (field) {
+        showDetail(field)
+    }
+  })
+})
 </script>
 
 <template>
   <svg ref="svgRef" class="minimap-svg" :viewBox="`0 0 ${svgSize.w} ${svgSize.h}`" width="100%" height="100%"
-    preserveAspectRatio="xMidYMid meet" @wheel.prevent="onWheel" @mousedown="onMouseDown" @mousemove="onMouseMove"
-    @mouseup="onMouseUp" @mouseleave="onMouseUp" @click.middle.stop.prevent="onMiddleClick">
+    preserveAspectRatio="xMidYMid meet"  @mousedown="onMouseDown" @mousemove="onMouseMove"
+    @mouseup="onMouseUp" @mouseleave="onMouseUp" @click.middle.stop.prevent="onMiddleClick" @click.right.stop.prevent="onRightClick">
 
     <defs>
       <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
