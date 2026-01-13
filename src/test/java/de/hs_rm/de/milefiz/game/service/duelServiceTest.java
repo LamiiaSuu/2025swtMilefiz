@@ -3,6 +3,7 @@ package de.hs_rm.de.milefiz.game.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
@@ -113,6 +114,38 @@ class DuelServiceImplTest {
         assertTrue(service.isMeepleInDuel(m2));
         assertFalse(service.isMeepleInDuel(UUID.randomUUID()));
     }
+
+    @Test
+    void getGames_returnsAllMiniGames() {
+        var games = service.getGames();
+
+        assertNotNull(games);
+        assertEquals(3, games.size());
+    }
+
+    @Test
+    void assignRandomGameToDuel_unknownDuel_throws() {
+        assertThrows(IllegalStateException.class,
+            () -> service.assignRandomGameToDuel(UUID.randomUUID()));
+    }
+
+    @Test
+    void getMiniGame_unknownDuel_throws() {
+        assertThrows(IllegalStateException.class,
+            () -> service.getMiniGame(UUID.randomUUID()));
+    }
+
+    @Test
+    void randomGame_noFactories_throws() {
+        DuelServiceImpl emptyService =
+            new DuelServiceImpl(lobbyManager, messaging);
+
+        ReflectionTestUtils.setField(emptyService, "gameFactories", new ArrayList<>());
+
+        assertThrows(IllegalStateException.class,
+            emptyService::randomGame);
+    }
+
 
 
 
