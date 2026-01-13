@@ -15,12 +15,14 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
+import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
 
 /**
  * Controller für die Mini-Spiele innerhalb eines Duells.
@@ -135,48 +137,44 @@ public class MiniGameController {
                 Field start2 = lobby.getBoard().getStartField(
                                 lobby.getPlayer(p2).getColor());
 
-        // Spieler 1 verliert?
-        if (winner == null || !winner.equals(p1)) {
-                lobby.getPlayer(p1).setMoved(false);
-                //if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
-                //        lobby.getPlayer(p1).setRemainingMoves(0);
-                //}
-                messaging.sendEvent(new LobbyMessage(
-                        lobby,
-                        new FrontendMoveEvent(
-                                p1,
-                                m1.getId(),
-                                start1.getId(),
-                                lobby.getPlayer(p1).getRemainingMoves(),
-                                lobby.getPlayer(p1).hasMoved()
-                        )
-                ));
-            
-                m1.setCurrentField(start1);
-                m1.clearLastField();
-        }
+                // Spieler 1 verliert?
+                if (winner == null || !winner.equals(p1)) {
+                        lobby.getPlayer(p1).setMoved(false);
+                        // if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
+                        // lobby.getPlayer(p1).setRemainingMoves(0);
+                        // }
+                        messaging.sendEvent(new LobbyMessage(
+                                        lobby,
+                                        new FrontendMoveEvent(
+                                                        p1,
+                                                        m1.getId(),
+                                                        start1.getId(),
+                                                        lobby.getPlayer(p1).getRemainingMoves(),
+                                                        lobby.getPlayer(p1).hasMoved())));
 
-        // Spieler 2 verliert?
-        if (winner == null || !winner.equals(p2)) {
-            lobby.getPlayer(p2).setMoved(false);
-            //if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
-            //    lobby.getPlayer(p2).setRemainingMoves(0);
-            //}
-            messaging.sendEvent(new LobbyMessage(
-                    lobby,
-                    new FrontendMoveEvent(
-                            p2,
-                            m2.getId(),
-                            start2.getId(),
-                            lobby.getPlayer(p2).getRemainingMoves(),
-                            lobby.getPlayer(p2).hasMoved()
-                    )
-            ));
-            
-            m2.setCurrentField(start2);
-            m2.clearLastField();
+                        m1.setCurrentField(start1);
+                        m1.clearLastField();
+                }
+
+                // Spieler 2 verliert?
+                if (winner == null || !winner.equals(p2)) {
+                        lobby.getPlayer(p2).setMoved(false);
+                        // if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
+                        // lobby.getPlayer(p2).setRemainingMoves(0);
+                        // }
+                        messaging.sendEvent(new LobbyMessage(
+                                        lobby,
+                                        new FrontendMoveEvent(
+                                                        p2,
+                                                        m2.getId(),
+                                                        start2.getId(),
+                                                        lobby.getPlayer(p2).getRemainingMoves(),
+                                                        lobby.getPlayer(p2).hasMoved())));
+
+                        m2.setCurrentField(start2);
+                        m2.clearLastField();
+                }
         }
-    }
 
         /**
          * Sendet den aktuellen Status des Würfel-Minigames an alle Clients der Lobby.
@@ -263,7 +261,8 @@ public class MiniGameController {
          *
          * <p>
          * Diese Methode wird immer dann aufgerufen, wenn sich der Zustand des
-         * BalloonGames ändert – z. B. nach einem Phasenwechsel oder nach Ablauf des Timeouts.
+         * BalloonGames ändert – z. B. nach einem Phasenwechsel oder nach Ablauf des
+         * Timeouts.
          *
          * <p>
          * Das Frontend erhält dadurch:
@@ -300,6 +299,25 @@ public class MiniGameController {
                                 game.getPhasePlayer2(),
                                 game.getWinner(),
                                 game.isFinished());
+
+                messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
+
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/quiz/getQuestion")
+        public void handleQuestionRequest(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
+                        Player player) throws LobbyNotFoundException {
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+                QuizGame game = (QuizGame) duelService.getMiniGame(duelId);
+
+                broadcastQuizUpdate(lobby, duelId, game);
+        }
+
+        public void broadcastQuizUpdate(Lobby lobby, UUID duelId, QuizGame game) {
+
+                var event = new FrontendQuizGameUpdateEvent(duelId, game.getPlayer1(), game.getPlayer2(),
+                                game.getQuestion(), duelId, game.isFinished());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }

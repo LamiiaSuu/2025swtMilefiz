@@ -1,0 +1,15 @@
+{
+    "questions": [
+        {
+            "id": 1,
+            "question": "Waar staat de Eiffeltoren?",
+            "answers": [
+                "Berlin",
+                "Marseille",
+                "Singapore",
+                "Paris"
+            ],
+            "correctAnswer": 4
+        }
+    ]
+}
