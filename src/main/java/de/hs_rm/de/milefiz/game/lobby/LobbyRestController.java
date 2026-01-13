@@ -258,8 +258,8 @@ public class LobbyRestController {
         return BoardMapper.mapToDTO(lobby.getBoard());
     }
 
-    @RequestMapping(value = "/{path:[^\\.]*}")
-    public String redirect() {
+    @GetMapping(value = "/{path:[^\\.]*}")
+    public String redirect(@PathVariable String path) {
         return "forward:/index.html";
     }
 }
