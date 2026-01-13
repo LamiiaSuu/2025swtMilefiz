@@ -107,8 +107,8 @@ function onHover() {
 
 .settings-button {
   position: absolute;
-  top: 5vh;
-  right: -13.5vw;
+  top: 2.6rem; 
+  right: -12.9rem;
   background: none;
   border: none;
   cursor: pointer;
