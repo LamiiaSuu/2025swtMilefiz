@@ -3,6 +3,7 @@ package de.hs_rm.de.milefiz.game.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -284,9 +285,10 @@ public class DuelServiceImpl implements DuelService {
 
         if (winner == null || !winner.equals(p1)) {
             lobby.getPlayer(p1).setMoved(false);
-            // if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
-            // lobby.getPlayer(p1).setRemainingMoves(0);
-            // }
+             if(Objects.equals(lobby.getPlayer(p1).getActiveMeeple(), m1)){
+                lobby.getPlayer(p1).setRemainingMoves(0);
+                lobby.getPlayer(p1).setActiveMeeple(null);
+             }
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
@@ -302,9 +304,10 @@ public class DuelServiceImpl implements DuelService {
 
         if (winner == null || !winner.equals(p2)) {
             lobby.getPlayer(p2).setMoved(false);
-            // if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
-            // lobby.getPlayer(p2).setRemainingMoves(0);
-            // }
+             if(Objects.equals(lobby.getPlayer(p2).getActiveMeeple(), m2)){
+                lobby.getPlayer(p2).setRemainingMoves(0);
+                lobby.getPlayer(p2).setActiveMeeple(null);
+             }
             messaging.sendEvent(new LobbyMessage(
                     lobby,
                     new FrontendMoveEvent(
