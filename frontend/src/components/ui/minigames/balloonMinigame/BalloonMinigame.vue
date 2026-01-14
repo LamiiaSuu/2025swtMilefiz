@@ -180,7 +180,7 @@ watch(isFinished, (finished) => {
     </h2>
 
     <!-- COUNTDOWN - nur anzeigen wenn Timer gestartet -->
-    <CountdownBar v-if="timerStarted" :seconds="duel.timeOut" />
+    <CountdownBar v-if="timerStarted" :seconds="duel.timeOut-2" />
 
     <!-- Platzhalter wenn Timer noch nicht läuft (verhindert Layout-Shift) -->
     <div v-else class="countdown-placeholder"></div>
