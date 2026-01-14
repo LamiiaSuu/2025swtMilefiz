@@ -1,5 +1,6 @@
 package de.hs_rm.de.milefiz.messaging;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -252,18 +253,17 @@ public class FrontendReceiverController {
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/startGame")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleStartGame(@DestinationVariable("lobbyId") UUID lobbyId, Player player) {
-        Lobby lobby = null;
-        try {
-            lobby = lobbyManager.getLobby(lobbyId);
-        } catch (LobbyNotFoundException e) {
-            logger.error(lobbyNotFound, e);
-        }
+    public FrontendEvent handleStartGame(@DestinationVariable("lobbyId") UUID lobbyId, Player player) throws LobbyNotFoundException {
+
+        Lobby lobby = lobbyManager.getLobby(lobbyId);
+
         if (!player.equals(lobby.getLeader())) {
             throw new PlayerHasNoPermissionException("Der Spieler ist kein Leader");
         }
+
         logger.info("Spiel {} wurde gestartet", lobbyId);
         lobby.setGameStarted(true);
+
         return new FrontendGameStartEvent("Das Spiel wurde gestartet!");
     }
 
@@ -275,9 +275,19 @@ public class FrontendReceiverController {
      * @throws PlayerNotFoundException
      */
     @EventListener
-    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws PlayerNotFoundException {
+    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        Player player = (Player) headerAccessor.getSessionAttributes().get("player");
+        Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
+        if (sessionAttributes == null) {
+            logger.warn("WebSocket disconnect ohne session attributes");
+            return;
+        }
+
+        Player player = (Player) sessionAttributes.get("player");
+        if (player == null) {
+            logger.warn("WebSocket disconnect ohne player in session");
+            return;
+        }
 
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
