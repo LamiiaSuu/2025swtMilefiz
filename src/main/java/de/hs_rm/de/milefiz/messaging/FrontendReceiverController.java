@@ -272,7 +272,6 @@ public class FrontendReceiverController {
      * zuätzlich allen bereits in der Lobby vorhandenen Spielern ein Update
      *
      * @param event
-     * @throws PlayerNotFoundException
      */
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
