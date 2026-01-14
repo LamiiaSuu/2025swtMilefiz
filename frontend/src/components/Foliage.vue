@@ -32,12 +32,12 @@ const { elements, boardId } = defineProps<{ elements?: Element[], boardId?: stri
  * variance – Varianz des Scalings um den in scale angegebenen wert in prozent (0 = Scaling wird 1:1 übernommen)
  */
 const models = {
-  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.8, collisionRadius: 3.5 },
-  [Sizes.Medium]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.2, collisionRadius: 2.5 },
-  [Sizes.Small]: { load: (useGLTF('/environment/trees/pine_low.glb', { draco: true })), scale: 1.2, collisionRadius: 2 },
-  [Sizes.Bush]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100, collisionRadius: 1 },
-  [Sizes.Mushroom]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1, collisionRadius: 0.6 },
-  [Sizes.Grass_Smol]: { load: (useGLTF('/environment/plants/grass_smol.glb', { draco: true })), scale: 2, collisionRadius: 0.4 }
+  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.8, collisionRadius: 2.5 },
+  [Sizes.Medium]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.2, collisionRadius: 2 },
+  [Sizes.Small]: { load: (useGLTF('/environment/trees/pine_low.glb', { draco: true })), scale: 1.2, collisionRadius: 1 },
+  [Sizes.Bush]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100, collisionRadius: 0.5 },
+  [Sizes.Mushroom]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1, collisionRadius: 0.3 },
+  [Sizes.Grass_Smol]: { load: (useGLTF('/environment/plants/grass_smol.glb', { draco: true })), scale: 2, collisionRadius: 0.2 }
 }
 const parts = ref<Part[]>([])
 const imRefs = ref<InstancedMesh[]>([])
@@ -53,7 +53,7 @@ const isCollidingWithAsset = (element: Element): boolean => {
   if (boardId !== STANDARD_BOARD_ID || !standardBoardAssets) return false
 
   const treePos = new Vector3(...element.position)
-  const blockRadius = 5 // Erhöhter Radius für bessere Sichtbarkeit
+  const blockRadius = 2
 
   return standardBoardAssets.some(asset => {
     const assetPos = new Vector3(...asset.position)
