@@ -141,8 +141,7 @@ public class MovementServiceImpl implements MovementService {
         Set<Meeple> rivalMeeples = getRivalMeeples(lobby, player);
         Set<Field> rivalMeepleFields = getRivalMeepleFields(lobby, player);
         Set<Field> barrierFields = getBarrierFields(board);
-        Set<Field> ownMeepleFields = getOwnMeepleFields(player);
-        ownMeepleFields.remove(currentField);
+        Set<Field> otherOwnMeepleFields = getOtherOwnMeepleFields(player);
 
         // Wenn keine weiteren Schritte verfügbar sind, kann man man sich nicht bewegen
         if (!player.canMove()) {
@@ -222,6 +221,20 @@ public class MovementServiceImpl implements MovementService {
                             player.getRemainingMoves(),
                             tempBarrier.getId());
                 }
+                if (!otherOwnMeepleFields.contains(currentField)) {
+
+                    endTurnWithMove(player, meeple, currentField);
+
+                    if (rivalMeepleFields.contains(currentField)) {
+                    
+                        Meeple rivalMeeple = getRivalMeepleByField(currentField, rivalMeeples);
+
+                        Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
+
+                        startDuel(meeple, rivalMeeple, player, rivalPlayer, currentField, lobby);
+                    }
+                } 
+
                 return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
             }
         }
@@ -229,7 +242,7 @@ public class MovementServiceImpl implements MovementService {
         // FELD DURCH EIGENEN MEEPLE BLOCKIERT
         // Ueberpruefen, ob das Zielfeld beim letzten Move durch einen eigenen Meeple
         // blockiert ist
-        if (player.getRemainingMoves() == LAST_MOVE && ownMeepleFields.contains(nextField)) {
+        if (player.getRemainingMoves() == LAST_MOVE && otherOwnMeepleFields.contains(nextField)) {
             logger.info("Attempt to occupy a field with multiple meeple failed");
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE");
         }
@@ -242,9 +255,9 @@ public class MovementServiceImpl implements MovementService {
         if (player.getRemainingMoves() > LAST_MOVE) {
 
             if (!existsLegalStopWithinRemainingMoves(nextField, currentField, player.getRemainingMoves() - 1,
-                    ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+                    otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
 
-                if (ownMeepleFields.contains(nextField)
+                if (otherOwnMeepleFields.contains(nextField)
                         || isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields)) {
                     logger.info("No valid Fields to End this Meeples run in this Direction");
                     return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_VALID_FIELDS");
@@ -257,40 +270,8 @@ public class MovementServiceImpl implements MovementService {
                     Meeple rivalMeeple = getRivalMeepleByField(nextField, rivalMeeples);
 
                     Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
-                    if (rivalPlayer == null) {
-                        return new FrontendMoveWithLossEvent(
-                                player.getId(),
-                                meeple.getId(),
-                                nextField.getId(),
-                                player.getRemainingMoves(),
-                                player.hasMoved());
-                    }
-                    var duel = duelService.createDuel(
-                            player.getId(),
-                            rivalPlayer.getId(),
-                            meeple.getId(),
-                            rivalMeeple.getId());
-
-                    var miniGame = duelService.assignRandomGameToDuel(duel.getId());
-
-                    if (miniGame instanceof DiceGame dice) {
-                        dice.initPlayers(player.getId(), rivalPlayer.getId());
-                    } else if (miniGame instanceof EinarmigerBanditGame game) {
-                        game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
-                    }
-                    if (miniGame instanceof BalloonGame game) {
-                        game.initPlayers(player.getId(), rivalPlayer.getId());
-                    }
-
-                    return new FrontendDuelEvent(
-                            duel.getId(),
-                            player.getId(),
-                            rivalPlayer.getId(),
-                            meeple.getId(),
-                            rivalMeeple.getId(),
-                            nextField.getId(),
-                            player.getRemainingMoves(),
-                            miniGame);
+                   
+                    startDuel(meeple, rivalMeeple, player, rivalPlayer, nextField, lobby);
                 }
                 return new FrontendMoveWithLossEvent(
                         player.getId(),
@@ -330,32 +311,7 @@ public class MovementServiceImpl implements MovementService {
                         logger.info("Initiating duel between meeple {} and meeple {}",
                                 meeple.getId(), rivalMeeple.getId());
 
-                        var duel = duelService.createDuel(
-                                player.getId(),
-                                rivalPlayer.getId(),
-                                meeple.getId(),
-                                rivalMeeple.getId());
-
-                        var miniGame = duelService.assignRandomGameToDuel(duel.getId());
-
-                        if (miniGame instanceof DiceGame dice) {
-                            dice.initPlayers(player.getId(), rivalPlayer.getId());
-                        } else if (miniGame instanceof EinarmigerBanditGame game) {
-                            game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
-                        }
-                        if (miniGame instanceof BalloonGame game) {
-                            game.initPlayers(player.getId(), rivalPlayer.getId());
-                        }
-
-                        return new FrontendDuelEvent(
-                                duel.getId(),
-                                player.getId(),
-                                rivalPlayer.getId(),
-                                meeple.getId(),
-                                rivalMeeple.getId(),
-                                nextField.getId(),
-                                player.getRemainingMoves(),
-                                miniGame);
+                        startDuel(meeple, rivalMeeple, player, rivalPlayer, nextField, lobby);
                     }
                 }
             }
@@ -432,7 +388,7 @@ public class MovementServiceImpl implements MovementService {
         } catch (LobbyNotFoundException e) {
             logger.error("Lobby not found", e);
         }
-        if(lobby == null){
+        if (lobby == null) {
             return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_NO_LOBBY");
         }
         Board board = lobby.getBoard();
@@ -455,6 +411,44 @@ public class MovementServiceImpl implements MovementService {
         barrier.setCurrentField(targetField);
 
         return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
+    }
+
+    private FrontendEvent startDuel(Meeple ownMeeple, Meeple rivalMeeple, Player player, Player rivalPlayer, Field field, Lobby lobby) {
+
+        if (rivalPlayer == null) {
+            return new FrontendMoveWithLossEvent(
+                    player.getId(),
+                    ownMeeple.getId(),
+                    field.getId(),
+                    player.getRemainingMoves(),
+                    player.hasMoved());
+        }
+        var duel = duelService.createDuel(
+                player.getId(),
+                rivalPlayer.getId(),
+                ownMeeple.getId(),
+                rivalMeeple.getId());
+
+        var miniGame = duelService.assignRandomGameToDuel(duel.getId());
+
+        if (miniGame instanceof DiceGame dice) {
+            dice.initPlayers(player.getId(), rivalPlayer.getId());
+        } else if (miniGame instanceof EinarmigerBanditGame game) {
+            game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
+        }
+        if (miniGame instanceof BalloonGame game) {
+            game.initPlayers(player.getId(), rivalPlayer.getId());
+        }
+
+        return new FrontendDuelEvent(
+                duel.getId(),
+                player.getId(),
+                rivalPlayer.getId(),
+                ownMeeple.getId(),
+                rivalMeeple.getId(),
+                field.getId(),
+                player.getRemainingMoves(),
+                miniGame);
     }
 
     /**
@@ -743,8 +737,10 @@ public class MovementServiceImpl implements MovementService {
      * Ermittelt alle Felder, die aktuell von eigenen Meeples des Spielers belegt
      * sind.
      */
-    private Set<Field> getOwnMeepleFields(Player player) {
+    private Set<Field> getOtherOwnMeepleFields(Player player) {
+        Meeple activeMeeple = player.getActiveMeeple();
         return Arrays.stream(player.getMeeples())
+                .filter(meeple -> activeMeeple == null || !meeple.equals(activeMeeple))
                 .map(Meeple::getCurrentField)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
