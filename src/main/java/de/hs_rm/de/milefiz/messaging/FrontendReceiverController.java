@@ -81,6 +81,8 @@ public class FrontendReceiverController {
      *
      * @return FrontendRotateEvent zur Synchronisation der Meeple-Rotation
      *         auf allen Clients der Lobby
+     * 
+     * @author Maximilian Ressel
      */
 
     @MessageMapping("/milefiz/lobby/{lobbyId}/rotate")

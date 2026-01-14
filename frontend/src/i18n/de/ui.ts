@@ -86,4 +86,6 @@ export const UI_DE: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Nächste Spielfigur',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Vorherige Spielfigur',
     CONTROLS_TUTORIAL_MENU: 'Menü öffnen',
+    MINIGAME_RPS_TITLE: "Schere • Stein • Papier",
+    RPS_DRAW: "Unentschieden"
 }

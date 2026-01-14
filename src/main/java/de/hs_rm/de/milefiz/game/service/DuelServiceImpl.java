@@ -18,12 +18,14 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
 
 @Service
 public class DuelServiceImpl implements DuelService {
@@ -66,10 +68,14 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.einarmigerBanditGame.timeout}")
     private int einarmigerBanditGameTimeout;
 
+    @Value("${minigame.rock.paper.scissors.timeout}")
+    private int rockPaperScissorsGameTimeout;
+
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
-        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
-        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+        // gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
+        // gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
+        // gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+        gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
         // gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
         // gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
         this.lobbyManager = lobbyManager;
@@ -86,6 +92,7 @@ public class DuelServiceImpl implements DuelService {
         }
 
         int index = random.nextInt(gameFactories.size());
+
         return gameFactories.get(index).get(); // immer neue Instanz
     }
 
@@ -243,6 +250,18 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             sendLoserHome(lobby, duel, einarmigerBandit);
+
+        } else if (game instanceof RockPaperScissorsGame ssp) {
+            var update = new FrontendRockPaperScissorsGameUpdateEvent(
+                    duel.getId(),
+                    ssp.getP1(),
+                    ssp.getP2(),
+                    ssp.getMoveP1(),
+                    ssp.getMoveP2(),
+                    ssp.getWinner(),
+                    ssp.isFinished());
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            sendLoserHome(lobby, duel, ssp);
         }
     }
 

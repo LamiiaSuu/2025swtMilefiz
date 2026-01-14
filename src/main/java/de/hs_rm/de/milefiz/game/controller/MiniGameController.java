@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,6 +20,7 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
@@ -26,6 +28,8 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -401,6 +405,46 @@ public class MiniGameController {
                                 game.getPlayer2(),
                                 game.getPhasePlayer1(),
                                 game.getPhasePlayer2(),
+                                game.getWinner(),
+                                game.isFinished());
+
+                messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
+
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/rockpaperscissors/choose")
+        public void handleChooseMove(
+                        @DestinationVariable UUID lobbyId,
+                        @DestinationVariable UUID duelId,
+                        String move,
+                        Player player) throws LobbyNotFoundException {
+
+                logger.info("Schere Stein Papier Move from player {} move: {}", player.getId(), move);
+
+                // Lobby laden
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+                // MiniGame holen (bereits zu diesem Zeitpunkt dem Duell zugewiesen)
+                RockPaperScissorsGame game = (RockPaperScissorsGame) duelService.getMiniGame(duelId);
+
+                // wahl für diesen Spieler
+                game.choose(player.getId(), move);
+
+                broadcastRockPaperScissorsUpdate(lobby, duelId, game);
+
+                if (game.isFinished()) {
+                        sendLoserHome(lobby, duelId, game);
+                }
+
+        }
+
+        private void broadcastRockPaperScissorsUpdate(Lobby lobby, UUID duelId, RockPaperScissorsGame game) {
+
+                var event = new FrontendRockPaperScissorsGameUpdateEvent(
+                                duelId,
+                                game.getP1(),
+                                game.getP2(),
+                                game.getMoveP1(),
+                                game.getMoveP2(),
                                 game.getWinner(),
                                 game.isFinished());
 
