@@ -83,7 +83,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    *  - OWN_MEEPLE: Ein eigenes Meeple steht auf diesem Feld
    *  - INVALID: Feld ist nicht für eine Sperre auswählbar (Start-/Zielfeld)
    */
-  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE' | 'INVALID_END' | 'INVALID_START'
+  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE' 
   /**
    * Reactive state für die MiniMap-Komponente.
    * Verwaltet die Anzeige und Interaktion mit der Barrieren-Verschiebungs-Map.
