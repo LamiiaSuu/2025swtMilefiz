@@ -1,5 +1,6 @@
 package de.hs_rm.de.milefiz.game.model.minigames;
 
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -68,15 +69,40 @@ public class MathGame extends MiniGame{
 
     class Term {
 
+        private final Random random = new Random();
+
         private String termRepresentation;
+        private Integer termElement1;
+        private Integer termElement2;
+
+        private enum Operations { ADD, SUB, MUL, DIV; }
+
         private Integer termValue;
 
         public Term() {
-
+            generateTerm();
         }
 
+        private void generateTerm() {
+            int index = random.nextInt(Operations.values().length);
+            Operations.values()[index];
+        }
 
-        
+        public String getTermRepresentation() {
+            return termRepresentation;
+        }
+
+        public Integer getTermValue() {
+            return termValue;
+        }
+
+        @Override
+        public String toString() {
+            return "Term [termRepresentation=" + termRepresentation + ", termValue=" + termValue + "]";
+        }
+
+    
+
     }
     
 }

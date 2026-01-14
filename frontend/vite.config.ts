@@ -23,5 +23,6 @@ export default defineConfig({
         ws: true,
       },
     },
+    port : 5117,
   },
 })
