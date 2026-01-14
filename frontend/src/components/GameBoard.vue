@@ -714,7 +714,7 @@ const additionalAssets = computed(() => {
       :key="id"
       :ref="(el) => registerGameCharRefFromTemplate(id, el)"
       :meepleId="id"
-      :playerColor="meepleColorMap.get(id)"
+      :playerColor="meepleColorMap.get(id)" :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)"
     />
 
     <!--Spawnen von Barrieren-->
