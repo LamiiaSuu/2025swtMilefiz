@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
+import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
@@ -19,6 +20,7 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.service.DuelResolutionService;
 import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
@@ -52,14 +54,17 @@ public class MiniGameController {
         private final DuelService duelService;
         private final FrontendMessagingService messaging;
         private final LobbyManager lobbyManager;
+        private final DuelResolutionService duelResolutionService;
 
         public MiniGameController(
                         DuelService duelService,
                         FrontendMessagingService messaging,
-                        LobbyManager lobbyManager) {
+                        LobbyManager lobbyManager,
+                        DuelResolutionService duelResolutionService) {
                 this.duelService = duelService;
                 this.messaging = messaging;
                 this.lobbyManager = lobbyManager;
+                this.duelResolutionService = duelResolutionService;
         }
 
         /**
@@ -98,7 +103,8 @@ public class MiniGameController {
                 broadcastDiceUpdate(lobby, duelId, game);
 
                 if (game.isFinished()) {
-                        sendLoserHome(lobby, duelId, game);
+                        Duel duel = duelService.getDuel(duelId);
+                        duelResolutionService.sendLoserHome(lobby, duel, game);
                 }
 
         }
@@ -145,87 +151,10 @@ public class MiniGameController {
                 if (game.isFinished()) {
                         logger.info("Einarmiger Bandit game finished in duel {}, winner: {}",
                                         duelId, game.getWinner());
-                        sendLoserHome(lobby, duelId, game);
+                        Duel duel = duelService.getDuel(duelId);
+                        duelResolutionService.sendLoserHome(lobby, duel, game);
                 }
 
-        }
-
-        /**
-         * Setzt nach einem beendeten Duell die Loser-Meeples
-         * zurück auf ihr jeweiliges Startfeld. Das können beide sein.
-         *
-         * <p>
-         * Regeln:
-         * <ul>
-         * <li>Gewinner bleibt stehen</li>
-         * <li>Verlierer gehen zurück in die Basis</li>
-         * <li>Bei Unentschieden verlieren beide</li>
-         * </ul>
-         *
-         * <p>
-         * Zusätzlich wird ein {@link FrontendMoveEvent}
-         * gesendet, damit das Update im Frontend animiert wird.
-         *
-         * @param lobby  aktuelle Lobby
-         * @param duelId ID des Duells
-         * @param game   beendetes Mini-Game
-         */
-        private void sendLoserHome(Lobby lobby, UUID duelId, MiniGame game) {
-
-                var duel = duelService.getDuel(duelId);
-
-                UUID winner = game.getWinner();
-
-                UUID p1 = duel.getPlayer1();
-                UUID p2 = duel.getPlayer2();
-
-                Meeple m1 = lobby.getMeepleById(duel.getFirstMeeple());
-                Meeple m2 = lobby.getMeepleById(duel.getSecondMeeple());
-
-                // Hilfsmethode: Startfeld des Spielers ermitteln
-                Field start1 = lobby.getBoard().getStartField(
-                                lobby.getPlayer(p1).getColor());
-
-                Field start2 = lobby.getBoard().getStartField(
-                                lobby.getPlayer(p2).getColor());
-
-                // Spieler 1 verliert?
-                if (winner == null || !winner.equals(p1)) {
-                        if(Objects.equals(lobby.getPlayer(p1).getActiveMeeple(), m1)){
-                                lobby.getPlayer(p1).setRemainingMoves(0);
-                                lobby.getPlayer(p1).setActiveMeeple(null);
-                        }
-                        messaging.sendEvent(new LobbyMessage(
-                                        lobby,
-                                        new FrontendMoveEvent(
-                                                        p1,
-                                                        m1.getId(),
-                                                        start1.getId(),
-                                                        lobby.getPlayer(p1).getRemainingMoves(),
-                                                        lobby.getPlayer(p1).hasMoved())));
-
-                        m1.setCurrentField(start1);
-                        m1.clearLastField();
-                }
-
-                // Spieler 2 verliert?
-                if (winner == null || !winner.equals(p2)) {
-                        if(Objects.equals(lobby.getPlayer(p2).getActiveMeeple(), m2)){
-                                lobby.getPlayer(p2).setRemainingMoves(0);
-                                lobby.getPlayer(p2).setActiveMeeple(null);
-                        }
-                        messaging.sendEvent(new LobbyMessage(
-                                        lobby,
-                                        new FrontendMoveEvent(
-                                                        p2,
-                                                        m2.getId(),
-                                                        start2.getId(),
-                                                        lobby.getPlayer(p2).getRemainingMoves(),
-                                                        lobby.getPlayer(p2).hasMoved())));
-
-                        m2.setCurrentField(start2);
-                        m2.clearLastField();
-                }
         }
 
         /**
@@ -360,7 +289,8 @@ public class MiniGameController {
                 }
 
                 if (game.isFinished()) {
-                        sendLoserHome(lobby, duelId, game);
+                        Duel duel = duelService.getDuel(duelId);
+                        duelResolutionService.sendLoserHome(lobby, duel, game);
                 }
         }
 

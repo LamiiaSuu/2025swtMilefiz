@@ -44,6 +44,7 @@ public class MovementServiceMeepleTest {
     @Mock
     private LobbyManager lobbyManager;
     private DuelService duelService;
+    private DuelResolutionService duelResolutionService;
     FrontendMessagingService messaging;
 
     private MovementService movementService;
@@ -60,7 +61,7 @@ public class MovementServiceMeepleTest {
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        duelService = new DuelServiceImpl(lobbyManager, messaging);
+        duelService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
         movementService = new MovementServiceImpl(lobbyManager, duelService);
 
         // Felder

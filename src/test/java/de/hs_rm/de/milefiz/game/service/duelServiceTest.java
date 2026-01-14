@@ -25,13 +25,14 @@ class DuelServiceImplTest {
     private LobbyManager lobbyManager;
     private FrontendMessagingService messaging;
     private DuelServiceImpl service;
+    private DuelResolutionService duelResolutionService;
 
     @BeforeEach
     void setup() {
         lobbyManager = mock(LobbyManager.class);
         messaging = mock(FrontendMessagingService.class);
 
-        service = new DuelServiceImpl(lobbyManager, messaging);
+        service = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
 
         // Inject @Value fields manually
         ReflectionTestUtils.setField(service, "diceGameTimeout", 5);
@@ -138,7 +139,7 @@ class DuelServiceImplTest {
     @Test
     void randomGame_noFactories_throws() {
         DuelServiceImpl emptyService =
-            new DuelServiceImpl(lobbyManager, messaging);
+            new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
 
         ReflectionTestUtils.setField(emptyService, "gameFactories", new ArrayList<>());
 
