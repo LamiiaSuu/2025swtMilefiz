@@ -3,6 +3,7 @@ package de.hs_rm.de.milefiz.game.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,17 +18,20 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
+import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 
 @Service
 public class DuelServiceImpl implements DuelService {
 
     /**
-     * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen entstehen).
+     * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen
+     * entstehen).
      */
     private final List<Supplier<MiniGame>> gameFactories = new ArrayList<>();
 
@@ -46,6 +50,7 @@ public class DuelServiceImpl implements DuelService {
 
     private final LobbyManager lobbyManager;
     private final FrontendMessagingService messaging;
+    private final DuelResolutionService duelResolutionService;
 
     /**
      * Die Timeouts aus den Spring application properties werden hier
@@ -60,13 +65,17 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.balloongame.timeout}")
     private int balloonGameTimeout;
 
-    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
-        gameFactories.add(() -> new DiceGame(diceGameTimeout+1));
+    @Value("${minigame.einarmigerBanditGame.timeout}")
+    private int einarmigerBanditGameTimeout;
+
+    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging, DuelResolutionService duelResolutionService) {
+        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        //gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
-        //gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
+        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
+        this.duelResolutionService = duelResolutionService;
     }
 
     /**
@@ -87,12 +96,9 @@ public class DuelServiceImpl implements DuelService {
         return duels.values().stream()
                 // nur Duelle berücksichtigen, die noch ein aktives Mini-Game haben
                 .filter(duel -> duel.getMiniGame() != null && !duel.getMiniGame().isFinished())
-                .anyMatch(duel ->
-                        duel.getFirstMeeple().equals(meepleId)
-                    || duel.getSecondMeeple().equals(meepleId)
-                );
+                .anyMatch(duel -> duel.getFirstMeeple().equals(meepleId)
+                        || duel.getSecondMeeple().equals(meepleId));
     }
-
 
     /**
      * {@inheritDoc}
@@ -159,28 +165,26 @@ public class DuelServiceImpl implements DuelService {
 
         if (duel == null) {
             throw new IllegalArgumentException(
-                    "Duel with id " + duelId + " not found"
-            );
+                    "Duel with id " + duelId + " not found");
         }
 
         return duel;
     }
-
 
     /**
      * Wird automatisch aufgerufen, wenn ein Mini-Game beendet ist.
      * <p>
      * Diese Methode:
      * <ul>
-     *   <li>sendet das finale Update-Event an alle Clients</li>
-     *   <li>setzt Verlierer-Meeples zurück zur Startposition</li>
+     * <li>sendet das finale Update-Event an alle Clients</li>
+     * <li>setzt Verlierer-Meeples zurück zur Startposition</li>
      * </ul>
      *
      * <p>
      * Unterstützte Mini-Games:
      * <ul>
-     *   <li>{@link DiceGame} - Würfelspiel</li>
-     *   <li>{@link BalloonGame} - Ballon-Klickspiel</li>
+     * <li>{@link DiceGame} - Würfelspiel</li>
+     * <li>{@link BalloonGame} - Ballon-Klickspiel</li>
      * </ul>
      *
      * <p>
@@ -202,11 +206,11 @@ public class DuelServiceImpl implements DuelService {
                     dice.getRollP1(),
                     dice.getRollP2(),
                     dice.getWinner(),
-                    dice.isFinished()
-            );
+                    dice.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
-            sendLoserHome(lobby, duel, dice);
+            duelResolutionService.sendLoserHome(lobby, duel, dice);
+
         }
 
         else if (game instanceof BalloonGame balloon) {
@@ -217,92 +221,34 @@ public class DuelServiceImpl implements DuelService {
                     balloon.getPhasePlayer1(),
                     balloon.getPhasePlayer2(),
                     balloon.getWinner(),
-                    balloon.isFinished()
-            );
+                    balloon.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
-            sendLoserHome(lobby, duel, balloon);
+            duelResolutionService.sendLoserHome(lobby, duel, balloon);
+
+        }
+
+        else if (game instanceof EinarmigerBanditGame einarmigerBandit) {
+            Integer energy = null;
+            if (game.getWinner() != null) {
+                energy = lobby.getPlayer(game.getWinner()).getEnergy();
+            }
+            var update = new FrontendEinarmigerBanditGameUpdateEvent(
+                    duel.getId(),
+                    einarmigerBandit.getP1(),
+                    einarmigerBandit.getP2(),
+                    einarmigerBandit.getResultP1(),
+                    einarmigerBandit.getResultP2(),
+                    einarmigerBandit.getResultComp(),
+                    einarmigerBandit.getWinner(),
+                    einarmigerBandit.isJackpot(),
+                    energy != null ? energy : 0,
+                    einarmigerBandit.isFinished());
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, einarmigerBandit);
+
         }
     }
-
-    /**
-     * Setzt nach einem beendeten Duell die Loser-Meeples
-     * zurück auf ihr jeweiliges Startfeld. Das können beide sein.
-     *
-     * <p>
-     * Regeln:
-     * <ul>
-     *   <li>Gewinner bleibt stehen</li>
-     *   <li>Verlierer gehen zurück in die Basis</li>
-     *   <li>Bei Unentschieden verlieren beide</li>
-     * </ul>
-     *
-     * <p>
-     * Zusätzlich wird ein {@link FrontendMoveEvent}
-     * gesendet, damit das Update im Frontend animiert wird.
-     *
-     * @param lobby  aktuelle Lobby
-     * @param duelId ID des Duells
-     * @param game   beendetes Mini-Game
-     */
-    private void sendLoserHome(Lobby lobby, Duel duel, MiniGame game) {
-
-        var winner = game.getWinner();
-
-        var p1 = duel.getPlayer1();
-        var p2 = duel.getPlayer2();
-
-        var m1 = lobby.getMeepleById(duel.getFirstMeeple());
-        var m2 = lobby.getMeepleById(duel.getSecondMeeple());
-
-        var start1 = lobby.getBoard().getStartField(
-                lobby.getPlayer(p1).getColor()
-        );
-
-        var start2 = lobby.getBoard().getStartField(
-                lobby.getPlayer(p2).getColor()
-        );
-
-        if (winner == null || !winner.equals(p1)) {
-            lobby.getPlayer(p1).setMoved(false);
-            //if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
-            //        lobby.getPlayer(p1).setRemainingMoves(0);
-            //}
-            messaging.sendEvent(new LobbyMessage(
-                    lobby,
-                    new FrontendMoveEvent(
-                            p1,
-                            m1.getId(),
-                            start1.getId(),
-                            lobby.getPlayer(p1).getRemainingMoves(),
-                            lobby.getPlayer(p1).hasMoved()
-                    )
-            ));
-
-            m1.setCurrentField(start1);
-            m1.clearLastField();
-        }
-
-        if (winner == null || !winner.equals(p2)) {
-            lobby.getPlayer(p2).setMoved(false);
-            //if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
-            //    lobby.getPlayer(p2).setRemainingMoves(0);
-            //}
-            messaging.sendEvent(new LobbyMessage(
-                    lobby,
-                    new FrontendMoveEvent(
-                            p2,
-                            m2.getId(),
-                            start2.getId(),
-                            lobby.getPlayer(p2).getRemainingMoves(),
-                            lobby.getPlayer(p2).hasMoved()
-                    )
-            ));
-
-            m2.setCurrentField(start2);
-            m2.clearLastField();
-        }
-    }
-
 
 }

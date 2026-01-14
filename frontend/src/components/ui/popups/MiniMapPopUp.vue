@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue"
+import { tUI } from '@/i18n'
 
-type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE"
 
 const props = defineProps<{
   isOpen: boolean
   selectedFieldId: string | null
-  occupancyByFieldId: Record<string, Occupancy>
 }>()
+
+const disabled = computed(() => props.selectedFieldId === "")
 
 const emit = defineEmits<{
   (e: "confirm"): void
@@ -20,6 +21,7 @@ function onKeyDown(e: KeyboardEvent) {
     emit("confirm")
   }
 }
+
 
 onMounted(() => {
   window.addEventListener("keydown", onKeyDown)
@@ -35,7 +37,7 @@ onUnmounted(() => {
   <div v-if="props.isOpen" class="backdrop">
     <div class="dialog" role="dialog" aria-modal="true">
       <header class="header">
-        <h2 class="title">Sperre umplatzieren</h2>
+        <h2 class="title">{{ tUI('MINIMAP_BARRIER_MOVE') }}</h2>
       </header>
 
       <section class="content">
@@ -45,34 +47,46 @@ onUnmounted(() => {
             <slot name="map" />
           </div>
 
-          <!-- Legende unten links -->
+          <!-- Legende -->
           <aside class="legend">
             <div class="legend-row">
-              <span class="legend-swatch swatch-barrier" aria-hidden="true"></span>
-              <span class="legend-label">Sperre</span>
+              <svg class="legend-icon legend-icon--barrier" viewBox="0 0 24 24" aria-hidden="true">
+                <image href="/mapEditorIcons/barrier.png" x="4" y="4" width="16" height="16" />
+              </svg>
+              <span class="legend-label">{{ tUI('BARRIER') }}</span>
             </div>
 
             <div class="legend-row">
-              <span class="legend-swatch swatch-own" aria-hidden="true"></span>
-              <span class="legend-label">Eigenes Meeple</span>
+              <svg class="legend-icon legend-icon--own" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--own" />
+              </svg>
+              <span class="legend-label">{{ tUI('MINIMAP_OWN_MEEPLE') }}</span>
             </div>
 
             <div class="legend-row">
-              <span class="legend-swatch swatch-occupied" aria-hidden="true">X</span>
-              <span class="legend-label">Besetzt</span>
+              <svg class="legend-icon legend-icon--occupied" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- leerer Kreis -->
+                <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--occupied" />
+                <!-- X -->
+                <line x1="5" y1="5" x2="19" y2="19" class="legend-x-line" />
+                <line x1="19" y1="5" x2="5" y2="19" class="legend-x-line" />
+              </svg>
+              <span class="legend-label">{{ tUI('MINIMAP_OCCUPIED') }}</span>
             </div>
 
             <div class="legend-row">
-              <span class="legend-swatch swatch-free" aria-hidden="true"></span>
-              <span class="legend-label">Frei</span>
+              <svg class="legend-icon legend-icon--free" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="8" class="legend-circle legend-circle--free" />
+              </svg>
+              <span class="legend-label">{{ tUI('MINIMAP_AVAILABLE') }}</span>
             </div>
           </aside>
         </div>
 
         <!-- Bestätigen Button -->
         <div class="actions">
-          <button type="button" class="btn primary" @click="emit('confirm')">
-            Bestätigen
+          <button type="button" class="btn primary" :disabled="disabled" @click="emit('confirm')">
+            {{ tUI('CONFIRM') }}
           </button>
         </div>
       </section>
@@ -95,7 +109,7 @@ onUnmounted(() => {
 .dialog {
   position: relative;
   width: min(980px, 100%);
-  background: #f7f7f7;
+  background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.35);
   border-radius: 10px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
@@ -129,12 +143,12 @@ onUnmounted(() => {
 
 .map-slot {
   position: relative;
-  overflow: hidden;
+  overflow: auto;
   width: min(520px, 100%);
   height: 340px;
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 8px;
-  background: #fff;
+  background: rgba(255, 243, 226, 0.5);
   display: grid;
   place-items: center;
   z-index: 1;
@@ -163,34 +177,30 @@ onUnmounted(() => {
   align-items: center;
 }
 
-.legend-swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  border: 1px solid #111;
-  display: grid;
-  place-items: center;
-  font-size: 11px;
-  line-height: 1;
-  font-weight: 700;
+.legend-icon {
+  padding: 0px;
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
-.swatch-barrier {
-  background: #000;
-  border-color: #000;
+.legend-circle {
+  fill: #ffffff00;
+  stroke: #111;
+  stroke-width: 1.5;
 }
 
-.swatch-own {
-  background: #e11;
-  border-color: #e11;
+.legend-circle--own {
+  fill: var(--own-color, #e11);
+  stroke: #000;
 }
 
-.swatch-occupied {
-  background: #fff;
-}
 
-.swatch-free {
-  background: #fff;
+
+.legend-x-line {
+  stroke: rgba(0, 0, 0);
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 
 .legend-label {
@@ -222,7 +232,7 @@ onUnmounted(() => {
 
 .btn.primary:disabled {
   opacity: 0.5;
-  cursor: not-allowed;
+  pointer-events: none;
 }
 
 
