@@ -31,15 +31,16 @@ const { elements } = defineProps<{ elements?: Element[] }>()
  * variance – Varianz des Scalings um den in scale angegebenen wert in prozent (0 = Scaling wird 1:1 übernommen)
  */
 const models = {
-  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.5, variance: 0.5 },
-    [Sizes.Medium]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100, variance: 0 },
-  [Sizes.Small]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1, variance: 0 }
-
+  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.8 },
+  [Sizes.Medium]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.2 },
+  [Sizes.Small]: { load: (useGLTF('/environment/trees/pine_low.glb', { draco: true })), scale: 1.2 },
+  [Sizes.Bush]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100 },
+  [Sizes.Mushroom]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1 },
+  [Sizes.Grass_Smol]: { load: (useGLTF('/environment/plants/grass_smol.glb', { draco: true })), scale: 2 }
 }
 const parts = ref<Part[]>([])
 const imRefs = ref<InstancedMesh[]>([])
 
-const elementsWithScale = computed<ElementWithScale[] | undefined>( () => (elements?.map((element) => ({ ...element, scale: (Math.random() * (models[element.type].variance * 2)) + (1 - models[element.type].variance) }))))
 
 // Dummy-Objekt für PLatzierung der einzelnen Elemente im InstancedMesh
 const dummy = new Object3D()
@@ -98,11 +99,11 @@ watchEffect(() => {
     parts.value.forEach((part, i) => {
       const ref = imRefs.value[i]; //zugehörige Referenz des InstancedMesh
       if (ref) {
-        elementsWithScale?.value?.filter((e) => e.type === part.type).forEach((e: ElementWithScale, i: number) => {
+        elements?.filter((e) => e.type === part.type).forEach((e: Element, i: number) => {
           // setze für alle gefundenen Elemente position, Sklalierung, Quaternion in der Matrix des Mesh
           dummy.position.set(...e.position)
           dummy.quaternion.copy(part.quaternion)
-          const scale = (models[part.type].scale as number) * e.scale; // scaling mit varianz
+          const scale = (models[part.type].scale as number); // scaling mit varianz
           dummy.scale.set(scale, scale, scale)
           dummy.rotateOnWorldAxis(new Vector3( 0, 1, 0 ), Math.floor(Math.random() * 361))
           dummy.updateMatrix()
@@ -121,5 +122,5 @@ const getRef = (el: any, index: number) => {
 </script>
 <template>
   <TresInstancedMesh v-for="(part, index) in parts" :ref="(el) => getRef(el, index)"
-    :args="[part.geometry, part.material, (elementsWithScale?.filter(e => e.type === part.type))?.length ?? 0]" />
+    :args="[part.geometry, part.material, (elements?.filter(e => e.type === part.type))?.length ?? 0]" />
 </template>
