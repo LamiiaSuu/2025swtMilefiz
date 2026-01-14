@@ -806,15 +806,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     // Zunächst Start und Zielfelder als INVALID markieren, dann überprüfen, ob ein Feld bereits durch eine Sperre oder fremdes Meeple besetzt ist 
     for (const f of board.fields) {
-      if (f.type != 'NORMAL') {
-        if (f.type == 'END') {
-          occ[f.id] = 'INVALID_END'
-        } else {
-          occ[f.id] = 'INVALID_START'
-        }
-      }
-      if ((occ[f.id] != 'INVALID_END' || occ[f.id] != 'INVALID_START') && f.barrier) occ[f.id] = 'OCCUPIED'
-
+      if (f.barrier || f.type=='END' || f.type.includes('START')) occ[f.id] = 'OCCUPIED'
     }
 
     // Wenn lobby fehlt, können own vs foreign meeples nicht unterschieden werden -> nur Barrieren markieren
