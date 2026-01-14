@@ -406,8 +406,23 @@ const toggleCamera = (e: KeyboardEvent) => {
  *
  * @param {KeyboardEvent} e - Das Tastatur-Event, das die Eingabe auslöst.
  */
+const MOVE_COOLDOWN_MS = 500
+let lastMoveSentAt = 0
+
 const handleMoveKeys = (e: KeyboardEvent) => {
   if (!useFirstPerson.value) return
+
+  const isMoveKey =
+    e.code === "ArrowUp" || e.code === "ArrowDown" || e.code === "ArrowLeft" || e.code === "ArrowRight" ||
+    e.code === "KeyW" || e.code === "KeyA" || e.code === "KeyS" || e.code === "KeyD"
+
+  if (!isMoveKey) return
+
+  const now = performance.now()
+  if (now - lastMoveSentAt < MOVE_COOLDOWN_MS) {
+    e.preventDefault()
+    return
+  }
 
   const cam = fpsCamera.value?.camera
   // const meepleId = gameCharRef.value?.meepleId
@@ -459,6 +474,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     direction = moveDir.z > 0 ? 'SOUTH' : 'NORTH'
   }
 
+  lastMoveSentAt = now
   milefizStore.sendMove(meepleId, direction)
 }
 
