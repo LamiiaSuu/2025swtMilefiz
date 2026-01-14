@@ -37,7 +37,7 @@ public class DuelResolutionService {
      * gesendet, damit das Update im Frontend animiert wird.
      *
      * @param lobby  aktuelle Lobby
-     * @param duelId ID des Duells
+     * @param duel   das beendete Duell
      * @param game   beendetes Mini-Game
      */
     public void sendLoserHome(Lobby lobby, Duel duel, MiniGame game) {
