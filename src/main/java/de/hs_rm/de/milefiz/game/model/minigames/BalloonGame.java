@@ -73,7 +73,7 @@ public class BalloonGame extends MiniGame {
 
         if (!timeoutStarted) {
             timeoutStarted = true;
-            scheduler.schedule(this::handleTimeout, getTimeOut() + INSTRUCTION_DELAY_SECONDS, TimeUnit.SECONDS);
+            scheduler.schedule(this::handleTimeout, getTimeOut() + (long) INSTRUCTION_DELAY_SECONDS, TimeUnit.SECONDS);
         }
     }
 
