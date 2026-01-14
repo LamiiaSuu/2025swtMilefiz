@@ -748,6 +748,7 @@ const additionalAssets = computed(() => {
           type: tree.treeType,
         }))
       "
+      :board-id="boardStore.board?.id"
     />
   </TresCanvas>
 
