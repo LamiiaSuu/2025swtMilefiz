@@ -17,7 +17,6 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerHasNoPermissionException;
-import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
@@ -35,8 +34,6 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
@@ -48,7 +45,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyRejectedEvent;
 public class FrontendReceiverController {
 
     private final Logger logger = LoggerFactory.getLogger(FrontendReceiverController.class);
-    private final String lobbyNotFound = "Lobby not found.";
+    private String lobbyNotFound = "Lobby not found.";
     private LobbyManager lobbyManager;
     private GameService gameService;
     private LobbyMapper lobbyMapper;

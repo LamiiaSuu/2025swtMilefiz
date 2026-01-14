@@ -3,7 +3,6 @@ package de.hs_rm.de.milefiz.game.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +23,6 @@ import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 
 @Service
 public class DuelServiceImpl implements DuelService {
