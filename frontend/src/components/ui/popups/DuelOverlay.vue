@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import BalloonMinigame from '../minigames/balloonMinigame/BalloonMinigame.vue';
 import DiceMiniGame from '../minigames/DiceMiniGame.vue'
+import QuizMinigame from '../minigames/QuizMinigame.vue';
 
 const props = defineProps<{
   duels: any[]
@@ -30,6 +31,8 @@ function resolveComponent(duel: any) {
       return DiceMiniGame
     case 'BalloonGame':
       return BalloonMinigame
+    case 'QuizGame':
+      return QuizMinigame
     default:
       return BalloonMinigame
   }

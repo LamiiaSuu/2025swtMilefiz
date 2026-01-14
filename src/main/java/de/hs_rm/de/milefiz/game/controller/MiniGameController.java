@@ -314,10 +314,27 @@ public class MiniGameController {
                 broadcastQuizUpdate(lobby, duelId, game);
         }
 
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/quiz/sendAnswer/{answerIndex}")
+        public void handleAnswerRequest(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
+                        Player player, @DestinationVariable int answerIndex) throws LobbyNotFoundException {
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+                QuizGame game = (QuizGame) duelService.getMiniGame(duelId);
+
+                game.checkAnswer(player.getId(), answerIndex);
+
+                broadcastQuizUpdate(lobby, duelId, game);
+
+                if (game.isFinished()) {
+                        sendLoserHome(lobby, duelId, game);
+                }
+        }
+
         public void broadcastQuizUpdate(Lobby lobby, UUID duelId, QuizGame game) {
 
                 var event = new FrontendQuizGameUpdateEvent(duelId, game.getPlayer1(), game.getPlayer2(),
-                                game.getQuestion(), duelId, game.isFinished());
+                                game.getQuestionDTO(), game.getWinner(), game.isFinished());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }

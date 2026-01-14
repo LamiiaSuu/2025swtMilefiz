@@ -16,7 +16,10 @@ public class QuizGame extends MiniGame {
     private UUID player1;
     private UUID player2;
     private boolean timeoutStarted = false;
-    private MinigameQuestionDTO question = null;
+    private MinigameQuestionDTO questionDTO = null;
+    private QuestionService questionService;
+    private boolean player1Answered = false;
+    private boolean player2Answered = false;
 
     public QuizGame(int timeout) {
         super(2, "Quiz-Spiel", timeout);
@@ -27,8 +30,8 @@ public class QuizGame extends MiniGame {
         this.player2 = p2;
 
         try {
-            QuestionService questionService = QuestionService.getQuestionService();
-            question = questionService.randomQuestion();
+            questionService = QuestionService.getQuestionService();
+            questionDTO = questionService.randomQuestion();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,12 +58,38 @@ public class QuizGame extends MiniGame {
         notifyFinished();
     }
 
+    public void checkAnswer(UUID playerId, int answerIndex) {
+
+        if (player1.equals(playerId)) {
+            if (player1Answered) {
+                return;
+            }
+            player1Answered = true;
+        } else {
+            if (player2Answered) {
+                return;
+            }
+            player2Answered = true;
+        }
+
+        boolean correctAnswer = questionService.checkAnswer(questionDTO.getId(), answerIndex);
+
+        if (correctAnswer) {
+            finishGame(playerId);
+            return;
+        }
+
+        if (player1Answered && player2Answered) {
+            finishGame(null);
+        }
+    }
+
     public ScheduledExecutorService getScheduler() {
         return scheduler;
     }
 
-    public MinigameQuestionDTO getQuestion() {
-        return question;
+    public MinigameQuestionDTO getQuestionDTO() {
+        return questionDTO;
     }
 
     public UUID getPlayer1() {

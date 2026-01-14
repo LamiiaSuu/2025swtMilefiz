@@ -3,7 +3,9 @@ package de.hs_rm.de.milefiz.game.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -21,6 +23,8 @@ public class QuestionService {
     private static QuestionService questionService = null;
 
     private List<MinigameQuestionDTO> questions = new ArrayList<>();
+
+    private Map<Integer, Integer> correctAnswers = new HashMap<>();
 
     private QuestionService()
             throws StreamReadException, DatabindException, IOException {
@@ -63,6 +67,7 @@ public class QuestionService {
                             .get();
                 }
 
+                correctAnswers.put(questionDE.id(), questionDE.correctAnswer());
                 MinigameQuestionDTO questionDTO = new MinigameQuestionDTO(questionDE.id());
                 questionDTO.setDEQuestion(questionDE.question(), questionDE.answers());
                 questionDTO.setENQuestion(questionEN.question(), questionEN.answers());
@@ -97,5 +102,9 @@ public class QuestionService {
         if (candidates.isEmpty())
             return Optional.empty();
         return Optional.of(candidates.get(ThreadLocalRandom.current().nextInt(candidates.size())));
+    }
+
+    public boolean checkAnswer(int questionId, int answerIndex) {
+        return correctAnswers.get(questionId) == answerIndex;
     }
 }
