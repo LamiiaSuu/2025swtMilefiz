@@ -70,18 +70,12 @@ const filteredElements = computed<Element[] | undefined>(() => {
  * variance – Varianz des Scalings um den in scale angegebenen wert in prozent (0 = Scaling wird 1:1 übernommen)
  */
 const models = {
-  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.5, variance: 0.5 },
-  [Sizes.Medium]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100, variance: 0 },
-  [Sizes.Small]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1, variance: 0 }
-}
-
-// Für Debugging
-const isDebug = false; // Auf false gesetzt für Production
-
-const DebugColors = {
-  [Sizes.Large]: '#34495E',
-  [Sizes.Medium]: '#FF00BD',
-  [Sizes.Small]: '#4B3621'
+  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.8 },
+  [Sizes.Medium]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.2 },
+  [Sizes.Small]: { load: (useGLTF('/environment/trees/pine_low.glb', { draco: true })), scale: 1.2 },
+  [Sizes.Bush]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100 },
+  [Sizes.Mushroom]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1 },
+  [Sizes.Grass_Smol]: { load: (useGLTF('/environment/plants/grass_smol.glb', { draco: true })), scale: 2 }
 }
 
 const parts = ref<Part[]>([])
@@ -150,11 +144,11 @@ watchEffect(() => {
     parts.value.forEach((part, i) => {
       const ref = imRefs.value[i]; //zugehörige Referenz des InstancedMesh
       if (ref) {
-        elementsWithScale?.value?.filter((e) => e.type === part.type).forEach((e: ElementWithScale, i: number) => {
+        elements?.filter((e) => e.type === part.type).forEach((e: Element, i: number) => {
           // setze für alle gefundenen Elemente position, Skalierung, Quaternion in der Matrix des Mesh
           dummy.position.set(...e.position)
           dummy.quaternion.copy(part.quaternion)
-          const scale = (models[part.type].scale as number) * e.scale; // scaling mit varianz
+          const scale = (models[part.type].scale as number); // scaling mit varianz
           dummy.scale.set(scale, scale, scale)
           dummy.rotateOnWorldAxis(new Vector3(0, 1, 0), Math.floor(Math.random() * 361))
           dummy.updateMatrix()
@@ -174,7 +168,7 @@ const getRef = (el: any, index: number) => {
 
 <template>
   <TresInstancedMesh v-for="(part, index) in parts" :ref="(el) => getRef(el, index)"
-    :args="[part.geometry, part.material, (elementsWithScale?.filter(e => e.type === part.type))?.length ?? 0]" />
+    :args="[part.geometry, part.material, (elements?.filter(e => e.type === part.type))?.length ?? 0]" />
 
   <!-- Debugging der Positionen -->
   <Html v-if="isDebug" v-for="element in filteredElements" :position="element.position" center>

@@ -18,6 +18,7 @@ import MiniMapPopUp from './popups/MiniMapPopUp.vue';
 import MiniMapGraph from './popups/MiniMapGraph.vue';
 import ErrorMessage from './ErrorMessage.vue';
 import { useBoardStore } from '@/stores/boardStore';
+import TutorialPopUp from './popups/TutorialPopUp.vue';
 
 const milefizStore = useMilefizStore()
 const boardStore = useBoardStore()
@@ -57,12 +58,17 @@ function colorToCss(c: string) {
 
     <!-- Menu Popup -->
     <transition name="fade">
-      <MenuPopUp v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen" />
+      <MenuPopUp v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.popUpTutorialOpen" />
     </transition>
 
     <!-- Settings Popup -->
     <transition name="fade">
       <SettingsPopUp v-if="milefizStore.popUpSettingsOpen" />
+    </transition>
+
+    <!-- Tutorial Popup -->
+    <transition name="fade">
+      <TutorialPopUp v-if="milefizStore.popUpTutorialOpen" />
     </transition>
 
     <!-- Meeple Bar -->

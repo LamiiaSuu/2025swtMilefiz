@@ -27,14 +27,17 @@ const onBackClick = () => {
     <div class="overlay">
 
         <!-- Close Button -->
-        <PopUpCloseButton></PopUpCloseButton>
+        <PopUpCloseButton>(Esc)</PopUpCloseButton>
+
+        <div class="header">
+            <button class="menu-button" disabled>{{ tUI('SETTINGS') }}</button>
+        </div>
 
         <div class="popup">
 
             <div class="language">
 
                 <h1>{{ tUI('LANGUAGE') }}</h1>
-
 
                 <div class="language-wrapper">
                     <!-- LANGUAGE SETTINGS -->
@@ -50,7 +53,6 @@ const onBackClick = () => {
                     <AudioSettings></AudioSettings>
                 </div>
             </div>
-
 
             <div class="button-container">
                 <button class="back-button" @mouseenter="onHover" @click="onBackClick()">{{ tUI('BACK') }}</button>
@@ -77,13 +79,30 @@ const onBackClick = () => {
     -webkit-backdrop-filter: blur(4px);
 }
 
+.header {
+    margin-bottom: -8.5vh;
+    z-index: 99999;
+}
+
+.header :deep(.menu-button) {
+    background-image: url("/backgrounds/PopUpHeader.png");
+    padding-top: 1vh;
+    height: 10vh;
+}
+
+.menu-button:disabled {
+    cursor: default;
+    pointer-events: none;
+}
+
 .popup {
     display: flex;
     flex-direction: column;
-    height: 65vh;
+    height: 68vh;
+    width: 35vw;
     text-align: center;
     position: relative;
-    padding-top: 0vh;
+    padding-top: 1vh;
 
     justify-content: center;
 
@@ -91,7 +110,6 @@ const onBackClick = () => {
     animation: fadeIn 0.3s ease;
 
     margin-top: 5vh;
-    width: 30vw;
     border-radius: 18px;
 
     background:
@@ -115,7 +133,7 @@ const onBackClick = () => {
     align-items: center;
     position: relative;
     z-index: 10;
-    
+
     margin-top: -1vh;
 }
 
@@ -164,7 +182,6 @@ h1 {
     margin-bottom: 5vh;
     margin-top: 5vh;
 }
-
 
 .button-container {
     display: flex;

@@ -3,12 +3,15 @@
  */
 
 export interface ITreeDTD {
-    treePosition: {x: number, y: number}
-    treeType: Sizes
+  treePosition: { x: number, y: number }
+  treeType: Sizes
 }
 
 export enum Sizes {
   Small = "SMALL",
   Medium = "MEDIUM",
-  Large = "LARGE"
+  Large = "LARGE",
+  Bush = "BUSH",
+  Mushroom = "MUSHROOM",
+  Grass_Smol = "GRASS_SMOL"
 }
