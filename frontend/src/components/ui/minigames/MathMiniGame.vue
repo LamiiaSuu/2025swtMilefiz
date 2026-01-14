@@ -35,7 +35,11 @@ const doInputFocus = () => {
 
         <div class="math-container">
             <div class="math-term-container">
-                <div class="math-term-value-container"></div>
+                <div class="math-term-value-container">
+                    <div class="math-term-value">
+                        
+                    </div>
+                </div>
                 <div class="math-term-input-container">
                     <input class="math-term-input" name="math-value" type="number" ref="inputRef" :value="inputValue"/>
                 </div>

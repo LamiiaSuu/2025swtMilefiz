@@ -19,6 +19,7 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
@@ -68,10 +69,14 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.einarmigerBanditGame.timeout}")
     private int einarmigerBanditGameTimeout;
 
+    @Value("${minigame.mathgame.timeout}")
+    private int mathGameTimeout;
+
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging, DuelResolutionService duelResolutionService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+        gameFactories.add(() -> new MathGame(mathGameTimeout + 1));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
