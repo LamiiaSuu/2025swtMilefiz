@@ -401,8 +401,23 @@ const toggleCamera = (e: KeyboardEvent) => {
  *
  * @param {KeyboardEvent} e - Das Tastatur-Event, das die Eingabe auslöst.
  */
+const MOVE_COOLDOWN_MS = 500
+let lastMoveSentAt = 0
+
 const handleMoveKeys = (e: KeyboardEvent) => {
   if (!useFirstPerson.value) return
+
+  const isMoveKey =
+    e.code === "ArrowUp" || e.code === "ArrowDown" || e.code === "ArrowLeft" || e.code === "ArrowRight" ||
+    e.code === "KeyW" || e.code === "KeyA" || e.code === "KeyS" || e.code === "KeyD"
+
+  if (!isMoveKey) return
+
+  const now = performance.now()
+  if (now - lastMoveSentAt < MOVE_COOLDOWN_MS) {
+    e.preventDefault()
+    return
+  }
 
   const cam = fpsCamera.value?.camera
   // const meepleId = gameCharRef.value?.meepleId
@@ -454,6 +469,7 @@ const handleMoveKeys = (e: KeyboardEvent) => {
     direction = moveDir.z > 0 ? "SOUTH" : "NORTH"
   }
 
+  lastMoveSentAt = now
   milefizStore.sendMove(meepleId, direction)
 }
 
@@ -594,7 +610,8 @@ const connectionSegments = computed(() => {
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
     <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="el => registerGameCharRefFromTemplate(id, el)"
-      :meepleId="id" :playerColor="meepleColorMap.get(id)" :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)"/>
+      :meepleId="id" :playerColor="meepleColorMap.get(id)"
+      :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)" />
 
     <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
@@ -609,7 +626,8 @@ const connectionSegments = computed(() => {
       :position="[field.position.x, 0, field.position.y]" :type="field.type" />
 
     <!-- Pflanzen und Bäume -->
-    <Foliage :elements="boardStore.board?.trees.map(tree => ({ position: [tree.treePosition.x, 0, tree.treePosition.y], type: tree.treeType }))" />
+    <Foliage
+      :elements="boardStore.board?.trees.map(tree => ({ position: [tree.treePosition.x, 0, tree.treePosition.y], type: tree.treeType }))" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
