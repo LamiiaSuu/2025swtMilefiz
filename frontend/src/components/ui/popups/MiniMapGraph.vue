@@ -6,7 +6,7 @@ import type { IBoardDTD } from "@/stores/IBoardDTD";
 
 const milefizStore = useMilefizStore()
 
-type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE" | "INVALID_END" | "INVALID_START"
+type Occupancy = "FREE" | "OCCUPIED" | "OWN_MEEPLE"
 
 const props = defineProps<{
   board: IBoardDTD
@@ -187,23 +187,6 @@ function isSelected(fieldId: string) {
   return props.selectedFieldId === fieldId
 }
 
-/**
- * Prüft ob das Feld ein Startfeld ist.
- * @param fieldId ID des Feldes
- * @returns {boolean}
- */
-function isInvalidStart(fieldId: string) {
-  return occ(fieldId) === "INVALID_START"
-}
-
-/**
- * Prüft ob das Feld ein Zielfeld ist.
- * @param fieldId ID des Feldes
- * @returns {boolean}
- */
-function isInvalidEnd(fieldId: string) {
-  return occ(fieldId) === "INVALID_END"
-}
 
 /**
  * Liefert das Feld auf dem das eigene aktive Meeple steht.
@@ -444,15 +427,12 @@ onMounted(() => {
 
 
           <!-- OCCUPIED X -->
-          <g v-else-if="isOccupied(f.id) && !isInvalidStart(f.id)" class="node-x">
+          <g v-else-if="isOccupied(f.id)" class="node-x">
             <line :x1="cx(f.position.x) - (R - 6)" :y1="cy(f.position.y) - (R - 6)" :x2="cx(f.position.x) + (R - 6)"
               :y2="cy(f.position.y) + (R - 6)" class="x-line" />
             <line :x1="cx(f.position.x) + (R - 6)" :y1="cy(f.position.y) - (R - 6)" :x2="cx(f.position.x) - (R - 6)"
               :y2="cy(f.position.y) + (R - 6)" class="x-line" />
           </g>
-          <!-- INVALID_START -->
-          <image v-else-if="isInvalidStart(f.id)" href="/mapEditorIcons/base.png" :x="cx(f.position.x) - (R)"
-            :y="cy(f.position.y) - (R)" :width="R * 2" :heigth="R * 2" />
         </g>
       </g>
 
