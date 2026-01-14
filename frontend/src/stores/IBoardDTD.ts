@@ -6,6 +6,8 @@ import type { ITreeDTD } from "./ITreeDTD";
 
 
 export interface IBoardDTD{
+    /** Eindeutige Board-ID */
+    id: string
     fields: Array<IFieldDTD>
     trees: Array<ITreeDTD>
 }
