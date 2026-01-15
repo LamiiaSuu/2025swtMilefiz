@@ -48,6 +48,7 @@ export const UI_DE: Record<UIKey, string> = {
     BACK_TO_MAIN_MENU_CONFIRMATION_INGAME: 'Willst du wirklich das Spiel verlassen?',
     CANCEL: 'Abbrechen',
     CONTINUE: 'Fortsetzen',
+    CONFIRM: 'Bestätigen',
     LEAVE_GAME: 'Spiel verlassen',
     POPUP_MENU: 'Menü',
     CONTROLS: 'Steuerung',
@@ -86,4 +87,8 @@ export const UI_DE: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Nächste Spielfigur',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Vorherige Spielfigur',
     CONTROLS_TUTORIAL_MENU: 'Menü öffnen',
+    MINIMAP_BARRIER_MOVE: 'Sperre umplatzieren',
+    MINIMAP_OWN_MEEPLE: 'Eigenes Meeple',
+    MINIMAP_OCCUPIED: 'Besetzt',
+    MINIMAP_AVAILABLE: 'Frei'
 }

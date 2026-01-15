@@ -130,7 +130,7 @@ public class MovementServiceImpl implements MovementService {
         try {
             lobby = lobbyManager.getLobby(lobbyId);
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error("Lobby not found", e);
         }
 
         Board board = lobby.getBoard();
@@ -257,7 +257,14 @@ public class MovementServiceImpl implements MovementService {
                     Meeple rivalMeeple = getRivalMeepleByField(nextField, rivalMeeples);
 
                     Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
-
+                    if (rivalPlayer == null) {
+                        return new FrontendMoveWithLossEvent(
+                                player.getId(),
+                                meeple.getId(),
+                                nextField.getId(),
+                                player.getRemainingMoves(),
+                                player.hasMoved());
+                    }
                     var duel = duelService.createDuel(
                             player.getId(),
                             rivalPlayer.getId(),
@@ -423,9 +430,11 @@ public class MovementServiceImpl implements MovementService {
         try {
             lobby = lobbyManager.getLobby(lobbyId);
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error("Lobby not found", e);
         }
-
+        if(lobby == null){
+            return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_NO_LOBBY");
+        }
         Board board = lobby.getBoard();
         Meeple barrier = board.getBarrierById(moveBarrCmd.barrierId());
         Field currentField = barrier.getCurrentField();

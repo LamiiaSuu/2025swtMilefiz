@@ -33,8 +33,8 @@ const isJumping = ref(false)
 const isJumpAllowed = computed(() => milefizStore.energy.isEnergyFull)
 
 // Standard-Sprunghöhe (wird für große Sprünge verwendet)
-const defaultJumpHeight = 4
-const defaultUpDuration = 300
+const defaultJumpHeight = 6
+const defaultUpDuration = 800
 const defaultFallDuration = 2000
 
 // Kleine Hüpfer (bei Bewegung)

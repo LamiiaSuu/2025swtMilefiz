@@ -1,27 +1,22 @@
 package de.hs_rm.de.milefiz.game.service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.Principal;
 
 import de.hs_rm.de.milefiz.game.model.Board;
-import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
-import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 
 /**
@@ -63,7 +58,7 @@ public class GameServiceImpl implements GameService {
 
         this.plantingService = plantingService;
 
-        final String BOARD_PATH = "boards/dummyBoard.json";
+        final String BOARD_PATH = "boards/standardBoard.json";
         ObjectMapper objectMapper = new ObjectMapper();
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(BOARD_PATH);
@@ -74,10 +69,10 @@ public class GameServiceImpl implements GameService {
 
         try {
             BoardDTO testBoardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
-            if (!testBoardDTO.hasTrees()) {
-                logger.info("Test board has no trees, Generating local trees...");
-                testBoardDTO = this.plantingService.plantTrees(testBoardDTO, 0.1f); // TODO: test
-            }
+            // if (!testBoardDTO.hasTrees()) {
+            //     logger.info("Test board has no trees, Generating local trees...");
+            //     testBoardDTO = this.plantingService.plantTrees(testBoardDTO, 0.1f); // TODO: test
+            // }
             testBoard = BoardMapper.mapToBoard(testBoardDTO);
             logger.info("Test board loaded successfully from: {}", BOARD_PATH);
         } finally {
