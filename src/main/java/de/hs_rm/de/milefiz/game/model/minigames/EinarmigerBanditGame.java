@@ -228,13 +228,11 @@ public class EinarmigerBanditGame extends MiniGame {
      * Ergebnisse automatisch mit der gegnerischen Farbe gefüllt.
      * </p>
      * 
-     * <p>
      * Konkret:
      * <ul>
      * <li>Spieler 1 hat nicht gestoppt → erhält die Farbe von Spieler 2</li>
      * <li>Spieler 2 hat nicht gestoppt → erhält die Farbe von Spieler 1</li>
      * </ul>
-     * </p>
      * 
      * <p>
      * Nach dem Auffüllen wird die normale Gewinnauswertung durchgeführt.
