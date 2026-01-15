@@ -43,10 +43,6 @@ public class EinarmigerBanditGame extends MiniGame {
 
     private static final Logger logger = LoggerFactory.getLogger(EinarmigerBanditGame.class);
 
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-    private boolean timeoutStarted = false;
-
     private final Random random = new SecureRandom();
 
     private final int COLOR_PLAYER1 = 0;
@@ -91,15 +87,6 @@ public class EinarmigerBanditGame extends MiniGame {
 
         possibleColorResults[COLOR_PLAYER1] = player1.getColor();
         possibleColorResults[COLOR_PLAYER2] = player2.getColor();
-
-        // Starte den Timeout
-        if (!timeoutStarted) {
-            timeoutStarted = true;
-
-            logger.info("Starting timeout timer for {} seconds", getTimeOut());
-
-            scheduler.schedule(this::forceMissingRolls, getTimeOut(), TimeUnit.SECONDS);
-        }
     }
 
     /**
@@ -255,12 +242,22 @@ public class EinarmigerBanditGame extends MiniGame {
      * 
      * @author Leon Schäfer
      */
-    private void forceMissingRolls() {
+    @Override
+    public void forceMissingActions() {
         logger.info("Timeout reached - forcing missing rolls");
 
         // Nur, Wenn nicht gestoppt
         if (isFinished())
             return;
+
+        //Besonders wichtig fürs Testen!
+        if (possibleColorResults[COLOR_PLAYER1] == null ||
+            possibleColorResults[COLOR_PLAYER2] == null) {
+
+            // Wenn null -> Dummy-Farben
+            possibleColorResults[COLOR_PLAYER1] = Color.RED;
+            possibleColorResults[COLOR_PLAYER2] = Color.BLUE;
+        }
 
         if (resultP1 == null) {
             resultP1 = possibleColorResults[COLOR_PLAYER2];

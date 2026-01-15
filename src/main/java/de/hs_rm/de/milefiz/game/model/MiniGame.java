@@ -163,5 +163,12 @@ public abstract class MiniGame {
             onFinished.run();
         }
     }
+
+    public void forceMissingActions() {
+        if (isFinished()) return;
+        setFinished(true);
+        notifyFinished();
+    }
+
 }
 
