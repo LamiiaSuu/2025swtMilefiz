@@ -19,12 +19,14 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -401,6 +403,52 @@ public class MiniGameController {
                                 game.getPlayer2(),
                                 game.getPhasePlayer1(),
                                 game.getPhasePlayer2(),
+                                game.getWinner(),
+                                game.isFinished());
+
+                messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
+
+        /**
+         * 
+         * @param lobbyId
+         * @param duelId
+         * @param player
+         * @param clickedColorName
+         * @throws LobbyNotFoundException
+         */
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/colorbrain/click")
+        public void handleColorbrainClick(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
+                        Player player, @RequestBody String clickedColorName) throws LobbyNotFoundException {
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+                ColorbrainGame game = (ColorbrainGame) duelService.getMiniGame(duelId);
+
+                ColorbrainGame.ColorbrainColor clickedColor = ColorbrainGame.ColorbrainColor
+                                .valueOf(clickedColorName.toUpperCase());
+
+                game.handlePlayerClick(player.getId(), clickedColor);
+
+                broadcastColorbrainUpdate(lobby, duelId, game);
+
+                if (game.isFinished()) {
+                        sendLoserHome(lobby, duelId, game);
+                }
+        }
+
+        /**
+         * 
+         * @param lobby
+         * @param duelId
+         * @param game
+         */
+        public void broadcastColorbrainUpdate(Lobby lobby, UUID duelId, ColorbrainGame game) {
+
+                var event = new FrontendColorbrainGameUpdateEvent(
+                                duelId,
+                                game.getPlayer1(),
+                                game.getPlayer2(),
+                                game.getSelectedColorNames(),
                                 game.getWinner(),
                                 game.isFinished());
 
