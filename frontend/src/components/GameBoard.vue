@@ -179,6 +179,26 @@ watch(
   { deep: true },
 )
 
+const _prevMeepleRotations = new Map<string, number>()
+
+watch(
+  () => boardStore.meepleRotations,
+  (rots) => {
+    for (const [id, rot] of Object.entries(rots)) {
+      const prev = _prevMeepleRotations.get(id)
+      if (prev != null && Math.abs(prev - rot) < 1e-6) continue
+
+      const inst: any = gameCharRefs[id]?.value
+      if (inst && typeof inst.setRotation === 'function') {
+        inst.setRotation(rot)
+      }
+
+      _prevMeepleRotations.set(id, rot)
+    }
+  },
+  { deep: true, immediate: true },
+)
+
 watchEffect(() => {
   if (milefizStore.gameFinished) {
     useFirstPerson.value = false
@@ -674,12 +694,8 @@ const additionalAssets = computed(() => {
     <OrbitControls v-if="!useFirstPerson" />
 
     <!-- First Person Kamera (Folgt dem Charakter) -->
-    <Camera
-      ref="fpsCamera"
-      :gameCharRef="gameCharRefs[selectedMeepleId ?? '']?.value ?? null"
-      :use-first-person="useFirstPerson"
-      @rotate-character="onRotateCharacter"
-    />
+    <Camera ref="fpsCamera" :gameCharRef="gameCharRefs[selectedMeepleId ?? '']?.value ?? null"
+      :use-first-person="useFirstPerson" @rotate-character="onRotateCharacter" />
 
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
      vertikal ist -->
@@ -698,74 +714,36 @@ const additionalAssets = computed(() => {
     <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" />
 
     <!-- Berge am Horizont hinzugefügt-->
-    <AssetSprite
-      v-for="(mountain, index) in mountains"
-      :key="`mountain-${index}`"
-      type="mountains"
-      :variant="mountain.variant"
-      :position="[mountain.x, mountain.y, mountain.z]"
-      :scale="mountain.scale"
-      :rotation="mountain.rotation"
-    />
+    <AssetSprite v-for="(mountain, index) in mountains" :key="`mountain-${index}`" type="mountains"
+      :variant="mountain.variant" :position="[mountain.x, mountain.y, mountain.z]" :scale="mountain.scale"
+      :rotation="mountain.rotation" />
 
-    <AssetSprite
-      v-for="(asset, index) in additionalAssets"
-      :key="`standard-asset-${index}`"
-      :type="asset.type"
-      :variant="asset.variant"
-      :position="asset.position"
-      :scale="asset.scale"
-      :rotation="asset.rotation"
-    />
+    <AssetSprite v-for="(asset, index) in additionalAssets" :key="`standard-asset-${index}`" :type="asset.type"
+      :variant="asset.variant" :position="asset.position" :scale="asset.scale" :rotation="asset.rotation" />
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
-    <GameCharacter
-      v-for="id in allMeepleIds"
-      :key="id"
-      :ref="(el) => registerGameCharRefFromTemplate(id, el)"
-      :meepleId="id"
-      :playerColor="meepleColorMap.get(id)" :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)"
-    />
+    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="(el) => registerGameCharRefFromTemplate(id, el)"
+      :meepleId="id" :playerColor="meepleColorMap.get(id)"
+      :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)" />
 
     <!--Spawnen von Barrieren-->
-    <GameCharacter
-      v-for="barrier in boardStore.barriersWithPositions"
-      :key="barrier.fieldId"
-      :position="barrier.position"
-      bodyColor="gray"
-      eyeColor="red"
-      :meepleId="barrier.fieldId"
-      :barrier="true"
-    />
+    <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
+      :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
     <!-- Verbindungspfade zwischen verbundenen Tiles -->
-    <Path
-      v-for="seg in connectionSegments"
-      :key="seg.key"
-      :position="[seg.x, 0, seg.z]"
-      :rotationY="seg.rotY"
-      :length="seg.length"
-    />
+    <Path v-for="seg in connectionSegments" :key="seg.key" :position="[seg.x, 0, seg.z]" :rotationY="seg.rotY"
+      :length="seg.length" />
 
     <!-- Spielfeldtiles rendern -->
-    <Tile
-      v-for="field in boardStore.board?.fields"
-      :key="field.id"
-      :id="field.id"
-      :position="[field.position.x, 0, field.position.y]"
-      :type="field.type"
-    />
+    <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
+      :position="[field.position.x, 0, field.position.y]" :type="field.type" />
 
     <!-- Pflanzen und Bäume -->
-    <Foliage
-      :elements="
-        boardStore.board?.trees.map((tree) => ({
-          position: [tree.treePosition.x, 0, tree.treePosition.y],
-          type: tree.treeType,
-        }))
-      "
-      :board-id="boardStore.board?.id"
-    />
+    <Foliage :elements="boardStore.board?.trees.map((tree) => ({
+      position: [tree.treePosition.x, 0, tree.treePosition.y],
+      type: tree.treeType,
+    }))
+      " :board-id="boardStore.board?.id" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
