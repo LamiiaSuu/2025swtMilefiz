@@ -24,6 +24,7 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCheatedEvent;
@@ -277,6 +278,8 @@ public class MovementServiceImpl implements MovementService {
                         dice.initPlayers(player.getId(), rivalPlayer.getId());
                     } else if (miniGame instanceof EinarmigerBanditGame game) {
                         game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
+                    } else if (miniGame instanceof ColorbrainGame game) {
+                        game.initGame(player.getId(), rivalPlayer.getId());
                     }
                     if (miniGame instanceof BalloonGame game) {
                         game.initPlayers(player.getId(), rivalPlayer.getId());
@@ -342,6 +345,9 @@ public class MovementServiceImpl implements MovementService {
                             dice.initPlayers(player.getId(), rivalPlayer.getId());
                         } else if (miniGame instanceof EinarmigerBanditGame game) {
                             game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
+                        } else if (miniGame instanceof ColorbrainGame game) {
+                            game.initGame(player.getId(), rivalPlayer.getId());
+                            duelService.initColorBrain(duel, lobby, game);
                         }
                         if (miniGame instanceof BalloonGame game) {
                             game.initPlayers(player.getId(), rivalPlayer.getId());
@@ -432,7 +438,7 @@ public class MovementServiceImpl implements MovementService {
         } catch (LobbyNotFoundException e) {
             logger.error("Lobby not found", e);
         }
-        if(lobby == null){
+        if (lobby == null) {
             return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_NO_LOBBY");
         }
         Board board = lobby.getBoard();
