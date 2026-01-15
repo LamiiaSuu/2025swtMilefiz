@@ -419,7 +419,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           const duel = activeDuels[event.duelId]
           if (!duel) return
 
-          duel.state.selectedColors = event.selectedColors
+          duel.selectedColors = event.selectedColors
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
