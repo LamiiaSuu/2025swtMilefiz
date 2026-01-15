@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import de.hs_rm.de.milefiz.game.model.Duel;
+import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
+import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 
 /**
  * Zentrale Schnittstelle zur Verwaltung von Duellen und den dazugehörigen Mini-Spielen.
@@ -140,5 +142,7 @@ public interface DuelService {
      *         wenn kein Duell mit dieser ID existiert
      */
     Duel getDuel(UUID duelId);
+
+    public void initColorBrain(Duel duel, Lobby lobby, ColorbrainGame game);
 
 }
