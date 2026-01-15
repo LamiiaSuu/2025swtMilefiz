@@ -397,6 +397,15 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
+        if (event.type === "COLORBRAIN_GAME_UPDATE") {
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          duel.state.selectedColors = event.selectedColors
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
 
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
@@ -1030,7 +1039,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     popUpSettingsOpen.value = false
   }
 
-    // Oeffnet PopUp Tutorial
+  // Oeffnet PopUp Tutorial
   function openPopUpTutorial() {
     popUpTutorialOpen.value = true
   }
