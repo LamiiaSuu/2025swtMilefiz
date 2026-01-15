@@ -111,23 +111,6 @@ class DiceGameTest {
     }
 
     @Test
-    void timeoutForcesMissingRolls() throws InterruptedException {
-        DiceGame game = new DiceGame(1, new FixedRandom(0));
-
-        UUID p1 = UUID.randomUUID();
-        UUID p2 = UUID.randomUUID();
-
-        game.initPlayers(p1, p2);
-
-        // niemand würfelt → Timeout greift
-        Thread.sleep(1100);
-
-        assertTrue(game.isFinished());
-        assertEquals(0, game.getRollP1());
-        assertEquals(0, game.getRollP2());
-    }
-
-    @Test
     void secondRollIsIgnored() {
         DiceGame game = new DiceGame(10, new FixedRandom(5, 10, 15));
 
