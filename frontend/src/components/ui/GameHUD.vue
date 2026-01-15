@@ -76,6 +76,12 @@ function colorToCss(c: string) {
       <MeepleBar />
     </div>
 
+    <!-- Menu Button -->‚
+    <div class="ingame-menu-button" >
+      <img src="@/assets/hud/menus_white.png" class="ingame-menu-icon" />
+      <span class="ingame-hotkey">esc</span>
+    </div>
+
     <!-- Spielerliste -->
     <div class="spielerliste-container">
       <SpielerListe />
@@ -139,6 +145,38 @@ function colorToCss(c: string) {
   left: 2vw;
   /* Abstand von rechts */
 }
+
+.ingame-menu-button {
+  position: relative;
+  padding: 5px;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: filter 120ms ease-out, transform 120ms ease-out;
+}
+
+.ingame-menu-icon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: filter 120ms ease-out, transform 120ms ease-out;
+  padding: 5px;
+}
+
+.ingame-hotkey {
+  position: absolute;
+  bottom: -3px;
+  left: 3px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+  border-radius: 3px;
+  font-family: "AcmeFont", sans-serif;
+}
+
 
 .button-bar {
   display: flex;
