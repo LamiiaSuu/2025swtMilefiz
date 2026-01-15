@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.model.Duel;
+import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
@@ -31,14 +34,15 @@ class DuelServiceImplTest {
     void setup() {
         lobbyManager = mock(LobbyManager.class);
         messaging = mock(FrontendMessagingService.class);
+        duelResolutionService = mock(DuelResolutionService.class); // 🔥 DAS FEHLT
 
         service = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
 
-        // Inject @Value fields manually
         ReflectionTestUtils.setField(service, "diceGameTimeout", 5);
         ReflectionTestUtils.setField(service, "balloonGameTimeout", 5);
         ReflectionTestUtils.setField(service, "einarmigerBanditGameTimeout", 5);
     }
+
 
     @Test
     void randomGame_returnsNewInstance() {
@@ -193,6 +197,88 @@ class DuelServiceImplTest {
 
         Object callback = ReflectionTestUtils.getField(game, "onFinished");
         assertNotNull(callback);
+    }
+
+    @Test
+    void upToFourMiniGames_canRunInParallel() {
+        List<Duel> duels = new ArrayList<>();
+
+        for (int i = 0; i < 4; i++) {
+            Duel duel = service.createDuel(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID()
+            );
+            duels.add(duel);
+            service.assignRandomGameToDuel(duel.getId());
+        }
+
+        // alle 4 Duelle sind aktiv
+        long activeGames = duels.stream()
+            .map(Duel::getMiniGame)
+            .filter(g -> g != null && !g.isFinished())
+            .count();
+
+        assertEquals(4, activeGames);
+    }
+    
+    @Test
+    void duelIsRemovedAfterMiniGameFinished() {
+        UUID p1 = UUID.randomUUID();
+        UUID p2 = UUID.randomUUID();
+        UUID m1 = UUID.randomUUID();
+        UUID m2 = UUID.randomUUID();
+
+        Duel duel = service.createDuel(p1, p2, m1, m2);
+
+        Lobby lobby = mock(Lobby.class);
+        when(lobbyManager.getLobbyFromPlayerUUID(p1)).thenReturn(lobby);
+
+        MiniGame game = service.assignRandomGameToDuel(duel.getId());
+
+        game.forceMissingActions();
+
+        assertThrows(IllegalArgumentException.class, () -> service.getDuel(duel.getId()));
+    }
+
+    @Test
+    void schedulerIsShutdownOnPreDestroy() {
+        DuelServiceImpl localService =
+            new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
+
+        ScheduledExecutorService scheduler =
+            (ScheduledExecutorService) ReflectionTestUtils
+                .getField(localService, "miniGameScheduler");
+
+        assertNotNull(scheduler);
+        assertFalse(scheduler.isShutdown());
+
+        localService.shutdownScheduler();
+
+        assertTrue(scheduler.isShutdown());
+    }
+
+
+    @Test
+    void forceMissingActions_finishesGame() {
+        Duel duel = service.createDuel(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
+        );
+
+        Lobby lobby = mock(Lobby.class);
+        when(lobbyManager.getLobbyFromPlayerUUID(any())).thenReturn(lobby);
+
+        MiniGame game = service.assignRandomGameToDuel(duel.getId());
+
+        assertFalse(game.isFinished());
+
+        game.forceMissingActions();
+
+        assertTrue(game.isFinished());
     }
 
 

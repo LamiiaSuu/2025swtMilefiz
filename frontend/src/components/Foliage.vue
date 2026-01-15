@@ -4,6 +4,7 @@ import { ref, watchEffect, watch, computed } from 'vue'
 import { BufferGeometry, DynamicDrawUsage, InstancedMesh, Material, Mesh, Object3D, Quaternion, Vector3 } from 'three'
 
 import { Sizes } from '@/stores/ITreeDTD';
+import { STANDARD_BOARD_ID, standardBoardAssets } from '@/types/BoardAsset';
 
 // Typ für Prop
 export type Element = {
@@ -23,7 +24,7 @@ type Part = {
 }
 
 // Props
-const { elements } = defineProps<{ elements?: Element[] }>()
+const { elements, boardId } = defineProps<{ elements?: Element[], boardId?: string }>()
 
 /**
  * Modelle
@@ -31,12 +32,12 @@ const { elements } = defineProps<{ elements?: Element[] }>()
  * variance – Varianz des Scalings um den in scale angegebenen wert in prozent (0 = Scaling wird 1:1 übernommen)
  */
 const models = {
-  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.8 },
-  [Sizes.Medium]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.2 },
-  [Sizes.Small]: { load: (useGLTF('/environment/trees/pine_low.glb', { draco: true })), scale: 1.2 },
-  [Sizes.Bush]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100 },
-  [Sizes.Mushroom]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1 },
-  [Sizes.Grass_Smol]: { load: (useGLTF('/environment/plants/grass_smol.glb', { draco: true })), scale: 2 }
+  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.8, collisionRadius: 2.5 },
+  [Sizes.Medium]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.2, collisionRadius: 2 },
+  [Sizes.Small]: { load: (useGLTF('/environment/trees/pine_low.glb', { draco: true })), scale: 1.2, collisionRadius: 1 },
+  [Sizes.Bush]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100, collisionRadius: 0.5 },
+  [Sizes.Mushroom]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1, collisionRadius: 0.3 },
+  [Sizes.Grass_Smol]: { load: (useGLTF('/environment/plants/grass_smol.glb', { draco: true })), scale: 2, collisionRadius: 0.2 }
 }
 const parts = ref<Part[]>([])
 const imRefs = ref<InstancedMesh[]>([])
@@ -44,6 +45,30 @@ const imRefs = ref<InstancedMesh[]>([])
 
 // Dummy-Objekt für PLatzierung der einzelnen Elemente im InstancedMesh
 const dummy = new Object3D()
+
+/**
+ * Prüft ob ein Element mit einem Board-Asset kollidiert
+ */
+const isCollidingWithAsset = (element: Element): boolean => {
+  if (boardId !== STANDARD_BOARD_ID || !standardBoardAssets) return false
+
+  const treePos = new Vector3(...element.position)
+  const blockRadius = 2
+
+  return standardBoardAssets.some(asset => {
+    const assetPos = new Vector3(...asset.position)
+    const distance = treePos.distanceTo(assetPos)
+    return distance < blockRadius
+  })
+}
+
+/**
+ * Gefilterte Elemente ohne Kollisionen
+ */
+const filteredElements = computed(() => {
+  if (!elements) return []
+  return elements.filter(element => !isCollidingWithAsset(element))
+})
 
 /**
  * Sucht für den Angegebenen Type alle im zugehörigen Modell vorhandenen Meshes und gibt ein Array an
@@ -55,7 +80,7 @@ const getPartsForType = (type: Sizes) => {
   const scene = model?.state?.value?.scene ?? null
   const partsT: Part[] = []
   if (!scene) return partsT
-  scene.traverse((node: Object3D) => {
+  scene.traverse((node) => {
     if ((node as Mesh).isMesh) {
       const mesh = node as Mesh;
       const geom = mesh.geometry.clone() as BufferGeometry
@@ -99,13 +124,13 @@ watchEffect(() => {
     parts.value.forEach((part, i) => {
       const ref = imRefs.value[i]; //zugehörige Referenz des InstancedMesh
       if (ref) {
-        elements?.filter((e) => e.type === part.type).forEach((e: Element, i: number) => {
+        filteredElements.value?.filter((e) => e.type === part.type).forEach((e: Element, i: number) => {
           // setze für alle gefundenen Elemente position, Sklalierung, Quaternion in der Matrix des Mesh
           dummy.position.set(...e.position)
           dummy.quaternion.copy(part.quaternion)
           const scale = (models[part.type].scale as number); // scaling mit varianz
           dummy.scale.set(scale, scale, scale)
-          dummy.rotateOnWorldAxis(new Vector3( 0, 1, 0 ), Math.floor(Math.random() * 361))
+          dummy.rotateOnWorldAxis(new Vector3(0, 1, 0), Math.floor(Math.random() * 361))
           dummy.updateMatrix()
           ref.setMatrixAt(i, dummy.matrix)
         })
@@ -116,11 +141,13 @@ watchEffect(() => {
 })
 
 const getRef = (el: any, index: number) => {
-  imRefs.value[index] = el;
+  if (el) {
+    imRefs.value[index] = el;
+  }
 }
 
 </script>
 <template>
-  <TresInstancedMesh v-for="(part, index) in parts" :ref="(el) => getRef(el, index)"
-    :args="[part.geometry, part.material, (elements?.filter(e => e.type === part.type))?.length ?? 0]" />
+  <TresInstancedMesh v-for="(part, index) in parts" :key="index" :ref="(el: any) => getRef(el, index)"
+    :args="[part.geometry, part.material, (filteredElements?.filter(e => e.type === part.type))?.length ?? 0]" />
 </template>
