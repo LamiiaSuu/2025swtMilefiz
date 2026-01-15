@@ -179,16 +179,17 @@ watch(
   { deep: true },
 )
 
+// Rotation-Updates aus dem Store auf die GameCharacter anwenden
 const _prevMeepleRotations = new Map<string, number>()
-
 watch(
   () => boardStore.meepleRotations,
   (rots) => {
     for (const [id, rot] of Object.entries(rots)) {
       const prev = _prevMeepleRotations.get(id)
-      if (prev != null && Math.abs(prev - rot) < 1e-6) continue
+      if (prev !== undefined && Math.abs(prev - rot) < 1e-6) continue
 
-      const inst: any = gameCharRefs[id]?.value
+      const ref = gameCharRefs[id]
+      const inst: any = ref?.value
       if (inst && typeof inst.setRotation === 'function') {
         inst.setRotation(rot)
       }
@@ -196,7 +197,7 @@ watch(
       _prevMeepleRotations.set(id, rot)
     }
   },
-  { deep: true, immediate: true },
+  { deep: true, immediate: true }
 )
 
 watchEffect(() => {
