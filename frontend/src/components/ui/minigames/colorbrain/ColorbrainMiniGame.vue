@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useMilefizStore } from "@/stores/milefizstore"
-import CountdownBar from "./CountdownBar.vue"
+import CountdownBar from "../CountdownBar.vue"
 import { tUI } from "@/i18n"
 
 const props = defineProps<{
@@ -14,6 +14,7 @@ const emit = defineEmits<{
 
 const store = useMilefizStore()
 const waiting = ref<string | null>(null)
+
 
 /**
  * Prüft ob der aktuelle Spieler gewonnen hat.
@@ -29,6 +30,7 @@ const isWinner = computed(() => {
 const isFinished = computed(() => {
   return props.duel?.state?.finished ?? false
 })
+
 
 
 function getPlayerNameByMeeple(meepleId: string) {
@@ -64,6 +66,47 @@ watch(
   }
 )
 
+const shuffledColors = ref<string[]>([])
+
+watch(
+  () => props.duel?.selectedColors,
+  (colors) => {
+    if (!colors) return
+
+    const copy = [...colors]
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+        ;[copy[i], copy[j]] = [copy[j], copy[i]]
+    }
+
+    shuffledColors.value = copy
+  },
+  { immediate: true }
+)
+
+
+const hasClicked = ref(false)
+
+/**
+ * Verarbeitet einen Klick auf eine Farbe.
+ * Sendet eine WebSocket-Message an das Backend (/colorbrain/click).
+ */
+const handleColorClick = (color: string) => {
+  if (isFinished.value) return
+
+  hasClicked.value = true
+
+  store.sendLobbyMessage(
+    `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/colorbrain/click`,
+    {
+      id: store.gamedata.playerId,
+      color
+    }
+  )
+}
+
+
+
 </script>
 
 <template>
@@ -73,6 +116,11 @@ watch(
     <h2 class="minigame-title">
       Colorbrain
     </h2>
+
+    <!-- ANLEITUNGSTEXT -->
+    <h3 v-if="!isFinished">
+      {{ tUI('MINIGAME_COLORBRAIN_INSTRUCTION') }}
+    </h3>
 
     <!-- COUNTDOWN -->
     <CountdownBar :seconds="duel.timeOut" />
@@ -86,8 +134,6 @@ watch(
         </h3>
       </div>
 
-      <h3>VS.</h3>
-
       <!-- Spieler 2 -->
       <div class="player">
         <h3 :style="{ color: getPlayerColorByMeeple(duel.secondMeeple) }">
@@ -96,10 +142,13 @@ watch(
       </div>
     </div>
 
-    <!-- Klick-Button (nur sichtbar während des Spiels) -->
-    <button v-if="!isFinished" class="dice-roll-button" >
-      {{ tUI('MINIGAME_BALLOON_CLICK') }}
-    </button>
+    <!-- Color Buttons -->
+    <div class="button-container">
+      <button v-for="color in shuffledColors" :key="color" :disabled="hasClicked || isFinished"
+        :class="['color-button', color.toLowerCase()]" @click="handleColorClick(color)">
+        {{ color }}
+      </button>
+    </div>
 
     <!-- GEWINNER/VERLIERER Anzeige -->
     <div v-if="isFinished" class="winner-big">
@@ -178,7 +227,7 @@ button {
   cursor: pointer;
 }
 
-.dice-title {
+.minigame-title {
   font-family: "Acme", sans-serif;
   font-size: 1.6rem;
   font-weight: 900;
