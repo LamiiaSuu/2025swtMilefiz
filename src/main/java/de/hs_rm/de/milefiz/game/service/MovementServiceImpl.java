@@ -121,9 +121,9 @@ public class MovementServiceImpl implements MovementService {
     @Override
     public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Player player) {
 
-        logger.info("Moving meeple {} from player '{}' in lobby {} in direction {} (sessionId={})",
+        logger.info("Moving meeple {} from player '{}' in lobby {} in direction {})",
                 moveCmd.meepleId(),
-                player != null ? player.getName() : "anonymous",
+                player.getName(),
                 lobbyId,
                 moveCmd.direction());
 
@@ -171,7 +171,7 @@ public class MovementServiceImpl implements MovementService {
         // RICHTUNGSWECHSEL
         // Fehler bei Versuch das Feld zu betreten auf dem man zuletzt war
         // (Richtungswechsel ist verboten)
-        if (lastField != null && nextField.equals(lastField)) {
+        if (changedDirection(lastField, nextField)) {
             logger.info("Cant change direction!");
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_CANT_CHANGE_DIRECTION");
         }
@@ -202,7 +202,7 @@ public class MovementServiceImpl implements MovementService {
         // FELD DURCH EIGENEN MEEPLE BLOCKIERT
         // Ueberpruefen, ob das Zielfeld beim letzten Move durch einen eigenen Meeple
         // blockiert ist
-        if (player.getRemainingMoves() == LAST_MOVE && otherOwnMeepleFields.contains(nextField)) {
+        if (turnWouldEndOnOwnMeeple(player, nextField, otherOwnMeepleFields)) {
             logger.info("Attempt to occupy a field with multiple meeple failed");
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE");
         }
@@ -227,7 +227,8 @@ public class MovementServiceImpl implements MovementService {
         // Wenn man mit dem letzten Schritt ein Feld mit einem gegnerischem meeple
         // betritt wird ein duell getriggert, wenn dieser sich nicht gerade in einem
         // duell befindet
-        if (player.getRemainingMoves() == LAST_MOVE && rivalMeepleFields.contains(nextField)) {
+        if (turnEndsOnRivalMeeple(player, rivalMeepleFields, nextField)) {
+
             Optional<FrontendEvent> frontendEvent = tryInitiatingDuel(meeple, nextField, player, rivalMeeples, lobby);
 
             if (frontendEvent.isPresent()) {
@@ -240,7 +241,7 @@ public class MovementServiceImpl implements MovementService {
         meeple.setCurrentField(nextField);
 
         // der erste Zug nach dem Würfeln und mehr als 1 move verfügbar
-        if (player.getRemainingMoves() > 1 && !player.hasMoved()) {
+        if (isTurnBegin(player)) {
             player.setActiveMeeple(meeple);
         }
 
@@ -329,6 +330,11 @@ public class MovementServiceImpl implements MovementService {
         return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
     }
 
+    // ueberprueft richtungswechsel
+    private boolean changedDirection(Field lastField, Field nextField) {
+        return (lastField != null && nextField.equals(lastField));
+    }
+
     // ueberprueft, ob ein Spieler versucht nach angebrochenen schritten einen
     // anderen meeple zu bewegen
     private boolean changedMeeple(Player player, Meeple meeple) {
@@ -397,6 +403,12 @@ public class MovementServiceImpl implements MovementService {
         return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
     }
 
+    //ueberprueft, ob der zug auf einem feld mit eigenem meeple enden wuerde
+    private boolean turnWouldEndOnOwnMeeple(Player player, Field targetField, Set<Field> otherOwnMeepleFields) {
+        return (player.getRemainingMoves() == LAST_MOVE
+                && otherOwnMeepleFields.contains(targetField));
+    }
+
     // Ueberprueft, ob es ueberhaupt legale Felder in diese Richtung gibt und ob man
     // in eine Sackgasse moved
     private Optional<FrontendEvent> checkPath(Meeple meeple, Field currentField, Field targetField, Player player,
@@ -430,6 +442,11 @@ public class MovementServiceImpl implements MovementService {
                 targetField.getId(),
                 player.getRemainingMoves(),
                 player.hasMoved()));
+    }
+
+    //ueberprueft, ob der zug auf einem feld mit eigenem meeple enden wuerde
+    private boolean turnEndsOnRivalMeeple(Player player, Set<Field> rivalMeepleFields, Field targetField){
+        return (player.getRemainingMoves() == LAST_MOVE && rivalMeepleFields.contains(targetField));
     }
 
     // Ueberprueft ob ein Duell getriggert wird
@@ -516,6 +533,11 @@ public class MovementServiceImpl implements MovementService {
                 field.getId(),
                 player.getRemainingMoves(),
                 miniGame);
+    }
+
+    //ueberprueft, ob es der Beginn eines neuen zuges des spielers ist.
+    private boolean isTurnBegin(Player player){
+        return (player.getRemainingMoves() > 1 && !player.hasMoved());
     }
 
     /**
