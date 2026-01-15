@@ -136,6 +136,9 @@ public class DuelServiceImpl implements DuelService {
         duel.setMiniGame(game);
 
         game.setOnFinished(() -> handleMiniGameFinished(duel));
+        if (game instanceof MathGame mathGame) {
+            mathGame.setOnStart(() -> handleMiniGameStart(duel));
+        }
 
         miniGameScheduler.schedule(
             game::forceMissingActions,
@@ -281,6 +284,25 @@ public class DuelServiceImpl implements DuelService {
             duelResolutionService.sendLoserHome(lobby, duel, mathGame);
         }
         duels.remove(duel.getId());
+    }
+
+    private void handleMiniGameStart(Duel duel) {
+        MiniGame game = duel.getMiniGame();
+        Lobby lobby = lobbyManager.getLobbyFromPlayerUUID(duel.getPlayer1());
+
+        if (game instanceof MathGame mathGame) {
+            var update = new FrontendMathGameUpdateEvent(
+                duel.getId(),
+                mathGame.getPlayer1(),
+                mathGame.getPlayer2(),
+                null,
+                null,
+                mathGame.getTermValue(),
+                null,
+                mathGame.isFinished());
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+        }
     }
 
     @PreDestroy

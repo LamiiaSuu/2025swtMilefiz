@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
@@ -16,6 +17,7 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
 import de.hs_rm.de.milefiz.game.service.DuelResolutionService;
 import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
@@ -334,5 +336,20 @@ public class MiniGameController {
                                 game.isFinished());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
+
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/math/input")
+        public void handleMathInput(@DestinationVariable UUID lobbyId,
+                        @DestinationVariable UUID duelId, @Payload int inputValue,
+                        Player player) throws LobbyNotFoundException {
+
+                logger.info("Player {} locked input {} in math game duel {} (lobby {})",
+                                player.getId(), inputValue, duelId, lobbyId);
+
+                // MiniGame holen (bereits zu diesem Zeitpunkt dem Duell zugewiesen)
+                MathGame game = (MathGame) duelService.getMiniGame(duelId);
+
+                // setze value für spieler
+                game.setValue(player.getId(), inputValue);
         }
 }

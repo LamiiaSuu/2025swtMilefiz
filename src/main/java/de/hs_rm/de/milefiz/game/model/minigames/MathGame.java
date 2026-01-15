@@ -10,6 +10,8 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 
 public class MathGame extends MiniGame {
 
+    private Runnable onStart;
+
     private boolean timeoutStarted;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -34,7 +36,7 @@ public class MathGame extends MiniGame {
 
         if (!timeoutStarted) {
             timeoutStarted = true;
-
+            onStart();
             scheduler.schedule(this::forceResult, getTimeOut(), TimeUnit.SECONDS);
         }
     }
@@ -85,7 +87,13 @@ public class MathGame extends MiniGame {
         scheduler.shutdown();
     }
 
-    
+    public void setOnStart(Runnable onStart) {
+        this.onStart = onStart;
+    }
+
+    private void onStart() {
+        onStart.run();
+    }
 
     public UUID getPlayer1() {
         return player1;
@@ -203,5 +211,4 @@ public class MathGame extends MiniGame {
         }
 
     }
-
 }
