@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
@@ -348,7 +349,7 @@ public class MiniGameController {
          */
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/colorbrain/click")
         public void handleColorbrainClick(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
-                        Player player, @RequestBody String clickedColorName) throws LobbyNotFoundException {
+                        Player player, @Payload String clickedColorName) throws LobbyNotFoundException {
 
                 Lobby lobby = lobbyManager.getLobby(lobbyId);
                 ColorbrainGame game = (ColorbrainGame) duelService.getMiniGame(duelId);
@@ -361,7 +362,8 @@ public class MiniGameController {
                 broadcastColorbrainUpdate(lobby, duelId, game);
 
                 if (game.isFinished()) {
-                        sendLoserHome(lobby, duelId, game);
+                        Duel duel = duelService.getDuel(duelId);
+                        duelResolutionService.sendLoserHome(lobby, duel, game);
                 }
         }
 
