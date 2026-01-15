@@ -115,32 +115,6 @@ class EinarmigerBanditTest {
     }
 
     @Test
-    void testTimeout_ForcesResults() {
-        EinarmigerBanditGame quickGame = new EinarmigerBanditGame(1);
-        quickGame.initPlayers(player1.getId(), player2.getId(), lobby);
-
-        // Warte maximal 2 Sekunden darauf, dass beide Ergebnisse gesetzt sind
-        await().atMost(Duration.ofSeconds(2))
-                .until(() -> quickGame.getResultP1() != null && quickGame.getResultP2() != null);
-
-        assertNotNull(quickGame.getResultP1());
-        assertNotNull(quickGame.getResultP2());
-        assertTrue(quickGame.isFinished());
-    }
-
-    @Test
-    void testTimeout_SetsOpponentColors() {
-        EinarmigerBanditGame quickGame = new EinarmigerBanditGame(1);
-        quickGame.initPlayers(player1.getId(), player2.getId(), lobby);
-
-        await().atMost(Duration.ofSeconds(2))
-                .until(quickGame::isFinished);
-
-        assertEquals(Color.BLUE, quickGame.getResultP1());
-        assertEquals(Color.RED, quickGame.getResultP2());
-    }
-
-    @Test
     void testGameName_IsCorrect() {
         assertEquals("Einarmiger-Bandit-Game", game.getName());
     }

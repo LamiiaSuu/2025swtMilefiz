@@ -198,7 +198,7 @@ async function importAndSetBoard() {
                                 <input type="file" ref="fileInputRef" @mouseenter="onHover" @change="handleFileChange"
                                     class="file-input" :disabled="mapMode === 'standard'" accept=".json">
 
-                                <button type="button" class="map-button" :disabled="mapMode === 'standard'"
+                                <button type="button" class="upload-button" :disabled="mapMode === 'standard'"
                                     :class="{ active: mapMode === 'import' }" @mouseenter="onHover"
                                     @click="importAndSetBoard">
                                     {{ tUI('UPLOAD') }}
@@ -281,6 +281,7 @@ async function importAndSetBoard() {
 .game-start-button,
 .player-item,
 .file-input,
+.upload-button,
 input {
     font-family: "AcmeFont", sans-serif;
     outline: none;
@@ -323,13 +324,15 @@ select {
 .form-input,
 .copy-button,
 .file-input,
-.players-list {
+.players-list,
+.upload-button {
     background-color: var(--background-color-forms);
 }
 
 .form-input,
 .copy-button,
 .file-input,
+.upload-button,
 .players-list,
 .map-button,
 .start-game-button {
@@ -376,17 +379,18 @@ select {
     min-width: 0;
 }
 
-.map-button.active, .file-input {
+.map-button.active {
     background: rgba(40, 60, 35, 0.92);
 }
 
-.file-input {
+.file-input, .upload-button {
     padding: 8px;
     font-size: 1rem;
     color: white;
+    background-image: var(--button-gradient-green);
 }
 
-.file-input:disabled {
+.file-input:disabled, .upload-button:disabled {
     background-color: var(--button-color-inactive);
     background-image: none;
 }

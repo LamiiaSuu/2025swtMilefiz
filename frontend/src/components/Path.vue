@@ -9,9 +9,9 @@ const props = defineProps<{
 }>()
 
 // GLB Modell laden
-const { state } = useGLTF('/paths/Rock_Path_Round_Small.glb', { draco: true })
+const { state } = useGLTF('/paths/Cobblestone_tile.glb', { draco: true })
 
-const BASE_LENGTH = 1
+const BASE_LENGTH = 2
 const lengthScale = computed(() => (props.length ? props.length / BASE_LENGTH : 1))
 
 // Szene aus dem geladenen GLB holen

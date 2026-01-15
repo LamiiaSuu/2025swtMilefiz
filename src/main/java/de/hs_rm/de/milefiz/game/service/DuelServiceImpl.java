@@ -3,10 +3,12 @@ package de.hs_rm.de.milefiz.game.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -26,10 +28,13 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMathGameUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
+import jakarta.annotation.PreDestroy;
+
 
 @Service
 public class DuelServiceImpl implements DuelService {
+
+    private final ScheduledExecutorService miniGameScheduler = Executors.newScheduledThreadPool(4);
 
     /**
      * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen
@@ -132,7 +137,14 @@ public class DuelServiceImpl implements DuelService {
 
         game.setOnFinished(() -> handleMiniGameFinished(duel));
 
+        miniGameScheduler.schedule(
+            game::forceMissingActions,
+            game.getTimeOut(),
+            TimeUnit.SECONDS
+        );
+
         return game;
+
     }
 
     /**
@@ -268,6 +280,11 @@ public class DuelServiceImpl implements DuelService {
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, mathGame);
         }
+        duels.remove(duel.getId());
     }
 
+    @PreDestroy
+    public void shutdownScheduler() {
+        miniGameScheduler.shutdownNow();
+    }
 }

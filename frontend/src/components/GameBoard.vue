@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, onUnmounted, computed, watchEffect, type ShallowRef, type ComputedRef, type ComponentPublicInstance } from 'vue'
+import {
+  ref,
+  shallowRef,
+  onMounted,
+  onUnmounted,
+  computed,
+  watchEffect,
+  type ShallowRef,
+  type ComputedRef,
+  type ComponentPublicInstance,
+} from 'vue'
 import { TresCanvas, type TresObject } from '@tresjs/core'
 import { OrbitControls } from '@tresjs/cientos'
 import GameCharacter from './GameCharacter.vue'
@@ -8,14 +18,16 @@ import Tile from './Tile.vue'
 import Path from './Path.vue'
 import Foliage from './Foliage.vue'
 import Camera from './Camera.vue'
-import { useMilefizStore } from "@/stores/milefizstore"
-import type { Direction } from "@/types/movement"
+import { useMilefizStore } from '@/stores/milefizstore'
+import type { Direction } from '@/types/movement'
 import { Vector3 } from 'three'
 import { watch } from 'vue'
-import { useErrorHandler } from '@/composables/useErrorHandler';
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import AssetSprite from './ui/AssetSprite.vue'
+import { standardBoardAssets, STANDARD_BOARD_ID } from '@/types/BoardAsset.ts'
 import { TreesGeometry } from 'three/examples/jsm/Addons.js'
 
-const milefizStore = useMilefizStore();
+const milefizStore = useMilefizStore()
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
 let started: boolean = false
@@ -37,7 +49,7 @@ const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | nu
 const allMeepleIds = computed(() => {
   const lobby = milefizStore.gamedata.lobby
   if (!lobby) return [] as string[]
-  return lobby.players.flatMap(p => p.meeples.map(m => m.id))
+  return lobby.players.flatMap((p) => p.meeples.map((m) => m.id))
 })
 
 /**
@@ -116,7 +128,6 @@ function registerGameCharRef(id: string, el: TresObject | null) {
   }
 }
 
-
 /**
  * Überträgt die berechneten 3D-Positionen auf die existierenden
  * `GameCharacter`-Instanzen.
@@ -132,29 +143,41 @@ function registerGameCharRef(id: string, el: TresObject | null) {
 
 // Vorherige Positionen merken, um nur geänderte Positionen zu animieren
 const _prevMeeplePositions = new Map<string, [number, number, number]>()
-watch(meeplePositions3D, (map) => {
-  // map is a Map<string, [number,number,number]>
-  for (const [id, pos] of map.entries()) {
-    const prev = _prevMeeplePositions.get(id)
-    const changed = !prev || Math.abs(prev[0] - pos[0]) > 1e-6 || Math.abs(prev[1] - pos[1]) > 1e-6 || Math.abs(prev[2] - pos[2]) > 1e-6
-    if (!changed) continue
+watch(
+  meeplePositions3D,
+  (map) => {
+    // map is a Map<string, [number,number,number]>
+    for (const [id, pos] of map.entries()) {
+      const prev = _prevMeeplePositions.get(id)
+      const changed =
+        !prev ||
+        Math.abs(prev[0] - pos[0]) > 1e-6 ||
+        Math.abs(prev[1] - pos[1]) > 1e-6 ||
+        Math.abs(prev[2] - pos[2]) > 1e-6
+      if (!changed) continue
 
-    const ref = gameCharRefs[id]
-    const inst: any = ref?.value
-    if (inst && typeof inst.animateTo === 'function') {
-      inst.animateTo(pos)
-    } else if (inst && typeof inst.setPositionImmediate === 'function') {
-      // fallback: snap into position if animateTo not present
-      inst.setPositionImmediate(pos)
+      const ref = gameCharRefs[id]
+      const inst: any = ref?.value
+      if (inst && typeof inst.animateTo === 'function') {
+        inst.animateTo(pos)
+      } else if (inst && typeof inst.setPositionImmediate === 'function') {
+        // fallback: snap into position if animateTo not present
+        inst.setPositionImmediate(pos)
+      }
+
+      _prevMeeplePositions.set(id, [pos[0], pos[1], pos[2]])
     }
+  },
+  { deep: true },
+)
 
-    _prevMeeplePositions.set(id, [pos[0], pos[1], pos[2]])
-  }
-}, { deep: true })
-
-watch(() => boardStore.meeplePositions, (val) => {
-  console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
-}, { deep: true })
+watch(
+  () => boardStore.meeplePositions,
+  (val) => {
+    console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
+  },
+  { deep: true },
+)
 
 // Rotation-Updates aus dem Store auf die GameCharacter anwenden
 const _prevMeepleRotations = new Map<string, number>()
@@ -187,16 +210,16 @@ watch(
   () => milefizStore.jumpTrigger,
   (t) => {
     const meepleId = t?.meepleId
-    console.log("Meeple in jump:")
+    console.log('Meeple in jump:')
     console.log(meepleId)
     if (!meepleId) return
 
     const ref = gameCharRefs[meepleId]
     const inst: any = ref?.value
     if (inst?.jump) inst.jump()
-    console.log("instanz im watcher: " + inst)
+    console.log('instanz im watcher: ' + inst)
   },
-  { deep: true }
+  { deep: true },
 )
 
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
@@ -216,10 +239,10 @@ const meeplesReady = computed(() => {
     hasLobby: !!lobby,
     playersLength: lobby?.players?.length,
     players: lobby?.players,
-    playersIsArray: Array.isArray(lobby?.players)
+    playersIsArray: Array.isArray(lobby?.players),
   })
   if (!lobby || !lobby.players?.length) return false
-  const ready = lobby.players.some(p => {
+  const ready = lobby.players.some((p) => {
     const hasMeeples = Array.isArray(p.meeples) && p.meeples.length > 0
     console.log(`Player ${p.id}: meeples=${p.meeples?.length}, hasMeeples=${hasMeeples}`)
     return hasMeeples
@@ -229,15 +252,19 @@ const meeplesReady = computed(() => {
 })
 
 // Lädt Board automatisch, sobald Meeples da sind
-watch(meeplesReady, async (ready) => {
-  console.log('meeplesReady changed to:', ready, 'boardStore.ok:', boardStore.ok)
-  if (ready && !boardStore.ok) {
-    console.log("Meeples detected — loading board data now...")
-    await boardStore.getBoard()
-  }
-}, { immediate: true })
+watch(
+  meeplesReady,
+  async (ready) => {
+    console.log('meeplesReady changed to:', ready, 'boardStore.ok:', boardStore.ok)
+    if (ready && !boardStore.ok) {
+      console.log('Meeples detected — loading board data now...')
+      await boardStore.getBoard()
+    }
+  },
+  { immediate: true },
+)
 
-//eigene Meeple aus der Lobby merken 
+//eigene Meeple aus der Lobby merken
 const ownMeepleIds = computed(() => {
   const lobby = milefizStore.gamedata.lobby
   const myId = milefizStore.gamedata.playerId
@@ -253,7 +280,7 @@ const selectedMeepleId = computed(() => {
   const myId = milefizStore.gamedata.playerId
   if (!lobby || !myId) return null
   const me = lobby.players.find((p) => p.id === myId)
-  return (me?.activeMeeple?.id) ?? null
+  return me?.activeMeeple?.id ?? null
 })
 
 // falls kein activeMeeple gesetzt ist, wird hier das erste gesetzt
@@ -272,7 +299,6 @@ watch(ownMeepleIds, (ids) => {
   }
 })
 
-
 const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
@@ -284,8 +310,8 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (milefizStore.popUpMenuOpen) {
       milefizStore.closePopUpMenu()
       return
-    }
-    else { // Oeffnet das PopUp-Menu
+    } else {
+      // Oeffnet das PopUp-Menu
       milefizStore.openPopUpMenu()
       return
     }
@@ -372,7 +398,7 @@ function selectMeepleByIndex(index: number) {
   const me = lobby.players.find((p) => p.id === myId)
   if (!me) return
 
-  const meeple = me.meeples.find(m => m.id === ids[index])
+  const meeple = me.meeples.find((m) => m.id === ids[index])
   if (!meeple) return
 
   me.activeMeeple = meeple
@@ -388,7 +414,7 @@ const toggleCamera = (e: KeyboardEvent) => {
 
 /**
  * Die Richtung wird relativ zur aktuellen Kamerasicht berechnet.
- * 
+ *
  * Ablauf:
  * 1. Prüft, ob sich der Spieler im First-Person-Modus befindet.
  * 2. Ermittelt, welche Bewegungstaste gedrückt wurde (`W`, `A`, `S`, `D` oder Pfeiltasten).
@@ -401,8 +427,23 @@ const toggleCamera = (e: KeyboardEvent) => {
  *
  * @param {KeyboardEvent} e - Das Tastatur-Event, das die Eingabe auslöst.
  */
+const MOVE_COOLDOWN_MS = 350
+let lastMoveSentAt = 0
+
 const handleMoveKeys = (e: KeyboardEvent) => {
   if (!useFirstPerson.value) return
+
+  const isMoveKey =
+    e.code === "ArrowUp" || e.code === "ArrowDown" || e.code === "ArrowLeft" || e.code === "ArrowRight" ||
+    e.code === "KeyW" || e.code === "KeyA" || e.code === "KeyS" || e.code === "KeyD"
+
+  if (!isMoveKey) return
+
+  const now = performance.now()
+  if (now - lastMoveSentAt < MOVE_COOLDOWN_MS) {
+    e.preventDefault()
+    return
+  }
 
   const cam = fpsCamera.value?.camera
   // const meepleId = gameCharRef.value?.meepleId
@@ -419,21 +460,21 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   const moveDir = new Vector3()
 
   switch (e.code) {
-    case "ArrowUp":
-    case "KeyW":
+    case 'ArrowUp':
+    case 'KeyW':
       moveDir.copy(lookDir)
       break
-    case "ArrowDown":
-    case "KeyS":
+    case 'ArrowDown':
+    case 'KeyS':
       moveDir.copy(lookDir).negate()
       break
-    case "ArrowLeft":
-    case "KeyA":
+    case 'ArrowLeft':
+    case 'KeyA':
       // Links = Kreuzprodukt von Up-Vektor × Blickrichtung
       moveDir.crossVectors(new Vector3(0, 1, 0), lookDir).normalize()
       break
-    case "ArrowRight":
-    case "KeyD":
+    case 'ArrowRight':
+    case 'KeyD':
       // Rechts = Kreuzprodukt von Blickrichtung × Up-Vektor
       moveDir.crossVectors(lookDir, new Vector3(0, 1, 0)).normalize()
       break
@@ -449,14 +490,14 @@ const handleMoveKeys = (e: KeyboardEvent) => {
 
   let direction: Direction
   if (absX > absZ) {
-    direction = moveDir.x > 0 ? "EAST" : "WEST"
+    direction = moveDir.x > 0 ? 'EAST' : 'WEST'
   } else {
-    direction = moveDir.z > 0 ? "SOUTH" : "NORTH"
+    direction = moveDir.z > 0 ? 'SOUTH' : 'NORTH'
   }
 
+  lastMoveSentAt = now
   milefizStore.sendMove(meepleId, direction)
 }
-
 
 let lastRotSent = 0
 const ROT_SEND_MS = 80
@@ -477,14 +518,13 @@ const onRotateCharacter = (yRotation: number) => {
 }
 
 onMounted(() => {
-
   /**
    * Wartet, bis die First-Person-Kamera vollständig initialisiert ist.
-   * 
+   *
    * Sobald die Kamera verfügbar ist:
    * - werden globale Event-Listener für Tastatur und Mausklicks aktiviert
    * - startet die Hover-Erkennung (checkHoverTile)
-   * 
+   *
    * Diese Schleife verhindert Fehler, falls die Kamera-Referenz
    * beim Mounten der Komponente noch nicht gesetzt wurde.
    */
@@ -494,7 +534,7 @@ onMounted(() => {
       requestAnimationFrame(waitForCamera)
       return
     }
-    globalThis.addEventListener("keydown", handleKeydown)
+    globalThis.addEventListener('keydown', handleKeydown)
   }
 
   waitForCamera()
@@ -522,12 +562,20 @@ const meepleColorMap = computed(() => {
   return map
 })
 
-
 const connectionSegments = computed(() => {
   const board = boardStore.board
-  if (!board) return [] as Array<{ x: number; y: number; z: number; length: number; rotY: number; key: string }>
+  if (!board)
+    return [] as Array<{
+      x: number
+      y: number
+      z: number
+      length: number
+      rotY: number
+      key: string
+    }>
 
-  const out: Array<{ x: number; y: number; z: number; length: number; rotY: number; key: string }> = []
+  const out: Array<{ x: number; y: number; z: number; length: number; rotY: number; key: string }> =
+    []
   const seen = new Set<string>()
 
   for (const f of board.fields) {
@@ -561,10 +609,85 @@ const connectionSegments = computed(() => {
   return out
 })
 
+const mountains = [
+  // Norden (oben) - 12 Berge weit hinten bei z = -200 (Spielfeld-Rand)
+  { x: -180, y: -3, z: -200, variant: 'mountain_1', scale: 19, rotation: 180 },
+  { x: -150, y: -5, z: -200, variant: 'mountain_1', scale: 17, rotation: 165 },
+  { x: -120, y: -2, z: -200, variant: 'mountain_1', scale: 20, rotation: 175 },
+  { x: -90, y: -4, z: -200, variant: 'mountain_1', scale: 22, rotation: 190 },
+  { x: -60, y: -6, z: -200, variant: 'mountain_1', scale: 18, rotation: 170 },
+  { x: -30, y: -3, z: -200, variant: 'mountain_1', scale: 21, rotation: 185 },
+  { x: 0, y: 0, z: -200, variant: 'mountain_1', scale: 25, rotation: 180 },
+  { x: 30, y: -4, z: -200, variant: 'mountain_1', scale: 19, rotation: 175 },
+  { x: 60, y: -3, z: -200, variant: 'mountain_1', scale: 21, rotation: 195 },
+  { x: 90, y: -5, z: -200, variant: 'mountain_1', scale: 18, rotation: 185 },
+  { x: 120, y: -6, z: -200, variant: 'mountain_1', scale: 20, rotation: 170 },
+  { x: 150, y: -4, z: -200, variant: 'mountain_1', scale: 16, rotation: 180 },
+  { x: 180, y: -5, z: -200, variant: 'mountain_1', scale: 17, rotation: 175 },
+
+  // Westen (links) - 11 Berge weit links bei x = -200 (Spielfeld-Rand)
+  { x: -200, y: -5, z: -180, variant: 'mountain_1', scale: 19, rotation: 90 },
+  { x: -200, y: -3, z: -150, variant: 'mountain_1', scale: 20, rotation: 85 },
+  { x: -200, y: -6, z: -120, variant: 'mountain_1', scale: 18, rotation: 95 },
+  { x: -200, y: -2, z: -90, variant: 'mountain_1', scale: 21, rotation: 80 },
+  { x: -200, y: -5, z: -60, variant: 'mountain_1', scale: 19, rotation: 100 },
+  { x: -200, y: 0, z: -30, variant: 'mountain_1', scale: 23, rotation: 90 },
+  { x: -200, y: -4, z: 0, variant: 'mountain_1', scale: 20, rotation: 85 },
+  { x: -200, y: -3, z: 30, variant: 'mountain_1', scale: 19, rotation: 95 },
+  { x: -200, y: -6, z: 60, variant: 'mountain_1', scale: 21, rotation: 90 },
+  { x: -200, y: -4, z: 90, variant: 'mountain_1', scale: 22, rotation: 95 },
+  { x: -200, y: -5, z: 120, variant: 'mountain_1', scale: 18, rotation: 85 },
+  { x: -200, y: -3, z: 150, variant: 'mountain_1', scale: 19, rotation: 90 },
+  { x: -200, y: -6, z: 180, variant: 'mountain_1', scale: 20, rotation: 95 },
+
+  // Osten (rechts) - 11 Berge weit rechts bei x = 200 (Spielfeld-Rand)
+  { x: 200, y: -4, z: -180, variant: 'mountain_1', scale: 20, rotation: -90 },
+  { x: 200, y: -3, z: -150, variant: 'mountain_1', scale: 21, rotation: -85 },
+  { x: 200, y: -6, z: -120, variant: 'mountain_1', scale: 18, rotation: -95 },
+  { x: 200, y: -2, z: -90, variant: 'mountain_1', scale: 22, rotation: -80 },
+  { x: 200, y: -5, z: -60, variant: 'mountain_1', scale: 19, rotation: -100 },
+  { x: 200, y: 0, z: -30, variant: 'mountain_1', scale: 22, rotation: -90 },
+  { x: 200, y: -4, z: 0, variant: 'mountain_1', scale: 21, rotation: -85 },
+  { x: 200, y: -3, z: 30, variant: 'mountain_1', scale: 20, rotation: -95 },
+  { x: 200, y: -6, z: 60, variant: 'mountain_1', scale: 24, rotation: -90 },
+  { x: 200, y: -5, z: 90, variant: 'mountain_1', scale: 23, rotation: -85 },
+  { x: 200, y: -4, z: 120, variant: 'mountain_1', scale: 19, rotation: -90 },
+  { x: 200, y: -3, z: 150, variant: 'mountain_1', scale: 18, rotation: -95 },
+  { x: 200, y: -6, z: 180, variant: 'mountain_1', scale: 20, rotation: -90 },
+
+  // Süden (unten) - 12 Berge weit vorne bei z = 200 (Spielfeld-Rand)
+  { x: -180, y: -5, z: 200, variant: 'mountain_1', scale: 19, rotation: 0 },
+  { x: -150, y: -2, z: 200, variant: 'mountain_1', scale: 21, rotation: 15 },
+  { x: -120, y: -5, z: 200, variant: 'mountain_1', scale: 18, rotation: -10 },
+  { x: -90, y: -3, z: 200, variant: 'mountain_1', scale: 21, rotation: 5 },
+  { x: -60, y: -6, z: 200, variant: 'mountain_1', scale: 19, rotation: -15 },
+  { x: -30, y: -4, z: 200, variant: 'mountain_1', scale: 22, rotation: 10 },
+  { x: 0, y: 0, z: 200, variant: 'mountain_1', scale: 24, rotation: 0 },
+  { x: 30, y: -6, z: 200, variant: 'mountain_1', scale: 18, rotation: 10 },
+  { x: 60, y: -2, z: 200, variant: 'mountain_1', scale: 22, rotation: -5 },
+  { x: 90, y: -4, z: 200, variant: 'mountain_1', scale: 21, rotation: 20 },
+  { x: 120, y: -5, z: 200, variant: 'mountain_1', scale: 20, rotation: -12 },
+  { x: 150, y: -3, z: 200, variant: 'mountain_1', scale: 19, rotation: 8 },
+  { x: 180, y: -6, z: 200, variant: 'mountain_1', scale: 17, rotation: 5 },
+]
+
+/**
+ * Prüft, ob das aktuelle Board das Standard-Board ist (via UUID)
+ */
+const isStandardBoard = computed(() => {
+  const board = boardStore.board
+  return board?.id === STANDARD_BOARD_ID
+})
+
+/**
+ * Lädt zusätzliche Assets nur für das Standard-Board
+ */
+const additionalAssets = computed(() => {
+  return isStandardBoard.value ? standardBoardAssets : []
+})
 </script>
 
 <template>
-
   <!-- 3D-Canvas Element das den ganzen Bildschirm ausfüllt-->
   <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB">
     <!-- Kameraposition und Kamerasteuerung via OrbitControls -->
@@ -572,29 +695,37 @@ const connectionSegments = computed(() => {
     <OrbitControls v-if="!useFirstPerson" />
 
     <!-- First Person Kamera (Folgt dem Charakter) -->
-    <Camera ref="fpsCamera" :gameCharRef="(gameCharRefs[selectedMeepleId ?? '']?.value) ?? null"
+    <Camera ref="fpsCamera" :gameCharRef="gameCharRefs[selectedMeepleId ?? '']?.value ?? null"
       :use-first-person="useFirstPerson" @rotate-character="onRotateCharacter" />
 
     <!-- 3D-Objekt für den Spielfeld-Boden rotation dreht den boden, damit er horizontal und nicht
      vertikal ist -->
     <TresMesh :rotation="[-Math.PI / 2, 0, 0]">
-      <TresPlaneGeometry :args="[500, 500]" />
-      <TresMeshStandardMaterial :color="0x4FA200" />
-
+      <TresPlaneGeometry :args="[400, 400]" />
+      <TresMeshStandardMaterial :color="0x4fa200" />
     </TresMesh>
 
     <!-- Grundbeleuchtung der Szene (75% Intensität) -->
-    <TresAmbientLight :intensity=".75" />
+    <TresAmbientLight :intensity="0.75" />
 
     <!-- Himmel- und Bodenlicht der Szene (75% Intensität)-->
-    <TresHemisphereLight :intensity=".75" skyColor="#ffffff" groundColor="#888888" />
+    <TresHemisphereLight :intensity="0.75" skyColor="#ffffff" groundColor="#888888" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
     <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" />
 
+    <!-- Berge am Horizont hinzugefügt-->
+    <AssetSprite v-for="(mountain, index) in mountains" :key="`mountain-${index}`" type="mountains"
+      :variant="mountain.variant" :position="[mountain.x, mountain.y, mountain.z]" :scale="mountain.scale"
+      :rotation="mountain.rotation" />
+
+    <AssetSprite v-for="(asset, index) in additionalAssets" :key="`standard-asset-${index}`" :type="asset.type"
+      :variant="asset.variant" :position="asset.position" :scale="asset.scale" :rotation="asset.rotation" />
+
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
-    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="el => registerGameCharRefFromTemplate(id, el)"
-      :meepleId="id" :playerColor="meepleColorMap.get(id)" :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)"/>
+    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="(el) => registerGameCharRefFromTemplate(id, el)"
+      :meepleId="id" :playerColor="meepleColorMap.get(id)"
+      :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)" />
 
     <!--Spawnen von Barrieren-->
     <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
@@ -609,7 +740,11 @@ const connectionSegments = computed(() => {
       :position="[field.position.x, 0, field.position.y]" :type="field.type" />
 
     <!-- Pflanzen und Bäume -->
-    <Foliage :elements="boardStore.board?.trees.map(tree => ({ position: [tree.treePosition.x, 0, tree.treePosition.y], type: tree.treeType }))" />
+    <Foliage :elements="boardStore.board?.trees.map((tree) => ({
+      position: [tree.treePosition.x, 0, tree.treePosition.y],
+      type: tree.treeType,
+    }))
+      " :board-id="boardStore.board?.id" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->
@@ -639,6 +774,8 @@ const connectionSegments = computed(() => {
   background: white;
   /* <-- immer weiß */
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
-  transition: background 0.1s ease, transform 0.1s ease;
+  transition:
+    background 0.1s ease,
+    transform 0.1s ease;
 }
 </style>

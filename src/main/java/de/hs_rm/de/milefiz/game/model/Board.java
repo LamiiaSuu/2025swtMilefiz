@@ -34,7 +34,7 @@ public class Board {
 
     public Board(Board other) {
         this(
-            UUID.randomUUID(),
+            other.getId(),
             other.getName(),
             other.getStartGreen(),
             other.getStartYellow(),

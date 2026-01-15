@@ -1,6 +1,5 @@
 package de.hs_rm.de.milefiz.game.controller;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -12,10 +11,7 @@ import org.springframework.stereotype.Controller;
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Duel;
-import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Lobby;
-import de.hs_rm.de.milefiz.game.model.Meeple;
-import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
@@ -27,7 +23,6 @@ import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 
 /**
  * Controller für die Mini-Spiele innerhalb eines Duells.
