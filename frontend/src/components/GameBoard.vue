@@ -406,7 +406,7 @@ const toggleCamera = (e: KeyboardEvent) => {
  *
  * @param {KeyboardEvent} e - Das Tastatur-Event, das die Eingabe auslöst.
  */
-const MOVE_COOLDOWN_MS = 500
+const MOVE_COOLDOWN_MS = 350
 let lastMoveSentAt = 0
 
 const handleMoveKeys = (e: KeyboardEvent) => {
