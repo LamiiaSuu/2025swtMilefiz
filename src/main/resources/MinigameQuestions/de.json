@@ -2,14 +2,1103 @@
     "questions": [
         {
             "id": 1,
-            "question": "Wo steht der Eiffelturm?",
+            "question": "Was ist die Hauptstadt von Spanien?",
             "answers": [
-                "Berlin",
-                "Marseille",
-                "Singapore",
-                "Paris"
+                "Barcelona",
+                "Madrid",
+                "Sevilla",
+                "Valencia"
             ],
-            "correctAnswer": 4
+            "correctAnswer": 1
+        },
+        {
+            "id": 2,
+            "question": "Welcher ist der größte Planet im Sonnensystem?",
+            "answers": [
+                "Mars",
+                "Saturn",
+                "Jupiter",
+                "Merkur"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 3,
+            "question": "Welches chemische Symbol steht für Gold?",
+            "answers": [
+                "Ag",
+                "Au",
+                "Fe",
+                "Gd"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 4,
+            "question": "Welcher Fluss fließt durch Wien?",
+            "answers": [
+                "Rhein",
+                "Donau",
+                "Elbe",
+                "Seine"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 5,
+            "question": "Wer malte die Mona Lisa?",
+            "answers": [
+                "Michelangelo",
+                "Rembrandt",
+                "Leonardo da Vinci",
+                "Pablo Picasso"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 6,
+            "question": "Welches dieser Tiere ist kein Säugetier?",
+            "answers": [
+                "Delfin",
+                "Krokodil",
+                "Fledermaus",
+                "Wal"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 7,
+            "question": "Welches Gas ist der Hauptbestandteil der Luft?",
+            "answers": [
+                "Sauerstoff",
+                "Kohlendioxid",
+                "Stickstoff",
+                "Argon"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 8,
+            "question": "Wie viele Kontinente gibt es auf der Erde?",
+            "answers": [
+                "5",
+                "6",
+                "7",
+                "8"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 9,
+            "question": "Welcher Kontinent ist flächenmäßig am kleinsten?",
+            "answers": [
+                "Afrika",
+                "Australien",
+                "Europa",
+                "Antarktika"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 10,
+            "question": "Welches Meer liegt südlich von Europa?",
+            "answers": [
+                "Arktischer Ozean",
+                "Mittelmeer",
+                "Schwarzes Meer",
+                "Kaspisches Meer"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 11,
+            "question": "Wer schrieb „Faust“?",
+            "answers": [
+                "Friedrich Schiller",
+                "Johann Wolfgang von Goethe",
+                "Gotthold Ephraim Lessing",
+                "Heinrich Heine"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 12,
+            "question": "Wie viele Zähne hat ein erwachsener Mensch typischerweise?",
+            "answers": [
+                "28",
+                "30",
+                "32",
+                "34"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 13,
+            "question": "Was ist die Hauptstadt von Kanada?",
+            "answers": [
+                "Toronto",
+                "Ottawa",
+                "Montreal",
+                "Vancouver"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 14,
+            "question": "Wie heißt die größte Sandwüste der Erde?",
+            "answers": [
+                "Sahara",
+                "Gobi",
+                "Kalahari",
+                "Arabische Wüste"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 15,
+            "question": "Welcher Planet ist der Sonne am nächsten?",
+            "answers": [
+                "Erde",
+                "Venus",
+                "Merkur",
+                "Mars"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 16,
+            "question": "Wie viele Minuten hat eine Stunde?",
+            "answers": [
+                "50",
+                "60",
+                "70",
+                "90"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 17,
+            "question": "Welche Farbe entsteht aus Blau und Gelb?",
+            "answers": [
+                "Lila",
+                "Grün",
+                "Orange",
+                "Braun"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 18,
+            "question": "Wer entwickelte die Relativitätstheorie?",
+            "answers": [
+                "Isaac Newton",
+                "Niels Bohr",
+                "Albert Einstein",
+                "Max Planck"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 19,
+            "question": "Wie viele Bundesländer hat Deutschland?",
+            "answers": [
+                "14",
+                "15",
+                "16",
+                "17"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 20,
+            "question": "Was ist die Hauptstadt von Japan?",
+            "answers": [
+                "Osaka",
+                "Kyoto",
+                "Tokio",
+                "Hiroshima"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 21,
+            "question": "Wofür steht die Formel H2O?",
+            "answers": [
+                "Salz",
+                "Wasser",
+                "Zucker",
+                "Sauerstoff"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 22,
+            "question": "Welches dieser Tiere legt Eier?",
+            "answers": [
+                "Kuh",
+                "Hund",
+                "Huhn",
+                "Katze"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 23,
+            "question": "Welches Element hat die Ordnungszahl 1?",
+            "answers": [
+                "Helium",
+                "Wasserstoff",
+                "Lithium",
+                "Sauerstoff"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 24,
+            "question": "In welcher Einheit misst man elektrische Stromstärke?",
+            "answers": [
+                "Volt",
+                "Watt",
+                "Ampere",
+                "Ohm"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 25,
+            "question": "Wie viele Ecken hat ein Quadrat?",
+            "answers": [
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 26,
+            "question": "Welche Flagge zeigt einen roten Kreis auf weißem Grund?",
+            "answers": [
+                "Bangladesch",
+                "Japan",
+                "Indonesien",
+                "Monaco"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 27,
+            "question": "Welcher Sport wird in Wimbledon gespielt?",
+            "answers": [
+                "Fußball",
+                "Tennis",
+                "Rugby",
+                "Cricket"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 28,
+            "question": "Wie heißt der höchste Berg der Welt?",
+            "answers": [
+                "K2",
+                "Kangchendzönga",
+                "Mount Everest",
+                "Lhotse"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 29,
+            "question": "Wer komponierte die 9. Symphonie („Ode an die Freude“)?",
+            "answers": [
+                "Wolfgang Amadeus Mozart",
+                "Johann Sebastian Bach",
+                "Ludwig van Beethoven",
+                "Joseph Haydn"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 30,
+            "question": "Welche Sprache beschreibt die Struktur von Webseiten?",
+            "answers": [
+                "CSS",
+                "HTML",
+                "SQL",
+                "Python"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 31,
+            "question": "Wie viele Planeten hat das Sonnensystem (ohne Zwergplaneten)?",
+            "answers": [
+                "7",
+                "8",
+                "9",
+                "10"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 32,
+            "question": "Wofür steht „www“ im Internet?",
+            "answers": [
+                "World Wide Web",
+                "Wide World Web",
+                "Web Wide World",
+                "World Web Wide"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 33,
+            "question": "Was ist die Hauptstadt von Ägypten?",
+            "answers": [
+                "Kairo",
+                "Alexandria",
+                "Luxor",
+                "Gizeh"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 34,
+            "question": "Welches Vitamin wird durch Sonnenlicht im Körper gebildet?",
+            "answers": [
+                "Vitamin A",
+                "Vitamin C",
+                "Vitamin D",
+                "Vitamin K"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 35,
+            "question": "Wie viele Grad hat ein rechter Winkel?",
+            "answers": [
+                "45",
+                "60",
+                "90",
+                "120"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 36,
+            "question": "Welches Instrument hat sowohl Tasten als auch Saiten?",
+            "answers": [
+                "Flöte",
+                "Trompete",
+                "Klavier",
+                "Schlagzeug"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 37,
+            "question": "Welcher Ozean ist der größte?",
+            "answers": [
+                "Atlantik",
+                "Indischer Ozean",
+                "Arktischer Ozean",
+                "Pazifik"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 38,
+            "question": "Wer schrieb „Die Verwandlung“?",
+            "answers": [
+                "Thomas Mann",
+                "Franz Kafka",
+                "Hermann Hesse",
+                "Bertolt Brecht"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 39,
+            "question": "Welche Stadt wird „Big Apple“ genannt?",
+            "answers": [
+                "Los Angeles",
+                "New York",
+                "Chicago",
+                "Boston"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 40,
+            "question": "Wie viele Wochen hat ein Jahr ungefähr?",
+            "answers": [
+                "50",
+                "51",
+                "52",
+                "53"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 41,
+            "question": "Wie heißt die kleinste Einheit des Lebens?",
+            "answers": [
+                "Atom",
+                "Molekül",
+                "Zelle",
+                "Organ"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 42,
+            "question": "In welchem Land befindet sich die Alhambra?",
+            "answers": [
+                "Italien",
+                "Spanien",
+                "Portugal",
+                "Frankreich"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 43,
+            "question": "Was verursacht einen Regenbogen?",
+            "answers": [
+                "Mondfinsternis",
+                "Lichtbrechung in Regentropfen",
+                "Polarlichter",
+                "Erdbeben"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 44,
+            "question": "Wie viele Spieler:innen stehen im Fußball pro Team auf dem Feld?",
+            "answers": [
+                "9",
+                "10",
+                "11",
+                "12"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 45,
+            "question": "Welche Sprache hat die meisten Muttersprachler:innen?",
+            "answers": [
+                "Englisch",
+                "Spanisch",
+                "Hindi",
+                "Mandarin-Chinesisch"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 46,
+            "question": "Welcher Planet hat die auffälligsten Ringe?",
+            "answers": [
+                "Uranus",
+                "Neptun",
+                "Jupiter",
+                "Saturn"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 47,
+            "question": "Wie heißt der längste Fluss Südamerikas?",
+            "answers": [
+                "Orinoco",
+                "Paraná",
+                "Amazonas",
+                "Magdalena"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 48,
+            "question": "In welcher Stadt steht das Kolosseum?",
+            "answers": [
+                "Athen",
+                "Rom",
+                "Neapel",
+                "Florenz"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 49,
+            "question": "Welches Metall ist bei Raumtemperatur flüssig?",
+            "answers": [
+                "Eisen",
+                "Aluminium",
+                "Quecksilber",
+                "Zink"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 50,
+            "question": "Wie viele Tasten hat ein Standard-Klavier?",
+            "answers": [
+                "76",
+                "80",
+                "82",
+                "88"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 51,
+            "question": "Wofür steht „USB“?",
+            "answers": [
+                "Universal Service Band",
+                "Unified Serial Board",
+                "Universal Serial Bus",
+                "Ultra System Bus"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 52,
+            "question": "Welches Gas atmen wir hauptsächlich ein?",
+            "answers": [
+                "Sauerstoff",
+                "Stickstoff",
+                "Kohlendioxid",
+                "Helium"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 53,
+            "question": "Welches ist das größte lebende Landtier?",
+            "answers": [
+                "Giraffe",
+                "Nilpferd",
+                "Afrikanischer Elefant",
+                "Weißes Nashorn"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 54,
+            "question": "Wer war der erste Mensch auf dem Mond?",
+            "answers": [
+                "Juri Gagarin",
+                "Neil Armstrong",
+                "Buzz Aldrin",
+                "Michael Collins"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 55,
+            "question": "Wie viele Karten hat ein französisches Standardkartenspiel ohne Joker?",
+            "answers": [
+                "32",
+                "36",
+                "40",
+                "52"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 56,
+            "question": "Welche der folgenden Zahlen ist eine Primzahl?",
+            "answers": [
+                "27",
+                "28",
+                "29",
+                "30"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 57,
+            "question": "In welcher Einheit misst man Frequenz?",
+            "answers": [
+                "Newton",
+                "Hertz",
+                "Pascal",
+                "Joule"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 58,
+            "question": "Welche Farbe hat Chlorophyll überwiegend?",
+            "answers": [
+                "Blau",
+                "Rot",
+                "Grün",
+                "Gelb"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 59,
+            "question": "Was ist die Hauptstadt von Australien?",
+            "answers": [
+                "Sydney",
+                "Melbourne",
+                "Canberra",
+                "Perth"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 60,
+            "question": "Welcher Kontinent hat die meisten Länder?",
+            "answers": [
+                "Europa",
+                "Asien",
+                "Afrika",
+                "Südamerika"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 61,
+            "question": "Welches dieser Tiere ist ein Beuteltier (Marsupial)?",
+            "answers": [
+                "Känguru",
+                "Lemur",
+                "Waschbär",
+                "Panda"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 62,
+            "question": "Wie viel ist die Quadratwurzel aus 81?",
+            "answers": [
+                "7",
+                "8",
+                "9",
+                "10"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 63,
+            "question": "Wer schrieb „Der kleine Prinz“?",
+            "answers": [
+                "Antoine de Saint-Exupéry",
+                "Jules Verne",
+                "Victor Hugo",
+                "Albert Camus"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 64,
+            "question": "Wie viele Spieler:innen sind im Basketball pro Team auf dem Feld?",
+            "answers": [
+                "4",
+                "5",
+                "6",
+                "7"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 65,
+            "question": "Welches Land ist besonders für Sushi bekannt?",
+            "answers": [
+                "China",
+                "Japan",
+                "Korea",
+                "Thailand"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 66,
+            "question": "Wofür steht „CPU“?",
+            "answers": [
+                "Central Processing Unit",
+                "Computer Power Unit",
+                "Central Performance Unit",
+                "Core Processing Utility"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 67,
+            "question": "Welche Währung hat die Schweiz?",
+            "answers": [
+                "Euro",
+                "Schweizer Franken",
+                "US-Dollar",
+                "Kronen"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 68,
+            "question": "Wie heißt die Hauptstadt von Brasilien?",
+            "answers": [
+                "Rio de Janeiro",
+                "São Paulo",
+                "Brasília",
+                "Salvador"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 69,
+            "question": "Welche Amtssprache hat Brasilien?",
+            "answers": [
+                "Spanisch",
+                "Portugiesisch",
+                "Französisch",
+                "Englisch"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 70,
+            "question": "Wie lautet die chemische Formel von Kochsalz?",
+            "answers": [
+                "NaCl",
+                "KCl",
+                "CaCO3",
+                "HCl"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 71,
+            "question": "Welche Einheit misst Energie?",
+            "answers": [
+                "Watt",
+                "Joule",
+                "Volt",
+                "Ampere"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 72,
+            "question": "Wie heißt die größte Insel der Welt?",
+            "answers": [
+                "Borneo",
+                "Neuguinea",
+                "Madagaskar",
+                "Grönland"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 73,
+            "question": "Wer erfand in Europa den Buchdruck mit beweglichen Lettern?",
+            "answers": [
+                "Johannes Gutenberg",
+                "Martin Luther",
+                "Leonardo da Vinci",
+                "Nikolaus Kopernikus"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 74,
+            "question": "Welcher Vogel kann rückwärts fliegen?",
+            "answers": [
+                "Albatros",
+                "Storch",
+                "Kolibri",
+                "Spatz"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 75,
+            "question": "Was misst ein Barometer?",
+            "answers": [
+                "Temperatur",
+                "Luftdruck",
+                "Luftfeuchtigkeit",
+                "Windgeschwindigkeit"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 76,
+            "question": "Welche Farbe zeigt die oberste Lampe einer deutschen Ampel?",
+            "answers": [
+                "Grün",
+                "Gelb",
+                "Rot",
+                "Blau"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 77,
+            "question": "In welchem Land liegt Machu Picchu?",
+            "answers": [
+                "Bolivien",
+                "Peru",
+                "Ecuador",
+                "Chile"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 78,
+            "question": "Wer war die erste Bundeskanzlerin Deutschlands?",
+            "answers": [
+                "Ursula von der Leyen",
+                "Angela Merkel",
+                "Annalena Baerbock",
+                "Hannelore Kraft"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 79,
+            "question": "Für welche Zahl steht das römische Zahlzeichen „X“?",
+            "answers": [
+                "5",
+                "10",
+                "50",
+                "100"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 80,
+            "question": "Was ist die Hauptstadt der Türkei?",
+            "answers": [
+                "Istanbul",
+                "Ankara",
+                "Izmir",
+                "Antalya"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 81,
+            "question": "Wie heißt das größte Organ des Menschen?",
+            "answers": [
+                "Herz",
+                "Lunge",
+                "Leber",
+                "Haut"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 82,
+            "question": "Welche Wolkenart ist typisch für Gewitter?",
+            "answers": [
+                "Cirrus",
+                "Stratus",
+                "Cumulonimbus",
+                "Altocumulus"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 83,
+            "question": "Wofür steht „AI“?",
+            "answers": [
+                "Automatische Integration",
+                "Künstliche Intelligenz",
+                "Audio Interface",
+                "Analoge Informatik"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 84,
+            "question": "Welche Blutgruppe gilt als Universalspender?",
+            "answers": [
+                "A positiv",
+                "AB positiv",
+                "0 negativ",
+                "B negativ"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 85,
+            "question": "In welcher Stadt fiel 1989 eine bekannte Mauer?",
+            "answers": [
+                "Wien",
+                "Prag",
+                "Berlin",
+                "Budapest"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 86,
+            "question": "Wofür steht „HTTP“?",
+            "answers": [
+                "Hypertext Transfer Protocol",
+                "High Transfer Text Program",
+                "Hyperlink Transport Platform",
+                "Host Text Transfer Protocol"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 87,
+            "question": "Was ist die Hauptstadt von Norwegen?",
+            "answers": [
+                "Stockholm",
+                "Kopenhagen",
+                "Oslo",
+                "Helsinki"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 88,
+            "question": "Wie viele Seiten hat ein Hexagon?",
+            "answers": [
+                "5",
+                "6",
+                "7",
+                "8"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 89,
+            "question": "Welcher Planet wird der „Rote Planet“ genannt?",
+            "answers": [
+                "Venus",
+                "Mars",
+                "Merkur",
+                "Jupiter"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 90,
+            "question": "Was bedeutet „biologisch abbaubar“?",
+            "answers": [
+                "Brennbar",
+                "Wasserdicht",
+                "Durch Mikroorganismen zersetzbar",
+                "Magnetisch"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 91,
+            "question": "Wer komponierte „Die Zauberflöte“?",
+            "answers": [
+                "Joseph Haydn",
+                "Ludwig van Beethoven",
+                "Wolfgang Amadeus Mozart",
+                "Franz Schubert"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 92,
+            "question": "Welche Sprache ist Amtssprache in Österreich?",
+            "answers": [
+                "Deutsch",
+                "Französisch",
+                "Italienisch",
+                "Ungarisch"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 93,
+            "question": "Wie viele Ringe hat das olympische Symbol?",
+            "answers": [
+                "4",
+                "5",
+                "6",
+                "7"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 94,
+            "question": "Was ist die Hauptstadt von Griechenland?",
+            "answers": [
+                "Thessaloniki",
+                "Athen",
+                "Patras",
+                "Rhodos"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 95,
+            "question": "Wer formulierte die klassischen Gesetze der Bewegung?",
+            "answers": [
+                "Galileo Galilei",
+                "Isaac Newton",
+                "Johannes Kepler",
+                "Blaise Pascal"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 96,
+            "question": "Welches ist das schnellste Landtier?",
+            "answers": [
+                "Leopard",
+                "Gepard",
+                "Antilope",
+                "Puma"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 97,
+            "question": "Welche Sprache verwendet das kyrillische Alphabet?",
+            "answers": [
+                "Russisch",
+                "Griechisch",
+                "Deutsch",
+                "Arabisch"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 98,
+            "question": "Wie viele Tage hat ein Schaltjahr?",
+            "answers": [
+                "365",
+                "366",
+                "367",
+                "368"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 99,
+            "question": "Welche Stadt liegt an der Themse?",
+            "answers": [
+                "Edinburgh",
+                "Dublin",
+                "London",
+                "Manchester"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 100,
+            "question": "Welches Element ist der Hauptbestandteil der Sonne?",
+            "answers": [
+                "Sauerstoff",
+                "Helium",
+                "Wasserstoff",
+                "Kohlenstoff"
+            ],
+            "correctAnswer": 2
         }
     ]
 }

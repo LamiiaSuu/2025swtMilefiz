@@ -23,6 +23,7 @@ import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
 
 @Service
 public class DuelServiceImpl implements DuelService {
@@ -221,6 +222,18 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             sendLoserHome(lobby, duel, balloon);
+        }
+
+        if (game instanceof QuizGame quiz) {
+            var update = new FrontendQuizGameUpdateEvent(
+                    duel.getId(),
+                    quiz.getPlayer1(),
+                    quiz.getPlayer2(),
+                    quiz.getQuestionDTO(),
+                    quiz.getWinner(),
+                    quiz.isFinished());
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            sendLoserHome(lobby, duel, quiz);
         }
     }
 

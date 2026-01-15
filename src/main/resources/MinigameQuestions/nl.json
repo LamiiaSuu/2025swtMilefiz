@@ -2,14 +2,1103 @@
     "questions": [
         {
             "id": 1,
-            "question": "Waar staat de Eiffeltoren?",
+            "question": "Wat is de hoofdstad van Spanje?",
             "answers": [
-                "Berlin",
-                "Marseille",
-                "Singapore",
-                "Paris"
+                "Barcelona",
+                "Madrid",
+                "Sevilla",
+                "Valencia"
             ],
-            "correctAnswer": 4
+            "correctAnswer": 1
+        },
+        {
+            "id": 2,
+            "question": "Welke planeet is het grootste in het zonnestelsel?",
+            "answers": [
+                "Mars",
+                "Saturnus",
+                "Jupiter",
+                "Mercurius"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 3,
+            "question": "Welk chemisch symbool staat voor goud?",
+            "answers": [
+                "Ag",
+                "Au",
+                "Fe",
+                "Gd"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 4,
+            "question": "Welke rivier stroomt door Wenen?",
+            "answers": [
+                "Rijn",
+                "Donau",
+                "Elbe",
+                "Seine"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 5,
+            "question": "Wie schilderde de Mona Lisa?",
+            "answers": [
+                "Michelangelo",
+                "Rembrandt",
+                "Leonardo da Vinci",
+                "Pablo Picasso"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 6,
+            "question": "Welk van deze dieren is geen zoogdier?",
+            "answers": [
+                "Dolfijn",
+                "Krokodil",
+                "Vleermuis",
+                "Walvis"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 7,
+            "question": "Welk gas is het belangrijkste bestanddeel van lucht?",
+            "answers": [
+                "Zuurstof",
+                "Koolstofdioxide",
+                "Stikstof",
+                "Argon"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 8,
+            "question": "Hoeveel continenten zijn er op aarde?",
+            "answers": [
+                "5",
+                "6",
+                "7",
+                "8"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 9,
+            "question": "Welk continent is het kleinst qua oppervlakte?",
+            "answers": [
+                "Afrika",
+                "Australië",
+                "Europa",
+                "Antarctica"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 10,
+            "question": "Welke zee ligt ten zuiden van Europa?",
+            "answers": [
+                "Arctische Oceaan",
+                "Middellandse Zee",
+                "Zwarte Zee",
+                "Kaspische Zee"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 11,
+            "question": "Wie schreef 'Faust'?",
+            "answers": [
+                "Friedrich Schiller",
+                "Johann Wolfgang von Goethe",
+                "Gotthold Ephraim Lessing",
+                "Heinrich Heine"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 12,
+            "question": "Hoeveel tanden heeft een volwassen mens meestal?",
+            "answers": [
+                "28",
+                "30",
+                "32",
+                "34"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 13,
+            "question": "Wat is de hoofdstad van Canada?",
+            "answers": [
+                "Toronto",
+                "Ottawa",
+                "Montreal",
+                "Vancouver"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 14,
+            "question": "Wat is de grootste zandwoestijn op aarde?",
+            "answers": [
+                "Sahara",
+                "Gobi",
+                "Kalahari",
+                "Arabische Woestijn"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 15,
+            "question": "Welke planeet staat het dichtst bij de zon?",
+            "answers": [
+                "Aarde",
+                "Venus",
+                "Mercurius",
+                "Mars"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 16,
+            "question": "Hoeveel minuten heeft een uur?",
+            "answers": [
+                "50",
+                "60",
+                "70",
+                "90"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 17,
+            "question": "Welke kleur ontstaat door blauw en geel te mengen?",
+            "answers": [
+                "Paars",
+                "Groen",
+                "Oranje",
+                "Bruin"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 18,
+            "question": "Wie ontwikkelde de relativiteitstheorie?",
+            "answers": [
+                "Isaac Newton",
+                "Niels Bohr",
+                "Albert Einstein",
+                "Max Planck"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 19,
+            "question": "Hoeveel deelstaten heeft Duitsland?",
+            "answers": [
+                "14",
+                "15",
+                "16",
+                "17"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 20,
+            "question": "Wat is de hoofdstad van Japan?",
+            "answers": [
+                "Osaka",
+                "Kyoto",
+                "Tokio",
+                "Hiroshima"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 21,
+            "question": "Waar staat de formule H2O voor?",
+            "answers": [
+                "Zout",
+                "Water",
+                "Suiker",
+                "Zuurstof"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 22,
+            "question": "Welk van deze dieren legt eieren?",
+            "answers": [
+                "Koe",
+                "Hond",
+                "Kip",
+                "Kat"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 23,
+            "question": "Welk element heeft het atoomnummer 1?",
+            "answers": [
+                "Helium",
+                "Waterstof",
+                "Lithium",
+                "Zuurstof"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 24,
+            "question": "In welke eenheid meet je elektrische stroomsterkte?",
+            "answers": [
+                "Volt",
+                "Watt",
+                "Ampère",
+                "Ohm"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 25,
+            "question": "Hoeveel hoeken heeft een vierkant?",
+            "answers": [
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 26,
+            "question": "Welke vlag toont een rode cirkel op een witte achtergrond?",
+            "answers": [
+                "Bangladesh",
+                "Japan",
+                "Indonesië",
+                "Monaco"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 27,
+            "question": "Welke sport wordt gespeeld op Wimbledon?",
+            "answers": [
+                "Voetbal",
+                "Tennis",
+                "Rugby",
+                "Cricket"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 28,
+            "question": "Hoe heet de hoogste berg ter wereld?",
+            "answers": [
+                "K2",
+                "Kangchenjunga",
+                "Mount Everest",
+                "Lhotse"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 29,
+            "question": "Wie componeerde de 9e symfonie ('Ode an die Freude')?",
+            "answers": [
+                "Wolfgang Amadeus Mozart",
+                "Johann Sebastian Bach",
+                "Ludwig van Beethoven",
+                "Joseph Haydn"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 30,
+            "question": "Welke taal beschrijft de structuur van webpagina's?",
+            "answers": [
+                "CSS",
+                "HTML",
+                "SQL",
+                "Python"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 31,
+            "question": "Hoeveel planeten heeft het zonnestelsel (zonder dwergplaneten)?",
+            "answers": [
+                "7",
+                "8",
+                "9",
+                "10"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 32,
+            "question": "Waar staat 'www' voor op het internet?",
+            "answers": [
+                "World Wide Web",
+                "Wide World Web",
+                "Web Wide World",
+                "World Web Wide"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 33,
+            "question": "Wat is de hoofdstad van Egypte?",
+            "answers": [
+                "Caïro",
+                "Alexandrië",
+                "Luxor",
+                "Gizeh"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 34,
+            "question": "Welk vitamine wordt in het lichaam door zonlicht gevormd?",
+            "answers": [
+                "Vitamine A",
+                "Vitamine C",
+                "Vitamine D",
+                "Vitamine K"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 35,
+            "question": "Hoeveel graden heeft een rechte hoek?",
+            "answers": [
+                "45",
+                "60",
+                "90",
+                "120"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 36,
+            "question": "Welk instrument heeft zowel toetsen als snaren?",
+            "answers": [
+                "Fluit",
+                "Trompet",
+                "Piano",
+                "Drums"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 37,
+            "question": "Welke oceaan is de grootste?",
+            "answers": [
+                "Atlantische Oceaan",
+                "Indische Oceaan",
+                "Arctische Oceaan",
+                "Stille Oceaan"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 38,
+            "question": "Wie schreef 'De Gedaanteverwisseling' (Die Verwandlung)?",
+            "answers": [
+                "Thomas Mann",
+                "Franz Kafka",
+                "Hermann Hesse",
+                "Bertolt Brecht"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 39,
+            "question": "Welke stad wordt de 'Big Apple' genoemd?",
+            "answers": [
+                "Los Angeles",
+                "New York",
+                "Chicago",
+                "Boston"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 40,
+            "question": "Hoeveel weken heeft een jaar ongeveer?",
+            "answers": [
+                "50",
+                "51",
+                "52",
+                "53"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 41,
+            "question": "Wat is de kleinste eenheid van leven?",
+            "answers": [
+                "Atoom",
+                "Molecule",
+                "Cel",
+                "Orgaan"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 42,
+            "question": "In welk land bevindt de Alhambra zich?",
+            "answers": [
+                "Italië",
+                "Spanje",
+                "Portugal",
+                "Frankrijk"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 43,
+            "question": "Wat veroorzaakt een regenboog?",
+            "answers": [
+                "Maansverduistering",
+                "Breking van licht in regendruppels",
+                "Noorderlicht",
+                "Aardbeving"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 44,
+            "question": "Hoeveel spelers staan er per team op het veld bij voetbal?",
+            "answers": [
+                "9",
+                "10",
+                "11",
+                "12"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 45,
+            "question": "Welke taal heeft de meeste moedertaalsprekers?",
+            "answers": [
+                "Engels",
+                "Spaans",
+                "Hindi",
+                "Mandarijn"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 46,
+            "question": "Welke planeet heeft de opvallendste ringen?",
+            "answers": [
+                "Uranus",
+                "Neptunus",
+                "Jupiter",
+                "Saturnus"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 47,
+            "question": "Hoe heet de langste rivier van Zuid-Amerika?",
+            "answers": [
+                "Orinoco",
+                "Paraná",
+                "Amazone",
+                "Magdalena"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 48,
+            "question": "In welke stad staat het Colosseum?",
+            "answers": [
+                "Athene",
+                "Rome",
+                "Napels",
+                "Florence"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 49,
+            "question": "Welk metaal is bij kamertemperatuur vloeibaar?",
+            "answers": [
+                "Ijzer",
+                "Aluminium",
+                "Kwik",
+                "Zink"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 50,
+            "question": "Hoeveel toetsen heeft een standaardpiano?",
+            "answers": [
+                "76",
+                "80",
+                "82",
+                "88"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 51,
+            "question": "Waar staat 'USB' voor?",
+            "answers": [
+                "Universal Service Band",
+                "Unified Serial Board",
+                "Universal Serial Bus",
+                "Ultra System Bus"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 52,
+            "question": "Welk gas ademen we voornamelijk in?",
+            "answers": [
+                "Zuurstof",
+                "Stikstof",
+                "Koolstofdioxide",
+                "Helium"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 53,
+            "question": "Wat is het grootste levende landdier?",
+            "answers": [
+                "Giraffe",
+                "Nijlpaard",
+                "Afrikaanse olifant",
+                "Witte neushoorn"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 54,
+            "question": "Wie was de eerste mens op de maan?",
+            "answers": [
+                "Joeri Gagarin",
+                "Neil Armstrong",
+                "Buzz Aldrin",
+                "Michael Collins"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 55,
+            "question": "Hoeveel kaarten heeft een standaard Frans kaartspel zonder jokers?",
+            "answers": [
+                "32",
+                "36",
+                "40",
+                "52"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 56,
+            "question": "Welke van de volgende cijfers is een priemgetal?",
+            "answers": [
+                "27",
+                "28",
+                "29",
+                "30"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 57,
+            "question": "In welke eenheid meet men frequentie?",
+            "answers": [
+                "Newton",
+                "Hertz",
+                "Pascal",
+                "Joule"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 58,
+            "question": "Welke kleur heeft chlorofyl voornamelijk?",
+            "answers": [
+                "Blauw",
+                "Rood",
+                "Groen",
+                "Geel"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 59,
+            "question": "Wat is de hoofdstad van Australië?",
+            "answers": [
+                "Sydney",
+                "Melbourne",
+                "Canberra",
+                "Perth"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 60,
+            "question": "Welk continent heeft de meeste landen?",
+            "answers": [
+                "Europa",
+                "Azië",
+                "Afrika",
+                "Zuid-Amerika"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 61,
+            "question": "Welk van deze dieren is een buideldier (marsupiaal)?",
+            "answers": [
+                "Kangoeroe",
+                "Lemur",
+                "Wasbeer",
+                "Panda"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 62,
+            "question": "Wat is de vierkantswortel van 81?",
+            "answers": [
+                "7",
+                "8",
+                "9",
+                "10"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 63,
+            "question": "Wie schreef 'De kleine prins' (Le Petit Prince)?",
+            "answers": [
+                "Antoine de Saint-Exupéry",
+                "Jules Verne",
+                "Victor Hugo",
+                "Albert Camus"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 64,
+            "question": "Hoeveel spelers staan er per team op het veld bij basketbal?",
+            "answers": [
+                "4",
+                "5",
+                "6",
+                "7"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 65,
+            "question": "Welk land staat bekend om sushi?",
+            "answers": [
+                "China",
+                "Japan",
+                "Korea",
+                "Thailand"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 66,
+            "question": "Waar staat 'CPU' voor?",
+            "answers": [
+                "Central Processing Unit",
+                "Computer Power Unit",
+                "Central Performance Unit",
+                "Core Processing Utility"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 67,
+            "question": "Welke munteenheid heeft Zwitserland?",
+            "answers": [
+                "Euro",
+                "Zwitserse frank",
+                "US dollar",
+                "Kronen"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 68,
+            "question": "Wat is de hoofdstad van Brazilië?",
+            "answers": [
+                "Rio de Janeiro",
+                "São Paulo",
+                "Brasília",
+                "Salvador"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 69,
+            "question": "Wat is de officiële taal van Brazilië?",
+            "answers": [
+                "Spaans",
+                "Portugees",
+                "Frans",
+                "Engels"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 70,
+            "question": "Wat is de chemische formule van keukenzout?",
+            "answers": [
+                "NaCl",
+                "KCl",
+                "CaCO3",
+                "HCl"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 71,
+            "question": "Welke eenheid meet energie?",
+            "answers": [
+                "Watt",
+                "Joule",
+                "Volt",
+                "Ampère"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 72,
+            "question": "Wat is het grootste eiland ter wereld?",
+            "answers": [
+                "Borneo",
+                "Nieuw-Guinea",
+                "Madagaskar",
+                "Groenland"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 73,
+            "question": "Wie uitvond de boekdrukkunst met losse letters in Europa?",
+            "answers": [
+                "Johannes Gutenberg",
+                "Maarten Luther",
+                "Leonardo da Vinci",
+                "Nicolaus Copernicus"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 74,
+            "question": "Welke vogel kan achteruit vliegen?",
+            "answers": [
+                "Albatros",
+                "Ooievaar",
+                "Kolibrie",
+                "Mus"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 75,
+            "question": "Wat meet een barometer?",
+            "answers": [
+                "Temperatuur",
+                "Luchtdruk",
+                "Luchtvochtigheid",
+                "Windsnelheid"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 76,
+            "question": "Welke kleur toont het bovenste lampje van een Duitse verkeerslicht?",
+            "answers": [
+                "Groen",
+                "Geel",
+                "Rood",
+                "Blauw"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 77,
+            "question": "In welk land ligt Machu Picchu?",
+            "answers": [
+                "Bolivia",
+                "Peru",
+                "Ecuador",
+                "Chili"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 78,
+            "question": "Wie was de eerste vrouwelijke bondskanselier van Duitsland?",
+            "answers": [
+                "Ursula von der Leyen",
+                "Angela Merkel",
+                "Annalena Baerbock",
+                "Hannelore Kraft"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 79,
+            "question": "Voor welk getal staat het Romeinse cijfer 'X'?",
+            "answers": [
+                "5",
+                "10",
+                "50",
+                "100"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 80,
+            "question": "Wat is de hoofdstad van Turkije?",
+            "answers": [
+                "Istanbul",
+                "Ankara",
+                "Izmir",
+                "Antalya"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 81,
+            "question": "Wat is het grootste orgaan van het menselijk lichaam?",
+            "answers": [
+                "Hart",
+                "Long",
+                "Lever",
+                "Huid"
+            ],
+            "correctAnswer": 3
+        },
+        {
+            "id": 82,
+            "question": "Welke wolkensoort is typisch voor onweer?",
+            "answers": [
+                "Cirrus",
+                "Stratus",
+                "Cumulonimbus",
+                "Altocumulus"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 83,
+            "question": "Waar staat 'AI' voor?",
+            "answers": [
+                "Automatische Integratie",
+                "Kunstmatige Intelligentie",
+                "Audio Interface",
+                "Analoge Informatica"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 84,
+            "question": "Welke bloedgroep geldt als universele donor?",
+            "answers": [
+                "A positief",
+                "AB positief",
+                "O negatief",
+                "B negatief"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 85,
+            "question": "In welke stad viel in 1989 een bekende muur?",
+            "answers": [
+                "Wenen",
+                "Praag",
+                "Berlijn",
+                "Boedapest"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 86,
+            "question": "Waar staat 'HTTP' voor?",
+            "answers": [
+                "Hypertext Transfer Protocol",
+                "High Transfer Text Program",
+                "Hyperlink Transport Platform",
+                "Host Text Transfer Protocol"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 87,
+            "question": "Wat is de hoofdstad van Noorwegen?",
+            "answers": [
+                "Stockholm",
+                "Kopenhagen",
+                "Oslo",
+                "Helsinki"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 88,
+            "question": "Hoeveel zijden heeft een hexagon?",
+            "answers": [
+                "5",
+                "6",
+                "7",
+                "8"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 89,
+            "question": "Welke planeet wordt de 'Rode Planeet' genoemd?",
+            "answers": [
+                "Venus",
+                "Mars",
+                "Mercurius",
+                "Jupiter"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 90,
+            "question": "Wat betekent 'biologisch afbreekbaar'?",
+            "answers": [
+                "Ontvlambaar",
+                "Waterdicht",
+                "Afbreekbaar door micro-organismen",
+                "Magnetisch"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 91,
+            "question": "Wie componeerde 'Die Zauberflöte' (The Magic Flute)?",
+            "answers": [
+                "Joseph Haydn",
+                "Ludwig van Beethoven",
+                "Wolfgang Amadeus Mozart",
+                "Franz Schubert"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 92,
+            "question": "Welke taal is de officiële taal in Oostenrijk?",
+            "answers": [
+                "Duits",
+                "Frans",
+                "Italiaans",
+                "Hongaars"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 93,
+            "question": "Hoeveel ringen heeft het olympische symbool?",
+            "answers": [
+                "4",
+                "5",
+                "6",
+                "7"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 94,
+            "question": "Wat is de hoofdstad van Griekenland?",
+            "answers": [
+                "Thessaloniki",
+                "Athene",
+                "Patras",
+                "Rhodos"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 95,
+            "question": "Wie formuleerde de klassieke bewegingswetten?",
+            "answers": [
+                "Galileo Galilei",
+                "Isaac Newton",
+                "Johannes Kepler",
+                "Blaise Pascal"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 96,
+            "question": "Wat is het snelste landdier?",
+            "answers": [
+                "Luipaard",
+                "Jachtluipaard",
+                "Antilope",
+                "Poema"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 97,
+            "question": "Welke taal gebruikt het cyrillische alfabet?",
+            "answers": [
+                "Russisch",
+                "Grieks",
+                "Duits",
+                "Arabisch"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 98,
+            "question": "Hoeveel dagen heeft een schrikkeljaar?",
+            "answers": [
+                "365",
+                "366",
+                "367",
+                "368"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 99,
+            "question": "Welke stad ligt aan de Theems?",
+            "answers": [
+                "Edinburgh",
+                "Dublin",
+                "Londen",
+                "Manchester"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 100,
+            "question": "Welk element is het belangrijkste bestanddeel van de zon?",
+            "answers": [
+                "Zuurstof",
+                "Helium",
+                "Waterstof",
+                "Koolstof"
+            ],
+            "correctAnswer": 2
         }
     ]
 }
