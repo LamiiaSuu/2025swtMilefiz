@@ -3,30 +3,21 @@ package de.hs_rm.de.milefiz.game.model.minigames;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
+import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
+import de.hs_rm.de.milefiz.messaging.LobbyMessage;
+import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 
 public class ColorbrainGame extends MiniGame {
-
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-    private boolean timeoutStarted = false;
 
     private UUID player1; // Spieler 1
     private UUID player2; // Spieler 2
 
-    // Speichert welche Farbe beide Spieler jeweils klicken
-    private final Map<UUID, ColorbrainColor> clickedColors = new HashMap<>();
-
-    // Speichert zu welcher Zeit beide Spieler klicken
-    private final Map<UUID, Long> clickTimestamps = new HashMap<>();
+    private ColorbrainColor player1Pick;
+    private ColorbrainColor player2Pick;
 
     // Liste aller moeglichen Farben
     public enum ColorbrainColor {
@@ -56,7 +47,8 @@ public class ColorbrainGame extends MiniGame {
 
     /**
      * Initialisiert das Minispiel mit:
-     * - Beiden Spieler, die am Duell teilnehmen anhand ihrer eindeutigen Spieler Ids,
+     * - Beiden Spieler, die am Duell teilnehmen anhand ihrer eindeutigen Spieler
+     * Ids,
      * - 4 zufaelligen und eindeutigen Farben,
      * - der richtigen Antwortfarbe.
      * 
@@ -72,25 +64,19 @@ public class ColorbrainGame extends MiniGame {
         selectFourRandomDifferentColors();
         correctColor = selectedColors[1];
 
-        // Starte den Timeout
-        if (!timeoutStarted) {
-            timeoutStarted = true;
-
-            scheduler.schedule(this::handleTimeout, getTimeOut(), TimeUnit.SECONDS);
-        }
     }
 
     /**
      * Wird aufgerufen, wenn der Timeout abläuft.
      * Falls das Spiel noch nicht beendet ist, verlieren beide Spieler.
      */
-    private void handleTimeout() {
+    @Override
+    public void forceMissingActions() {
         if (!isFinished()) {
             setWinner(null); // Beide verlieren
             setFinished(true);
             notifyFinished(); // Triggert Callback in DuelService
         }
-        scheduler.shutdown();
     }
 
     /**
@@ -108,17 +94,21 @@ public class ColorbrainGame extends MiniGame {
     }
 
     /**
-     * Speichert bei ersten Klick eines Spielers die Farbe und den Zeitpunkt.
+     * Speichert beim ersten Klick eines Spielers die geklickte Farbe.
      * 
      * @param player       Id des klickenden Spielers
      * @param clickedColor Farbe, die der Spieler anklickt
      */
     public synchronized void handlePlayerClick(UUID player, ColorbrainColor clickedColor) {
-        if (!clickedColors.containsKey(player)) {
-            clickedColors.put(player, clickedColor);
-            clickTimestamps.put(player, System.currentTimeMillis());
-            checkWinCondition();
+        if (player.equals(player1) && player1Pick == null) {
+            player1Pick = clickedColor;
+        } else if (player.equals(player2) && player2Pick == null) {
+            player2Pick = clickedColor;
+        } else {
+            return;
         }
+
+        checkWinCondition();
     }
 
     /**
@@ -135,35 +125,21 @@ public class ColorbrainGame extends MiniGame {
      * 
      */
     private void checkWinCondition() {
-        if (clickedColors.size() < 2) {
-            return;
+        if (getWinner() == null) {
+            boolean player1Correct = isCorrectColor(player1Pick);
+            boolean player2Correct = isCorrectColor(player2Pick);
+
+            if (player1Correct && !player2Correct) { // Spieler 1 richtig
+                setWinner(player1);
+            } else if (!player1Correct && player2Correct) { // Spieler 2 richtig
+                setWinner(player2);
+            } else { // beide falsch
+                setWinner(null);
+            }
+
+            setFinished(true);
+            notifyFinished();
         }
-
-        UUID p1 = getPlayer1();
-        UUID p2 = getPlayer2();
-
-        ColorbrainColor color1 = clickedColors.get(p1);
-        ColorbrainColor color2 = clickedColors.get(p2);
-
-        long time1 = clickTimestamps.get(p1);
-        long time2 = clickTimestamps.get(p2);
-
-        boolean p1Correct = isCorrectColor(color1);
-        boolean p2Correct = isCorrectColor(color2);
-
-        if (p1Correct && !p2Correct) { // Spieler 1 richtig
-            setWinner(p1);
-        } else if (!p1Correct && p2Correct) { // Spieler 2 richtig
-            setWinner(p2);
-        } else if (p1Correct && p2Correct) { // beide richtig
-            setWinner(time1 < time2 ? p1 : p2);
-        } else { // beide falsch
-            setWinner(null);
-        }
-
-        setFinished(true);
-        notifyFinished();
-        scheduler.shutdown();
     }
 
     /**
