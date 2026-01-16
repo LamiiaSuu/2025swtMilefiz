@@ -101,5 +101,6 @@ export const UI_EN: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Next meeple',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Previous meeple',
     CONTROLS_TUTORIAL_MENU: 'Open menu',
+    CONTROLS_TUTORIAL_MINIMAP_ZOOM: 'Zoom minimap',
 }
 
