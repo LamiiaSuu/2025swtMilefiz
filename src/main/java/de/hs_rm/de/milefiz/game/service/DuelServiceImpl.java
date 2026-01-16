@@ -82,7 +82,7 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
-        gameFactories.add(() -> new MathGame(mathGameTimeout + 10));
+        gameFactories.add(() -> new MathGame(mathGameTimeout));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
@@ -132,8 +132,7 @@ public class DuelServiceImpl implements DuelService {
             throw new IllegalStateException("Duel not found: " + duelId);
         }
 
-        //MiniGame game = randomGame();
-        MiniGame game = gameFactories.get(3).get();
+        MiniGame game = randomGame();
         duel.setMiniGame(game);
 
         game.setOnFinished(() -> handleMiniGameFinished(duel));

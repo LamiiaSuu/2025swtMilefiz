@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
 <template>
   <main >
     <!-- LoadingScreen -->
-    <LoadingScreen :show="false" />
+    <LoadingScreen :show="loading" />
 
     <!-- Duelle -->
     <DuelOverlay
@@ -85,7 +85,7 @@ onBeforeUnmount(() => {
     />
 
     <!-- HUD (Spielstatus, Buttons etc.) -->
-    <GameHUD v-if="!false"/>
+    <GameHUD v-if="!loading"/>
 
     <!-- Spielfeld -->
     <GameBoard />
