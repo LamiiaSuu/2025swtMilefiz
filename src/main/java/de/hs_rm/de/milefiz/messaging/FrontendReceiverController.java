@@ -1,5 +1,6 @@
 package de.hs_rm.de.milefiz.messaging;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerHasNoPermissionException;
-import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
@@ -34,8 +34,6 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendCooldownFinishedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendGameStartEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendLobbyUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRollDiceRejectedMovesLeftEvent;
@@ -47,6 +45,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendSaveEnergyRejectedEvent;
 public class FrontendReceiverController {
 
     private final Logger logger = LoggerFactory.getLogger(FrontendReceiverController.class);
+    private String lobbyNotFound = "Lobby not found.";
     private LobbyManager lobbyManager;
     private GameService gameService;
     private LobbyMapper lobbyMapper;
@@ -253,18 +252,17 @@ public class FrontendReceiverController {
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/startGame")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleStartGame(@DestinationVariable("lobbyId") UUID lobbyId, Player player) {
-        Lobby lobby = null;
-        try {
-            lobby = lobbyManager.getLobby(lobbyId);
-        } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
-        }
+    public FrontendEvent handleStartGame(@DestinationVariable("lobbyId") UUID lobbyId, Player player) throws LobbyNotFoundException {
+
+        Lobby lobby = lobbyManager.getLobby(lobbyId);
+
         if (!player.equals(lobby.getLeader())) {
             throw new PlayerHasNoPermissionException("Der Spieler ist kein Leader");
         }
+
         logger.info("Spiel {} wurde gestartet", lobbyId);
         lobby.setGameStarted(true);
+
         return new FrontendGameStartEvent("Das Spiel wurde gestartet!");
     }
 
@@ -273,12 +271,21 @@ public class FrontendReceiverController {
      * zuätzlich allen bereits in der Lobby vorhandenen Spielern ein Update
      *
      * @param event
-     * @throws PlayerNotFoundException
      */
     @EventListener
-    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws PlayerNotFoundException {
+    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        Player player = (Player) headerAccessor.getSessionAttributes().get("player");
+        Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
+        if (sessionAttributes == null) {
+            logger.warn("WebSocket disconnect ohne session attributes");
+            return;
+        }
+
+        Player player = (Player) sessionAttributes.get("player");
+        if (player == null) {
+            logger.warn("WebSocket disconnect ohne player in session");
+            return;
+        }
 
         Lobby lobby = lobbyManager.getLobbyFromPlayer(player);
         lobby.leave(player);
@@ -588,7 +595,7 @@ public class FrontendReceiverController {
             lobby.setMaxPlayers(lobbyUpdateSettingsCmd.maxPlayers());
             return new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Update der Einstellungen");
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error(lobbyNotFound, e);
         }
         return new FrontendLobbyUpdateEvent(null, "");
     }
@@ -627,7 +634,7 @@ public class FrontendReceiverController {
             lobby = lobbyManager.getLobby(lobbyId);
             return new FrontendLobbyUpdateEvent(lobbyMapper.toDTO(lobby), "Update PlayerName");
         } catch (LobbyNotFoundException e) {
-            e.printStackTrace();
+            logger.error(lobbyNotFound, e);
         }
         return new FrontendLobbyUpdateEvent(null, "");
 

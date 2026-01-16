@@ -21,9 +21,6 @@ public class PlayerDTO {
     private boolean moved;
     private int maxEnergy;
 
-    public PlayerDTO() {
-    }
-
     public UUID getId() {
         return id;
     }

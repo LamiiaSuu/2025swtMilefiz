@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,11 +27,15 @@ import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
+import jakarta.annotation.PreDestroy;
+
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
 
 @Service
 public class DuelServiceImpl implements DuelService {
+
+    private final ScheduledExecutorService miniGameScheduler = Executors.newScheduledThreadPool(4);
 
     /**
      * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen
@@ -51,6 +58,7 @@ public class DuelServiceImpl implements DuelService {
 
     private final LobbyManager lobbyManager;
     private final FrontendMessagingService messaging;
+    private final DuelResolutionService duelResolutionService;
 
     /**
      * Die Timeouts aus den Spring application properties werden hier
@@ -71,6 +79,11 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.rock.paper.scissors.timeout}")
     private int rockPaperScissorsGameTimeout;
 
+    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging, DuelResolutionService duelResolutionService) {
+        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
+        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
+        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
         // gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         // gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
@@ -80,6 +93,7 @@ public class DuelServiceImpl implements DuelService {
         // gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
+        this.duelResolutionService = duelResolutionService;
     }
 
     /**
@@ -131,7 +145,14 @@ public class DuelServiceImpl implements DuelService {
 
         game.setOnFinished(() -> handleMiniGameFinished(duel));
 
+        miniGameScheduler.schedule(
+            game::forceMissingActions,
+            game.getTimeOut(),
+            TimeUnit.SECONDS
+        );
+
         return game;
+
     }
 
     /**
@@ -214,7 +235,8 @@ public class DuelServiceImpl implements DuelService {
                     dice.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
-            sendLoserHome(lobby, duel, dice);
+            duelResolutionService.sendLoserHome(lobby, duel, dice);
+
         }
 
         else if (game instanceof BalloonGame balloon) {
@@ -228,7 +250,8 @@ public class DuelServiceImpl implements DuelService {
                     balloon.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
-            sendLoserHome(lobby, duel, balloon);
+            duelResolutionService.sendLoserHome(lobby, duel, balloon);
+
         }
 
         else if (game instanceof EinarmigerBanditGame einarmigerBandit) {
@@ -338,4 +361,14 @@ public class DuelServiceImpl implements DuelService {
         }
     }
 
+            duelResolutionService.sendLoserHome(lobby, duel, einarmigerBandit);
+
+        }
+        duels.remove(duel.getId());
+    }
+
+    @PreDestroy
+    public void shutdownScheduler() {
+        miniGameScheduler.shutdownNow();
+    }
 }

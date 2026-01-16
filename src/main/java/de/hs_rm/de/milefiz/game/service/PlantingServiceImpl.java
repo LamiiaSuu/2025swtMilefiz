@@ -56,7 +56,7 @@ public class PlantingServiceImpl implements PlantingService {
         // Parameter die noch angepasst werden können
 
         // Rand um die Felder herum, wo noch Bäume gepflanzt werden sollen
-        final int TREE_BORDER = 10;
+        final int TREE_BORDER = 65;
 
         // wieviele Bäume können innerhalb einer koordinaten einheit stehen. bestimmt,
         // wie nah Bäume beieinander stehen
@@ -66,7 +66,7 @@ public class PlantingServiceImpl implements PlantingService {
 
         // wert zwischen 0 und 1. wieviel weniger Bäume sollen am rand stehen?
         // 0.5 == 50% weniger
-        final double LESS_TREES_ON_BORDER = 0.8;
+        final double LESS_TREES_ON_BORDER = 0.99;
 
         final int NO_OF_TYPES = TreeType.values().length;
         boardDTO.deleteAllTrees();
@@ -74,54 +74,85 @@ public class PlantingServiceImpl implements PlantingService {
         int[] minPos = getMinPos(boardDTO);
         int[] maxPos = getMaxPos(boardDTO);
 
-        // ursprung des koordinatensystems auf 0 und lässt einen rand um die
-        // felder
-        for (FieldDTO field : boardDTO.getFields()) {
-            Position p = field.getPosition();
-            field.setPosition(new Position(p.getX() + TREE_BORDER - minPos[0], p.getY() + TREE_BORDER - minPos[1]));
+        // // ursprung des koordinatensystems auf 0 und lässt einen rand um die
+        // // felder
+        // for (FieldDTO field : boardDTO.getFields()) {
+        // Position p = field.getPosition();
+        // field.setPosition(new Position(p.getX() + TREE_BORDER - minPos[0], p.getY() +
+        // TREE_BORDER - minPos[1]));
 
-        }
-        minPos = getMinPos(boardDTO);
-        maxPos = getMaxPos(boardDTO);
+        // }
 
-        int[][] blockedByPath = getBlockedPositions(boardDTO, maxPos);
-        maxPos[0] = (maxPos[0] + TREE_BORDER) * TREES_PER_COORD;
-        maxPos[1] = (maxPos[1] + TREE_BORDER) * TREES_PER_COORD;
-        int[][] blueNoise = generateBlueNoiseVoidCluster(density, maxPos[0], maxPos[1]);
+        // minPos = getMinPos(boardDTO);
+        // maxPos = getMaxPos(boardDTO);
+
+        //
+
+        int boardWidth = maxPos[0] - minPos[0];
+        int boardHeight = maxPos[1] - minPos[1];
+
+        int offsetX = TREE_BORDER - minPos[0];
+        int offsetY = TREE_BORDER - minPos[1];
+
+        int[][] blockedByPath = getBlockedPositions(boardDTO, minPos, offsetX, offsetY);
+
+        int totalWidth = (boardWidth + 2 * TREE_BORDER) * TREES_PER_COORD;
+        int totalHeight = (boardHeight + 2 * TREE_BORDER) * TREES_PER_COORD;
+
+        int[][] blueNoise = generateBlueNoiseVoidCluster(density, totalWidth, totalHeight);
 
         for (int i = 0; i < blueNoise.length; i++) {
             for (int j = 0; j < blueNoise[0].length; j++) {
                 if (blueNoise[i][j] == 1) {
-                    float x = (j / (float) TREES_PER_COORD);
-                    float y = (i / (float) TREES_PER_COORD);
-                    int xFloor = (int) Math.floor(x);
-                    int xCeil = (int) Math.ceil(x);
-                    int yFloor = (int) Math.floor(y);
-                    int yCeil = (int) Math.ceil(y);
+                    // Original-Koordinaten - KEINE VERSCHIEBUNG
+                    float x = (j / (float) TREES_PER_COORD) - TREE_BORDER + minPos[0];
+                    float y = (i / (float) TREES_PER_COORD) - TREE_BORDER + minPos[1];
 
-                    // auf feld blockierung überprüfen
-                    if (!(blockedByPath.length <= xCeil || blockedByPath.length <= xFloor
-                            || blockedByPath[0].length <= yCeil || blockedByPath[0].length <= yFloor)) {
-                        int isBlocked = blockedByPath[xFloor][yFloor] + blockedByPath[xFloor][yCeil]
-                                + blockedByPath[xCeil][yFloor] + blockedByPath[xCeil][yCeil];
+                    // Für Blockierungs-Check
+                    float xShifted = x + offsetX;
+                    float yShifted = y + offsetY;
+
+                    int xFloor = (int) Math.floor(xShifted);
+                    int xCeil = (int) Math.ceil(xShifted);
+                    int yFloor = (int) Math.floor(yShifted);
+                    int yCeil = (int) Math.ceil(yShifted);
+
+                    // Blockierung prüfen
+                    if (xFloor >= 0 && xCeil < blockedByPath.length &&
+                            yFloor >= 0 && yCeil < blockedByPath[0].length) {
+                        int isBlocked = blockedByPath[xFloor][yFloor] +
+                                blockedByPath[xFloor][yCeil] +
+                                blockedByPath[xCeil][yFloor] +
+                                blockedByPath[xCeil][yCeil];
                         if (isBlocked > 0) {
                             continue;
                         }
                     }
-                    // am rand weniger bäume pflanzen
-                    if (j < (TREE_BORDER * 2) || i < (TREE_BORDER * 2) || blockedByPath.length <= xCeil + 4
-                            || blockedByPath.length <= xFloor + 4
-                            || blockedByPath[0].length <= yCeil + 4 || blockedByPath[0].length <= yFloor + 4) {
-                        double rand = Math.random();
-                        if (rand < LESS_TREES_ON_BORDER) {
+
+                    // Innerhalb oder außerhalb?
+                    boolean insideBoard = (x >= minPos[0] && x <= maxPos[0] &&
+                            y >= minPos[1] && y <= maxPos[1]);
+
+                    if (insideBoard) {
+                        // Innerhalb: nur am direkten Rand filtern
+                        int distToEdge = Math.min(
+                                Math.min((int) (x - minPos[0]), (int) (maxPos[0] - x)),
+                                Math.min((int) (y - minPos[1]), (int) (maxPos[1] - y)));
+
+                        if (distToEdge < 4 && Math.random() < 0.5) { // 50% am Rand
+                            continue;
+                        }
+                    } else {
+                        // Außerhalb: stark filtern mit LESS_TREES_ON_BORDER
+                        if (Math.random() < LESS_TREES_ON_BORDER) {
                             continue;
                         }
                     }
 
+                    // Baum pflanzen - ORIGINAL-KOORDINATEN
                     double rand = Math.random();
-                    TreeType treeType;
                     int typeInd = (int) (rand * NO_OF_TYPES);
-                    treeType = TreeType.values()[typeInd];
+                    TreeType treeType = TreeType.values()[typeInd];
                     boardDTO.addTree(new PositionFloat(x, y), treeType);
                 }
             }
@@ -141,31 +172,39 @@ public class PlantingServiceImpl implements PlantingService {
      * @return array, wo die die indizes der blockierten positionen auf 1 gesetzt
      *         sind
      */
-    private int[][] getBlockedPositions(BoardDTO boardDTO, int[] boundingBox) {
-        int[][] res = new int[boundingBox[0] + 4][boundingBox[1] + 4];
+    private int[][] getBlockedPositions(BoardDTO boardDTO, int[] minPos, int offsetX, int offsetY) {
+        int[] maxPos = getMaxPos(boardDTO);
+        int width = maxPos[0] - minPos[0] + 2 * 200; // +Border
+        int height = maxPos[1] - minPos[1] + 2 * 200;
+
+        int[][] res = new int[width + 4][height + 4];
 
         for (FieldDTO field : boardDTO.getFields()) {
             Position p = field.getPosition();
-            int x = p.getX();
-            int y = p.getY();
-            res[x][y] = 1;
+            // Offset anwenden für Blockierungs-Array
+            int x = p.getX() + offsetX;
+            int y = p.getY() + offsetY;
 
-            if (field.getType().isStart() || field.getType().isEnd()) {
-                res = blockSourrounding(2, x, y, res);
-                continue;
-            }
+            if (x >= 0 && x < res.length && y >= 0 && y < res[0].length) {
+                res[x][y] = 1;
 
-            if (field.getNorth() != null && res[x].length > (y + 1)) {
-                res[x][y + 1] = 1;
-            }
-            if (field.getEast() != null && res.length > (x + 1)) {
-                res[x + 1][y] = 1;
-            }
-            if (field.getSouth() != null && y > 0) {
-                res[x][y - 1] = 1;
-            }
-            if (field.getWest() != null && x > 0) {
-                res[x - 1][y] = 1;
+                if (field.getType().isStart() || field.getType().isEnd()) {
+                    res = blockSourrounding(2, x, y, res);
+                    continue;
+                }
+
+                if (field.getNorth() != null && y + 1 < res[0].length) {
+                    res[x][y + 1] = 1;
+                }
+                if (field.getEast() != null && x + 1 < res.length) {
+                    res[x + 1][y] = 1;
+                }
+                if (field.getSouth() != null && y > 0) {
+                    res[x][y - 1] = 1;
+                }
+                if (field.getWest() != null && x > 0) {
+                    res[x - 1][y] = 1;
+                }
             }
         }
 

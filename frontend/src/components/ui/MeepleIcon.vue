@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { playerColors, type PlayerColor } from '@/types/colorsAssets';
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -14,6 +15,10 @@ const iconSrc = computed(() => {
   const state = props.isInBase ? 'house' : 'default'
   
   return `/meepleIcons/${colorUpper}_${state}.png`
+})
+
+const bodyColor = computed(() => {
+  return playerColors[props.color.toUpperCase() as PlayerColor]?.body || '##00552d'
 })
 </script>
 
@@ -81,7 +86,7 @@ const iconSrc = computed(() => {
 }
 
 .meeple-icon.selected .key-badge {
-  color: #00552d;
+  color: v-bind(bodyColor);
   border-color: #ffd700;
   animation: pulse-badge 1.5s ease-in-out infinite;
 }
