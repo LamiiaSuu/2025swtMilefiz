@@ -29,7 +29,6 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import jakarta.annotation.PreDestroy;
 
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
 
 @Service
@@ -79,18 +78,12 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.rock.paper.scissors.timeout}")
     private int rockPaperScissorsGameTimeout;
 
-    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging, DuelResolutionService duelResolutionService) {
+    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
+            DuelResolutionService duelResolutionService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
-
-    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
-        // gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
-        // gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        // gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
-        // gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
-        // gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
         this.duelResolutionService = duelResolutionService;
@@ -146,10 +139,9 @@ public class DuelServiceImpl implements DuelService {
         game.setOnFinished(() -> handleMiniGameFinished(duel));
 
         miniGameScheduler.schedule(
-            game::forceMissingActions,
-            game.getTimeOut(),
-            TimeUnit.SECONDS
-        );
+                game::forceMissingActions,
+                game.getTimeOut(),
+                TimeUnit.SECONDS);
 
         return game;
 
@@ -272,96 +264,19 @@ public class DuelServiceImpl implements DuelService {
                     einarmigerBandit.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
-            sendLoserHome(lobby, duel, einarmigerBandit);
+            duelResolutionService.sendLoserHome(lobby, duel, einarmigerBandit);
 
-        } else if (game instanceof RockPaperScissorsGame ssp) {
+        } else if (game instanceof RockPaperScissorsGame rockPaperScissorsGame) {
             var update = new FrontendRockPaperScissorsGameUpdateEvent(
                     duel.getId(),
-                    ssp.getP1(),
-                    ssp.getP2(),
-                    ssp.getMoveP1(),
-                    ssp.getMoveP2(),
-                    ssp.getWinner(),
-                    ssp.isFinished());
+                    rockPaperScissorsGame.getP1(),
+                    rockPaperScissorsGame.getP2(),
+                    rockPaperScissorsGame.getMoveP1(),
+                    rockPaperScissorsGame.getMoveP2(),
+                    rockPaperScissorsGame.getWinner(),
+                    rockPaperScissorsGame.isFinished());
             messaging.sendEvent(new LobbyMessage(lobby, update));
-            sendLoserHome(lobby, duel, ssp);
-        }
-    }
-
-    /**
-     * Setzt nach einem beendeten Duell die Loser-Meeples
-     * zurück auf ihr jeweiliges Startfeld. Das können beide sein.
-     *
-     * <p>
-     * Regeln:
-     * <ul>
-     * <li>Gewinner bleibt stehen</li>
-     * <li>Verlierer gehen zurück in die Basis</li>
-     * <li>Bei Unentschieden verlieren beide</li>
-     * </ul>
-     *
-     * <p>
-     * Zusätzlich wird ein {@link FrontendMoveEvent}
-     * gesendet, damit das Update im Frontend animiert wird.
-     *
-     * @param lobby  aktuelle Lobby
-     * @param duelId ID des Duells
-     * @param game   beendetes Mini-Game
-     */
-    private void sendLoserHome(Lobby lobby, Duel duel, MiniGame game) {
-
-        var winner = game.getWinner();
-
-        var p1 = duel.getPlayer1();
-        var p2 = duel.getPlayer2();
-
-        var m1 = lobby.getMeepleById(duel.getFirstMeeple());
-        var m2 = lobby.getMeepleById(duel.getSecondMeeple());
-
-        var start1 = lobby.getBoard().getStartField(
-                lobby.getPlayer(p1).getColor());
-
-        var start2 = lobby.getBoard().getStartField(
-                lobby.getPlayer(p2).getColor());
-
-        if (winner == null || !winner.equals(p1)) {
-            lobby.getPlayer(p1).setMoved(false);
-            // if(lobby.getPlayer(p1).getActiveMeeple().equals(m1)){
-            // lobby.getPlayer(p1).setRemainingMoves(0);
-            // }
-            messaging.sendEvent(new LobbyMessage(
-                    lobby,
-                    new FrontendMoveEvent(
-                            p1,
-                            m1.getId(),
-                            start1.getId(),
-                            lobby.getPlayer(p1).getRemainingMoves(),
-                            lobby.getPlayer(p1).hasMoved())));
-
-            m1.setCurrentField(start1);
-            m1.clearLastField();
-        }
-
-        if (winner == null || !winner.equals(p2)) {
-            lobby.getPlayer(p2).setMoved(false);
-            // if(lobby.getPlayer(p2).getActiveMeeple().equals(m2)){
-            // lobby.getPlayer(p2).setRemainingMoves(0);
-            // }
-            messaging.sendEvent(new LobbyMessage(
-                    lobby,
-                    new FrontendMoveEvent(
-                            p2,
-                            m2.getId(),
-                            start2.getId(),
-                            lobby.getPlayer(p2).getRemainingMoves(),
-                            lobby.getPlayer(p2).hasMoved())));
-
-            m2.setCurrentField(start2);
-            m2.clearLastField();
-        }
-    }
-
-            duelResolutionService.sendLoserHome(lobby, duel, einarmigerBandit);
+            duelResolutionService.sendLoserHome(lobby, duel, rockPaperScissorsGame);
 
         }
         duels.remove(duel.getId());
