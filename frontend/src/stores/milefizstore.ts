@@ -345,10 +345,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
-            gamedata.moved = false;
           }
           if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId) {
+            const old = activeDuels[event.duelId] ?? { state: {} }
+
             activeDuels[event.duelId] = {
+              ...old,
               duelId: event.duelId,
 
               firstMeeple: event.firstMeepleId,
@@ -361,8 +363,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
               timeOut: event.timeOut,
 
-              state: {}
+              state: {...old.state}
             }
+            gamedata.moved = false
             document.exitPointerLock()
           }
 
@@ -416,9 +419,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
 
         if (event.type === "COLORBRAIN_GAME_UPDATE") {
+          if (!activeDuels[event.duelId]) {
+            activeDuels[event.duelId] = { duelId: event.duelId, state: {} }
+          }
 
           const duel = activeDuels[event.duelId]
-          if (!duel) return
 
           duel.selectedColors = event.selectedColors
           duel.state.winner = event.winner
