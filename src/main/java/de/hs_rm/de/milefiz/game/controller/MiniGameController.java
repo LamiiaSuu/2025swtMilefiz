@@ -354,17 +354,22 @@ public class MiniGameController {
                 Lobby lobby = lobbyManager.getLobby(lobbyId);
                 ColorbrainGame game = (ColorbrainGame) duelService.getMiniGame(duelId);
 
-                ColorbrainGame.ColorbrainColor clickedColor = ColorbrainGame.ColorbrainColor
-                                .valueOf(clickedColorName.toUpperCase());
+                // Quotes entfernen falls Payload als JSON-String kommt ("RED")
+                String cleaned = clickedColorName == null ? "" : clickedColorName.trim();
 
-                game.handlePlayerClick(player.getId(), clickedColor);
-
-                broadcastColorbrainUpdate(lobby, duelId, game);
-
-                if (game.isFinished()) {
-                        Duel duel = duelService.getDuel(duelId);
-                        duelResolutionService.sendLoserHome(lobby, duel, game);
+                if (cleaned.startsWith("\"") && cleaned.endsWith("\"") && cleaned.length() >= 2) {
+                        cleaned = cleaned.substring(1, cleaned.length() - 1);
                 }
+                if(clickedColorName != null) {
+                        ColorbrainGame.ColorbrainColor clickedColor = ColorbrainGame.ColorbrainColor
+                                .valueOf(cleaned.toUpperCase());
+
+                        game.handlePlayerClick(player.getId(), clickedColor);
+
+                        broadcastColorbrainUpdate(lobby, duelId, game);
+
+                }
+
         }
 
         /**

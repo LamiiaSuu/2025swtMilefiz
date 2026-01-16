@@ -19,6 +19,8 @@ public class ColorbrainGame extends MiniGame {
     private ColorbrainColor player1Pick;
     private ColorbrainColor player2Pick;
 
+    private UUID firstClicker = null;
+
     // Liste aller moeglichen Farben
     public enum ColorbrainColor {
         PINK,
@@ -100,6 +102,12 @@ public class ColorbrainGame extends MiniGame {
      * @param clickedColor Farbe, die der Spieler anklickt
      */
     public synchronized void handlePlayerClick(UUID player, ColorbrainColor clickedColor) {
+        if (isFinished()) return;
+
+        if (firstClicker == null) {
+            firstClicker = player;
+        }
+
         if (player.equals(player1) && player1Pick == null) {
             player1Pick = clickedColor;
         } else if (player.equals(player2) && player2Pick == null) {
@@ -110,6 +118,7 @@ public class ColorbrainGame extends MiniGame {
 
         checkWinCondition();
     }
+
 
     /**
      * Prueft ob es sich bei einer Farbe um die richtige Antwortfarbe handelt.
@@ -125,22 +134,30 @@ public class ColorbrainGame extends MiniGame {
      * 
      */
     private void checkWinCondition() {
-        if (getWinner() == null) {
-            boolean player1Correct = isCorrectColor(player1Pick);
-            boolean player2Correct = isCorrectColor(player2Pick);
 
-            if (player1Correct && !player2Correct) { // Spieler 1 richtig
-                setWinner(player1);
-            } else if (!player1Correct && player2Correct) { // Spieler 2 richtig
-                setWinner(player2);
-            } else { // beide falsch
-                setWinner(null);
-            }
+        // erst auswerten wenn beide geklickt haben
+        if (player1Pick == null || player2Pick == null) return;
+        if (isFinished()) return;
 
-            setFinished(true);
-            notifyFinished();
+        boolean player1Correct = isCorrectColor(player1Pick);
+        boolean player2Correct = isCorrectColor(player2Pick);
+
+        if (player1Correct && !player2Correct) {
+            setWinner(player1);
+        } else if (!player1Correct && player2Correct) {
+            setWinner(player2);
+        } else if (player1Correct && player2Correct) {
+            setWinner(firstClicker); 
+        } else {
+            setWinner(null);
         }
+
+        setFinished(true);
+        notifyFinished();
     }
+
+
+
 
     /**
      * Gibt die eindeutige Id von Spieler 1 zurueck.

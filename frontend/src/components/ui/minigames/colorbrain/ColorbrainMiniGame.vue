@@ -15,6 +15,8 @@ const emit = defineEmits<{
 const store = useMilefizStore()
 const waiting = ref<string | null>(null)
 
+const displayWord = computed(() => props.duel?.selectedColors?.[0] ?? "")
+const displayTextColor = computed(() => (props.duel?.selectedColors?.[1] ?? "WHITE").toLowerCase())
 
 /**
  * Prüft ob der aktuelle Spieler gewonnen hat.
@@ -67,22 +69,28 @@ watch(
 )
 
 const shuffledColors = ref<string[]>([])
+const hasShuffled = ref(false)
+
 
 watch(
   () => props.duel?.selectedColors,
   (colors) => {
     if (!colors) return
+    if (hasShuffled.value) return
 
     const copy = [...colors]
     for (let i = copy.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
-        ;[copy[i], copy[j]] = [copy[j], copy[i]]
+      ;[copy[i], copy[j]] = [copy[j], copy[i]]
     }
 
     shuffledColors.value = copy
+    hasShuffled.value = true
   },
   { immediate: true }
 )
+
+
 
 
 const hasClicked = ref(false)
@@ -98,13 +106,20 @@ const handleColorClick = (color: string) => {
 
   store.sendLobbyMessage(
     `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/colorbrain/click`,
-    {
-      id: store.gamedata.playerId,
-      color
-    }
+    color
   )
+
 }
 
+watch(
+  () => props.duel?.duelId,
+  () => {
+    hasShuffled.value = false
+    shuffledColors.value = []
+    hasClicked.value = false 
+  },
+  { immediate: true }
+)
 
 
 </script>
@@ -121,6 +136,9 @@ const handleColorClick = (color: string) => {
     <h3 v-if="!isFinished">
       {{ tUI('MINIGAME_COLORBRAIN_INSTRUCTION') }}
     </h3>
+    <h2 class="colorbrain-word" :class="displayTextColor">
+      {{ displayWord }}
+    </h2>
 
     <!-- COUNTDOWN -->
     <CountdownBar :seconds="duel.timeOut" />
@@ -259,4 +277,24 @@ button {
 
   -webkit-user-drag: none;
 }
+
+.colorbrain-word {
+  font-family: "Acme", sans-serif;
+  font-size: 2.4rem;
+  font-weight: 900;
+  text-align: center;
+  margin: 10px 0 14px 0;
+  text-transform: uppercase;
+}
+
+/* Textfarben-Klassen */
+.red { color: red; }
+.blue { color: blue; }
+.green { color: green; }
+.yellow { color: yellow; }
+.orange { color: orange; }
+.pink { color: hotpink; }
+.purple { color: purple; }
+.black { color: black; }
+
 </style>
