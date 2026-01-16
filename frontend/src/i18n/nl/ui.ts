@@ -64,6 +64,8 @@ export const UI_NL: Record<UIKey, string> = {
     MINIGAME_BALLOON_INSTRUCTION: 'Maak je klaar! Druk zo snel mogelijk op de knop!',
     MINIGAME_BALLOON_CLICK: 'Klikken!',    
     MINIGAME_MATH_TITLE: 'Hoofdrekenen',
+    MINIGAME_MATH_YOURSELF: 'je',
+    MINIGAME_MATH_CHECK: 'Controleren',
     CONFIRM: "Bevestigen",
     MINIMAP_BARRIER_MOVE: "Barrière verplaatsen",
     MINIMAP_OWN_MEEPLE: "Eigen meeple",

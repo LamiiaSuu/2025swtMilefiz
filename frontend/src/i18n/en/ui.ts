@@ -64,6 +64,8 @@ export const UI_EN: Record<UIKey, string> = {
     MINIGAME_BALLOON_INSTRUCTION: 'Get ready! Click the button as fast as you can!',
     MINIGAME_BALLOON_CLICK: 'Click!',    
     MINIGAME_MATH_TITLE: 'Mental Maths',
+    MINIGAME_MATH_YOURSELF: 'you',
+    MINIGAME_MATH_CHECK: 'check',
     CONFIRM: 'Confirm',
     MINIMAP_BARRIER_MOVE: 'Relocate barrier',
     MINIMAP_OWN_MEEPLE: 'Own Meeple',

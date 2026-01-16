@@ -58,7 +58,7 @@ public class GameServiceImpl implements GameService {
 
         this.plantingService = plantingService;
 
-        final String BOARD_PATH = "boards/standardBoard.json";
+        final String BOARD_PATH = "boards/Board.json";
         ObjectMapper objectMapper = new ObjectMapper();
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(BOARD_PATH);
