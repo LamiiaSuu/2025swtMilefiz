@@ -25,6 +25,7 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCheatedEvent;
@@ -656,6 +657,9 @@ public class MovementServiceImpl implements MovementService {
         }
         if (miniGame instanceof BalloonGame game) {
             game.initPlayers(player.getId(), rivalPlayer.getId());
+        }
+        if (miniGame instanceof QuizGame quiz) {
+            quiz.initPlayers(player.getId(), rivalPlayer.getId());
         }
 
         return new FrontendDuelEvent(
