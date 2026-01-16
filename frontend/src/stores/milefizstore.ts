@@ -415,6 +415,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.finished = event.finished
         }
 
+        if (event.type === "COLORBRAIN_GAME_UPDATE") {
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          duel.selectedColors = event.selectedColors
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
+
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0

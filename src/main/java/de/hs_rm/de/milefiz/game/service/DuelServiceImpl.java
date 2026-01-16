@@ -19,15 +19,16 @@ import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
+import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import jakarta.annotation.PreDestroy;
-
 
 @Service
 public class DuelServiceImpl implements DuelService {
@@ -73,7 +74,8 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.einarmigerBanditGame.timeout}")
     private int einarmigerBanditGameTimeout;
 
-    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging, DuelResolutionService duelResolutionService) {
+    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
+            DuelResolutionService duelResolutionService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
@@ -132,10 +134,9 @@ public class DuelServiceImpl implements DuelService {
         game.setOnFinished(() -> handleMiniGameFinished(duel));
 
         miniGameScheduler.schedule(
-            game::forceMissingActions,
-            game.getTimeOut(),
-            TimeUnit.SECONDS
-        );
+                game::forceMissingActions,
+                game.getTimeOut(),
+                TimeUnit.SECONDS);
 
         return game;
 
@@ -181,6 +182,19 @@ public class DuelServiceImpl implements DuelService {
         }
 
         return duel;
+    }
+
+    public void initColorBrain(Duel duel, Lobby lobby, ColorbrainGame game) {
+        var event = new FrontendColorbrainGameUpdateEvent(
+                duel.getId(),
+                game.getPlayer1(),
+                game.getPlayer2(),
+                game.getSelectedColorNames(), // hier sind die Farben
+                null, // noch kein Gewinner
+                false // noch nicht fertig
+        );
+
+        messaging.sendEvent(new LobbyMessage(lobby, event));
     }
 
     /**
@@ -237,6 +251,20 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, balloon);
+
+        }
+
+        else if (game instanceof ColorbrainGame colorbrainGame) {
+            var update = new FrontendColorbrainGameUpdateEvent(
+                    duel.getId(),
+                    colorbrainGame.getPlayer1(),
+                    colorbrainGame.getPlayer2(),
+                    null,
+                    colorbrainGame.getWinner(),
+                    colorbrainGame.isFinished());
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, colorbrainGame);
 
         }
 
