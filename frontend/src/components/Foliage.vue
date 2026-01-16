@@ -39,7 +39,7 @@ const models = {
   [Sizes.Mushroom]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1, collisionRadius: 0.3 },
   [Sizes.Grass_Smol]: { load: (useGLTF('/environment/plants/grass_smol.glb', { draco: true })), scale: 2, collisionRadius: 0.2 }
 }
-const parts = ref<Part[]>([])
+
 const imRefs = ref<InstancedMesh[]>([])
 
 
@@ -116,16 +116,18 @@ const getPartsForType = (type: Sizes) => {
   return partsT
 }
 
-watchEffect(() => {
-  // Über alle Werte im Sizes-Enum iterieren und Parts hinzufügen */
-  parts.value = []
+const parts = computed<Part[]>(() => {
+  const result: Part[] = []
+  
   for (const key of Object.values(Sizes)) {
     const type = key as Sizes
     const partsT = getPartsForType(type)
     if (partsT.length > 0) {
-      parts.value.push(...partsT)
+      result.push(...partsT)
     }
   }
+  
+  return result
 })
 
 const getRef = (el: any, index: number) => {
