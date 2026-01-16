@@ -76,7 +76,7 @@ function colorToCss(c: string) {
       <MeepleBar />
     </div>
 
-    <!-- Menu Button -->‚
+    <!-- Menu Button -->
     <div class="ingame-menu-button" >
       <img src="@/assets/hud/menus_white.png" class="ingame-menu-icon" />
       <span class="ingame-hotkey">esc</span>

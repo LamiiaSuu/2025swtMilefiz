@@ -161,7 +161,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       }
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe(DEST + gamedata.lobby?.id, (message) => {
-        console.log('Message received: ' + message + '\nBody:\n' + message.body)
+        //console.log('Message received: ' + message + '\nBody:\n' + message.body)
 
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
@@ -692,7 +692,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         destination: DEST_APP + '/rotate',
         body,
       })
-      console.log('Meeple rotated:', body)
+      //console.log('Meeple rotated:', body)
     } catch (err) {
       console.error('Error rotating:', err)
     }
