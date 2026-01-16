@@ -148,6 +148,7 @@ function colorToCss(c: string) {
 
 .ingame-menu-button {
   position: relative;
+  margin-left: 25px;
   padding: 5px;
   width: 60px;
   height: 60px;
