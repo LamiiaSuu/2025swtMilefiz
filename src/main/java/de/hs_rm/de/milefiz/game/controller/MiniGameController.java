@@ -364,7 +364,8 @@ public class MiniGameController {
                 broadcastRockPaperScissorsUpdate(lobby, duelId, game);
 
                 if (game.isFinished()) {
-                        sendLoserHome(lobby, duelId, game);
+                        Duel duel = duelService.getDuel(duelId);
+                        duelResolutionService.sendLoserHome(lobby, duel, game);
                 }
 
         }
