@@ -83,8 +83,10 @@ public class FrontendReceiverController {
      * @param player der authentifizierte Spieler, der die Rotation ausgelöst
      * hat
      *
-     * @return FrontendRotateEvent zur Synchronisation der Meeple-Rotation auf
-     * allen Clients der Lobby
+     * @return FrontendRotateEvent zur Synchronisation der Meeple-Rotation
+     *         auf allen Clients der Lobby
+     * 
+     * @author Maximilian Ressel
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rotate")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")

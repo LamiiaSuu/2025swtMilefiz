@@ -92,5 +92,7 @@ export const UI_DE: Record<UIKey, string> = {
     MINIMAP_BARRIER_MOVE: 'Sperre umplatzieren',
     MINIMAP_OWN_MEEPLE: 'Eigenes Meeple',
     MINIMAP_OCCUPIED: 'Besetzt',
-    MINIMAP_AVAILABLE: 'Frei'
+    MINIMAP_AVAILABLE: 'Frei',
+    MINIGAME_RPS_TITLE: "Schere • Stein • Papier",
+    RPS_DRAW: "Unentschieden"
 }
