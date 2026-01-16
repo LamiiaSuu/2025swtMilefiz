@@ -266,7 +266,19 @@ public class DuelServiceImpl implements DuelService {
             duelResolutionService.sendLoserHome(lobby, duel, einarmigerBandit);
 
         }
+
+        if (game instanceof QuizGame quiz) {
+            var update = new FrontendQuizGameUpdateEvent(duel.getId(), quiz.getPlayer1(), quiz.getPlayer2(),
+                    quiz.getQuestionDTO(), quiz.getWinner(),
+                    quiz.isFinished());
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, quiz);
+        }
         duels.remove(duel.getId());
     }
 
+    @PreDestroy
+    public void shutdownScheduler() {
+        miniGameScheduler.shutdownNow();
+    }
 }
