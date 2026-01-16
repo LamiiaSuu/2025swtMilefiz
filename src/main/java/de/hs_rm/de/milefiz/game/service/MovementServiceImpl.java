@@ -159,6 +159,18 @@ public class MovementServiceImpl implements MovementService {
             return new FrontendCheatedEvent(player.getId(), "Attempt to switch Meeple during move failed.");
         }
 
+        //Meeple ist stuck, Zug wird zurückgesetzt, sodass der Spieler der Meeple wechseln kann
+        if (!existsLegalStopWithinRemainingMoves(currentField, lastField, player.getRemainingMoves(),
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+            endTurnWithMove(player, meeple, currentField);
+            return new FrontendMoveWithLossEvent(
+                    player.getId(),
+                    meeple.getId(),
+                    currentField.getId(),
+                    player.getRemainingMoves(),
+                    player.hasMoved());
+        }
+
         // Ziel-Feld anhand der Bewegungsrichtung bestimmen
         Field nextField = getNextFieldByDirection(currentField, direction);
 
