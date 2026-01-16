@@ -16,6 +16,8 @@ public class ColorbrainGame extends MiniGame {
     private UUID player1; // Spieler 1
     private UUID player2; // Spieler 2
 
+    private UUID firstClicker = null;
+
     private ColorbrainColor player1Pick;
     private ColorbrainColor player2Pick;
 
@@ -72,11 +74,30 @@ public class ColorbrainGame extends MiniGame {
      */
     @Override
     public void forceMissingActions() {
-        if (!isFinished()) {
-            setWinner(null); // Beide verlieren
-            setFinished(true);
-            notifyFinished(); // Triggert Callback in DuelService
+        if (isFinished()) {
+            return;
         }
+
+        boolean p1Clicked = player1Pick != null;
+        boolean p2Clicked = player2Pick != null;
+
+        boolean p1Correct = p1Clicked && isCorrectColor(player1Pick);
+        boolean p2Correct = p2Clicked && isCorrectColor(player2Pick);
+
+        if (p1Correct && !p2Correct) {
+            setWinner(player1);
+        } else if (!p1Correct && p2Correct) {
+            setWinner(player2);
+        } else if (p1Correct && p2Correct) {
+            // beide richtig -> erster Klick gewinnt
+            setWinner(firstClicker);
+        } else {
+            // keiner richtig (oder keiner geklickt)
+            setWinner(null);
+        }
+
+        setFinished(true);
+        notifyFinished();
     }
 
     /**
@@ -100,6 +121,13 @@ public class ColorbrainGame extends MiniGame {
      * @param clickedColor Farbe, die der Spieler anklickt
      */
     public synchronized void handlePlayerClick(UUID player, ColorbrainColor clickedColor) {
+        if (isFinished())
+            return;
+
+        if (firstClicker == null) {
+            firstClicker = player;
+        }
+
         if (player.equals(player1) && player1Pick == null) {
             player1Pick = clickedColor;
         } else if (player.equals(player2) && player2Pick == null) {
@@ -125,21 +153,30 @@ public class ColorbrainGame extends MiniGame {
      * 
      */
     private void checkWinCondition() {
-        if (getWinner() == null) {
-            boolean player1Correct = isCorrectColor(player1Pick);
-            boolean player2Correct = isCorrectColor(player2Pick);
-
-            if (player1Correct && !player2Correct) { // Spieler 1 richtig
-                setWinner(player1);
-            } else if (!player1Correct && player2Correct) { // Spieler 2 richtig
-                setWinner(player2);
-            } else { // beide falsch
-                setWinner(null);
-            }
-
-            setFinished(true);
-            notifyFinished();
+        // erst auswerten wenn beide geklickt haben
+        if (player1Pick == null || player2Pick == null) {
+            return;
         }
+
+        if (isFinished()) {
+            return;
+        }
+            
+        boolean player1Correct = isCorrectColor(player1Pick);
+        boolean player2Correct = isCorrectColor(player2Pick);
+
+        if (player1Correct && !player2Correct) {
+            setWinner(player1);
+        } else if (!player1Correct && player2Correct) {
+            setWinner(player2);
+        } else if (player1Correct && player2Correct) {
+            setWinner(firstClicker);
+        } else {
+            setWinner(null);
+        }
+
+        setFinished(true);
+        notifyFinished();
     }
 
     /**
