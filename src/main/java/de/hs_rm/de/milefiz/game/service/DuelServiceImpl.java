@@ -74,13 +74,16 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.einarmigerBanditGame.timeout}")
     private int einarmigerBanditGameTimeout;
 
+    // Timeout fuer ColorbrainGame
+    @Value("${minigame.colorbrain.timeout}")
+    private int colorbrainGameTimeout;
+
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
             DuelResolutionService duelResolutionService) {
-        // gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
-        // gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        // gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout
-        // + 1)); 
-        gameFactories.add(() -> new ColorbrainGame(15));
+        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
+        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
+        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1)); 
+        gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
         this.duelResolutionService = duelResolutionService;
