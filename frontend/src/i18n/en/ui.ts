@@ -56,5 +56,5 @@ export const UI_EN: Record<UIKey, string> = {
     MINIGAME_BALLOON_TITLE: 'Pop the Balloon!',
     MINIGAME_BALLOON_INSTRUCTION: 'Get ready! Click the button as fast as you can!',
     MINIGAME_BALLOON_CLICK: 'Click!',
-    MINIGANE_QUIZ_TITLE: 'MINIGANE_QUIZ_TITLE'
+    MINIGANE_QUIZ_TITLE: 'Who Wants To Be A Millionaire'
 }

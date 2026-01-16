@@ -141,7 +141,7 @@ watch(isFinished, (finished) => {
 
 .dice-title {
   font-family: 'Acme', sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.6rem;
   letter-spacing: 1px;
   color: #ffd66b;
   text-align: center;

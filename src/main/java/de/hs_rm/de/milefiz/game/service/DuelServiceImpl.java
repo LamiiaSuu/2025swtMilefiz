@@ -67,8 +67,8 @@ public class DuelServiceImpl implements DuelService {
     private int quizGameTimeout;
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging) {
-        // gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
-        // gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
+        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
+        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new QuizGame(quizGameTimeout));
         // gameFactories.add(() -> new DummyGame(2, "Dummy Game #2"));
         // gameFactories.add(() -> new DummyGame(3, "Dummy Game #3"));
