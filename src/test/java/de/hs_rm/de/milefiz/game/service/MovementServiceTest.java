@@ -89,8 +89,21 @@ public class MovementServiceTest {
     @Test
     void moveMeepleOntoRivalMeepleAlreadyInDuelIsRejected() {
         player.setRemainingMoves(1);
-
+        Field dummyField2 = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(2, 2));
         Player rival = new Player(Color.BLUE);
+
+        Meeple rivalMeeple2 = rival.getMeeples()[1];
+        Meeple rivalMeeple3 = rival.getMeeples()[2];
+        Meeple rivalMeeple4 = rival.getMeeples()[3];
+        Meeple rivalMeeple5 = rival.getMeeples()[4];
+        rivalMeeple2.setCurrentField(dummyField2);
+        rivalMeeple3.setCurrentField(dummyField2);
+        rivalMeeple4.setCurrentField(dummyField2);
+        rivalMeeple5.setCurrentField(dummyField2);
+
+        Field furtherField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
+        start.addNeighbour(furtherField, Direction.SOUTH);
+
         Meeple rivalMeeple = rival.getMeeples()[0];
         rivalMeeple.setCurrentField(next);
 
@@ -112,8 +125,7 @@ public class MovementServiceTest {
         barrier.setCurrentField(start);
         board.addBarrier(barrier);
 
-        MoveBarrierCommand cmd =
-                new MoveBarrierCommand(barrier.getId(), UUID.randomUUID());
+        MoveBarrierCommand cmd = new MoveBarrierCommand(barrier.getId(), UUID.randomUUID());
 
         assertThrows(NullPointerException.class,
                 () -> movementService.moveBarrier(lobby.getId(), cmd, player));

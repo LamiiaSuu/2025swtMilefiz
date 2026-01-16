@@ -26,6 +26,8 @@ import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
+import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
+import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendCheatedEvent;
@@ -158,6 +160,15 @@ public class MovementServiceImpl implements MovementService {
         if (changedMeeple(player, meeple)) {
             logger.info("Attempt to switch Meeple during move failed.");
             return new FrontendCheatedEvent(player.getId(), "Attempt to switch Meeple during move failed.");
+        }
+
+        // Meeple ist stuck, Zug wird zurückgesetzt, sodass der Spieler der Meeple
+        // wechseln kann
+        if (!existsLegalStopWithinRemainingMoves(currentField, lastField, player.getRemainingMoves(),
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+
+            endTurnWithMove(player, meeple, currentField);
+            return meepleIsStuck(player, meeple, currentField, rivalMeepleFields, rivalMeeples, lobby);
         }
 
         // Ziel-Feld anhand der Bewegungsrichtung bestimmen
@@ -332,6 +343,26 @@ public class MovementServiceImpl implements MovementService {
         return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
     }
 
+    private FrontendEvent meepleIsStuck(Player player, Meeple meeple, Field currentField, Set<Field> rivalMeepleFields,
+            Set<Meeple> rivalMeeples, Lobby lobby) {
+
+        if (rivalMeepleFields.contains(currentField)) {
+
+            Meeple rivalMeeple = getRivalMeepleByField(currentField, rivalMeeples);
+
+            Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
+
+            return startDuel(meeple, rivalMeeple, player, rivalPlayer, currentField, lobby);
+        }
+
+        return new FrontendMoveWithLossEvent(
+                player.getId(),
+                meeple.getId(),
+                currentField.getId(),
+                player.getRemainingMoves(),
+                player.hasMoved());
+    }
+
     /**
      * Prüft, ob sich die Bewegungsrichtung geändert hat.
      *
@@ -442,20 +473,6 @@ public class MovementServiceImpl implements MovementService {
                     targetField.getId(),
                     player.getRemainingMoves(),
                     barrier.getId());
-        }
-        if (otherOwnMeepleFields.contains(currentField)) {
-            return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
-        }
-
-        endTurnWithMove(player, meeple, currentField);
-
-        if (rivalMeepleFields.contains(currentField)) {
-
-            Meeple rivalMeeple = getRivalMeepleByField(currentField, rivalMeeples);
-
-            Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
-
-            return startDuel(meeple, rivalMeeple, player, rivalPlayer, currentField, lobby);
         }
 
         return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
@@ -644,7 +661,13 @@ public class MovementServiceImpl implements MovementService {
             game.initPlayers(player.getId(), rivalPlayer.getId());
         } else if (miniGame instanceof MathGame game) {
             game.initPlayers(player.getId(), rivalPlayer.getId());
-        } 
+        }
+        if (miniGame instanceof QuizGame quiz) {
+            quiz.initPlayers(player.getId(), rivalPlayer.getId());
+        }
+        if (miniGame instanceof RockPaperScissorsGame game) {
+            game.initPlayers(player.getId(), rivalPlayer.getId());
+        }
 
         return new FrontendDuelEvent(
                 duel.getId(),

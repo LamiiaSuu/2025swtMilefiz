@@ -168,7 +168,7 @@ watch(
       _prevMeeplePositions.set(id, [pos[0], pos[1], pos[2]])
     }
   },
-  { deep: true },
+  { deep: true, flush:'post' },
 )
 
 watch(
@@ -197,7 +197,7 @@ watch(
       _prevMeepleRotations.set(id, rot)
     }
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true, flush: 'post' }
 )
 
 watchEffect(() => {
@@ -500,7 +500,10 @@ const handleMoveKeys = (e: KeyboardEvent) => {
 }
 
 let lastRotSent = 0
-const ROT_SEND_MS = 80
+const ROT_SEND_MS = 200
+
+let lastSentRotation = 0
+const MIN_ROT_DELTA = 0.1
 
 // Updated die Rotation vom Meeple
 const onRotateCharacter = (yRotation: number) => {
@@ -508,11 +511,15 @@ const onRotateCharacter = (yRotation: number) => {
   if (!id) return
   const ref = gameCharRefs[id]
   if (!ref || !ref.value) return
+
+  const rotDelta = Math.abs(yRotation - lastSentRotation)
+
   boardStore.updateMeepleRotation(id, yRotation)
   // in bestimmten Zeitabständen an alle clients senden
   const now = performance.now()
-  if (now - lastRotSent >= ROT_SEND_MS) {
+  if (now - lastRotSent >= ROT_SEND_MS && rotDelta >= MIN_ROT_DELTA) {
     lastRotSent = now
+    lastSentRotation = yRotation
     milefizStore.sendMeepleRotation(id, yRotation)
   }
 }
@@ -542,6 +549,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   globalThis.removeEventListener('keydown', handleKeydown)
+  
 })
 
 // Computed Property für Meeple → PlayerColor Mapping
@@ -610,66 +618,46 @@ const connectionSegments = computed(() => {
 })
 
 const mountains = [
-  // Norden (oben) - 12 Berge weit hinten bei z = -200 (Spielfeld-Rand)
-  { x: -180, y: -3, z: -200, variant: 'mountain_1', scale: 19, rotation: 180 },
-  { x: -150, y: -5, z: -200, variant: 'mountain_1', scale: 17, rotation: 165 },
-  { x: -120, y: -2, z: -200, variant: 'mountain_1', scale: 20, rotation: 175 },
-  { x: -90, y: -4, z: -200, variant: 'mountain_1', scale: 22, rotation: 190 },
-  { x: -60, y: -6, z: -200, variant: 'mountain_1', scale: 18, rotation: 170 },
-  { x: -30, y: -3, z: -200, variant: 'mountain_1', scale: 21, rotation: 185 },
-  { x: 0, y: 0, z: -200, variant: 'mountain_1', scale: 25, rotation: 180 },
-  { x: 30, y: -4, z: -200, variant: 'mountain_1', scale: 19, rotation: 175 },
-  { x: 60, y: -3, z: -200, variant: 'mountain_1', scale: 21, rotation: 195 },
-  { x: 90, y: -5, z: -200, variant: 'mountain_1', scale: 18, rotation: 185 },
-  { x: 120, y: -6, z: -200, variant: 'mountain_1', scale: 20, rotation: 170 },
-  { x: 150, y: -4, z: -200, variant: 'mountain_1', scale: 16, rotation: 180 },
-  { x: 180, y: -5, z: -200, variant: 'mountain_1', scale: 17, rotation: 175 },
+  // Norden (oben) - 7 Berge statt 13 (größere Abstände)
+  { x: -150, y: -3, z: -200, variant: 'mountain_1', scale: 21, rotation: 180 },
+  { x: -100, y: -4, z: -200, variant: 'mountain_1', scale: 23, rotation: 175 },
+  { x: -50, y: -5, z: -200, variant: 'mountain_1', scale: 20, rotation: 185 },
+  { x: 0, y: 0, z: -200, variant: 'mountain_1', scale: 26, rotation: 180 },
+  { x: 50, y: -4, z: -200, variant: 'mountain_1', scale: 22, rotation: 190 },
+  { x: 100, y: -5, z: -200, variant: 'mountain_1', scale: 21, rotation: 175 },
+  { x: 150, y: -3, z: -200, variant: 'mountain_1', scale: 19, rotation: 185 },
 
-  // Westen (links) - 11 Berge weit links bei x = -200 (Spielfeld-Rand)
-  { x: -200, y: -5, z: -180, variant: 'mountain_1', scale: 19, rotation: 90 },
-  { x: -200, y: -3, z: -150, variant: 'mountain_1', scale: 20, rotation: 85 },
-  { x: -200, y: -6, z: -120, variant: 'mountain_1', scale: 18, rotation: 95 },
-  { x: -200, y: -2, z: -90, variant: 'mountain_1', scale: 21, rotation: 80 },
-  { x: -200, y: -5, z: -60, variant: 'mountain_1', scale: 19, rotation: 100 },
-  { x: -200, y: 0, z: -30, variant: 'mountain_1', scale: 23, rotation: 90 },
-  { x: -200, y: -4, z: 0, variant: 'mountain_1', scale: 20, rotation: 85 },
-  { x: -200, y: -3, z: 30, variant: 'mountain_1', scale: 19, rotation: 95 },
-  { x: -200, y: -6, z: 60, variant: 'mountain_1', scale: 21, rotation: 90 },
-  { x: -200, y: -4, z: 90, variant: 'mountain_1', scale: 22, rotation: 95 },
-  { x: -200, y: -5, z: 120, variant: 'mountain_1', scale: 18, rotation: 85 },
-  { x: -200, y: -3, z: 150, variant: 'mountain_1', scale: 19, rotation: 90 },
-  { x: -200, y: -6, z: 180, variant: 'mountain_1', scale: 20, rotation: 95 },
+  // Westen (links) - 6 Berge statt 13
+  { x: -200, y: -4, z: -150, variant: 'mountain_1', scale: 21, rotation: 90 },
+  { x: -200, y: -2, z: -90, variant: 'mountain_1', scale: 23, rotation: 85 },
+  { x: -200, y: 0, z: -30, variant: 'mountain_1', scale: 24, rotation: 90 },
+  { x: -200, y: -3, z: 30, variant: 'mountain_1', scale: 21, rotation: 95 },
+  { x: -200, y: -5, z: 90, variant: 'mountain_1', scale: 23, rotation: 90 },
+  { x: -200, y: -4, z: 150, variant: 'mountain_1', scale: 20, rotation: 85 },
 
-  // Osten (rechts) - 11 Berge weit rechts bei x = 200 (Spielfeld-Rand)
-  { x: 200, y: -4, z: -180, variant: 'mountain_1', scale: 20, rotation: -90 },
-  { x: 200, y: -3, z: -150, variant: 'mountain_1', scale: 21, rotation: -85 },
-  { x: 200, y: -6, z: -120, variant: 'mountain_1', scale: 18, rotation: -95 },
-  { x: 200, y: -2, z: -90, variant: 'mountain_1', scale: 22, rotation: -80 },
-  { x: 200, y: -5, z: -60, variant: 'mountain_1', scale: 19, rotation: -100 },
-  { x: 200, y: 0, z: -30, variant: 'mountain_1', scale: 22, rotation: -90 },
-  { x: 200, y: -4, z: 0, variant: 'mountain_1', scale: 21, rotation: -85 },
-  { x: 200, y: -3, z: 30, variant: 'mountain_1', scale: 20, rotation: -95 },
-  { x: 200, y: -6, z: 60, variant: 'mountain_1', scale: 24, rotation: -90 },
-  { x: 200, y: -5, z: 90, variant: 'mountain_1', scale: 23, rotation: -85 },
-  { x: 200, y: -4, z: 120, variant: 'mountain_1', scale: 19, rotation: -90 },
-  { x: 200, y: -3, z: 150, variant: 'mountain_1', scale: 18, rotation: -95 },
-  { x: 200, y: -6, z: 180, variant: 'mountain_1', scale: 20, rotation: -90 },
+  // Osten (rechts) - 6 Berge statt 13
+  { x: 200, y: -3, z: -150, variant: 'mountain_1', scale: 22, rotation: -90 },
+  { x: 200, y: -2, z: -90, variant: 'mountain_1', scale: 23, rotation: -85 },
+  { x: 200, y: 0, z: -30, variant: 'mountain_1', scale: 23, rotation: -90 },
+  { x: 200, y: -4, z: 30, variant: 'mountain_1', scale: 21, rotation: -95 },
+  { x: 200, y: -5, z: 90, variant: 'mountain_1', scale: 24, rotation: -90 },
+  { x: 200, y: -3, z: 150, variant: 'mountain_1', scale: 20, rotation: -85 },
 
-  // Süden (unten) - 12 Berge weit vorne bei z = 200 (Spielfeld-Rand)
-  { x: -180, y: -5, z: 200, variant: 'mountain_1', scale: 19, rotation: 0 },
-  { x: -150, y: -2, z: 200, variant: 'mountain_1', scale: 21, rotation: 15 },
-  { x: -120, y: -5, z: 200, variant: 'mountain_1', scale: 18, rotation: -10 },
-  { x: -90, y: -3, z: 200, variant: 'mountain_1', scale: 21, rotation: 5 },
-  { x: -60, y: -6, z: 200, variant: 'mountain_1', scale: 19, rotation: -15 },
-  { x: -30, y: -4, z: 200, variant: 'mountain_1', scale: 22, rotation: 10 },
-  { x: 0, y: 0, z: 200, variant: 'mountain_1', scale: 24, rotation: 0 },
-  { x: 30, y: -6, z: 200, variant: 'mountain_1', scale: 18, rotation: 10 },
-  { x: 60, y: -2, z: 200, variant: 'mountain_1', scale: 22, rotation: -5 },
-  { x: 90, y: -4, z: 200, variant: 'mountain_1', scale: 21, rotation: 20 },
-  { x: 120, y: -5, z: 200, variant: 'mountain_1', scale: 20, rotation: -12 },
-  { x: 150, y: -3, z: 200, variant: 'mountain_1', scale: 19, rotation: 8 },
-  { x: 180, y: -6, z: 200, variant: 'mountain_1', scale: 17, rotation: 5 },
+  // Süden (unten) - 7 Berge statt 13
+  { x: -150, y: -4, z: 200, variant: 'mountain_1', scale: 20, rotation: 5 },
+  { x: -100, y: -3, z: 200, variant: 'mountain_1', scale: 22, rotation: -10 },
+  { x: -50, y: -5, z: 200, variant: 'mountain_1', scale: 21, rotation: 10 },
+  { x: 0, y: 0, z: 200, variant: 'mountain_1', scale: 25, rotation: 0 },
+  { x: 50, y: -4, z: 200, variant: 'mountain_1', scale: 23, rotation: -5 },
+  { x: 100, y: -5, z: 200, variant: 'mountain_1', scale: 21, rotation: 15 },
+  { x: 150, y: -3, z: 200, variant: 'mountain_1', scale: 19, rotation: -10 },
+  // Ecken - 4 zusätzliche Berge
+  { x: -180, y: -3, z: -180, variant: 'mountain_1', scale: 22, rotation: 135 }, // Nordwest
+  { x: 180, y: -4, z: -180, variant: 'mountain_1', scale: 23, rotation: -135 }, // Nordost
+  { x: -180, y: -3, z: 180, variant: 'mountain_1', scale: 21, rotation: 45 },   // Südwest
+  { x: 180, y: -4, z: 180, variant: 'mountain_1', scale: 22, rotation: -45 },   // Südost
 ]
+
 
 /**
  * Prüft, ob das aktuelle Board das Standard-Board ist (via UUID)
@@ -689,7 +677,7 @@ const additionalAssets = computed(() => {
 
 <template>
   <!-- 3D-Canvas Element das den ganzen Bildschirm ausfüllt-->
-  <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB">
+  <TresCanvas window-size style="width: 100vw; height: 100vh" clear-color="#87CEEB" :alpha="false" :antialias="false">
     <!-- Kameraposition und Kamerasteuerung via OrbitControls -->
     <TresPerspectiveCamera v-if="!useFirstPerson" ref="orbitCam" :position="[0, 8, 15]" :fov="60" />
     <OrbitControls v-if="!useFirstPerson" />
@@ -712,7 +700,7 @@ const additionalAssets = computed(() => {
     <TresHemisphereLight :intensity="0.75" skyColor="#ffffff" groundColor="#888888" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
-    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" />
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" :cast-shadow="false"/>
 
     <!-- Berge am Horizont hinzugefügt-->
     <AssetSprite v-for="(mountain, index) in mountains" :key="`mountain-${index}`" type="mountains"

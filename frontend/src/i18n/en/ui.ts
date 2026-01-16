@@ -62,10 +62,11 @@ export const UI_EN: Record<UIKey, string> = {
     MINIGAME_SLOT_JACKPOT: 'MINIGAME_SLOT_JACKPOT',
     MINIGAME_BALLOON_TITLE: 'Pop the Balloon!',
     MINIGAME_BALLOON_INSTRUCTION: 'Get ready! Click the button as fast as you can!',
-    MINIGAME_BALLOON_CLICK: 'Click!',    
+    MINIGAME_BALLOON_CLICK: 'Click!',
     MINIGAME_MATH_TITLE: 'Mental Maths',
     MINIGAME_MATH_YOURSELF: 'you',
     MINIGAME_MATH_CHECK: 'check',
+    MINIGANE_QUIZ_TITLE: 'Who Wants To Be A Millionaire',
     CONFIRM: 'Confirm',
     MINIMAP_BARRIER_MOVE: 'Relocate barrier',
     MINIMAP_OWN_MEEPLE: 'Own Meeple',
@@ -94,5 +95,8 @@ export const UI_EN: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Next meeple',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Previous meeple',
     CONTROLS_TUTORIAL_MENU: 'Open menu',
+    CONTROLS_TUTORIAL_MINIMAP_ZOOM: 'Zoom minimap',
+    MINIGAME_RPS_TITLE: "Rock • Paper • Scissors",
+    RPS_DRAW: "Draw"
 }
 

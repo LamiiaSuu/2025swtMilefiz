@@ -20,8 +20,10 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
+import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
+import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
@@ -30,6 +32,8 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEv
 import de.hs_rm.de.milefiz.messaging.events.FrontendMathGameUpdateEvent;
 import jakarta.annotation.PreDestroy;
 
+import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
 
 @Service
 public class DuelServiceImpl implements DuelService {
@@ -72,18 +76,27 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.balloongame.timeout}")
     private int balloonGameTimeout;
 
+    @Value("${minigame.quiz.timeout}")
+    private int quizGameTimeout;
+
     @Value("${minigame.einarmigerBanditGame.timeout}")
     private int einarmigerBanditGameTimeout;
 
     @Value("${minigame.mathgame.timeout}")
     private int mathGameTimeout;
 
-    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging, DuelResolutionService duelResolutionService) {
+    @Value("${minigame.rock.paper.scissors.timeout}")
+    private int rockPaperScissorsGameTimeout;
+
+    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
+            DuelResolutionService duelResolutionService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
         gameFactories.add(() -> new MathGame(mathGameTimeout));
 
+        gameFactories.add(() -> new QuizGame(quizGameTimeout));
+        gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
         this.duelResolutionService = duelResolutionService;
@@ -99,6 +112,7 @@ public class DuelServiceImpl implements DuelService {
         }
 
         int index = random.nextInt(gameFactories.size());
+
         return gameFactories.get(index).get(); // immer neue Instanz
     }
 
@@ -138,10 +152,9 @@ public class DuelServiceImpl implements DuelService {
         game.setOnFinished(() -> handleMiniGameFinished(duel));
 
         miniGameScheduler.schedule(
-            game::forceMissingActions,
-            game.getTimeOut(),
-            TimeUnit.SECONDS
-        );
+                game::forceMissingActions,
+                game.getTimeOut(),
+                TimeUnit.SECONDS);
 
         return game;
 
@@ -243,7 +256,6 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, balloon);
-
         }
 
         else if (game instanceof EinarmigerBanditGame einarmigerBandit) {
@@ -280,6 +292,26 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, mathGame);
+        }
+
+        if (game instanceof QuizGame quiz) {
+            var update = new FrontendQuizGameUpdateEvent(duel.getId(), quiz.getPlayer1(), quiz.getPlayer2(),
+                    quiz.getQuestionDTO(), quiz.getWinner(),
+                    quiz.isFinished());
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, quiz);
+        } else if (game instanceof RockPaperScissorsGame rockPaperScissorsGame) {
+            var update = new FrontendRockPaperScissorsGameUpdateEvent(
+                    duel.getId(),
+                    rockPaperScissorsGame.getP1(),
+                    rockPaperScissorsGame.getP2(),
+                    rockPaperScissorsGame.getMoveP1(),
+                    rockPaperScissorsGame.getMoveP2(),
+                    rockPaperScissorsGame.getWinner(),
+                    rockPaperScissorsGame.isFinished());
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, rockPaperScissorsGame);
+
         }
         duels.remove(duel.getId());
     }

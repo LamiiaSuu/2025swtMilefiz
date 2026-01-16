@@ -67,6 +67,7 @@ export const UI_DE: Record<UIKey, string> = {
     MINIGAME_MATH_TITLE: 'Kopfrechnen',
     MINIGAME_MATH_YOURSELF: 'Du',
     MINIGAME_MATH_CHECK: 'Überprüfen',
+    MINIGANE_QUIZ_TITLE: 'Wer wird Millionär?',
     WINNING_TAB: 'Gewinnen',
     WINNING_TUTORIAL: 'Gewonnen hast du, sobald du als erste*r eine deiner Spielfiguren mit der genau passenden Würfelzahl ins Ziel bringst.',
     JUMPING_TAB: 'Hüpfen',
@@ -90,8 +91,11 @@ export const UI_DE: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Nächste Spielfigur',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Vorherige Spielfigur',
     CONTROLS_TUTORIAL_MENU: 'Menü öffnen',
+    CONTROLS_TUTORIAL_MINIMAP_ZOOM: 'Minimap zoomen',
     MINIMAP_BARRIER_MOVE: 'Sperre umplatzieren',
     MINIMAP_OWN_MEEPLE: 'Eigenes Meeple',
     MINIMAP_OCCUPIED: 'Besetzt',
-    MINIMAP_AVAILABLE: 'Frei'
+    MINIMAP_AVAILABLE: 'Frei',
+    MINIGAME_RPS_TITLE: "Schere • Stein • Papier",
+    RPS_DRAW: "Unentschieden"
 }
