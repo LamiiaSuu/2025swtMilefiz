@@ -49,25 +49,39 @@ const dummy = new Object3D()
 /**
  * Prüft ob ein Element mit einem Board-Asset kollidiert
  */
+const BLOCK_RADIUS = 2
+const BLOCK_RADIUS_SQ = BLOCK_RADIUS * BLOCK_RADIUS
+
 const isCollidingWithAsset = (element: Element): boolean => {
   if (boardId !== STANDARD_BOARD_ID || !standardBoardAssets) return false
 
-  const treePos = new Vector3(...element.position)
-  const blockRadius = 2
+  const [tx, ty, tz] = element.position
 
-  return standardBoardAssets.some(asset => {
-    const assetPos = new Vector3(...asset.position)
-    const distance = treePos.distanceTo(assetPos)
-    return distance < blockRadius
-  })
+  // FIX: Verwende direkt standardBoardAssets statt BoardAsset.standardBoardAssets
+  for (let i = 0; i < standardBoardAssets.length; i++) {
+    const asset = standardBoardAssets[i]
+    if (!asset) continue
+    const [ax, ay, az] = asset.position
+
+    const dx = tx - ax
+    const dy = ty - ay
+    const dz = tz - az
+
+    if (dx * dx + dy * dy + dz * dz < BLOCK_RADIUS_SQ) {
+      return true
+    }
+  }
+
+  return false
 }
+
 
 /**
  * Gefilterte Elemente ohne Kollisionen
  */
 const filteredElements = computed(() => {
   if (!elements) return []
-  return elements.filter(element => !isCollidingWithAsset(element))
+  return elements.filter(e => !isCollidingWithAsset(e))
 })
 
 /**
@@ -114,37 +128,55 @@ watchEffect(() => {
   }
 })
 
-
-watch(imRefs, (imRefs: any) => {
-  imRefs.value.forEach((imRef: any) => imRef.instanceMatrix.setUsage(DynamicDrawUsage))
-});
-
-watchEffect(() => {
-  if (parts.value.length > 0) {
-    parts.value.forEach((part, i) => {
-      const ref = imRefs.value[i]; //zugehörige Referenz des InstancedMesh
-      if (ref) {
-        filteredElements.value?.filter((e) => e.type === part.type).forEach((e: Element, i: number) => {
-          // setze für alle gefundenen Elemente position, Sklalierung, Quaternion in der Matrix des Mesh
-          dummy.position.set(...e.position)
-          dummy.quaternion.copy(part.quaternion)
-          const scale = (models[part.type].scale as number); // scaling mit varianz
-          dummy.scale.set(scale, scale, scale)
-          dummy.rotateOnWorldAxis(new Vector3(0, 1, 0), Math.floor(Math.random() * 361))
-          dummy.updateMatrix()
-          ref.setMatrixAt(i, dummy.matrix)
-        })
-        ref.instanceMatrix.needsUpdate = true
-      }
-    })
-  }
-})
-
 const getRef = (el: any, index: number) => {
-  if (el) {
-    imRefs.value[index] = el;
-  }
+  if (!el) return
+  imRefs.value[index] = el
+  el.instanceMatrix.setUsage(DynamicDrawUsage)
 }
+
+
+const Y_AXIS = new Vector3(0, 1, 0)
+
+function hash01(x: number, z: number) {
+  const s = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453
+  return s - Math.floor(s) // Bereich 0..1
+}
+
+function rotationFromPosition(pos: [number, number, number]) {
+  return hash01(pos[0], pos[2]) * Math.PI * 2
+}
+
+watch(
+  [parts, filteredElements],
+  () => {
+    parts.value.forEach((part, partIndex) => {
+      const ref = imRefs.value[partIndex]
+      if (!ref) return
+
+      const list = filteredElements.value.filter(e => e.type === part.type)
+
+      ref.count = list.length
+
+      list.forEach((e, i) => {
+        dummy.position.set(...e.position)
+        dummy.quaternion.copy(part.quaternion)
+
+        const scale = models[part.type].scale
+        dummy.scale.set(scale, scale, scale)
+
+        const angle = rotationFromPosition(e.position)
+        dummy.rotateOnWorldAxis(Y_AXIS, angle)
+
+        dummy.updateMatrix()
+        ref.setMatrixAt(i, dummy.matrix)
+      })
+
+      ref.instanceMatrix.needsUpdate = true
+    })
+  },
+  { deep: true, flush: 'post' }
+)
+
 
 </script>
 <template>
