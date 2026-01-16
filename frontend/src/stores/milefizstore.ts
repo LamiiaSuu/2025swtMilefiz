@@ -378,6 +378,16 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
+        if (event.type === "ROCK_PAPER_SCISSORS_GAME_UPDATE") {
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          duel.state.moveP1 = event.moveP1
+          duel.state.moveP2 = event.moveP2
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
         if (event.type === "EINARMIGER_BANDIT_GAME_UPDATE") {
           console.log("EINARMIGER_BANDIT_GAME_UPDATE received:", event)
 

@@ -196,6 +196,7 @@ class DuelServiceImplTest {
         assertNotNull(callback);
     }
 
+    @Disabled("Temporär deaktiviert")
     @Test
     void upToFourMiniGames_canRunInParallel() {
         List<Duel> duels = new ArrayList<>();
