@@ -1,6 +1,10 @@
 package de.hs_rm.de.milefiz.game.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,4 +90,54 @@ public class PlantingServiceTest {
             }
         }
     }
+
+    @Test
+    void plantTrees_densityZero_createsNoTrees() {
+        boardDTO = plantingService.plantTrees(boardDTO, 0f);
+
+        assertNotNull(boardDTO.getTrees());
+        assertTrue(boardDTO.getTrees().isEmpty(),
+            "Bei Density 0 dürfen keine Bäume gepflanzt werden");
+    }
+
+    @Test
+    void plantTrees_densityPositive_createsTrees() {
+        boardDTO = plantingService.plantTrees(boardDTO, 0.2f);
+
+        assertNotNull(boardDTO.getTrees());
+        assertFalse(boardDTO.getTrees().isEmpty(),
+            "Bei positiver Density sollten Bäume gepflanzt werden");
+    }
+
+    @Test
+    void plantedTrees_areWithinExtendedBoardBounds() {
+        boardDTO = plantingService.plantTrees(boardDTO, 0.2f);
+
+        int minX = Integer.MAX_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int maxY = Integer.MIN_VALUE;
+
+        for (FieldDTO field : boardDTO.getFields()) {
+            minX = Math.min(minX, field.getPosition().getX());
+            minY = Math.min(minY, field.getPosition().getY());
+            maxX = Math.max(maxX, field.getPosition().getX());
+            maxY = Math.max(maxY, field.getPosition().getY());
+        }
+
+        for (var tree : boardDTO.getTrees()) {
+            PositionFloat pos = tree.getTreePosition();
+
+            assertTrue(
+                pos.getX() >= minX - 100 && pos.getX() <= maxX + 100,
+                "Baum-X liegt außerhalb des erwarteten Bereichs"
+            );
+            assertTrue(
+                pos.getY() >= minY - 100 && pos.getY() <= maxY + 100,
+                "Baum-Y liegt außerhalb des erwarteten Bereichs"
+            );
+        }
+    }
+
+
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -54,13 +55,13 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent;
  *
  * Unterstützte Spiellogiken umfassen unter anderem:
  * 
- * -> Bewegung von Meeples in kardinalen Richtungen
- * -> Verwaltung verbleibender Spielzüge pro Spieler
- * -> Erkennung ungültiger Züge (z.B. Richtungswechsel, blockierte Felder)
- * -> Interaktion mit Barrieren inklusive Verlust verbleibender Züge
- * -> Auslösen von Duellen zwischen gegnerischen Meeplen
- * -> Erkennen von Sackgassen durch Barrieren oder eigene Meeple
- * -> Erreichen des Zielfelds und Auslösen eines Spielsiegs
+ * +Bewegung von Meeples in kardinalen Richtungen
+ * +Verwaltung verbleibender Spielzüge pro Spieler
+ * +Erkennung ungültiger Züge (z.B. Richtungswechsel, blockierte Felder)
+ * +Interaktion mit Barrieren inklusive Verlust verbleibender Züge
+ * +Auslösen von Duellen zwischen gegnerischen Meeplen
+ * +Erkennen von Sackgassen durch Barrieren oder eigene Meeple
+ * +Erreichen des Zielfelds und Auslösen eines Spielsiegs
  * 
  * Die Klasse ist als Spring {@link Service} annotiert und wird über
  * Dependency Injection mit einem {@link LobbyManager} versorgt.
@@ -88,19 +89,20 @@ public class MovementServiceImpl implements MovementService {
      * aktuellen Spielsituation, ob der Zug erlaubt ist. Dabei werden u.a. folgende
      * Regeln berücksichtigt:
      * 
-     * -> Der Spieler muss noch verbleibende Bewegungen besitzen.
-     * -> Das Zielfeld muss in der angegebenen Richtung existieren.
-     * -> Ein Richtungswechsel (Zurückgehen auf das zuletzt betretene Feld)
+     * +Der Spieler muss noch verbleibende Bewegungen besitzen.
+     * +Das Zielfeld muss in der angegebenen Richtung existieren.
+     * +Ein Richtungswechsel (Zurückgehen auf das zuletzt betretene Feld)
      * ist nicht erlaubt.
-     * -> Startfelder dürfen nach dem Verlassen nicht erneut betreten werden.
-     * -> Zielfelder dürfen nur beim exakt letzten Schritt betreten werden.
-     * -> Barrieren können Bewegungen blockieren oder – bei einem exakten Treffer
+     * +Startfelder dürfen nach dem Verlassen nicht erneut betreten werden.
+     * +Zielfelder dürfen nur beim exakt letzten Schritt betreten werden.
+     * +Barrieren können Bewegungen blockieren oder – bei einem exakten Treffer
      * im letzten Schritt – eine Barrierenverschiebung auslösen.
-     * -> Das Betreten eines Feldes mit eigenen Meeples ist im letzten Schritt
+     * +Das Betreten eines Feldes mit eigenen Meeples ist im letzten Schritt
      * nicht erlaubt.
-     * -> Trifft ein Meeple im letzten Schritt auf einen gegnerischen Meeple,
+     * +Trifft ein Meeple im letzten Schritt auf einen gegnerischen Meeple,
      * wird ein Duell ausgelöst.
-     * -> Bewegungen in Sackgassen (durch Barrieren oder eigene Meeples)
+     * +Bewegungen in Sackgassen (durch Barrieren oder eigene Meeples oder sich
+     * duellierende Meeple)
      * können zum Verlust verbleibender Züge führen.
      *
      * Abhängig vom Ergebnis der Prüfungen wird entweder ein erfolgreiches
@@ -120,9 +122,9 @@ public class MovementServiceImpl implements MovementService {
     @Override
     public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Player player) {
 
-        logger.info("Moving meeple {} from player '{}' in lobby {} in direction {} (sessionId={})",
+        logger.info("Moving meeple {} from player '{}' in lobby {} in direction {})",
                 moveCmd.meepleId(),
-                player != null ? player.getName() : "anonymous",
+                player.getName(),
                 lobbyId,
                 moveCmd.direction());
 
@@ -141,31 +143,42 @@ public class MovementServiceImpl implements MovementService {
         Set<Meeple> rivalMeeples = getRivalMeeples(lobby, player);
         Set<Field> rivalMeepleFields = getRivalMeepleFields(lobby, player);
         Set<Field> barrierFields = getBarrierFields(board);
-        Set<Field> ownMeepleFields = getOwnMeepleFields(player);
-        ownMeepleFields.remove(currentField);
+        Set<Field> otherOwnMeepleFields = getOtherOwnMeepleFields(player);
+
+        // Meeple ist stuck, Zug wird zurückgesetzt, sodass der Spieler der Meeple
+        // wechseln kann
+        if (!existsLegalStopWithinRemainingMoves(currentField, lastField, player.getRemainingMoves(),
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+
+            endTurnWithMove(player, meeple, currentField);
+            return meepleIsStuck(player, meeple, currentField, rivalMeepleFields, rivalMeeples, lobby);
+        }
 
         // Wenn keine weiteren Schritte verfügbar sind, kann man man sich nicht bewegen
         if (!player.canMove()) {
             logger.info("No more moves left");
-            if (player.hasMoved())
-                player.setMoved(false);
+            player.setMoved(false);
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_MOVES_LEFT");
         }
 
         // Spieler hat schon gemoved in diesem Zug und versucht einen anderen Meeple zu
         // bewegen
-        if (player.hasMoved() && player.getActiveMeeple() != null && !player.getActiveMeeple().equals(meeple)) {
+        if (changedMeeple(player, meeple)) {
             logger.info("Attempt to switch Meeple during move failed.");
             return new FrontendCheatedEvent(player.getId(), "Attempt to switch Meeple during move failed.");
         }
 
+        // Meeple ist stuck, Zug wird zurückgesetzt, sodass der Spieler der Meeple
+        // wechseln kann
+        if (!existsLegalStopWithinRemainingMoves(currentField, lastField, player.getRemainingMoves(),
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+
+            endTurnWithMove(player, meeple, currentField);
+            return meepleIsStuck(player, meeple, currentField, rivalMeepleFields, rivalMeeples, lobby);
+        }
+
         // Ziel-Feld anhand der Bewegungsrichtung bestimmen
-        Field nextField = switch (direction) {
-            case NORTH -> currentField.getNorth();
-            case EAST -> currentField.getEast();
-            case SOUTH -> currentField.getSouth();
-            case WEST -> currentField.getWest();
-        };
+        Field nextField = getNextFieldByDirection(currentField, direction);
 
         // FELD EXISTIERT NICHT
         // Fehler, wenn in der angegeben Richtung kein Feld ist
@@ -177,7 +190,7 @@ public class MovementServiceImpl implements MovementService {
         // RICHTUNGSWECHSEL
         // Fehler bei Versuch das Feld zu betreten auf dem man zuletzt war
         // (Richtungswechsel ist verboten)
-        if (lastField != null && nextField.equals(lastField)) {
+        if (changedDirection(lastField, nextField)) {
             logger.info("Cant change direction!");
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_CANT_CHANGE_DIRECTION");
         }
@@ -193,43 +206,22 @@ public class MovementServiceImpl implements MovementService {
         // ZIEL
         // Man kann das Ziel nur betreten, wenn man exakt darauf endet
         if (nextField.getType().isEnd()) {
-            // Wenn man darauf endet, hat man gewonnen
-            if (player.getRemainingMoves() == LAST_MOVE) {
-                player.useMove();
-                logger.info("player {} has won", player.getPlayerName());
-                return new FrontendPlayerHasWonEvent(player.getPlayerName(), player.getColor(), meeple.getId(),
-                        nextField.getId());
-            }
-            logger.info("Cant enter End with remaining moves");
-            return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
+            return tryMovingOnEnd(meeple, nextField, player);
         }
 
         // BARRIERE
         // Wenn man in eine Barriere läuft, verliert man seine restlichen Schritte,
         // außer man landet genau darauf
-        for (Meeple tempBarrier : board.getBarriers()) {
-            if (tempBarrier.getCurrentField() != null && tempBarrier.getCurrentField().equals(nextField)) {
-                // wenn man genau drauf landet, darf man sie verschieben
-                if (player.getRemainingMoves() == LAST_MOVE) {
-                    meeple.setCurrentField(nextField);
-                    meeple.clearLastField();
-                    player.useMove();
-                    logger.info("Direct hit on barrier {} with meeple {}", tempBarrier.getId(), meeple.getId());
-                    return new FrontendTriggerBarrierMoveEvent(
-                            player.getId(),
-                            meeple.getId(),
-                            nextField.getId(),
-                            player.getRemainingMoves(),
-                            tempBarrier.getId());
-                }
-                return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
-            }
+        if (barrierFields.contains(nextField)) {
+            Meeple barrier = getBarrierByField(board, nextField);
+            return tryMovingOnBarrier(meeple, barrier, currentField, nextField, player, otherOwnMeepleFields,
+                    rivalMeepleFields, rivalMeeples, lobby);
         }
 
         // FELD DURCH EIGENEN MEEPLE BLOCKIERT
         // Ueberpruefen, ob das Zielfeld beim letzten Move durch einen eigenen Meeple
         // blockiert ist
-        if (player.getRemainingMoves() == LAST_MOVE && ownMeepleFields.contains(nextField)) {
+        if (turnWouldEndOnOwnMeeple(player, nextField, otherOwnMeepleFields)) {
             logger.info("Attempt to occupy a field with multiple meeple failed");
             return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE");
         }
@@ -240,124 +232,26 @@ public class MovementServiceImpl implements MovementService {
         // in eine Sackgasse aus eigenen Meeplen, Barrieren oder sich duellierenden
         // gegnerischen Meeplen bewegt
         if (player.getRemainingMoves() > LAST_MOVE) {
+            Optional<FrontendEvent> frontendEvent = checkPath(meeple, currentField, nextField, player,
+                    otherOwnMeepleFields,
+                    barrierFields, rivalMeeples,
+                    rivalMeepleFields, lobby);
 
-            if (!existsLegalStopWithinRemainingMoves(nextField, currentField, player.getRemainingMoves() - 1,
-                    ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
-
-                if (ownMeepleFields.contains(nextField)
-                        || isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields)) {
-                    logger.info("No valid Fields to End this Meeples run in this Direction");
-                    return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_VALID_FIELDS");
-                }
-
-                endTurnWithMove(player, meeple, nextField);
-                logger.info("No further possible Fields within reach - turn ends");
-                if (rivalMeepleFields.contains(nextField)) {
-
-                    Meeple rivalMeeple = getRivalMeepleByField(nextField, rivalMeeples);
-
-                    Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
-                    if (rivalPlayer == null) {
-                        return new FrontendMoveWithLossEvent(
-                                player.getId(),
-                                meeple.getId(),
-                                nextField.getId(),
-                                player.getRemainingMoves(),
-                                player.hasMoved());
-                    }
-                    var duel = duelService.createDuel(
-                            player.getId(),
-                            rivalPlayer.getId(),
-                            meeple.getId(),
-                            rivalMeeple.getId());
-
-                    var miniGame = duelService.assignRandomGameToDuel(duel.getId());
-
-                    if (miniGame instanceof DiceGame dice) {
-                        dice.initPlayers(player.getId(), rivalPlayer.getId());
-                    } else if (miniGame instanceof EinarmigerBanditGame game) {
-                        game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
-                    }
-                    if (miniGame instanceof BalloonGame game) {
-                        game.initPlayers(player.getId(), rivalPlayer.getId());
-                    }
-
-                    return new FrontendDuelEvent(
-                            duel.getId(),
-                            player.getId(),
-                            rivalPlayer.getId(),
-                            meeple.getId(),
-                            rivalMeeple.getId(),
-                            nextField.getId(),
-                            player.getRemainingMoves(),
-                            miniGame);
-                }
-                return new FrontendMoveWithLossEvent(
-                        player.getId(),
-                        meeple.getId(),
-                        nextField.getId(),
-                        player.getRemainingMoves(),
-                        player.hasMoved());
+            if (frontendEvent.isPresent()) {
+                return frontendEvent.get();
             }
         }
 
         // DUELL
-        // Sonderfaelle wenn es sich um den letzten Zug handelt
-        if (player.getRemainingMoves() == LAST_MOVE) {
+        // Wenn man mit dem letzten Schritt ein Feld mit einem gegnerischem meeple
+        // betritt wird ein duell getriggert, wenn dieser sich nicht gerade in einem
+        // duell befindet
+        if (turnEndsOnRivalMeeple(player, rivalMeepleFields, nextField)) {
 
-            for (Player rivalPlayer : lobby.getPlayers()) {
+            Optional<FrontendEvent> frontendEvent = tryInitiatingDuel(meeple, nextField, player, rivalMeeples, lobby);
 
-                if (player.equals(rivalPlayer))
-                    continue;
-
-                for (Meeple rivalMeeple : rivalPlayer.getMeeples()) {
-
-                    if (rivalMeeple.getCurrentField().equals(nextField)) {
-
-                        if (duelService.isMeepleInDuel(rivalMeeple.getId())) {
-                            logger.info("Move blocked — rival meeple {} is already in a duel", rivalMeeple.getId());
-
-                            return new FrontendMoveRejectedEvent(
-                                    player.getId(),
-                                    "MEEPLE_IN_DUEL");
-                        }
-
-                        meeple.setCurrentField(nextField);
-                        meeple.clearLastField();
-                        player.setActiveMeeple(meeple);
-                        player.useMove();
-
-                        logger.info("Initiating duel between meeple {} and meeple {}",
-                                meeple.getId(), rivalMeeple.getId());
-
-                        var duel = duelService.createDuel(
-                                player.getId(),
-                                rivalPlayer.getId(),
-                                meeple.getId(),
-                                rivalMeeple.getId());
-
-                        var miniGame = duelService.assignRandomGameToDuel(duel.getId());
-
-                        if (miniGame instanceof DiceGame dice) {
-                            dice.initPlayers(player.getId(), rivalPlayer.getId());
-                        } else if (miniGame instanceof EinarmigerBanditGame game) {
-                            game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
-                        }
-                        if (miniGame instanceof BalloonGame game) {
-                            game.initPlayers(player.getId(), rivalPlayer.getId());
-                        }
-
-                        return new FrontendDuelEvent(
-                                duel.getId(),
-                                player.getId(),
-                                rivalPlayer.getId(),
-                                meeple.getId(),
-                                rivalMeeple.getId(),
-                                nextField.getId(),
-                                player.getRemainingMoves(),
-                                miniGame);
-                    }
-                }
+            if (frontendEvent.isPresent()) {
+                return frontendEvent.get();
             }
         }
 
@@ -366,9 +260,7 @@ public class MovementServiceImpl implements MovementService {
         meeple.setCurrentField(nextField);
 
         // der erste Zug nach dem Würfeln und mehr als 1 move verfügbar
-        if (player.getRemainingMoves() > 1 && !player.hasMoved())
-
-        {
+        if (isTurnBegin(player)) {
             player.setActiveMeeple(meeple);
         }
 
@@ -432,7 +324,7 @@ public class MovementServiceImpl implements MovementService {
         } catch (LobbyNotFoundException e) {
             logger.error("Lobby not found", e);
         }
-        if(lobby == null){
+        if (lobby == null) {
             return new FrontendMoveBarrierRejectedEvent("MOVE_BARRIER_NO_LOBBY");
         }
         Board board = lobby.getBoard();
@@ -455,6 +347,349 @@ public class MovementServiceImpl implements MovementService {
         barrier.setCurrentField(targetField);
 
         return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
+    }
+
+    private FrontendEvent meepleIsStuck(Player player, Meeple meeple, Field currentField, Set<Field> rivalMeepleFields,
+            Set<Meeple> rivalMeeples, Lobby lobby) {
+
+        if (rivalMeepleFields.contains(currentField)) {
+
+            Meeple rivalMeeple = getRivalMeepleByField(currentField, rivalMeeples);
+
+            Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
+
+            return startDuel(meeple, rivalMeeple, player, rivalPlayer, currentField, lobby);
+        }
+
+        return new FrontendMoveWithLossEvent(
+                player.getId(),
+                meeple.getId(),
+                currentField.getId(),
+                player.getRemainingMoves(),
+                player.hasMoved());
+    }
+
+    /**
+     * Prüft, ob sich die Bewegungsrichtung geändert hat.
+     *
+     * @param lastField das vorherige Feld
+     * @param nextField das nächste Feld
+     * @return true, wenn ein Richtungswechsel erkannt wurde, sonst false
+     * 
+     * @author Maximilian Ressel
+     */
+    private boolean changedDirection(Field lastField, Field nextField) {
+        return (lastField != null && nextField.equals(lastField));
+    }
+
+    /**
+     * Prüft, ob ein Spieler nach bereits begonnenen Schritten versucht,
+     * einen anderen Meeple zu bewegen.
+     *
+     * @param player der aktuelle Spieler
+     * @param meeple der Meeple, der bewegt werden soll
+     * @return true, wenn der Spieler bereits gezogen hat und ein anderer Meeple
+     *         als der aktive Meeple bewegt werden soll, sonst false
+     *
+     * @author Maximilian Ressel
+     */
+    private boolean changedMeeple(Player player, Meeple meeple) {
+        return (player.getActiveMeeple() != null
+                && player.hasMoved()
+                && !player.getActiveMeeple().equals(meeple));
+    }
+
+    /**
+     * Gibt das nächste Feld in der angegebenen Richtung zurück.
+     *
+     * @param currentField das aktuelle Feld
+     * @param direction    die Richtung, in die gegangen werden soll
+     * @return das benachbarte Feld in der angegebenen Richtung
+     * 
+     * @author Maximilian Ressel
+     */
+    private Field getNextFieldByDirection(Field currentField, Direction direction) {
+        return switch (direction) {
+            case NORTH -> currentField.getNorth();
+            case EAST -> currentField.getEast();
+            case SOUTH -> currentField.getSouth();
+            case WEST -> currentField.getWest();
+        };
+    }
+
+    /**
+     * Prüft, ob ein Spieler das Zielfeld betreten darf, und gibt das passende
+     * FrontendEvent zurück.
+     *
+     * Betritt der Spieler das Zielfeld mit dem letzten erlaubten Zug,
+     * wird der Sieg ausgelöst. Andernfalls wird der Zug abgelehnt.
+     *
+     * @param meeple der Meeple, der bewegt werden soll
+     * @param end    das Zielfeld
+     * @param player der aktuelle Spieler
+     * @return ein FrontendEvent, das entweder den Sieg signalisiert oder den Zug
+     *         ablehnt
+     * 
+     * @author Maximilian Ressel
+     */
+    private FrontendEvent tryMovingOnEnd(Meeple meeple, Field end, Player player) {
+        // Wenn man darauf endet, hat man gewonnen
+        if (player.getRemainingMoves() == LAST_MOVE) {
+            player.useMove();
+            logger.info("player {} has won", player.getPlayerName());
+            return new FrontendPlayerHasWonEvent(player.getPlayerName(), player.getColor(), meeple.getId(),
+                    end.getId());
+        }
+        logger.info("Cant enter End with remaining moves");
+        return new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL");
+    }
+
+    /**
+     * Prüft, ob der Versuch, ein Feld mit einer Barriere zu betreten, erfolgreich
+     * ist.
+     * Bei Erfolg darf die Barriere verschoben werden.
+     * Bei Misserfolg wird der Zug abgelehnt; steht auf dem aktuellen Feld ein
+     * gegnerischer Meeple, kann stattdessen ein Duell gestartet werden.
+     *
+     * @param meeple               der Meeple, der bewegt werden soll
+     * @param barrier              die Barriere, die das Feld blockiert
+     * @param currentField         das aktuelle Feld des Meeples
+     * @param targetField          das Feld mit der Barriere, das betreten werden
+     *                             soll
+     * @param player               der aktuelle Spieler
+     * @param otherOwnMeepleFields Felder, auf denen eigene andere Meeples stehen
+     * @param rivalMeepleFields    Felder, auf denen gegnerische Meeples stehen
+     * @param rivalMeeples         alle gegnerischen Meeples
+     * @param lobby                die aktuelle Lobby/Spielumgebung
+     * @return ein FrontendEvent passend zum Ergebnis (Barriereschub, Ablehnung oder
+     *         Duellstart)
+     * 
+     * @author Maximilian Ressel
+     */
+    private FrontendEvent tryMovingOnBarrier(Meeple meeple, Meeple barrier, Field currentField, Field targetField,
+            Player player,
+            Set<Field> otherOwnMeepleFields, Set<Field> rivalMeepleFields, Set<Meeple> rivalMeeples, Lobby lobby) {
+        // wenn man genau drauf landet, darf man sie verschieben
+        if (player.getRemainingMoves() == LAST_MOVE) {
+            endTurnWithMove(player, meeple, targetField);
+            logger.info("Direct hit on barrier {} with meeple {}", barrier.getId(), meeple.getId());
+            return new FrontendTriggerBarrierMoveEvent(
+                    player.getId(),
+                    meeple.getId(),
+                    targetField.getId(),
+                    player.getRemainingMoves(),
+                    barrier.getId());
+        }
+
+        return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
+    }
+
+    /**
+     * Prüft, ob der Zug auf einem Feld mit einem eigenen Meeple enden würde.
+     *
+     * @param player               der aktuelle Spieler
+     * @param targetField          das Zielfeld des Zuges
+     * @param otherOwnMeepleFields Felder, auf denen eigene (andere) Meeples stehen
+     * @return true, wenn es der letzte verbleibende Zug ist und das Zielfeld von
+     *         einem eigenen Meeple belegt ist,
+     *         sonst false
+     * 
+     * @author Maximilian Ressel
+     */
+    private boolean turnWouldEndOnOwnMeeple(Player player, Field targetField, Set<Field> otherOwnMeepleFields) {
+        return (player.getRemainingMoves() == LAST_MOVE
+                && otherOwnMeepleFields.contains(targetField));
+    }
+
+    /**
+     * Prüft, ob es in der gewählten Richtung noch legale Stop-Felder innerhalb der
+     * verbleibenden Züge gibt
+     * und ob der Meeple in eine Sackgasse läuft.
+     *
+     * Wenn innerhalb der Reichweite noch ein legales Endfeld existiert, wird
+     * {@code Optional.empty()} zurückgegeben.
+     * Andernfalls wird der Zug ggf. abgelehnt (wenn das Zielfeld durch eigenen
+     * Meeple oder duellierende Meeples blockiert ist)
+     * oder der Zug endet auf dem Zielfeld (mit möglichem Duell bzw. Verlust-Event).
+     *
+     * @param meeple               der Meeple, der bewegt wird
+     * @param currentField         das aktuelle Feld des Meeples
+     * @param targetField          das Feld, das als nächstes angesteuert
+     *                             wird
+     * @param player               der aktuelle Spieler
+     * @param otherOwnMeepleFields Felder, auf denen eigene (andere) Meeples stehen
+     * @param barrierFields        Felder, die von Barrieren belegt sind
+     * @param rivalMeeples         gegnerische Meeples
+     * @param rivalMeepleFields    Felder, auf denen gegnerische Meeples stehen
+     * @param lobby                die aktuelle Lobby/Spielumgebung
+     * @return Optional.empty(), wenn noch ein legales Stop-Feld existiert; sonst
+     *         ein FrontendEvent, das
+     *         Ablehnung, Duellstart oder Zugende mit Verlust signalisiert
+     * 
+     * @author Maximilian Ressel
+     */
+    private Optional<FrontendEvent> checkPath(Meeple meeple, Field currentField, Field targetField, Player player,
+            Set<Field> otherOwnMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
+            Set<Field> rivalMeepleFields, Lobby lobby) {
+
+        if (existsLegalStopWithinRemainingMoves(targetField, currentField, player.getRemainingMoves() - 1,
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+            return Optional.empty();
+        }
+
+        if (otherOwnMeepleFields.contains(targetField)
+                || isOccupiedByDuelingMeeples(targetField, rivalMeeples, rivalMeepleFields)) {
+            logger.info("No valid Fields to End this Meeples run in this Direction");
+            return Optional.of(new FrontendMoveRejectedEvent(player.getId(), "MOVE_ERROR_NO_VALID_FIELDS"));
+        }
+
+        endTurnWithMove(player, meeple, targetField);
+        logger.info("No further possible Fields within reach - turn ends");
+        if (rivalMeepleFields.contains(targetField)) {
+
+            Meeple rivalMeeple = getRivalMeepleByField(targetField, rivalMeeples);
+
+            Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
+
+            return Optional.of(startDuel(meeple, rivalMeeple, player, rivalPlayer, targetField, lobby));
+        }
+        return Optional.of(new FrontendMoveWithLossEvent(
+                player.getId(),
+                meeple.getId(),
+                targetField.getId(),
+                player.getRemainingMoves(),
+                player.hasMoved()));
+    }
+
+    /**
+     * Prüft, ob der Zug auf einem Feld mit einem gegnerischen Meeple enden würde.
+     *
+     * @param player            der aktuelle Spieler
+     * @param rivalMeepleFields Felder, auf denen gegnerische Meeples stehen
+     * @param targetField       das Zielfeld des Zuges
+     * @return true, wenn es der letzte verbleibende Zug ist und das Zielfeld von
+     *         einem gegnerischen Meeple belegt ist, sonst false
+     * 
+     * @author Maximilian Ressel
+     */
+    private boolean turnEndsOnRivalMeeple(Player player, Set<Field> rivalMeepleFields, Field targetField) {
+        return (player.getRemainingMoves() == LAST_MOVE && rivalMeepleFields.contains(targetField));
+    }
+
+    /**
+     * Prüft, ob durch den Zug ein Duell ausgelöst wird, und leitet dieses
+     * gegebenenfalls ein.
+     *
+     * @param ownMeeple    der eigene Meeple, der bewegt wird
+     * @param targetField  das Zielfeld des Zuges
+     * @param player       der aktuelle Spieler
+     * @param rivalMeeples alle gegnerischen Meeples
+     * @param lobby        die aktuelle Lobby/Spielumgebung
+     * @return Optional.empty(), wenn kein Duell ausgelöst wird; andernfalls ein
+     *         FrontendEvent zum Starten des Duells oder zur Ablehnung des Zuges
+     * 
+     * @author Maximilian Ressel
+     */
+    private Optional<FrontendEvent> tryInitiatingDuel(Meeple ownMeeple, Field targetField, Player player,
+            Set<Meeple> rivalMeeples, Lobby lobby) {
+        Meeple rivalMeeple = getRivalMeepleByField(targetField, rivalMeeples);
+        Player rivalPlayer = getPlayerByMeeple(lobby, rivalMeeple);
+
+        if (rivalMeeple == null) {
+            return Optional.empty();
+        }
+
+        if (duelService.isMeepleInDuel(rivalMeeple.getId())) {
+            logger.info("Move blocked — rival meeple {} is already in a duel", rivalMeeple.getId());
+
+            return Optional.of(new FrontendMoveRejectedEvent(
+                    player.getId(),
+                    "MEEPLE_IN_DUEL"));
+        }
+
+        ownMeeple.setCurrentField(targetField);
+        ownMeeple.clearLastField();
+        player.setActiveMeeple(ownMeeple);
+        player.useMove();
+
+        logger.info("Initiating duel between meeple {} and meeple {}",
+                ownMeeple.getId(), rivalMeeple.getId());
+
+        return Optional.of(startDuel(ownMeeple, rivalMeeple, player, rivalPlayer, targetField, lobby));
+    }
+
+    /**
+     * Startet ein Duell zwischen dem Meeple des aktuellen Spielers und dem Meeple
+     * eines gegnerischen Spielers auf einem bestimmten Feld.
+     *
+     * Andernfalls wird ein neues Duell erstellt, ein zufälliges Minispiel
+     * zugewiesen und die beteiligten Spieler werden abhängig vom Minispiel
+     * initialisiert.
+     *
+     * @param ownMeeple   das Meeple des aktuellen Spielers, das das Duell startet
+     * @param rivalMeeple das Meeple des gegnerischen Spielers
+     * @param player      der aktuelle Spieler
+     * @param rivalPlayer der gegnerische Spieler, kann {@code null} sein
+     * @param field       das Spielfeld, auf dem das Duell stattfindet
+     * @param lobby       die Lobby, die von bestimmten Minispielen benötigt wird
+     *
+     * @return ein FrontendEvent, das entweder einen verlorenen Zug oder ein
+     *         initialisiertes Duell mit zugewiesenem Minispiel repräsentiert
+     * 
+     * @author Robert Bothfeld
+     * @author Maximilian Ressel
+     */
+    private FrontendEvent startDuel(Meeple ownMeeple, Meeple rivalMeeple, Player player, Player rivalPlayer,
+            Field field, Lobby lobby) {
+
+        if (rivalPlayer == null) {
+            return new FrontendMoveWithLossEvent(
+                    player.getId(),
+                    ownMeeple.getId(),
+                    field.getId(),
+                    player.getRemainingMoves(),
+                    player.hasMoved());
+        }
+        var duel = duelService.createDuel(
+                player.getId(),
+                rivalPlayer.getId(),
+                ownMeeple.getId(),
+                rivalMeeple.getId());
+
+        var miniGame = duelService.assignRandomGameToDuel(duel.getId());
+
+        if (miniGame instanceof DiceGame dice) {
+            dice.initPlayers(player.getId(), rivalPlayer.getId());
+        } else if (miniGame instanceof EinarmigerBanditGame game) {
+            game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
+        }
+        if (miniGame instanceof BalloonGame game) {
+            game.initPlayers(player.getId(), rivalPlayer.getId());
+        }
+
+        return new FrontendDuelEvent(
+                duel.getId(),
+                player.getId(),
+                rivalPlayer.getId(),
+                ownMeeple.getId(),
+                rivalMeeple.getId(),
+                field.getId(),
+                player.getRemainingMoves(),
+                miniGame);
+    }
+
+    /**
+     * Prüft, ob es sich um den Beginn eines neuen Zuges des Spielers handelt.
+     *
+     * @param player der aktuelle Spieler
+     * @return true, wenn der Spieler noch mehr als einen verbleibenden Zug hat
+     *         und in diesem Zug noch keine Bewegung durchgeführt wurde,
+     *         sonst false
+     * 
+     * @author Maximilian Ressel
+     */
+    private boolean isTurnBegin(Player player) {
+        return (player.getRemainingMoves() > 1 && !player.hasMoved());
     }
 
     /**
@@ -711,24 +946,34 @@ public class MovementServiceImpl implements MovementService {
     }
 
     /**
-     * Prüft, ob ein bestimmtes Feld bereits durch einen Meeple oder eine Barriere
-     * belegt ist.
+     * Prüft, ob ein bestimmtes Feld aktuell von einem Meeple belegt ist.
      *
      * @param lobby die aktuelle Lobby mit allen Spielern und Meeples
-     * @param board das aktuelle Spielfeld (enthält die Barrieren)
-     * @param field das Feld, das überprüft werden soll
-     * @return true, wenn das Feld besetzt ist, sonst false
-     * 
-     * @author Maximilian Ressel
+     * @param field das zu prüfende Feld
+     * @return true, wenn sich ein Meeple auf dem Feld befindet,
+     *         sonst false
      */
-    private boolean isOccupied(Lobby lobby, Board board, Field field) {
-        boolean occupiedByMeeple = lobby.getPlayers().stream()
-                .flatMap(p -> Arrays.stream(p.getMeeples()))
+    private boolean isOccupiedByMeeple(Lobby lobby, Field field) {
+        return lobby.getPlayers().stream()
+                .flatMap(player -> Arrays.stream(player.getMeeples()))
                 .map(Meeple::getCurrentField)
                 .filter(Objects::nonNull)
                 .anyMatch(f -> f.equals(field));
+    }
 
-        if (occupiedByMeeple)
+    /**
+     * Prüft, ob ein bestimmtes Feld aktuell durch einen Meeple oder eine Barriere
+     * belegt ist.
+     *
+     * @param lobby die aktuelle Lobby mit allen Spielern und Meeples
+     * @param board das Spielbrett mit allen Barrieren
+     * @param field das zu prüfende Feld
+     * @return true, wenn das Feld durch einen Meeple oder eine Barriere belegt ist,
+     *         sonst false
+     */
+    private boolean isOccupied(Lobby lobby, Board board, Field field) {
+
+        if (isOccupiedByMeeple(lobby, field))
             return true;
 
         boolean occupiedByBarrier = board.getBarriers().stream()
@@ -741,17 +986,29 @@ public class MovementServiceImpl implements MovementService {
 
     /**
      * Ermittelt alle Felder, die aktuell von eigenen Meeples des Spielers belegt
-     * sind.
+     * sind,
+     * ausgenommen der aktive Meeple.
+     *
+     * @param player der aktuelle Spieler
+     * @return eine Menge aller Felder, auf denen eigene (nicht aktive) Meeples
+     *         stehen
      */
-    private Set<Field> getOwnMeepleFields(Player player) {
+    private Set<Field> getOtherOwnMeepleFields(Player player) {
+        Meeple activeMeeple = player.getActiveMeeple();
         return Arrays.stream(player.getMeeples())
+                .filter(meeple -> activeMeeple == null || !meeple.equals(activeMeeple))
                 .map(Meeple::getCurrentField)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
     /**
-     * Ermittelt alle gegnerischen Meeples in der angegebenen Lobby.
+     * Ermittelt alle gegnerischen Meeples
+     *
+     * @param lobby  die aktuelle Lobby mit allen Spielern
+     * @param player der Spieler selbst, dessen eigene Meeple ignoriert werden
+     *               sollen
+     * @return eine Menge aller gegnerischen Meeples
      */
     private Set<Meeple> getRivalMeeples(Lobby lobby, Player player) {
         Set<Meeple> rivalMeeples = new HashSet<>();
@@ -768,6 +1025,11 @@ public class MovementServiceImpl implements MovementService {
 
     /**
      * Ermittelt alle Felder, die aktuell von gegnerischen Meeples belegt sind.
+     *
+     * @param lobby  die aktuelle Lobby mit allen Spielern
+     * @param player der Spieler selbst, dessen eigene Meeple ignoriert werden
+     *               sollen
+     * @return eine Menge aller Felder, auf denen gegnerische Meeples stehen
      */
     private Set<Field> getRivalMeepleFields(Lobby lobby, Player player) {
         return getRivalMeeples(lobby, player).stream()
@@ -777,6 +1039,9 @@ public class MovementServiceImpl implements MovementService {
 
     /**
      * Ermittelt alle Felder, die aktuell von Barrieren belegt sind.
+     *
+     * @param board das Spielbrett mit allen Barrieren
+     * @return eine Menge aller Felder, auf denen sich Barrieren befinden
      */
     private Set<Field> getBarrierFields(Board board) {
         return board.getBarriers().stream()
@@ -786,7 +1051,27 @@ public class MovementServiceImpl implements MovementService {
     }
 
     /**
+     * Ermittelt die Barriere, die sich auf dem angegebenen Feld befindet.
+     *
+     * @param board das Spielbrett mit allen Barrieren
+     * @param field das Feld, auf dem die Barriere gesucht wird
+     * @return die gefundene Barriere oder null, wenn sich keine Barriere auf dem
+     *         Feld befindet
+     */
+    private Meeple getBarrierByField(Board board, Field field) {
+        return board.getBarriers().stream()
+                .filter(barrier -> field.equals(barrier.getCurrentField()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
      * Liefert den gegnerischen Meeple, der sich auf dem angegebenen Feld befindet.
+     *
+     * @param field        das Feld, auf dem der gegnerische Meeple gesucht wird
+     * @param rivalMeeples die Menge aller gegnerischen Meeples
+     * @return der gefundene gegnerische Meeple oder null, wenn sich keiner auf dem
+     *         Feld befindet
      */
     private Meeple getRivalMeepleByField(Field field, Set<Meeple> rivalMeeples) {
         return rivalMeeples.stream()
@@ -796,7 +1081,11 @@ public class MovementServiceImpl implements MovementService {
     }
 
     /**
-     * Ermittelt den Spieler, zu dem das angegebene Meeple gehört.
+     * Ermittelt den Spieler, zu dem der angegebene Meeple gehört.
+     *
+     * @param lobby  die aktuelle Lobby mit allen Spielern
+     * @param meeple der Meeple, dessen Besitzer ermittelt werden soll
+     * @return der zugehörige Spieler oder null, wenn kein Spieler gefunden wird
      */
     private Player getPlayerByMeeple(Lobby lobby, Meeple meeple) {
         if (meeple == null)

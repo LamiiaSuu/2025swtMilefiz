@@ -33,11 +33,6 @@ public class BalloonGame extends MiniGame {
     private static final int PHASE_1_THRESHOLD = 10; // Obere Grenze Phase 1 (1-10 Klicks)
     private static final int PHASE_2_THRESHOLD = 20; // Obere Grenze Phase 2 (11-20 Klicks)
     private static final int PHASE_3_THRESHOLD = 30; // Obere Grenze Phase 3 (21-30 Klicks)
-    private static final int INSTRUCTION_DELAY_SECONDS = 2; // Verzögerung für Instructions
-
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(); // Timer für
-                                                                                                     // Timeout
-    private boolean timeoutStarted = false; // Flag ob Timer bereits gestartet
 
     private UUID player1; // Spieler-ID des ersten Duellanten
     private UUID player2; // Spieler-ID des zweiten Duellanten
@@ -71,23 +66,19 @@ public class BalloonGame extends MiniGame {
         this.player1 = p1;
         this.player2 = p2;
 
-        if (!timeoutStarted) {
-            timeoutStarted = true;
-            scheduler.schedule(this::handleTimeout, getTimeOut() + (long) INSTRUCTION_DELAY_SECONDS, TimeUnit.SECONDS);
-        }
     }
 
     /**
      * Wird aufgerufen, wenn der Timeout abläuft.
      * Falls das Spiel noch nicht beendet ist, verlieren beide Spieler.
      */
-    private void handleTimeout() {
+    @Override
+    public void forceMissingActions() {
         if (!isFinished()) {
             setWinner(null); // Beide verlieren
             setFinished(true);
             notifyFinished(); // Triggert Callback in DuelService
         }
-        scheduler.shutdown();
     }
 
     /**
@@ -138,7 +129,6 @@ public class BalloonGame extends MiniGame {
     public void finishGame(UUID winner) {
         setWinner(winner);
         setFinished(true);
-        scheduler.shutdown();
         notifyFinished();
     }
 

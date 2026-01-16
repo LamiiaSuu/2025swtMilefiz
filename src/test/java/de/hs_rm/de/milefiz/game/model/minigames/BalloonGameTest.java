@@ -123,21 +123,6 @@ class BalloonGameTest {
         assertFalse(game.isFinished());
     }
 
-    @Test
-    void timeout_withoutWinner_bothLose() throws InterruptedException {
-        BalloonGame game = new BalloonGame(1);
-
-        UUID p1 = UUID.randomUUID();
-        UUID p2 = UUID.randomUUID();
-
-        game.initPlayers(p1, p2);
-
-        // Timeout + Instruction Delay (1 + 2 Sekunden)
-        Thread.sleep(3200);
-
-        assertTrue(game.isFinished());
-        assertNull(game.getWinner());
-    }
 
     @Test
     void finishGame_setsWinnerAndStopsGame() {
