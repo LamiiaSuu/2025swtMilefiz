@@ -176,11 +176,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           energy.isEnergyFresh = true
         }
 
-        // Wenn der Spieler im Moment noch nicht Würfeln darf, weil er noch aktiven Cooldown hat, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
+        // Wenn der Spieler im Moment noch nicht Würfeln darf
         else if (event.type === 'ROLL_DICE_ERROR' && event.playerId === gamedata.playerId) {
-          console.log(
-            `Player ${event.playerId} still has ${event.seconds} seconds of cooldown to roll their dice!`,
-          )
+          console.log(`Player ${event.playerId} cannot roll their dice!`,)
           audioStore.playSfx('eventError')
           cooldown.remainingSeconds = event.seconds
         }
@@ -416,6 +414,18 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.phasePlayer2 = event.phasePlayer2
           duel.state.winner = event.winner
           duel.state.finished = event.finished
+        }
+
+        if (event.type === "QUIZ_GAME_UPDATE") {
+          const duel = activeDuels[event.duelId]
+
+          if (!duel) return
+          duel.questionDTO = event.questionDTO
+          duel.state.question = event.questionDTO?.question
+          duel.state.answers = event.questionDTO?.answers
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+
         }
 
         if (event.type === "COLORBRAIN_GAME_UPDATE") {
@@ -920,7 +930,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     return lobby.players.find(p => p.id === playerId)?.color ?? null
   }
 
-  function sendRollDice() {
+  function sendRollDice(requestedValue?: number) {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot roll dice: STOMP client not connected.')
       return
@@ -931,8 +941,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
-    const rollDiceCommand = {
+    const rollDiceCommand: any = {
       playerId: gamedata.playerId,
+    }
+
+    if (requestedValue !== undefined) {
+      rollDiceCommand.requestedValue = requestedValue
     }
 
     try {

@@ -4,6 +4,7 @@ import { useGLTF } from '@tresjs/cientos'
 import { computed, watchEffect } from 'vue'
 import { DoubleSide, Object3D } from 'three'
 import { startingbaseColors } from '@/types/colorsAssets';
+import { useBoardStore } from '@/stores/boardStore';
 
 // Props definieren
 const props = defineProps<{
@@ -57,6 +58,35 @@ const overlayZOffset = computed(() => {
   return 0
 })
 
+// Berechnet die Rotation basierend auf dem benachbartem Tile
+const houseRotation = computed(() => {
+  if (!props.type?.startsWith?.('START_')) return 0
+
+  const boardStore = useBoardStore()
+  const currentField = boardStore.board?.fields.find(f => f.id === props.id)
+
+  if (!currentField) return 0
+
+  // Check in welcher Richtung das Angrenzende Feld ist: Math.PI = 180 Grad
+  if (currentField.north) {
+    const northField = boardStore.board?.fields.find(f => f.id === currentField.north)
+    if (northField && !northField.type.startsWith('START_')) return 0  // Nachbar im Norden
+  }
+  if (currentField.east) {
+    const eastField = boardStore.board?.fields.find(f => f.id === currentField.east)
+    if (eastField && !eastField.type.startsWith('START_')) return -Math.PI / 2  // Nachbar im Osten
+  }
+  if (currentField.south) {
+    const southField = boardStore.board?.fields.find(f => f.id === currentField.south)
+    if (southField && !southField.type.startsWith('START_')) return -Math.PI // Nachbar im Süden
+  }
+  if (currentField.west) {
+    const westField = boardStore.board?.fields.find(f => f.id === currentField.west)
+    if (westField && !westField.type.startsWith('START_')) return Math.PI / 2  // Nachbar im Westen
+  }
+  return 0
+})
+
 //Setzt für tile die Position und Skalierung im Raum
 //Setzt für Overlay die Position basierend auf dem dazu gehörigen tile und Skalierung
 watchEffect(() => {
@@ -90,11 +120,40 @@ watchEffect(() => {
     if (props.type?.startsWith?.('START_')) {
       const col = startingbaseColors[props.type as keyof typeof startingbaseColors] ?? '#ffffff'
       setOverlayMainColor(overlay, col)
+
+      // Rotation und Position für die Häuser basierend auf anschließendem Tile
+      const rotation = houseRotation.value
+
+      // Rotation setzen
+      if (typeof overlay.rotation?.set === 'function') {
+        overlay.rotation.set(0, rotation, 0)
+      }
+
+      // Offset nach hinten und rechts relativ zur Rotation berechnen
+      const backwardOffset = 0.3
+      const rightOffset = -0.35
+
+      // berechne Offset basierend auf Rotation
+      const backwardX = Math.sin(rotation) * backwardOffset
+      const backwardZ = Math.cos(rotation) * backwardOffset
+
+      const rightX = Math.sin(rotation - Math.PI / 2) * rightOffset
+      const rightZ = Math.cos(rotation - Math.PI / 2) * rightOffset
+
+      const offsetX = backwardX + rightX
+      const offsetZ = backwardZ + rightZ
+
+      // Position mit rotierten Offsets setzen (mittig auf Tile + nach hinten + nach rechts verschoben)
+      if (typeof overlay.position?.set === 'function') {
+        overlay.position.set(props.position[0] + offsetX, overlayYOffset.value, props.position[2] + offsetZ)
+      }
+    } else {
+      // Position + Scale für Overlay (höher platzieren): für nicht-START Felder
+      if (typeof overlay.position?.set === 'function') {
+        overlay.position.set(props.position[0] + overlayXOffset.value, overlayYOffset.value, props.position[2] + overlayZOffset.value)
+      }
     }
-    // Position + Scale für Overlay (höher platzieren)
-    if (typeof overlay.position?.set === 'function') {
-      overlay.position.set(props.position[0] + overlayXOffset.value, overlayYOffset.value, props.position[2] + overlayZOffset.value)
-    }
+
     if (typeof overlay.scale?.set === 'function') {
       overlay.scale.set(overlayScale.value, overlayScale.value, overlayScale.value)
     }

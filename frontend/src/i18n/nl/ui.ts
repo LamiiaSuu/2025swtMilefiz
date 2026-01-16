@@ -63,6 +63,7 @@ export const UI_NL: Record<UIKey, string> = {
     MINIGAME_BALLOON_TITLE: 'Laat de ballon knallen!',
     MINIGAME_BALLOON_INSTRUCTION: 'Maak je klaar! Druk zo snel mogelijk op de knop!',
     MINIGAME_BALLOON_CLICK: 'Klikken!',
+    MINIGANE_QUIZ_TITLE: 'Weekend Miljonairs',
     MINIGAME_COLORBRAIN_INSTRUCTION: 'Kies de tekstkleur',
     MINIGAME_COLORBRAIN_RED: "Rood",
     MINIGAME_COLORBRAIN_BLUE: "Blauw",

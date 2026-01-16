@@ -72,6 +72,7 @@ export const UI_EN: Record<UIKey, string> = {
     MINIGAME_COLORBRAIN_PINK: "Pink",
     MINIGAME_COLORBRAIN_PURPLE: "Purple",
     MINIGAME_COLORBRAIN_BLACK: "Black",
+    MINIGANE_QUIZ_TITLE: 'Who Wants To Be A Millionaire',
     CONFIRM: 'Confirm',
     MINIMAP_BARRIER_MOVE: 'Relocate barrier',
     MINIMAP_OWN_MEEPLE: 'Own Meeple',

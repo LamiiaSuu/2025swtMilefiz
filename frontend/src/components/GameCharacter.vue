@@ -279,6 +279,12 @@ watch(
       return
     }
 
+    if (props.barrier) {
+      _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
+      setPositionImmediate(newPos)
+      return
+    }
+
     // record and animate
     _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
     animateTo(newPos)
