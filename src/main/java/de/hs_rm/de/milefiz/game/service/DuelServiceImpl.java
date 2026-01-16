@@ -20,6 +20,7 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
+import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
@@ -29,6 +30,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import jakarta.annotation.PreDestroy;
 
+import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
 
 @Service
@@ -72,6 +74,9 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.balloongame.timeout}")
     private int balloonGameTimeout;
 
+    @Value("${minigame.quiz.timeout}")
+    private int quizGameTimeout;
+
     @Value("${minigame.einarmigerBanditGame.timeout}")
     private int einarmigerBanditGameTimeout;
 
@@ -83,6 +88,8 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+
+        gameFactories.add(() -> new QuizGame(quizGameTimeout));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
@@ -243,7 +250,6 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, balloon);
-
         }
 
         else if (game instanceof EinarmigerBanditGame einarmigerBandit) {
@@ -266,6 +272,14 @@ public class DuelServiceImpl implements DuelService {
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, einarmigerBandit);
 
+        }
+
+        if (game instanceof QuizGame quiz) {
+            var update = new FrontendQuizGameUpdateEvent(duel.getId(), quiz.getPlayer1(), quiz.getPlayer2(),
+                    quiz.getQuestionDTO(), quiz.getWinner(),
+                    quiz.isFinished());
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, quiz);
         } else if (game instanceof RockPaperScissorsGame rockPaperScissorsGame) {
             var update = new FrontendRockPaperScissorsGameUpdateEvent(
                     duel.getId(),

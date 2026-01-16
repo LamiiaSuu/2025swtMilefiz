@@ -64,6 +64,7 @@ export const UI_DE: Record<UIKey, string> = {
     MINIGAME_BALLOON_TITLE: 'Bring den Ballon zum Platzen!',
     MINIGAME_BALLOON_INSTRUCTION: 'Mach dich bereit! Drück den Button so schnell du kannst!',
     MINIGAME_BALLOON_CLICK: 'Klicken!',
+    MINIGANE_QUIZ_TITLE: 'Wer wird Millionär?',
     WINNING_TAB: 'Gewinnen',
     WINNING_TUTORIAL: 'Gewonnen hast du, sobald du als erste*r eine deiner Spielfiguren mit der genau passenden Würfelzahl ins Ziel bringst.',
     JUMPING_TAB: 'Hüpfen',
