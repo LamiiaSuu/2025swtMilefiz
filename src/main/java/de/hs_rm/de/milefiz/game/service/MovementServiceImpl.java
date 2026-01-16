@@ -145,15 +145,6 @@ public class MovementServiceImpl implements MovementService {
         Set<Field> barrierFields = getBarrierFields(board);
         Set<Field> otherOwnMeepleFields = getOtherOwnMeepleFields(player);
 
-        // Meeple ist stuck, Zug wird zurückgesetzt, sodass der Spieler der Meeple
-        // wechseln kann
-        if (!existsLegalStopWithinRemainingMoves(currentField, lastField, player.getRemainingMoves(),
-                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
-
-            endTurnWithMove(player, meeple, currentField);
-            return meepleIsStuck(player, meeple, currentField, rivalMeepleFields, rivalMeeples, lobby);
-        }
-
         // Wenn keine weiteren Schritte verfügbar sind, kann man man sich nicht bewegen
         if (!player.canMove()) {
             logger.info("No more moves left");

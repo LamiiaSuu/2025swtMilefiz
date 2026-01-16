@@ -56,7 +56,11 @@ public class BoardServiceImpl implements BoardService {
                 LOGGER.debug(String.format("%s ist nicht mit dem Ziel verbunden", startField.getType().name()));
                 throw new BoardValidateException(String.format("%s ist nicht mit einem Ziel verbunden", startField.getType().name()));
             }
+            if (!isStartFieldValid(startField)) {
+                throw new BoardValidateException(String.format("%s darf nur eine Verbindung haben", startField.getType().name()));
+            }
         }
+        LOGGER.debug("Map-Validierung abgeschlossen, erfolgreich!");
         return true;
     }
 
@@ -81,5 +85,17 @@ public class BoardServiceImpl implements BoardService {
             }
         }
         return false;
+    }
+
+    /**
+     * Überprüft, ob ein Startfeld ansich valide ist. Es wird geprüft, ob es
+     * GENAU EINE connection gibt, sodass hinter dem Start kein weiteres Feld
+     * sein darf.
+     * @param field
+     * @return
+     */
+    private boolean isStartFieldValid(Field field) {
+        // Das Startfeld sollte genau einen Nachbarn haben
+        return field.getNeighbours().size() == 1;
     }
 }

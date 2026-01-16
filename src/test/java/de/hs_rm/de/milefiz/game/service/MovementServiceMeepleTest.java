@@ -145,6 +145,9 @@ public class MovementServiceMeepleTest {
     @Test
     void moveMeepleChangeDirectionIsRejected() {
 
+        Field furtherField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
+        nextField.addNeighbour(furtherField, Direction.NORTH);
+
         meeple.setCurrentField(nextField);
 
         MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.SOUTH);
@@ -365,6 +368,9 @@ public class MovementServiceMeepleTest {
 
         player.setRemainingMoves(LAST_MOVE);
 
+        Field furtherField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
+        currentField.addNeighbour(furtherField, Direction.SOUTH);
+
         Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
         nextField.addNeighbour(dummyField, Direction.NORTH);
 
@@ -509,11 +515,21 @@ public class MovementServiceMeepleTest {
         player.setRemainingMoves(LAST_MOVE);
 
         Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
+        Field dummyField2 = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(2, 2));
         nextField.addNeighbour(dummyField, Direction.NORTH);
 
         Player rival = new Player(Color.BLUE);
-        Meeple rivalMeeple = rival.getMeeples()[0];
-        rivalMeeple.setCurrentField(nextField);
+        Meeple rivalMeeple2 = rival.getMeeples()[1];
+        Meeple rivalMeeple3 = rival.getMeeples()[2];
+        Meeple rivalMeeple4 = rival.getMeeples()[3];
+        Meeple rivalMeeple5 = rival.getMeeples()[4];
+        rivalMeeple2.setCurrentField(dummyField2);
+        rivalMeeple3.setCurrentField(dummyField2);
+        rivalMeeple4.setCurrentField(dummyField2);
+        rivalMeeple5.setCurrentField(dummyField2);
+
+        Meeple rivalMeeple1 = rival.getMeeples()[0];
+        rivalMeeple1.setCurrentField(nextField);
 
         lobby.setPlayers(List.of(player, rival));
 
@@ -525,7 +541,7 @@ public class MovementServiceMeepleTest {
 
         FrontendDuelEvent evt = (FrontendDuelEvent) result;
         assertEquals(meeple.getId(), evt.firstMeepleId());
-        assertEquals(rivalMeeple.getId(), evt.secondMeepleId());
+        assertEquals(rivalMeeple1.getId(), evt.secondMeepleId());
         assertEquals(nextField.getId(), evt.targetField());
         assertEquals(NO_MOVES, evt.remainingMoves());
 
@@ -541,8 +557,19 @@ public class MovementServiceMeepleTest {
 
         Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
         nextField.addNeighbour(dummyField, Direction.NORTH);
+        Field dummyField2 = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(2, 2));
 
         Player rival = new Player(Color.BLUE);
+
+        Meeple rivalMeeple2 = rival.getMeeples()[1];
+        Meeple rivalMeeple3 = rival.getMeeples()[2];
+        Meeple rivalMeeple4 = rival.getMeeples()[3];
+        Meeple rivalMeeple5 = rival.getMeeples()[4];
+        rivalMeeple2.setCurrentField(dummyField2);
+        rivalMeeple3.setCurrentField(dummyField2);
+        rivalMeeple4.setCurrentField(dummyField2);
+        rivalMeeple5.setCurrentField(dummyField2);
+
         Meeple rivalMeeple = rival.getMeeples()[0];
         rivalMeeple.setCurrentField(nextField);
 
