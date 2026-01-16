@@ -92,5 +92,6 @@ export const UI_NL: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Volgend speelstuk',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Vorig speelstuk',
     CONTROLS_TUTORIAL_MENU: 'Menu openen',
+    CONTROLS_TUTORIAL_MINIMAP_ZOOM: '',
 }
 
