@@ -34,6 +34,7 @@ public record FrontendMathGameUpdateEvent(
         UUID player2,
         Integer p1Value,
         Integer p2Value,
+        String termRepresentation,
         Integer termValue,
         UUID winner,
         boolean finished
@@ -45,10 +46,11 @@ public record FrontendMathGameUpdateEvent(
             UUID player2,
             Integer p1Value,
             Integer p2Value,
+            String termRepresentation,
             Integer termValue,
             UUID winner,
             boolean finished
     ) {
-        this(EventType.MATH_GAME_UPDATE.name(), duelId, player1, player2, p1Value, p2Value, termValue, winner, finished);
+        this(EventType.MATH_GAME_UPDATE.name(), duelId, player1, player2, p1Value, p2Value, termRepresentation, termValue, winner, finished);
     }
 }

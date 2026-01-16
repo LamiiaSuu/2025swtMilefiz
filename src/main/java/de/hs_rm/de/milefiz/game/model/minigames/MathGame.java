@@ -10,8 +10,6 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 
 public class MathGame extends MiniGame {
 
-    private Runnable onStart;
-
     private boolean timeoutStarted;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -36,8 +34,7 @@ public class MathGame extends MiniGame {
 
         if (!timeoutStarted) {
             timeoutStarted = true;
-            onStart();
-            scheduler.schedule(this::forceResult, getTimeOut(), TimeUnit.SECONDS);
+            scheduler.schedule(this::handleTimeout, getTimeOut(), TimeUnit.SECONDS);
         }
     }
 
@@ -78,21 +75,13 @@ public class MathGame extends MiniGame {
         scheduler.shutdown();
     }
 
-    public void forceResult() {
+    public void handleTimeout() {
         if (!isFinished()) {
             setWinner(null); // Beide verlieren
             setFinished(true);
             notifyFinished(); // Triggert Callback in DuelService
         }
         scheduler.shutdown();
-    }
-
-    public void setOnStart(Runnable onStart) {
-        this.onStart = onStart;
-    }
-
-    private void onStart() {
-        onStart.run();
     }
 
     public UUID getPlayer1() {
@@ -115,7 +104,9 @@ public class MathGame extends MiniGame {
         return term.getTermValue();
     }
 
-
+    public String getTermRepresentaion() {
+        return term.getTermRepresentation();
+    }
 
     private class Term {
 
@@ -193,7 +184,7 @@ public class MathGame extends MiniGame {
                     break;
             }
 
-            termRepresentation = String.join(" ", Integer.toString(getId()), operation.toString(),
+            termRepresentation = String.join(" ", Integer.toString(termElement1), operation.toString(),
                     Integer.toString(termElement2));
         }
 

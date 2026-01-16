@@ -82,7 +82,7 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
-        gameFactories.add(() -> new MathGame(mathGameTimeout + 1));
+        gameFactories.add(() -> new MathGame(mathGameTimeout + 10));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
@@ -132,13 +132,11 @@ public class DuelServiceImpl implements DuelService {
             throw new IllegalStateException("Duel not found: " + duelId);
         }
 
-        MiniGame game = randomGame();
+        //MiniGame game = randomGame();
+        MiniGame game = gameFactories.get(3).get();
         duel.setMiniGame(game);
 
         game.setOnFinished(() -> handleMiniGameFinished(duel));
-        if (game instanceof MathGame mathGame) {
-            mathGame.setOnStart(() -> handleMiniGameStart(duel));
-        }
 
         miniGameScheduler.schedule(
             game::forceMissingActions,
@@ -276,6 +274,7 @@ public class DuelServiceImpl implements DuelService {
                 mathGame.getPlayer2(),
                 mathGame.getP1Value(),
                 mathGame.getP2Value(),
+                mathGame.getTermRepresentaion(),
                 mathGame.getTermValue(),
                 mathGame.getWinner(),
                 mathGame.isFinished());
@@ -284,25 +283,6 @@ public class DuelServiceImpl implements DuelService {
             duelResolutionService.sendLoserHome(lobby, duel, mathGame);
         }
         duels.remove(duel.getId());
-    }
-
-    private void handleMiniGameStart(Duel duel) {
-        MiniGame game = duel.getMiniGame();
-        Lobby lobby = lobbyManager.getLobbyFromPlayerUUID(duel.getPlayer1());
-
-        if (game instanceof MathGame mathGame) {
-            var update = new FrontendMathGameUpdateEvent(
-                duel.getId(),
-                mathGame.getPlayer1(),
-                mathGame.getPlayer2(),
-                null,
-                null,
-                mathGame.getTermValue(),
-                null,
-                mathGame.isFinished());
-
-            messaging.sendEvent(new LobbyMessage(lobby, update));
-        }
     }
 
     @PreDestroy

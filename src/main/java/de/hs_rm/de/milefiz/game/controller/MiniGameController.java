@@ -22,9 +22,11 @@ import de.hs_rm.de.milefiz.game.service.DuelResolutionService;
 import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
+import de.hs_rm.de.milefiz.messaging.commands.MathGameCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendMathGameUpdateEvent;
 
 /**
  * Controller für die Mini-Spiele innerhalb eines Duells.
@@ -340,16 +342,41 @@ public class MiniGameController {
 
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/math/input")
         public void handleMathInput(@DestinationVariable UUID lobbyId,
-                        @DestinationVariable UUID duelId, @Payload int inputValue,
-                        Player player) throws LobbyNotFoundException {
-
+                        @DestinationVariable UUID duelId,
+                        MathGameCommand mathGameCommand, Player player) throws LobbyNotFoundException {
+                                logger.info("{}", mathGameCommand);
                 logger.info("Player {} locked input {} in math game duel {} (lobby {})",
-                                player.getId(), inputValue, duelId, lobbyId);
+                                player.getId(), mathGameCommand.input(), duelId, lobbyId);
 
                 // MiniGame holen (bereits zu diesem Zeitpunkt dem Duell zugewiesen)
                 MathGame game = (MathGame) duelService.getMiniGame(duelId);
 
                 // setze value für spieler
-                game.setValue(player.getId(), inputValue);
+                game.setValue(player.getId(), mathGameCommand.input());
+        }
+
+
+
+
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/math/term")
+        public void handleQuestionRequest(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
+                        Player player) throws LobbyNotFoundException {
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+                MathGame mathGame = (MathGame) duelService.getMiniGame(duelId);
+
+                var update = new FrontendMathGameUpdateEvent(
+                duelId,
+                mathGame.getPlayer1(),
+                mathGame.getPlayer2(),
+                null,
+                null,
+                mathGame.getTermRepresentaion(),
+                null,
+                null,
+                mathGame.isFinished());
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
         }
 }

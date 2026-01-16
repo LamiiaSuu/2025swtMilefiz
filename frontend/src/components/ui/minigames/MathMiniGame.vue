@@ -2,7 +2,7 @@
 import { useMilefizStore } from '@/stores/milefizstore';
 import { tUI } from "@/i18n";
 import CountdownBar from "./CountdownBar.vue"
-import { ref, type VNodeRef } from 'vue';
+import { computed, onMounted, ref, watch, type VNodeRef } from 'vue';
 
 const props = defineProps<{
     duel: any // Duel-Objekt { duelId, firstMeeple, secondMeeple, targetField, miniGameId, miniGameName, miniGameType, timeout, state }
@@ -14,13 +14,40 @@ const emit = defineEmits<{
 
 const inputRef = ref();
 
-const inputValue = ref<string>('')
+const inputValue = ref<number>();
 
 const store = useMilefizStore()
+
+onMounted(() => {
+    store.sendLobbyMessage(
+        `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/math/term`,
+        { id: store.gamedata.playerId }
+    )
+})
 
 const doInputFocus = () => {
   inputRef.value?.focus();
 };
+
+const termRepresentation = computed(() => props.duel.state?.termRepresentation)
+
+function isWinner() {
+  return props.duel.state?.winner === store.gamedata.playerId
+}
+
+const isPlayer1 = () => {
+    return props.duel.state?.player1 === store.gamedata.playerId
+}
+
+const sendInput = () => {
+    console.log("send input")
+  store.sendLobbyMessage(
+    `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/math/input`,
+    { playerId: store.gamedata.playerId,  input: inputValue.value }
+  )
+}
+
+console.log(props.duel.state?.termRepresentation);
 
 </script>
 <template>
@@ -34,16 +61,31 @@ const doInputFocus = () => {
         <CountdownBar :seconds="duel.timeOut" />
 
         <div class="math-container">
-            <div class="math-term-container">
-                <div class="math-term-value-container">
-                    <div class="math-term-value">
-                        
+            <div class="math-item-container">
+                <div class="math-term-value">
+                    {{ termRepresentation }}
+                </div>
+                <div class="math-term-value">
+                    <div v-if="duel.state?.finished">
+                        {{ duel.state?.termValue }}
                     </div>
                 </div>
-                <div class="math-term-input-container">
-                    <input class="math-term-input" name="math-value" type="number" ref="inputRef" :value="inputValue"/>
+            </div>
+            <div class="math-item-container">
+                <div class="math-user-name">Du</div>
+                <div class="math-user-value">
+                    <input class="math-user-input" name="math-value" type="number" ref="inputRef" v-model="inputValue" />
+                    {{ isPlayer1() ? duel.state?.p1Value : duel.state?.p2Value }}
                 </div>
             </div>
+            <div class="math-item-container">
+                <div class="math-user-name">anderer</div>
+                <div class="math-user-value">
+                    {{ isPlayer1() ? duel.state?.p2Value : duel.state?.p1Value }}
+                </div>
+            </div>
+            <button @click="sendInput()">Send</button>
+            <button @click="$emit('close')">close</button>
         </div>
     </div>
 </template>
@@ -54,7 +96,7 @@ const doInputFocus = () => {
     flex-direction: column;
 }
 
-.math-term-container {
+.math-item-container {
     display: flex;
     flex-direction: row;
     flex: 1;
@@ -64,7 +106,7 @@ const doInputFocus = () => {
     width: 100%;
 }
 
-.math-term-input {
+.math-user-input {
     all: unset;
     padding: 1rem;
     background-color: aliceblue;

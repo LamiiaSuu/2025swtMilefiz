@@ -70,22 +70,6 @@ onBeforeUnmount(() => {
   audioEngine.stopMusic()
 })
 
-            activeDuels[0] = {
-              duelId: 0,
-
-              firstMeeple: 0,
-              secondMeeple: 1,
-              targetField: 1,
-
-              miniGameId: 0,
-              miniGameName: 0,
-              miniGameType: 0,
-
-              timeOut: 10,
-
-              state: {}
-            }
-
 </script>
 
 <template>
