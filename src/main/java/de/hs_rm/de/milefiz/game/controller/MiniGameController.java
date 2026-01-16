@@ -15,6 +15,7 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
+import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.game.service.DuelResolutionService;
 import de.hs_rm.de.milefiz.game.service.DuelService;
@@ -23,6 +24,7 @@ import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
 
 /**
  * Controller für die Mini-Spiele innerhalb eines Duells.
@@ -332,6 +334,43 @@ public class MiniGameController {
                                 game.getPhasePlayer2(),
                                 game.getWinner(),
                                 game.isFinished());
+
+                messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
+
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/quiz/getQuestion")
+        public void handleQuestionRequest(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
+                        Player player) throws LobbyNotFoundException {
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+                QuizGame game = (QuizGame) duelService.getMiniGame(duelId);
+
+                broadcastQuizUpdate(lobby, duelId, game);
+        }
+
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/quiz/sendAnswer/{answerIndex}")
+        public void handleAnswerRequest(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
+                        Player player, @DestinationVariable int answerIndex) throws LobbyNotFoundException {
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+                QuizGame game = (QuizGame) duelService.getMiniGame(duelId);
+
+                game.checkAnswer(player.getId(), answerIndex);
+
+                broadcastQuizUpdate(lobby, duelId, game);
+
+                if (game.isFinished()) {
+                        Duel duel = duelService.getDuel(duelId);
+                        duelResolutionService.sendLoserHome(lobby, duel, game);
+                }
+        }
+
+        public void broadcastQuizUpdate(Lobby lobby, UUID duelId, QuizGame game) {
+
+                var event = new FrontendQuizGameUpdateEvent(duelId, game.getPlayer1(), game.getPlayer2(),
+                                game.getQuestionDTO(), game.getWinner(), game.isFinished());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }
