@@ -22,10 +22,7 @@ const onContinueClick = () => {
 
 const onTutorialClick = () => {
     audio.playSfx('click')
-}
-
-const onControlsClick = () => {
-    audio.playSfx('click')
+    milefizStore.openPopUpTutorial()
 }
 
 const onSettingsClick = () => {
@@ -45,9 +42,8 @@ const onBackClick = () => {
         <!-- MI'lefiz Header -->
         <Header>{{ tUI('POPUP_MENU') }}</Header>
 
-
         <!-- Close Button -->
-        <PopUpCloseButton></PopUpCloseButton>
+        <PopUpCloseButton>(Esc)</PopUpCloseButton>
 
         <div class="popup">
 
@@ -108,12 +104,6 @@ const onBackClick = () => {
     margin-bottom: 7vh;
 
     padding-top: 5vh;
-}
-
-.settings-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2vh;
 }
 
 .button-container {

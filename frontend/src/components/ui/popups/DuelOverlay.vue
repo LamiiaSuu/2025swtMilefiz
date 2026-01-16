@@ -1,20 +1,19 @@
 <template>
   <div class="overlay no-select">
     <div class="duel-container">
-      <div v-for="duel in duels" :key="duel.duelId" class="duel-card">
-        <component
-          :is="resolveComponent(duel)"
-          :duel="duel"
-          @close="() => emit('close', duel.duelId)"
-        />
+
+      <div v-for="duel in duels" :key="duel.duelId"
+        :class="['duel-card', { 'duel-card-wide': duel.miniGameType === 'SlotGame' }]">
+        <component :is="resolveComponent(duel)" :duel="duel" @close="() => emit('close', duel.duelId)" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import DiceMiniGame from "../minigames/DiceMiniGame.vue"
+import EinarmigerBanditMiniGame from '@/components/ui/minigames/EinarmigerBandit/EinarmigerBanditMiniGame.vue'
 import BalloonMinigame from '../minigames/balloonMinigame/BalloonMinigame.vue';
-import DiceMiniGame from '../minigames/DiceMiniGame.vue'
 import QuizMinigame from '../minigames/QuizMinigame.vue';
 
 const props = defineProps<{
@@ -26,9 +25,13 @@ const emit = defineEmits<{
 }>()
 
 function resolveComponent(duel: any) {
+  console.log('Resolving component for duel:', duel)
+  console.log('miniGameType:', duel.miniGameType)
   switch (duel.miniGameType) {
     case 'DiceGame':
       return DiceMiniGame
+    case "EinarmigerBanditGame":
+      return EinarmigerBanditMiniGame
     case 'BalloonGame':
       return BalloonMinigame
     case 'QuizGame':
@@ -43,7 +46,7 @@ function resolveComponent(duel: any) {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, .55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,7 +67,11 @@ function resolveComponent(duel: any) {
   border-radius: 14px;
   color: white;
   min-width: 340px;
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .35);
+}
+
+.duel-card-wide {
+  min-width: 600px;
 }
 
 .no-select {

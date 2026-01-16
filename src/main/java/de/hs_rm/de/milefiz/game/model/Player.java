@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.game.service.NamingService;
 
 public class Player implements Principal {
@@ -87,6 +88,14 @@ public class Player implements Principal {
 
     public int getMaxEnergy() {
         return MAX_ENERGY;
+    }
+
+    /**
+     * Wird genutzt, wenn in {@link EinarmigerBanditGame#checkFinished()} ein
+     * Jackpot erzielt wurde, um dem Ggewinner volle Energie zu geben.
+     */
+    public void jackpot() {
+        this.energy = MAX_ENERGY;
     }
 
     public boolean hasMoved() {
@@ -306,7 +315,8 @@ public class Player implements Principal {
      * @author Kevin Tran
      */
     public void consumeEnergy() {
-        if (hasFullEnergy()) energy = 0;
+        if (hasFullEnergy())
+            energy = 0;
     }
 
     @Override

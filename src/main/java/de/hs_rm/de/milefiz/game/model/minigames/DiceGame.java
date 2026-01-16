@@ -19,12 +19,7 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
  */
 public class DiceGame extends MiniGame {
 
-    private final ScheduledExecutorService scheduler =
-        Executors.newSingleThreadScheduledExecutor();
-
-    private boolean timeoutStarted = false;
-
-    private final Random random = new Random();
+    private final Random random;
 
     private UUID player1;
     private UUID player2;
@@ -34,6 +29,13 @@ public class DiceGame extends MiniGame {
 
     public DiceGame(int timeOut) {
         super(1, "Würfel-Spiel", timeOut);
+        this.random = new Random();
+    }
+
+    //Für die Unit-Tests
+    DiceGame(int timeOut, Random random) {
+        super(1, "Würfel-Spiel", timeOut);
+        this.random = random;
     }
 
     /**
@@ -44,12 +46,6 @@ public class DiceGame extends MiniGame {
         this.player1 = p1;
         this.player2 = p2;
 
-        // Starte den Timeout
-        if (!timeoutStarted) {
-            timeoutStarted = true;
-
-            scheduler.schedule(this::forceMissingRolls, getTimeOut(), TimeUnit.SECONDS);
-        }
     }
 
     /**
@@ -121,7 +117,7 @@ public class DiceGame extends MiniGame {
         return player2;
     }
     
-    private void forceMissingRolls() {
+    public void forceMissingActions() {
 
         // Nur, Wenn nicht gerollt
         if (isFinished()) return;
