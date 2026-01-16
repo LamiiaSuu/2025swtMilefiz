@@ -122,6 +122,9 @@ const handleColorClick = (color: string) => {
       Colorbrain
     </h2>
 
+    <!-- COUNTDOWN -->
+    <CountdownBar :seconds="duel.timeOut" />
+
     <!-- ANLEITUNGSTEXT -->
     <h3 v-if="!isFinished">
       {{ tUI('MINIGAME_COLORBRAIN_INSTRUCTION') }}
@@ -130,8 +133,14 @@ const handleColorClick = (color: string) => {
       {{ displayWord }}
     </h2>
 
-    <!-- COUNTDOWN -->
-    <CountdownBar :seconds="duel.timeOut" />
+    <!-- Color Buttons -->
+    <div class="button-container">
+      <button v-for="color in shuffledColors" :key="color" :disabled="hasClicked || isFinished"
+        :class="['color-button', color.toLowerCase()]" @click="handleColorClick(color)">
+        {{ color }}
+      </button>
+    </div>
+
 
     <!-- Spieler -->
     <div class="players">
@@ -148,14 +157,6 @@ const handleColorClick = (color: string) => {
           {{ getPlayerNameByMeeple(duel.secondMeeple) }}
         </h3>
       </div>
-    </div>
-
-    <!-- Color Buttons -->
-    <div class="button-container">
-      <button v-for="color in shuffledColors" :key="color" :disabled="hasClicked || isFinished"
-        :class="['color-button', color.toLowerCase()]" @click="handleColorClick(color)">
-        {{ color }}
-      </button>
     </div>
 
     <!-- GEWINNER/VERLIERER Anzeige -->
