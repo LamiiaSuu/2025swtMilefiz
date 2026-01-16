@@ -76,10 +76,11 @@ public class DuelServiceImpl implements DuelService {
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
             DuelResolutionService duelResolutionService) {
-        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
-        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
-
+        // gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
+        // gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
+        // gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout
+        // + 1)); 
+        gameFactories.add(() -> new ColorbrainGame(15));
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
         this.duelResolutionService = duelResolutionService;
@@ -259,7 +260,7 @@ public class DuelServiceImpl implements DuelService {
                     duel.getId(),
                     colorbrainGame.getPlayer1(),
                     colorbrainGame.getPlayer2(),
-                    null,
+                    colorbrainGame.getSelectedColorNames(),
                     colorbrainGame.getWinner(),
                     colorbrainGame.isFinished());
 
