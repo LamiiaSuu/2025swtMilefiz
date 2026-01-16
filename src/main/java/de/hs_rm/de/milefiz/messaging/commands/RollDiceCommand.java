@@ -1,5 +1,6 @@
 package de.hs_rm.de.milefiz.messaging.commands;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -11,4 +12,4 @@ import java.util.UUID;
  * 
  * @author Leon Schäfer
  */
-public record RollDiceCommand(UUID playerId) {}
+public record RollDiceCommand(UUID playerId, Optional<Integer> requestedValue) {}

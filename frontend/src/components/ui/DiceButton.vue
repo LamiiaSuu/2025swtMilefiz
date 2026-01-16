@@ -85,20 +85,32 @@ const onKeypress = (e: KeyboardEvent) => {
         audio.playSfx('gameHUD')
         rollDice()
     }
-}
 
+    // shift+1 - shift+6 für requested Dice rolls
+    if (e.shiftKey) {
+        const match = e.code.match(/^Digit([1-6])$/)
+        if (match) {
+            e.preventDefault()
+            const requestedValue = parseInt(match[1]!)
+            console.log("Würfeln mit gewünschten Wert:", requestedValue)
+            audio.playSfx('gameHUD')
+            rollDice(requestedValue)
+        }
+    }
+}
 
 /**
  * Versucht einen Würfelwurf im Backend auszulösen.
  * - wenn disabled: Abbruch
  * - sonst Anfrage ans Backend senden
  * - und visuelles Feedback für das Aktivieren des Buttons 
+ * @param requestedValue optionaler spezifischer Würfelwert (1-6)
  */
-function rollDice() {
+function rollDice(requestedValue?: number) {
     if (disabled.value) {
         triggerErrorAnimation()
     }
-    milefizStore.sendRollDice();
+    milefizStore.sendRollDice(requestedValue);
     triggerPressAnimation();
 }
 
