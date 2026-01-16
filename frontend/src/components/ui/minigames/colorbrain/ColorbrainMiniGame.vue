@@ -15,6 +15,13 @@ const emit = defineEmits<{
 const store = useMilefizStore()
 const waiting = ref<string | null>(null)
 
+const displayWord = computed(() => props.duel?.selectedColors?.[0] ?? "")
+const displayTextColor = computed(() => (props.duel?.selectedColors?.[1] ?? "WHITE").toLowerCase())
+
+const shuffledColors = ref<string[]>([])
+const hasShuffled = ref(false)
+
+const hasClicked = ref(false)
 
 /**
  * Prüft ob der aktuelle Spieler gewonnen hat.
@@ -66,12 +73,11 @@ watch(
   }
 )
 
-const shuffledColors = ref<string[]>([])
-
 watch(
   () => props.duel?.selectedColors,
   (colors) => {
     if (!colors) return
+    if (hasShuffled.value) return
 
     const copy = [...colors]
     for (let i = copy.length - 1; i > 0; i--) {
@@ -80,12 +86,10 @@ watch(
     }
 
     shuffledColors.value = copy
+    hasShuffled.value = true
   },
   { immediate: true }
 )
-
-
-const hasClicked = ref(false)
 
 /**
  * Verarbeitet einen Klick auf eine Farbe.
@@ -98,14 +102,9 @@ const handleColorClick = (color: string) => {
 
   store.sendLobbyMessage(
     `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/colorbrain/click`,
-    {
-      id: store.gamedata.playerId,
-      color
-    }
+    color
   )
 }
-
-
 
 </script>
 
@@ -117,13 +116,26 @@ const handleColorClick = (color: string) => {
       Colorbrain
     </h2>
 
+    <!-- COUNTDOWN -->
+    <CountdownBar :seconds="duel.timeOut" />
+
+
     <!-- ANLEITUNGSTEXT -->
     <h3 v-if="!isFinished">
       {{ tUI('MINIGAME_COLORBRAIN_INSTRUCTION') }}
     </h3>
 
-    <!-- COUNTDOWN -->
-    <CountdownBar :seconds="duel.timeOut" />
+    <h2 class="colorbrain-word" :class="displayTextColor">
+      {{ displayWord }}
+    </h2>
+
+    <!-- Color Buttons -->
+    <div class="button-container">
+      <button v-for="color in shuffledColors" :key="color" :disabled="hasClicked || isFinished"
+        :class="['color-button', color.toLowerCase()]" @click="handleColorClick(color)">
+        {{ color }}
+      </button>
+    </div>
 
     <!-- Spieler -->
     <div class="players">
@@ -140,14 +152,6 @@ const handleColorClick = (color: string) => {
           {{ getPlayerNameByMeeple(duel.secondMeeple) }}
         </h3>
       </div>
-    </div>
-
-    <!-- Color Buttons -->
-    <div class="button-container">
-      <button v-for="color in shuffledColors" :key="color" :disabled="hasClicked || isFinished"
-        :class="['color-button', color.toLowerCase()]" @click="handleColorClick(color)">
-        {{ color }}
-      </button>
     </div>
 
     <!-- GEWINNER/VERLIERER Anzeige -->
@@ -235,17 +239,24 @@ button {
   margin: 0 0 8px 0;
 }
 
-.dice-roll-button {
+.colorbrain-word {
   font-family: "Acme", sans-serif;
+  font-size: 2.4rem;
   font-weight: 900;
-  font-size: 1.6rem;
-
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
+  text-align: center;
+  margin: 10px 0 14px 0;
+  text-transform: uppercase;
 }
+
+/* Textfarben-Klassen */
+.red { color: red; }
+.blue { color: blue; }
+.green { color: green; }
+.yellow { color: yellow; }
+.orange { color: orange; }
+.pink { color: hotpink; }
+.purple { color: purple; }
+.black { color: black; }
 
 .winner-text,
 .loser-text {
