@@ -111,16 +111,6 @@ const handleColorClick = (color: string) => {
 
 }
 
-watch(
-  () => props.duel?.duelId,
-  () => {
-    hasShuffled.value = false
-    shuffledColors.value = []
-    hasClicked.value = false 
-  },
-  { immediate: true }
-)
-
 
 </script>
 

@@ -345,7 +345,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
-            gamedata.moved = false
           }
           if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId) {
             const old = activeDuels[event.duelId] ?? { state: {} }
@@ -365,6 +364,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
               state: {...old.state}
             }
+            gamedata.moved = false
             document.exitPointerLock()
           }
 
