@@ -74,12 +74,30 @@ public class ColorbrainGame extends MiniGame {
      */
     @Override
     public void forceMissingActions() {
-        if (!isFinished()) {
-            setWinner(null); // Beide verlieren
-            setFinished(true);
-            notifyFinished(); // Triggert Callback in DuelService
+        if (isFinished()) return;
+
+        boolean p1Clicked = player1Pick != null;
+        boolean p2Clicked = player2Pick != null;
+
+        boolean p1Correct = p1Clicked && isCorrectColor(player1Pick);
+        boolean p2Correct = p2Clicked && isCorrectColor(player2Pick);
+
+        if (p1Correct && !p2Correct) {
+            setWinner(player1);
+        } else if (!p1Correct && p2Correct) {
+            setWinner(player2);
+        } else if (p1Correct && p2Correct) {
+            // beide richtig -> erster Klick gewinnt
+            setWinner(firstClicker);
+        } else {
+            // keiner richtig (oder keiner geklickt)
+            setWinner(null);
         }
+
+        setFinished(true);
+        notifyFinished();
     }
+
 
     /**
      * Erstellt eine Liste aller moeglichen Farben, durchmischt diese zufaellig und
