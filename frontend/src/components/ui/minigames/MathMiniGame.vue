@@ -13,16 +13,19 @@ const emit = defineEmits<{
     (e: 'close'): void // Wird aufgerufen wenn das Spiel beendet ist
 }>()
 
-const inputRef = ref();
+const inputRef = ref(); // referenz des input-felds
 
-const inputValue = ref<number>();
+const inputValue = ref<number>(); // wert des input-felds
 
-const isInputSend = ref<boolean>(false);
+const isInputSend = ref<boolean>(false); // ob Eingabe-Wert abgesendet wurde
 
-const termRepresentation = computed(() => props.duel.state?.termRepresentation)
+const termRepresentation = computed(() => props.duel.state?.termRepresentation) // String Representation des Rechenterms
 
 const store = useMilefizStore()
 
+/**
+ * Gibt Array von {@link Player}, bei denen Player[0] immer der aktuelle Spieler ist
+ */
 const players = computed<(Player | undefined)[]>(() => {
     let players: (Player | undefined)[] = [];
     players.push(store.getOwnPlayer());
@@ -43,27 +46,39 @@ const players = computed<(Player | undefined)[]>(() => {
 })
 
 onMounted(() => {
+    // initialisierung und abfrage des terms
     store.sendLobbyMessage(
         `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/math/term`,
         { id: store.gamedata.playerId }
     );
 
-    doInputFocus();
+    doInputFocus(); // fokus
 })
 
 const doInputFocus = () => {
     inputRef.value?.focus();
 };
 
+/**
+ * Prüft ob aktueller Spieler gewonnen hat
+ */
 function isWinner() {
     return props.duel.state?.winner === store.gamedata.playerId
 }
 
+
+/**
+ * Prüft ob aktueller Spieler player1 ist.
+ * Wichtig für konsistente Anzeige in der UI
+ */
 const isPlayer1 = () => {
     return props.duel.state?.player1 === store.gamedata.playerId
 }
 
 
+/**
+ * Sendet Input-Wert zur Verarbeitung an Backend
+ */
 const sendInput = () => {
     isInputSend.value = true;
     store.sendLobbyMessage(
@@ -72,33 +87,54 @@ const sendInput = () => {
     )
 }
 
-const myInput = () => (isPlayer1() ? props.duel.state?.p1Value : props.duel.state?.p2Value);
+/**
+ * Gibt den aktuellen Eingabe-Wert des Spielers aus dem Duel-Objekt aus
+ */
+const playerInput = () => (isPlayer1() ? props.duel.state?.p1Value : props.duel.state?.p2Value);
 
-const otherInput = () => (isPlayer1() ? props.duel.state?.p2Value : props.duel.state?.p1Value);
 
+/**
+ * Gibt den aktuellen Eingabe-Wert des Gegners aus dem Duell-Objekt aus
+ */
+const rivalInput = () => (isPlayer1() ? props.duel.state?.p2Value : props.duel.state?.p1Value);
+
+
+/**
+ * Validiert den Eingabe-Wert des Spielers gegen die richtige Lösung und gibt entsprechend einen String 'right'/'wrong' zurück.
+ * WIchtig für Anzeige in UI.
+ */
 const validatePlayerInput = computed(() => {
     if (!props.duel.state?.finished) return '';
-    if (myInput() == null) return 'wrong';
-    return (myInput() == props.duel.state?.termValue) ? 'right' : 'wrong';
+    if (playerInput() == null) return 'wrong';
+    return (playerInput() == props.duel.state?.termValue) ? 'right' : 'wrong';
 });
 
+
+/**
+ * Validiert den Eingabe-Wert des Gegners gegen die richtige Lösung und gibt entsprechend einen String 'right'/'wrong' zurück.
+ * WIchtig für Anzeige in UI.
+ */
 const validateRivalInput = computed(() => {
     if (!props.duel.state?.finished) return '';
-    if (otherInput() == null) return 'wrong';
-    return (otherInput() == props.duel.state?.termValue) ? 'right' : 'wrong';
+    if (rivalInput() == null) return 'wrong';
+    return (rivalInput() == props.duel.state?.termValue) ? 'right' : 'wrong';
 });
 
+
+/**
+ * Überprüft in Duel-Objekt ob Duel beendet
+ */
 const isFinished = computed(() => {
     return props.duel?.state?.finished ?? false
 })
 
 watch(isFinished, (finished) => {
     isInputSend.value = true;
-    inputValue.value = myInput();
+    inputValue.value = playerInput();
     if (finished) {
         setTimeout(() => {
             emit('close')
-        }, 2000)
+        }, 2000) // schließt nach beenden des Minispiels das Fenster nach 2 Sekunden
     }
 })
 
@@ -114,6 +150,7 @@ watch(isFinished, (finished) => {
         <CountdownBar :seconds="duel.timeOut" />
 
         <div class="math-container">
+            <!-- Anzeige des Terms -->
             <div class="math-item-container">
                 <div class="math-term-value align-right">
                     <div class="value-box">
@@ -127,27 +164,31 @@ watch(isFinished, (finished) => {
                     </div>
                 </div>
             </div>
+            <!-- Spieler Eingabe und Wert -->
             <div class="math-item-container">
-                <div class="math-user-name align-right">{{ players[0]?.playerName ?? 'Player1' }} ({{
-                    tUI('MINIGAME_MATH_YOURSELF') }})</div>
+                <div class="math-user-name align-right">{{ players[0]?.playerName ?? 'Player1' }} ({{ tUI('MINIGAME_MATH_YOURSELF') }})</div>
                 <div class="math-term-value align-center"> = </div>
                 <div class="math-user-value">
                     <input class="value-box math-user-input" :class="validatePlayerInput" :disabled="isInputSend"
                         name="math-value" type="number" ref="inputRef" v-model="inputValue" />
                 </div>
             </div>
+            <!-- Gegner Wert -->
             <div v-if="duel.state?.finished" class="math-item-container">
                 <div class="math-user-name align-right">{{ players[1]?.playerName ?? 'Player2' }}</div>
                 <div class="math-term-value align-center"> = </div>
                 <div class="math-user-value">
-                    <div class="value-box" :class="validateRivalInput">{{ otherInput() ?? '' }}</div>
+                    <div class="value-box" :class="validateRivalInput">{{ rivalInput() ?? '' }}</div>
                 </div>
             </div>
+            <!-- Button zum Validieren -->
             <div v-if="!duel.state?.finished" class="math-item-container">
                 <div>
-                    <button class="math-button" :disabled="isInputSend" @click="sendInput()">{{ tUI('MINIGAME_MATH_CHECK') }}</button>
+                    <button class="math-button" :disabled="isInputSend" @click="sendInput()">{{
+                        tUI('MINIGAME_MATH_CHECK') }}</button>
                 </div>
             </div>
+            <!-- Anzeige des Gewinners -->
             <div v-if="duel.state?.finished" class="winner-big">
                 <span v-if="isWinner()" class="winner-text">
                     {{ tUI('DUEL_WON') }}
@@ -285,7 +326,6 @@ input::-webkit-inner-spin-button {
     margin: 0;
 }
 
-/* Hide spin buttons in Firefox */
 input[type="number"] {
     -moz-appearance: textfield;
 }

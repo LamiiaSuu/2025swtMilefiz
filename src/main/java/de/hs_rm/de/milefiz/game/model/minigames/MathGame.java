@@ -3,45 +3,54 @@ package de.hs_rm.de.milefiz.game.model.minigames;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 
 public class MathGame extends MiniGame {
 
-    private static final Logger logger = LoggerFactory.getLogger(MathGame.class);
 
+    // Wahrscheinlichkeit (0.0 - 1.0), mit der ein schwerer Term ausgewählt wird
     @Value("${minigame.mathgame.schwerwahrs}")
     private double schwerwahrs;
 
-    private UUID player1;
-    private UUID player2;
+    private UUID player1; // ID des ersten Spielers, Initiator
+    private UUID player2; // ID des zweiten Spielers
 
-    private UUID firstFinished = null;
+    private UUID firstFinished = null; // ID des Spielers, der als ersten seinen Eingabe-Wert gespeichert hat
 
-    private Integer p1Value = null;
-    private Integer p2Value = null;
+    private Integer p1Value = null; // Eingabe von Spieler1, Initial null
+    private Integer p2Value = null; // EIngabe von Spieler2, Initial null
 
-    private Term term;
+    private Term term; // Aktuelle Term-Instanz
 
+    /**
+     * Erstellt neue Minigame-Instanz mit angegebenem Timeout
+     * @param timeOut Timeout in Sekunden, nach Ablauf wird {@link #forceMissingActions()} aufgerufen
+     */
     public MathGame(int timeOut) {
         super(3, "Kopfrechnen-Spiel", timeOut);
         term = new Term(schwerwahrs);
     }
 
+    /**
+     * Initialisierung des Minigames mit Spielern des Duells
+     * @param p1 ID des ersten Spielers, Auslöser des Duel-Events
+     * @param p2 ID des zweiten Spielers
+     */
     public void initPlayers(UUID p1, UUID p2) {
         player1 = p1;
         player2 = p2;
-
-        logger.info("gerade wird hier values geinited!!!");
     }
 
+    /**
+     * Setzt den Eingabe-Wert für den jeweils angegebenen Spieler, falls Eingabe noch nicht gesetzt.
+     * Es wird in {@code firstFinished} hinterlegt ob der Spieler der erste ist, der einen Eingabe-Wert abgespeichert hat.
+     * Nach dem Setzen wird geprüft, ob für beide Spieler Eingabe-Werte vorliegen ({@link #checkFinished()}).
+     * @param playerid ID des speichernden Spielers
+     * @param value Wert der abgespeichert werden soll, Integer
+     */
     public void setValue(UUID playerid, int value) {
         if (playerid.equals(player1) && p1Value == null) {
             p1Value = value;
@@ -57,21 +66,29 @@ public class MathGame extends MiniGame {
         checkFinished();
     }
 
+    /**
+     * Überprüft ob die Bedingungen zum Auflösen des Minispiels erfüllt sind.
+     * Wenn beide Spieler einen Eingabe-Wert gespeichert haben, wird {@link #checkValues()} aufgerufen und das Spiel als fertig gesetzt.
+     */
     private void checkFinished() {
 
         if (p1Value == null || p2Value == null) {
             return;
         }
-
-        logger.info("gerade wird hier gecheckt!!!");
         checkValues();
 
         setFinished(true);
         notifyFinished();
     }
 
+    /**
+     * Bestimmt den Gewinner des Minispiels.
+     * Es gewinnt der Spielermit der richtigen Antwort.
+     * Haben beide Spieler die richtige Antwort gegeben, gewinnt derjenige Spieler, der zuerst gesetzt hat.
+     * Hat keiner der Spieler die richtige Antwort verlieren beide, der Gewinner wird auf null gesetzt.
+     */
     private void checkValues() {
-        logger.info("gerade wird hier values gecheckt!!!");
+
         if (term.getTermValue().equals(p1Value) && term.getTermValue().equals(p2Value)) {
             setWinner(firstFinished);
         } else if (term.getTermValue().equals(p1Value)) {
@@ -83,6 +100,12 @@ public class MathGame extends MiniGame {
         }
     }
 
+
+    /**
+     * Beendet das Minigame nach Ablauf des Timers.
+     * Ist das Spiel nicht schon vorher beendet worden, wird {@link #checkValues()} aufgerufen und das Spiel als fertig gesetzt.
+     */
+    @Override
     public void forceMissingActions() {
         if (!isFinished()) {
             checkValues();
@@ -90,6 +113,8 @@ public class MathGame extends MiniGame {
             notifyFinished(); // Triggert Callback in DuelService
         }
     }
+
+    // Getter
 
     public UUID getPlayer1() {
         return player1;
@@ -115,6 +140,11 @@ public class MathGame extends MiniGame {
         return term.getTermRepresentation();
     }
 
+    /**
+     * Hilfsklasse zur Generierung und Berechnung von Rechentermen für die Aufgaben.
+     * Generierung mit zwei Operanden und Operation (Addition, Substraktion, Multiplikation)
+     * Wahrscheinlichkeit zur Ausgabe eines schweren Terms.
+     */
     private class Term {
 
         private final Random random = new Random();
@@ -127,12 +157,19 @@ public class MathGame extends MiniGame {
         private Integer termValue;
         private Operations operation;
 
+        /**
+         * Schwere Terme
+         */
         private static final List<GanzSchwer> schwereTerme = List.of(
                 new GanzSchwer(121, 27, 3264, Operations.MUL),
                 new GanzSchwer(226, 79, 147, Operations.SUB),
                 new GanzSchwer(132, 4, 528, Operations.MUL),
                 new GanzSchwer(273, 192, 465, Operations.ADD));
 
+        /**
+         * Mögliche Operationen
+         * {@link #getRandom()} liefert zufällige Operation
+         */
         private enum Operations {
             ADD("+"), SUB("-"), MUL("×");
 
@@ -152,14 +189,26 @@ public class MathGame extends MiniGame {
             }
         }
 
+        /**
+         * Repräsentation eines schweren Terms.
+         * Besteht wie {@link Term} aus termElement1, termElement2, termValue und operation
+         */
         private record GanzSchwer(int termElement1, int termElement2, int termValue, Operations operation) {
         }
 
+        /**
+         * @param schwerwahrs Wahrscheinlichkeit für schweren Term
+         */
         public Term(double schwerwahrs) {
             this.schwerwahrs = schwerwahrs;
             generateTerm();
         }
 
+        /**
+         * Erzeugung des eigentlichen Terms
+         * Auswahl eines schweren Terms mit Wahrscheinlichkeit {@code schwerwahrs} oder
+         * Erzeugung eines zufälligen Terms aus Multiplikation, Addition oder Subtraktion
+         */
         private void generateTerm() {
 
             if (random.nextDouble() < schwerwahrs) {
