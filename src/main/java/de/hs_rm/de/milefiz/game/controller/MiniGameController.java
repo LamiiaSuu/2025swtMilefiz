@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
@@ -15,6 +16,7 @@ import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
+import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
@@ -24,6 +26,7 @@ import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
@@ -417,6 +420,59 @@ public class MiniGameController {
                                 game.getP2(),
                                 game.getMoveP1(),
                                 game.getMoveP2(),
+                                game.getWinner(),
+                                game.isFinished());
+
+                messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
+
+        /**
+         * 
+         * @param lobbyId
+         * @param duelId
+         * @param player
+         * @param clickedColorName
+         * @throws LobbyNotFoundException
+         */
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/colorbrain/click")
+        public void handleColorbrainClick(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
+                        Player player, @Payload String clickedColorName) throws LobbyNotFoundException {
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+                ColorbrainGame game = (ColorbrainGame) duelService.getMiniGame(duelId);
+
+                // Quotes entfernen falls Payload als JSON-String kommt ("RED")
+                String cleaned = clickedColorName == null ? "" : clickedColorName.trim();
+
+                if (cleaned.startsWith("\"") && cleaned.endsWith("\"") && cleaned.length() >= 2) {
+                        cleaned = cleaned.substring(1, cleaned.length() - 1);
+                }
+
+                if(clickedColorName != null) {
+                        ColorbrainGame.ColorbrainColor clickedColor = ColorbrainGame.ColorbrainColor
+                                .valueOf(cleaned.toUpperCase());
+
+                        game.handlePlayerClick(player.getId(), clickedColor);
+
+                        broadcastColorbrainUpdate(lobby, duelId, game);
+                }
+        }
+
+        /**
+         * 
+         * @param lobby
+         * @param duelId
+         * @param game
+         */
+        public void broadcastColorbrainUpdate(Lobby lobby, UUID duelId, ColorbrainGame game) {
+
+                var event = new FrontendColorbrainGameUpdateEvent(
+                                duelId,
+                                game.getPlayer1(),
+                                game.getPlayer2(),
+                                game.getPlayer1Pick(),
+                                game.getPlayer2Pick(),
+                                game.getSelectedColorNames(),
                                 game.getWinner(),
                                 game.isFinished());
 

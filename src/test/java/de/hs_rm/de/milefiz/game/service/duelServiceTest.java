@@ -125,7 +125,7 @@ class DuelServiceImplTest {
         var games = service.getGames();
 
         assertNotNull(games);
-        assertEquals(5, games.size());
+        assertEquals(6, games.size());
     }
 
     @Test
