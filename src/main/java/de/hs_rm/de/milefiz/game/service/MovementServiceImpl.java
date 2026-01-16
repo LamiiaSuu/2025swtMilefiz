@@ -658,6 +658,9 @@ public class MovementServiceImpl implements MovementService {
         if (miniGame instanceof BalloonGame game) {
             game.initPlayers(player.getId(), rivalPlayer.getId());
         }
+        if (miniGame instanceof RockPaperScissorsGame game) {
+            game.initPlayers(player.getId(), rivalPlayer.getId());
+        }
 
         return new FrontendDuelEvent(
                 duel.getId(),

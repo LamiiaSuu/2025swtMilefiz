@@ -56,7 +56,7 @@
                 {{ tUI('DUEL_LOST') }}
             </span>
 
-            <!-- optional: Unentschieden -->
+            <!-- Unentschieden -->
             <div v-if="duel.state?.winner === null" class="draw-text">
                 {{ tUI('RPS_DRAW')}}
             </div>
@@ -76,32 +76,23 @@ const emit = defineEmits<{ (e: "close"): void }>()
 const store = useMilefizStore()
 const waiting = ref<string | null>(null)
 
-// winner check
 function isWinner() {
     return props.duel.state?.winner === store.gamedata.playerId
 }
 
-// optional: wenn dein Event p1/p2 nicht enthält, kannst du das auch über Meeple->Player machen.
-// hier minimal: "isMe" kann auch einfach immer false sein, renderMoveFor nutzt es nur für "?" logic.
 function isMe(playerId: string | undefined) {
     if (!playerId) return false
     return playerId === store.gamedata.playerId
 }
 
-// falls du deinen eigenen Move schon im state hast: keine Mehrfachwahl
 function hasAlreadyChosen() {
     const myId = store.gamedata.playerId
-    // wir erkennen "ich bin p1 oder p2" über winner? -> schwierig. simplest:
-    // wenn dein Backend im Update p1/p2 mitsendet, kannst du das sauberer machen.
-    // pragmatisch: wenn moveP1 oder moveP2 schon gesetzt ist UND dein Name dem Spieler gehört, ok.
-    // Hier: wir erlauben nur einmal klicken pro Duel-Overlay (waiting).
     return waiting.value === props.duel.duelId
 }
 
 function choose(move: "SCISSORS" | "ROCK" | "PAPER") {
     waiting.value = props.duel.duelId
 
-    // Backend erwartet hier aktuell: Payload = String (z.B. "SCHERE")
     store.sendLobbyMessage(
         `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/rockpaperscissors/choose`,
         move
@@ -109,10 +100,9 @@ function choose(move: "SCISSORS" | "ROCK" | "PAPER") {
 }
 
 function renderMoveFor(move: string | null | undefined, reveal: boolean) {
-    // Wenn nicht gewählt:
+   
     if (!move) return "…"
 
-    // Optional: Gegnerwahl bis Ende verstecken (nice UX)
     if (!props.duel.state?.finished && !reveal) return "?"
 
     switch (move) {
@@ -147,7 +137,6 @@ function getPlayerColorByMeeple(meepleId: string) {
     return "#ffffff"
 }
 
-// auto close nachdem es fertig ist
 watch(
     () => props.duel.state?.finished,
     finished => {
