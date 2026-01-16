@@ -197,7 +197,7 @@ public class MovementServiceImpl implements MovementService {
         if (barrierFields.contains(nextField)) {
             Meeple barrier = getBarrierByField(board, nextField);
             return tryMovingOnBarrier(meeple, barrier, currentField, nextField, player, otherOwnMeepleFields,
-                    rivalMeepleFields, rivalMeeples, lobby);
+                    rivalMeepleFields, rivalMeeples, barrierFields, lobby);
         }
 
         // FELD DURCH EIGENEN MEEPLE BLOCKIERT
@@ -297,7 +297,7 @@ public class MovementServiceImpl implements MovementService {
                 "Moving Barrier {} in lobby {} by player '{}' to field {} (sessionId={})",
                 moveBarrCmd.barrierId(),
                 lobbyId,
-                player != null ? player.getName() : "anonymous",
+                player.getName(),
                 moveBarrCmd.targetFieldId());
 
         Lobby lobby = null;
@@ -430,7 +430,8 @@ public class MovementServiceImpl implements MovementService {
      */
     private FrontendEvent tryMovingOnBarrier(Meeple meeple, Meeple barrier, Field currentField, Field targetField,
             Player player,
-            Set<Field> otherOwnMeepleFields, Set<Field> rivalMeepleFields, Set<Meeple> rivalMeeples, Lobby lobby) {
+            Set<Field> otherOwnMeepleFields, Set<Field> rivalMeepleFields, Set<Meeple> rivalMeeples,
+            Set<Field> barrierFields, Lobby lobby) {
         // wenn man genau drauf landet, darf man sie verschieben
         if (player.getRemainingMoves() == LAST_MOVE) {
             endTurnWithMove(player, meeple, targetField);
@@ -442,7 +443,9 @@ public class MovementServiceImpl implements MovementService {
                     player.getRemainingMoves(),
                     barrier.getId());
         }
-        if (otherOwnMeepleFields.contains(currentField)) {
+        if (otherOwnMeepleFields.contains(currentField)
+                && !isStuck(currentField, meeple.getLastField(), player.getRemainingMoves(), otherOwnMeepleFields,
+                        barrierFields, rivalMeeples, rivalMeepleFields)) {
             return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
         }
 
@@ -458,6 +461,31 @@ public class MovementServiceImpl implements MovementService {
         }
 
         return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
+    }
+
+    /**
+     * Prüft, ob vom aktuellen Feld aus noch mindestens ein legaler Zug möglich ist.
+     *
+     * @param currentField      das aktuelle Feld
+     * @param lastField         das zuletzt betretene Feld
+     * @param remainingMoves    die Anzahl der verbleibenden Züge
+     * @param ownMeepleFields   Felder, auf denen eigene Meeples stehen
+     * @param barrierFields     Felder, die von Barrieren belegt sind
+     * @param rivalMeeples      gegnerische Meeples
+     * @param rivalMeepleFields Felder, auf denen gegnerische Meeples stehen
+     * @return false, wenn noch mindestens ein legales Nachbarfeld existiert,
+     *         sonst true
+     */
+    private boolean isStuck(Field currentField, Field lastField, int remainingMoves,
+            Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
+            Set<Field> rivalMeepleFields) {
+        for (Field neighbor : currentField.getNeighbours().values()) {
+            if (isLegalTarget(neighbor, lastField, remainingMoves, ownMeepleFields, barrierFields, rivalMeeples,
+                    rivalMeepleFields)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -844,48 +872,48 @@ public class MovementServiceImpl implements MovementService {
      *
      * @author Maximilian Ressel
      */
-    private boolean isLegalTarget(Field nextField, Field lastField, int remainingMoves,
+    private boolean isLegalTarget(Field targetField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
             Set<Field> rivalMeepleFields) {
 
         // FELD EXISTIERT NICHT
-        if (nextField == null) {
+        if (targetField == null) {
             logger.info("No Field in this Direction");
             return false;
         }
 
         // RICHTUNGSWECHSEL
-        if (lastField != null && nextField.equals(lastField)) {
+        if (lastField != null && targetField.equals(lastField)) {
             logger.info("Cant change direction!");
             return false;
         }
 
         // START
-        if (nextField.getType().isStart()) {
+        if (targetField.getType().isStart()) {
             logger.info("Cant go back to a starting field!");
             return false;
         }
 
         // ZIEL
-        if (nextField.getType().isEnd() && remainingMoves != LAST_MOVE) {
+        if (targetField.getType().isEnd() && remainingMoves != LAST_MOVE) {
             logger.info("Cant enter End with remaining moves!");
             return false;
         }
 
         // BARRIERE
-        if (barrierFields.contains(nextField) && remainingMoves != LAST_MOVE) {
+        if (barrierFields.contains(targetField) && remainingMoves != LAST_MOVE) {
             logger.info("Field blocked by barrier (not your last move)!");
             return false;
         }
 
         // EIGENE MEEPLE
-        if (ownMeepleFields.contains(nextField) && remainingMoves == LAST_MOVE) {
+        if (ownMeepleFields.contains(targetField) && remainingMoves == LAST_MOVE) {
             logger.info("Field blocked by own Meeple!");
             return false;
         }
 
         // DUELL ZWISCHEN ZWEI ANDEREN MEEPLE
-        if (isOccupiedByDuelingMeeples(nextField, rivalMeeples, rivalMeepleFields) && remainingMoves == LAST_MOVE) {
+        if (isOccupiedByDuelingMeeples(targetField, rivalMeeples, rivalMeepleFields) && remainingMoves == LAST_MOVE) {
             logger.info("Field blocked by dueling Meeple!");
             return false;
         }
