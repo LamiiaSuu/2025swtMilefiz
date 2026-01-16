@@ -3,20 +3,16 @@ package de.hs_rm.de.milefiz.game.model.minigames;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hs_rm.de.milefiz.game.model.Color;
-import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.Player;
 
 /**
- * Implementierung des einarmiger Bandit-Minigames für Duelle.
+ * Implementierung des Slot Machine-Minigames für Duelle.
  * 
  * <p>
  * In diesem Minigame stoppen beide Spieler einen virtuellen Slot-Automaten,
@@ -39,20 +35,21 @@ import de.hs_rm.de.milefiz.game.model.Player;
  * 
  * @author Leon Schäfer
  */
-public class EinarmigerBanditGame extends MiniGame {
+public class SlotMachineGame extends MiniGame {
 
-    private static final Logger logger = LoggerFactory.getLogger(EinarmigerBanditGame.class);
+    private static final Logger logger = LoggerFactory.getLogger(SlotMachineGame.class);
 
     private final Random random = new SecureRandom();
 
-    private final int COLOR_PLAYER1 = 0;
-    private final int COLOR_PLAYER2 = 1;
-    private final int JACKPOT_NUMBER = 3;
+    private static final int COLOR_PLAYER1 = 0;
+    private static final int COLOR_PLAYER2 = 1;
+    private static final int NUMBER_OF_COLORS = 2;
+    private static final int JACKPOT_NUMBER = 3;
 
     private boolean jackpot = false;
 
-    private Color resultP1;
-    private Color resultP2;
+    private Color resultPlayer1;
+    private Color resultPlayer2;
     private Color resultComp;
 
     private Color possibleColorResults[] = new Color[2];
@@ -60,8 +57,8 @@ public class EinarmigerBanditGame extends MiniGame {
     private Player player1;
     private Player player2;
 
-    public EinarmigerBanditGame(int timeOut) {
-        super(6, "Einarmiger-Bandit-Game", timeOut);
+    public SlotMachineGame(int timeOut) {
+        super(6, "Slot-Machine-Game", timeOut);
     }
 
     /**
@@ -73,17 +70,16 @@ public class EinarmigerBanditGame extends MiniGame {
      * Timeout, der fehlende Slot stoppt nach Ablauf der Zeit erzwingt.
      * </p>
      * 
-     * @param p1    ID des ersten Spielers
-     * @param p2    ID des zweiten Spielers
-     * @param lobby Lobby, aus der die Spielerdaten geladen werden
+     * @param player1 Der ersten Spielers
+     * @param player2 Der zweiten Spielers
      * 
      * @author Leon Schäfer
      */
-    public void initPlayers(UUID p1, UUID p2, Lobby lobby) {
-        logger.info("Initializing Einarmiger Bandit game for players {} and {}", p1, p2);
+    public void initPlayers(Player player1, Player player2) {
+        logger.info("Initializing Slot Machine game for players {} and {}", player1, player2);
 
-        player1 = lobby.getPlayer(p1);
-        player2 = lobby.getPlayer(p2);
+        this.player1 = player1;
+        this.player2 = player2;
 
         possibleColorResults[COLOR_PLAYER1] = player1.getColor();
         possibleColorResults[COLOR_PLAYER2] = player2.getColor();
@@ -109,20 +105,14 @@ public class EinarmigerBanditGame extends MiniGame {
     public void stop(UUID playerId) {
         logger.info("Player {} stopping slot", playerId);
 
-        int value = random.nextInt(2);
+        int value = random.nextInt(NUMBER_OF_COLORS);
 
-        // Spieler 1
-        if (resultP1 == null && playerId.equals(player1.getId())) {
-            resultP1 = possibleColorResults[value];
-            logger.info("Player 1 result: {}", resultP1);
-
-        }
-
-        // Spieler 2
-        else if (resultP2 == null && playerId.equals(player2.getId())) {
-            resultP2 = possibleColorResults[value];
-            logger.info("Player 2 result: {}", resultP2);
-
+        if (resultPlayer1 == null && playerId.equals(player1.getId())) {
+            resultPlayer1 = possibleColorResults[value];
+            logger.info("Player 1 result: {}", resultPlayer1);
+        } else if (resultPlayer2 == null && playerId.equals(player2.getId())) {
+            resultPlayer2 = possibleColorResults[value];
+            logger.info("Player 2 result: {}", resultPlayer2);
         }
 
         // Wenn beide gewürfelt haben → Gewinner bestimmen
@@ -159,61 +149,19 @@ public class EinarmigerBanditGame extends MiniGame {
      */
     private void checkFinished() {
 
-        if (resultP1 == null || resultP2 == null) {
+        if (resultPlayer1 == null || resultPlayer2 == null) {
             return;
-        } else {
-            resultComp = possibleColorResults[random.nextInt(2)];
-            logger.info("Computer result: {}", resultComp);
         }
+        resultComp = drawComputerColor();
+        logger.info("Computer result: {}", resultComp);
 
-        // Zähle wie oft jede Farbe vorgekommen ist
-        int countPlayer1Color = 0;
-        int countPlayer2Color = 0;
-
-        // Was hat P1 gezogen
-        if (resultP1.equals(possibleColorResults[COLOR_PLAYER1]))
-            countPlayer1Color++;
-        else
-            countPlayer2Color++;
-
-        // Was hat P2 gezogen
-        if (resultP2.equals(possibleColorResults[COLOR_PLAYER1]))
-            countPlayer1Color++;
-        else
-            countPlayer2Color++;
-
-        // Was hat Comp gezogen
-        if (resultComp.equals(possibleColorResults[COLOR_PLAYER1]))
-            countPlayer1Color++;
-        else
-            countPlayer2Color++;
-
+        int[] colorCounts = countColors();
+        int countPlayer1Color = colorCounts[COLOR_PLAYER1];
+        int countPlayer2Color = colorCounts[COLOR_PLAYER2];
         logger.info("Color counts - Player1Color: {}, Player2Color: {}",
                 countPlayer1Color, countPlayer2Color);
-        // Jackpot Auswertung
-        if (countPlayer1Color == JACKPOT_NUMBER) {
-            logger.info("JACKPOT! Player 1 ({}) wins with full energy!", player1.getId());
 
-            setWinner(player1.getId());
-            jackpot = true;
-            player1.jackpot();
-        } else if (countPlayer2Color == JACKPOT_NUMBER) {
-            logger.info("JACKPOT! Player 2 ({}) wins with full energy!", player2.getId());
-
-            setWinner(player2.getId());
-            jackpot = true;
-            player2.jackpot();
-        }
-        // normale Auswertung
-        else if (countPlayer1Color > countPlayer2Color) {
-            logger.info("Player 1 ({}) wins", player1.getId());
-
-            setWinner(player1.getId());
-        } else if (countPlayer2Color > countPlayer1Color) {
-            logger.info("Player 2 ({}) wins", player2.getId());
-
-            setWinner(player2.getId());
-        }
+        determineWinner(countPlayer1Color, countPlayer2Color);
 
         setFinished(true);
         notifyFinished();
@@ -248,50 +196,93 @@ public class EinarmigerBanditGame extends MiniGame {
         if (isFinished())
             return;
 
-        //Besonders wichtig fürs Testen!
-        if (possibleColorResults[COLOR_PLAYER1] == null ||
-            possibleColorResults[COLOR_PLAYER2] == null) {
-
-            // Wenn null -> Dummy-Farben
-            possibleColorResults[COLOR_PLAYER1] = Color.RED;
-            possibleColorResults[COLOR_PLAYER2] = Color.BLUE;
+        if (resultPlayer1 == null) {
+            resultPlayer1 = possibleColorResults[COLOR_PLAYER2];
+            logger.info("Player 1 timeout - forced result: {}", resultPlayer1);
         }
 
-        if (resultP1 == null) {
-            resultP1 = possibleColorResults[COLOR_PLAYER2];
-            logger.info("Player 1 timeout - forced result: {}", resultP1);
+        if (resultPlayer2 == null) {
+            resultPlayer2 = possibleColorResults[COLOR_PLAYER1];
+            logger.info("Player 2 timeout - forced result: {}", resultPlayer2);
         }
 
-        if (resultP2 == null) {
-            resultP2 = possibleColorResults[COLOR_PLAYER1];
-            logger.info("Player 2 timeout - forced result: {}", resultP2);
-        }
-
-        checkFinished(); // normal auswerten
+        checkFinished();
     }
 
-    public Color getResultP1() {
-        return resultP1;
+    public Color getResultPlayer1() {
+        return resultPlayer1;
     }
 
-    public Color getResultP2() {
-        return resultP2;
+    public Color getResultPlayer2() {
+        return resultPlayer2;
     }
 
     public Color getResultComp() {
         return resultComp;
     }
 
-    public UUID getP1() {
-        return player1.getId();
+    public Player getPlayer1() {
+        return player1;
     }
 
-    public UUID getP2() {
-        return player2.getId();
+    public Player getPlayer2() {
+        return player2;
     }
 
     public boolean isJackpot() {
         return jackpot;
+    }
+
+    private Color drawComputerColor() {
+        return possibleColorResults[random.nextInt(NUMBER_OF_COLORS)];
+    }
+
+    private int[] countColors() {
+        int[] countColor = { 0, 0 };
+
+        if (resultPlayer1.equals(possibleColorResults[COLOR_PLAYER1])) {
+            countColor[COLOR_PLAYER1]++;
+        } else {
+            countColor[COLOR_PLAYER2]++;
+        }
+
+        if (resultPlayer2.equals(possibleColorResults[COLOR_PLAYER1])) {
+            countColor[COLOR_PLAYER1]++;
+        } else {
+            countColor[COLOR_PLAYER2]++;
+        }
+
+        if (resultComp.equals(possibleColorResults[COLOR_PLAYER1])) {
+            countColor[COLOR_PLAYER1]++;
+        } else {
+            countColor[COLOR_PLAYER2]++;
+        }
+
+        return countColor;
+    }
+
+    private void determineWinner(int countPlayer1Color, int countPlayer2Color) {
+        if (countPlayer1Color == JACKPOT_NUMBER) {
+            handleJackpot(player1);
+        } else if (countPlayer2Color == JACKPOT_NUMBER) {
+            handleJackpot(player2);
+        } else if (countPlayer1Color > countPlayer2Color) {
+            handleNormalWin(player1);
+        } else if (countPlayer2Color > countPlayer1Color) {
+            handleNormalWin(player2);
+        }
+    }
+
+    private void handleJackpot(Player winner) {
+        logger.info("JACKPOT! Player ({}) wins duel and full energy", winner.getId());
+        setWinner(winner.getId());
+        jackpot = true;
+        winner.jackpot();
+    }
+
+    private void handleNormalWin(Player winner) {
+        logger.info("Player ({}) wins", winner.getId());
+        setWinner(winner.getId());
     }
 
 }

@@ -41,7 +41,7 @@ class DuelServiceImplTest {
 
         ReflectionTestUtils.setField(service, "diceGameTimeout", 5);
         ReflectionTestUtils.setField(service, "balloonGameTimeout", 5);
-        ReflectionTestUtils.setField(service, "einarmigerBanditGameTimeout", 5);
+        ReflectionTestUtils.setField(service, "slotMachineGameTimeout", 5);
     }
 
     @Test

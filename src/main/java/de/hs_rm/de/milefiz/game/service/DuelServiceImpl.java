@@ -21,12 +21,12 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
-import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendSlotMachineGameUpdateEvent;
 import jakarta.annotation.PreDestroy;
 
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
@@ -75,14 +75,14 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.quiz.timeout}")
     private int quizGameTimeout;
 
-    @Value("${minigame.einarmigerBanditGame.timeout}")
-    private int einarmigerBanditGameTimeout;
+    @Value("${minigame.slotMachineGame.timeout}")
+    private int slotMachineGameTimeout;
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
             DuelResolutionService duelResolutionService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+        gameFactories.add(() -> new SlotMachineGame(slotMachineGameTimeout));
 
         gameFactories.add(() -> new QuizGame(quizGameTimeout));
         this.lobbyManager = lobbyManager;
@@ -243,28 +243,25 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, balloon);
-        }
-
-        else if (game instanceof EinarmigerBanditGame einarmigerBandit) {
-            Integer energy = null;
+        } else if (game instanceof SlotMachineGame slotMachine) {
+            int energy = 0;
             if (game.getWinner() != null) {
                 energy = lobby.getPlayer(game.getWinner()).getEnergy();
             }
-            var update = new FrontendEinarmigerBanditGameUpdateEvent(
+            var update = new FrontendSlotMachineGameUpdateEvent(
                     duel.getId(),
-                    einarmigerBandit.getP1(),
-                    einarmigerBandit.getP2(),
-                    einarmigerBandit.getResultP1(),
-                    einarmigerBandit.getResultP2(),
-                    einarmigerBandit.getResultComp(),
-                    einarmigerBandit.getWinner(),
-                    einarmigerBandit.isJackpot(),
-                    energy != null ? energy : 0,
-                    einarmigerBandit.isFinished());
+                    slotMachine.getPlayer1().getId(),
+                    slotMachine.getPlayer2().getId(),
+                    slotMachine.getResultPlayer1(),
+                    slotMachine.getResultPlayer2(),
+                    slotMachine.getResultComp(),
+                    slotMachine.getWinner(),
+                    slotMachine.isJackpot(),
+                    energy,
+                    slotMachine.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
-            duelResolutionService.sendLoserHome(lobby, duel, einarmigerBandit);
-
+            duelResolutionService.sendLoserHome(lobby, duel, slotMachine);
         }
 
         if (game instanceof QuizGame quiz) {

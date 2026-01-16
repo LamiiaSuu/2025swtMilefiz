@@ -83,7 +83,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    *  - OWN_MEEPLE: Ein eigenes Meeple steht auf diesem Feld
    *  - INVALID: Feld ist nicht für eine Sperre auswählbar (Start-/Zielfeld)
    */
-  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE' 
+  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE'
   /**
    * Reactive state für die MiniMap-Komponente.
    * Verwaltet die Anzeige und Interaktion mit der Barrieren-Verschiebungs-Map.
@@ -375,9 +375,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
-        if (event.type === "EINARMIGER_BANDIT_GAME_UPDATE") {
-          console.log("EINARMIGER_BANDIT_GAME_UPDATE received:", event)
-
+        if (event.type === "SLOT_MACHINE_GAME_UPDATE") {
+          console.log("SLOT_MACHINE_GAME_UPDATE received:", event)
+          debugger;
           const duel = activeDuels[event.duelId]
           if (!duel) {
             console.log("Duel not found for ID:", event.duelId)
@@ -385,13 +385,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           }
 
           console.log("Updating duel state:", {
-            resultP1: event.resultP1,
-            resultP2: event.resultP2,
+            resultP1: event.resultPlayer1,
+            resultP2: event.resultPlayer2,
             resultComp: event.resultComp
           })
 
-          duel.state.resultP1 = event.resultP1
-          duel.state.resultP2 = event.resultP2
+          duel.state.resultP1 = event.resultPlayer1
+          duel.state.resultP2 = event.resultPlayer2
           duel.state.resultComp = event.resultComp
           duel.state.winner = event.winner
           duel.state.jackpot = event.jackpot
@@ -816,7 +816,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     // Zunächst Start und Zielfelder als INVALID markieren, dann überprüfen, ob ein Feld bereits durch eine Sperre oder fremdes Meeple besetzt ist 
     for (const f of board.fields) {
-      if (f.barrier || f.type!='NORMAL') occ[f.id] = 'OCCUPIED'
+      if (f.barrier || f.type != 'NORMAL') occ[f.id] = 'OCCUPIED'
     }
 
     // Wenn lobby fehlt, können own vs foreign meeples nicht unterschieden werden -> nur Barrieren markieren

@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
 import de.hs_rm.de.milefiz.game.service.NamingService;
 
 public class Player implements Principal {
@@ -91,7 +91,7 @@ public class Player implements Principal {
     }
 
     /**
-     * Wird genutzt, wenn in {@link EinarmigerBanditGame#checkFinished()} ein
+     * Wird genutzt, wenn in {@link SlotMachineGame#checkFinished()} ein
      * Jackpot erzielt wurde, um dem Ggewinner volle Energie zu geben.
      */
     public void jackpot() {
