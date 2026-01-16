@@ -190,6 +190,8 @@ public class DuelServiceImpl implements DuelService {
                 duel.getId(),
                 game.getPlayer1(),
                 game.getPlayer2(),
+                game.getPlayer1Pick(),
+                game.getPlayer2Pick(),
                 game.getSelectedColorNames(), // hier sind die Farben
                 null, // noch kein Gewinner
                 false // noch nicht fertig
@@ -260,6 +262,8 @@ public class DuelServiceImpl implements DuelService {
                     duel.getId(),
                     colorbrainGame.getPlayer1(),
                     colorbrainGame.getPlayer2(),
+                    colorbrainGame.getPlayer1Pick(),
+                    colorbrainGame.getPlayer2Pick(),
                     colorbrainGame.getSelectedColorNames(),
                     colorbrainGame.getWinner(),
                     colorbrainGame.isFinished());

@@ -78,26 +78,13 @@ public class ColorbrainGame extends MiniGame {
             return;
         }
 
-        boolean p1Clicked = player1Pick != null;
-        boolean p2Clicked = player2Pick != null;
+        boolean player1Clicked = player1Pick != null;
+        boolean player2Clicked = player2Pick != null;
 
-        boolean p1Correct = p1Clicked && isCorrectColor(player1Pick);
-        boolean p2Correct = p2Clicked && isCorrectColor(player2Pick);
+        boolean player1Correct = player1Clicked && isCorrectColor(player1Pick);
+        boolean player2Correct = player2Clicked && isCorrectColor(player2Pick);
 
-        if (p1Correct && !p2Correct) {
-            setWinner(player1);
-        } else if (!p1Correct && p2Correct) {
-            setWinner(player2);
-        } else if (p1Correct && p2Correct) {
-            // beide richtig -> erster Klick gewinnt
-            setWinner(firstClicker);
-        } else {
-            // keiner richtig (oder keiner geklickt)
-            setWinner(null);
-        }
-
-        setFinished(true);
-        notifyFinished();
+        findWinner(player1Correct, player2Correct);
     }
 
     /**
@@ -161,17 +148,29 @@ public class ColorbrainGame extends MiniGame {
         if (isFinished()) {
             return;
         }
-            
+
         boolean player1Correct = isCorrectColor(player1Pick);
         boolean player2Correct = isCorrectColor(player2Pick);
 
+        findWinner(player1Correct, player2Correct);
+    }
+
+    /**
+     * Prueft welcher der beiden Spieler gewonnen hat.
+     * 
+     * @param player1Correct Wahr, wenn Spieler 1 die richtige Farbe geklickt hat, sonst falsch
+     * @param player2Correct Wahr, wenn Spieler 2 die richtige Farbe geklickt hat, sonst falsch
+     */
+    private void findWinner(boolean player1Correct, boolean player2Correct) {
         if (player1Correct && !player2Correct) {
             setWinner(player1);
         } else if (!player1Correct && player2Correct) {
             setWinner(player2);
         } else if (player1Correct && player2Correct) {
+            // beide richtig -> erster Klick gewinnt
             setWinner(firstClicker);
         } else {
+            // keiner richtig (oder keiner geklickt)
             setWinner(null);
         }
 
@@ -195,6 +194,24 @@ public class ColorbrainGame extends MiniGame {
      */
     public UUID getPlayer2() {
         return player2;
+    }
+
+    /**
+     * Gibt die Farbe die Spieler 1 geklickt hat zurueck.
+     * 
+     * @return die Farbauswahl von Spieler 1
+     */
+    public String getPlayer1Pick() {
+        return player1Pick != null ? player1Pick.name() : null;
+    }
+
+    /**
+     * Gibt die Farbe die Spieler 2 geklickt hat zurueck.
+     * 
+     * @return die Farbauswahl von Spieler 2
+     */
+    public String getPlayer2Pick() {
+        return player2Pick != null ? player2Pick.name() : null;
     }
 
     /**

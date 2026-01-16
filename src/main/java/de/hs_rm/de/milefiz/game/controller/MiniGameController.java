@@ -383,6 +383,8 @@ public class MiniGameController {
                                 duelId,
                                 game.getPlayer1(),
                                 game.getPlayer2(),
+                                game.getPlayer1Pick(),
+                                game.getPlayer2Pick(),
                                 game.getSelectedColorNames(),
                                 game.getWinner(),
                                 game.isFinished());
