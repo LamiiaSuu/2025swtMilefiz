@@ -259,7 +259,7 @@ public class DuelServiceImpl implements DuelService {
                     duel.getId(),
                     colorbrainGame.getPlayer1(),
                     colorbrainGame.getPlayer2(),
-                    null,
+                    colorbrainGame.getSelectedColorNames(),
                     colorbrainGame.getWinner(),
                     colorbrainGame.isFinished());
 
