@@ -98,10 +98,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   // Handle normale Buchstaben
   if (e.key.length === 1 && e.key.match(/[a-zA-ZäöüÄÖÜß\-]/i)) {
     e.preventDefault()
-    
-    // Buchstabe in Großbuchstaben umwandeln
-    const upperKey = e.key.toUpperCase()
-    sendKeyPress(upperKey)
+    sendKeyPress(e.key)
   }
 }
 
@@ -232,7 +229,7 @@ watch(isFinished, (finished) => {
 </template>
 
 <style scoped>
-.dice-card {
+/* .dice-card {
   position: relative;
   width: 600px;
   max-width: 90vw;
@@ -245,7 +242,7 @@ watch(isFinished, (finished) => {
   align-items: center;
   font-family: 'Acme', sans-serif;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
+} */
 
 .dice-title {
   font-family: "Acme", sans-serif;

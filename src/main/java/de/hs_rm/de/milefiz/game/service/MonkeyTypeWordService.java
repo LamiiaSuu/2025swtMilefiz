@@ -30,8 +30,7 @@ public class MonkeyTypeWordService {
             
             if(wordsArray != null && wordsArray.isArray()) {
                 words = objectMapper.convertValue(wordsArray, 
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
-                words = words.stream().map(String::toUpperCase).collect(Collectors.toList());    
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));  
             } else {
                 words = List.of("MILEFIZ", "TOASTER", "WANDERPOKAL");
             }
