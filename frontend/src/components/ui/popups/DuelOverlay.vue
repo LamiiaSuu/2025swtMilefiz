@@ -17,6 +17,7 @@ import BalloonMinigame from '../minigames/balloonMinigame/BalloonMinigame.vue';
 import QuizMinigame from '../minigames/QuizMinigame.vue';
 import SchereSteinPapier from "../minigames//SchereSteinPapier/SchereSteinPapier.vue";
 import ColorbrainMiniGame from "../minigames/colorbrain/ColorbrainMiniGame.vue";
+import MonkeyTypeGame from "../minigames/monkeyType/MonkeyTypeGame.vue";
 
 const props = defineProps<{
   duels: any[]
@@ -42,8 +43,10 @@ function resolveComponent(duel: any) {
       return SchereSteinPapier
     case 'ColorbrainGame':
       return ColorbrainMiniGame
+    case 'MonkeyTypeGame':
+      return MonkeyTypeGame
     default:
-      return BalloonMinigame
+      return MonkeyTypeGame
   }
 }
 </script>

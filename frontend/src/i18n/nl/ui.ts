@@ -73,6 +73,8 @@ export const UI_NL: Record<UIKey, string> = {
     MINIGAME_COLORBRAIN_PINK: "Roze",
     MINIGAME_COLORBRAIN_PURPLE: "Paars",
     MINIGAME_COLORBRAIN_BLACK: "Zwart",
+    MINIGAME_MONKEY_TYPE_TITLE: 'Apen Tikken',
+    MINIGAME_MONKEY_TYPE_INSTRUCTION: 'Typ het woord correct en zo snel mogelijk!',
     CONFIRM: "Bevestigen",
     MINIMAP_BARRIER_MOVE: "Barrière verplaatsen",
     MINIMAP_OWN_MEEPLE: "Eigen meeple",

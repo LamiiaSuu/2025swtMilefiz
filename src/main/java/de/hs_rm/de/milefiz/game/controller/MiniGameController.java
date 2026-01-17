@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
@@ -15,10 +14,12 @@ import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.dto.minigames.MonkeyTypeInputDTO;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
+import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.game.service.DuelResolutionService;
@@ -30,11 +31,8 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.hs_rm.de.milefiz.messaging.events.FrontendMonkeyTypeGameUpdateEvent;
 
 /**
  * Controller für die Mini-Spiele innerhalb eines Duells.
@@ -346,6 +344,96 @@ public class MiniGameController {
                                 game.isFinished());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
+
+        /**
+         * Verarbeitet eine Anfrage für das Target-Word im MonkeyTypeGame.
+         * 
+         * Analog zu /quiz/getQuestion: Frontend fragt das Wort an,
+         * Backend sendet Update-Event mit dem Wort.
+         *
+         * @param lobbyId ID der Lobby
+         * @param duelId  ID des Duells
+         * @param player  Spieler, der das Wort anfordert
+         * @throws LobbyNotFoundException wenn die Lobby nicht gefunden wird
+         */
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/monkeyType/getWord")
+        public void handleGetWordRequest(
+                        @DestinationVariable UUID lobbyId,
+                        @DestinationVariable UUID duelId,
+                        Player player) throws LobbyNotFoundException {
+
+                logger.info("Player {} requesting word for monkeyType duel {}",
+                                player.getId(), duelId);
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+                MonkeyTypeGame game = (MonkeyTypeGame) duelService.getMiniGame(duelId);
+
+                // Initialisiere Spieler
+                if (game.getPlayer1() == null) {
+                        logger.info("Initializing players for monkeyType game {}", duelId);
+                        Duel duel = duelService.getDuel(duelId);
+                        game.initPlayers(duel.getPlayer1(), duel.getPlayer2(), lobby);
+                }
+
+                // Sende Update mit targetWord an alle Clients
+                broadcastMonkeyTypeUpdate(lobby, duelId, game);
+        }
+
+        /**
+         * Sendet den aktuellen Status des MonkeyTypeGames an alle Clients der Lobby.
+         * 
+         * Diese Methode wird aufgerufen:
+         * 1. Wenn das Wort angefordert wird (/getWord)
+         * 2. Wenn ein Spieler einen Buchstaben tippt (/input)
+         * 3. Wenn das Spiel beendet ist (in handleMiniGameFinished)
+         *
+         * @param lobby  die Lobby, in der das Duell stattfindet
+         * @param duelId ID des Duells
+         * @param game   aktueller Zustand des MonkeyTypeGames
+         */
+        public void broadcastMonkeyTypeUpdate(Lobby lobby, UUID duelId, MonkeyTypeGame game) {
+                logger.info("Broadcasting monkeyType update for duel {}", duelId);
+
+                var event = new FrontendMonkeyTypeGameUpdateEvent(
+                                duelId,
+                                game.getPlayer1(),
+                                game.getPlayer2(),
+                                game.getTargetWord(),
+                                game.getPlayer1Input(),
+                                game.getPlayer2Input(),
+                                game.getCorrectLettersPlayer1(),
+                                game.getCorrectLettersPlayer2(),
+                                game.getWinner(),
+                                game.isFinished());
+
+                messaging.sendEvent(new LobbyMessage(lobby, event));
+                logger.info("MonkeyType update sent for duel {}, word: {}",
+                                duelId, game.getTargetWord());
+        }
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/monkeyType/input")
+        public void handleTypingInput(
+                        @DestinationVariable UUID lobbyId,
+                        @DestinationVariable UUID duelId,
+                        @Payload MonkeyTypeInputDTO input) throws LobbyNotFoundException {
+
+                logger.info("Player {} typed char '{}' at position {} in duel {}",
+                                input.playerId(), input.typedChar(), input.position(), duelId);
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+                MonkeyTypeGame game = (MonkeyTypeGame) duelService.getMiniGame(duelId);
+
+                // Verarbeite die Eingabe
+                game.processInput(input.playerId(), input.typedChar(), input.position());
+
+                // Sende Update an alle Clients
+                broadcastMonkeyTypeUpdate(lobby, duelId, game);
+
+                // Wenn Spiel beendet, Verlierer zurücksetzen
+                if (game.isFinished()) {
+                        Duel duel = duelService.getDuel(duelId);
+                        duelResolutionService.sendLoserHome(lobby, duel, game);
+                }
         }
 
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/quiz/getQuestion")

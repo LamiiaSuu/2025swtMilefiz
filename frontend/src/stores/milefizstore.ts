@@ -451,7 +451,34 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
+        if (event.type === "MONKEY_TYPE_GAME_UPDATE") {
+          console.log("Event details:", {
+            duelId: event.duelId,
+            targetWord: event.targetWord,
+            targetWordLength: event.targetWord?.length,
+            player1Input: event.player1Input,
+            player2Input: event.player2Input
+          })
 
+          const duel = activeDuels[event.duelId]
+          if (!duel) {
+            console.error("❌ Kein Duel gefunden für ID:", event.duelId)
+            return
+          }
+          
+          duel.state = {
+            ...duel.state,
+            targetWord: event.targetWord || "",
+            player1: event.player1,
+            player2: event.player2,
+            player1Input: event.player1Input || "",
+            player2Input: event.player2Input || "",
+            correctLettersPlayer1: event.correctLettersPlayer1 || [],
+            correctLettersPlayer2: event.correctLettersPlayer2 || [],
+            winner: event.winner,
+            finished: event.finished
+          }
+        }
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0

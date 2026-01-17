@@ -74,6 +74,8 @@ export const UI_DE: Record<UIKey, string> = {
     MINIGAME_COLORBRAIN_PINK: "Pink",
     MINIGAME_COLORBRAIN_PURPLE: "Lila",
     MINIGAME_COLORBRAIN_BLACK: "Schwarz",
+    MINIGAME_MONKEY_TYPE_TITLE: 'Abtipp-Affe', 
+    MINIGAME_MONKEY_TYPE_INSTRUCTION: 'Tippe das Wort korrekt und so schnell wie möglich ab!',
     WINNING_TAB: 'Gewinnen',
     WINNING_TUTORIAL: 'Gewonnen hast du, sobald du als erste*r eine deiner Spielfiguren mit der genau passenden Würfelzahl ins Ziel bringst.',
     JUMPING_TAB: 'Hüpfen',
