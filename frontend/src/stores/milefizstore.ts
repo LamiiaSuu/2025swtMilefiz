@@ -83,7 +83,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    *  - OWN_MEEPLE: Ein eigenes Meeple steht auf diesem Feld
    *  - INVALID: Feld ist nicht für eine Sperre auswählbar (Start-/Zielfeld)
    */
-  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE' 
+  type Occupancy = 'FREE' | 'OCCUPIED' | 'OWN_MEEPLE'
   /**
    * Reactive state für die MiniMap-Komponente.
    * Verwaltet die Anzeige und Interaktion mit der Barrieren-Verschiebungs-Map.
@@ -343,10 +343,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
-            gamedata.moved = false;
           }
           if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId) {
+            const old = activeDuels[event.duelId] ?? { state: {} }
+
             activeDuels[event.duelId] = {
+              ...old,
               duelId: event.duelId,
 
               firstMeeple: event.firstMeepleId,
@@ -359,8 +361,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
               timeOut: event.timeOut,
 
-              state: {}
+              state: { ...old.state }
             }
+            gamedata.moved = false
             document.exitPointerLock()
           }
 
@@ -450,6 +453,47 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
         }
 
+        if (event.type === "COLORBRAIN_GAME_UPDATE") {
+          if (!activeDuels[event.duelId]) {
+            activeDuels[event.duelId] = { duelId: event.duelId, state: {} }
+          }
+
+          const duel = activeDuels[event.duelId]
+
+          duel.state.player1Pick = event.player1Pick
+          duel.state.player2Pick = event.player2Pick
+          duel.selectedColors = event.selectedColors
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
+        if (event.type === "MONKEY_TYPE_GAME_UPDATE") {
+          console.log("Event details:", {
+            duelId: event.duelId,
+            targetWord: event.targetWord,
+            targetWordLength: event.targetWord?.length,
+            player1Input: event.player1Input,
+            player2Input: event.player2Input
+          })
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) {
+            console.error("❌ Kein Duel gefunden für ID:", event.duelId)
+            return
+          }
+          
+          duel.state = {
+            ...duel.state,
+            targetWord: event.targetWord || "",
+            player1: event.player1,
+            player2: event.player2,
+            player1Input: event.player1Input || "",
+            player2Input: event.player2Input || "",
+            correctLettersPlayer1: event.correctLettersPlayer1 || [],
+            correctLettersPlayer2: event.correctLettersPlayer2 || [],
+            winner: event.winner,
+            finished: event.finished
+          }
+        }
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0
@@ -841,7 +885,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
     // Zunächst Start und Zielfelder als INVALID markieren, dann überprüfen, ob ein Feld bereits durch eine Sperre oder fremdes Meeple besetzt ist 
     for (const f of board.fields) {
-      if (f.barrier || f.type!='NORMAL') occ[f.id] = 'OCCUPIED'
+      if (f.barrier || f.type != 'NORMAL') occ[f.id] = 'OCCUPIED'
     }
 
     // Wenn lobby fehlt, können own vs foreign meeples nicht unterschieden werden -> nur Barrieren markieren

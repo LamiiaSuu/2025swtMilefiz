@@ -44,8 +44,6 @@ public class MovementServiceMeepleTest {
     @Mock
     private LobbyManager lobbyManager;
     private DuelService duelService;
-    private DuelResolutionService duelResolutionService;
-    FrontendMessagingService messaging;
 
     private MovementService movementService;
     private Lobby lobby;
@@ -58,6 +56,11 @@ public class MovementServiceMeepleTest {
     private final int NO_MOVES = 0;
     private final int LAST_MOVE = 1;
     private final int SECOND_TO_LAST_MOVE = 2;
+    @Mock
+    private FrontendMessagingService messaging;
+
+    @Mock
+    private DuelResolutionService duelResolutionService;
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
