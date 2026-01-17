@@ -469,12 +469,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             targetWord: event.targetWord || "",
             player1: event.player1,
             player2: event.player2,
-            player1Input: event.player1Input || "",
-            player2Input: event.player2Input || "",
-            correctLettersPlayer1: event.correctLettersPlayer1 || [],
-            correctLettersPlayer2: event.correctLettersPlayer2 || [],
+            player1Progress: event.player1Progress,
+            player2Progress: event.player2Progress,
             winner: event.winner,
-            finished: event.finished
+            finished: event.finished,
+            startedAt: event.startedAt
           }
         }
         if (event.type === "WIN") {
