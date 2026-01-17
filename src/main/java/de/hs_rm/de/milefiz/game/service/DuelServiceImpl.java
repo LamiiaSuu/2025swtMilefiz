@@ -326,15 +326,15 @@ public class DuelServiceImpl implements DuelService {
             duelResolutionService.sendLoserHome(lobby, duel, slotMachine);
         } else if (game instanceof MathGame mathGame) {
             var update = new FrontendMathGameUpdateEvent(
-                duel.getId(),
-                mathGame.getPlayer1(),
-                mathGame.getPlayer2(),
-                mathGame.getP1Value(),
-                mathGame.getP2Value(),
-                mathGame.getTermRepresentaion(),
-                mathGame.getTermValue(),
-                mathGame.getWinner(),
-                mathGame.isFinished());
+                    duel.getId(),
+                    mathGame.getPlayer1(),
+                    mathGame.getPlayer2(),
+                    mathGame.getP1Value(),
+                    mathGame.getP2Value(),
+                    mathGame.getTermRepresentaion(),
+                    mathGame.getTermValue(),
+                    mathGame.getWinner(),
+                    mathGame.isFinished());
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, mathGame);
@@ -363,8 +363,20 @@ public class DuelServiceImpl implements DuelService {
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, monkeyTypeGame);
 
-            
+        } else if (game instanceof RockPaperScissorsGame rockPaperScissorsGame) {
+            var update = new FrontendRockPaperScissorsGameUpdateEvent(
+                    duel.getId(),
+                    rockPaperScissorsGame.getP1(),
+                    rockPaperScissorsGame.getP2(),
+                    rockPaperScissorsGame.getMoveP1(),
+                    rockPaperScissorsGame.getMoveP2(),
+                    rockPaperScissorsGame.getWinner(),
+                    rockPaperScissorsGame.isFinished());
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, rockPaperScissorsGame);
+
         }
+
         duels.remove(duel.getId());
     }
 
