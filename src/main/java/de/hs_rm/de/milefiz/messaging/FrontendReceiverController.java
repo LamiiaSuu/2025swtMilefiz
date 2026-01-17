@@ -228,6 +228,7 @@ public class FrontendReceiverController {
             int number;
             if (command.requestedValue().isPresent()) {
                 if (!enableRequestedDiceRolls) {
+                    logger.warn("Player {} wanted to roll the dice with a specific value, but developermode.enableRequestedDiceRolls is false", command.playerId());
                     return new FrontendRollDiceRejectedEvent(command.playerId(), 0);
                 }
                 // Requested Würfelzahl, nur wenn es enabled ist
