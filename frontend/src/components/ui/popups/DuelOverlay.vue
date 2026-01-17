@@ -14,6 +14,7 @@
 import DiceMiniGame from "../minigames/DiceMiniGame.vue"
 import SlotMachineGame from '@/components/ui/minigames/SlotMachineMinigame/SlotMachineMinigame.vue'
 import BalloonMinigame from '../minigames/balloonMinigame/BalloonMinigame.vue';
+import MathMiniGame from '../minigames/MathMiniGame.vue';
 import QuizMinigame from '../minigames/QuizMinigame.vue';
 import SchereSteinPapier from "../minigames//SchereSteinPapier/SchereSteinPapier.vue";
 import ColorbrainMiniGame from "../minigames/colorbrain/ColorbrainMiniGame.vue";
@@ -37,6 +38,8 @@ function resolveComponent(duel: any) {
       return SlotMachineGame
     case 'BalloonGame':
       return BalloonMinigame
+    case 'MathGame':
+      return MathMiniGame
     case 'QuizGame':
       return QuizMinigame
     case "RockPaperScissorsGame":

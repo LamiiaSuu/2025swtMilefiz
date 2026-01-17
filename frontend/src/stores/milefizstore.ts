@@ -425,6 +425,21 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.finished = event.finished
         }
 
+          if (event.type === "MATH_GAME_UPDATE") {
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          console.log(event)
+          duel.state.player1 = event.player1
+          duel.state.player2 = event.player2
+          duel.state.p1Value = event.p1Value
+          duel.state.p2Value = event.p2Value
+          duel.state.termRepresentation = event.termRepresentation
+          duel.state.termValue = event.termValue
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
+
         if (event.type === "QUIZ_GAME_UPDATE") {
           const duel = activeDuels[event.duelId]
 
