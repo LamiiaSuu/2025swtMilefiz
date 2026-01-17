@@ -2,7 +2,6 @@ package de.hs_rm.de.milefiz.game.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.FieldType;
 
 @SpringBootTest
-public class BoardValidateTest {
+class BoardValidateTest {
 
     @Autowired
     private BoardService boardService;

@@ -37,7 +37,6 @@ public class GameServiceImpl implements GameService {
     private final DiceServiceImpl diceService;
     private final CooldownServiceImpl cooldownService;
     private final MovementService movementService;
-    private final PlantingService plantingService;
     private final ApplicationEventPublisher publisher;
     private Board testBoard;
 
@@ -56,7 +55,6 @@ public class GameServiceImpl implements GameService {
             CooldownServiceImpl cooldownService, MovementService movementService, PlantingService plantingService)
             throws IOException {
 
-        this.plantingService = plantingService;
 
         final String BOARD_PATH = "boards/standardBoard.json";
         ObjectMapper objectMapper = new ObjectMapper();
@@ -69,10 +67,6 @@ public class GameServiceImpl implements GameService {
 
         try {
             BoardDTO testBoardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
-            // if (!testBoardDTO.hasTrees()) {
-            //     logger.info("Test board has no trees, Generating local trees...");
-            //     testBoardDTO = this.plantingService.plantTrees(testBoardDTO, 0.1f); // TODO: test
-            // }
             testBoard = BoardMapper.mapToBoard(testBoardDTO);
             logger.info("Test board loaded successfully from: {}", BOARD_PATH);
         } finally {
@@ -138,7 +132,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Player player) {
 
-        logger.info("Processing movement command in lobby {} from player '{}': meeple {} moving {} (sessionId={})",
+        logger.info("Processing movement command in lobby {} from player '{}': meeple {} moving {}",
                 lobbyId,
                 player != null ? player.getName() : "anonymous",
                 moveCmd.meepleId(),
@@ -167,7 +161,7 @@ public class GameServiceImpl implements GameService {
     public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Player player) {
 
         logger.info(
-                "Processing MoveBarrierCommand in lobby {} from player '{}': barrier {} moving to field {} (sessionId={})",
+                "Processing MoveBarrierCommand in lobby {} from player '{}': barrier {} moving to field {}",
                 lobbyId,
                 player != null ? player.getName() : "anonymous",
                 moveBarrCmd.barrierId(),

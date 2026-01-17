@@ -74,20 +74,6 @@ public class PlantingServiceImpl implements PlantingService {
         int[] minPos = getMinPos(boardDTO);
         int[] maxPos = getMaxPos(boardDTO);
 
-        // // ursprung des koordinatensystems auf 0 und lässt einen rand um die
-        // // felder
-        // for (FieldDTO field : boardDTO.getFields()) {
-        // Position p = field.getPosition();
-        // field.setPosition(new Position(p.getX() + TREE_BORDER - minPos[0], p.getY() +
-        // TREE_BORDER - minPos[1]));
-
-        // }
-
-        // minPos = getMinPos(boardDTO);
-        // maxPos = getMaxPos(boardDTO);
-
-        //
-
         int boardWidth = maxPos[0] - minPos[0];
         int boardHeight = maxPos[1] - minPos[1];
 

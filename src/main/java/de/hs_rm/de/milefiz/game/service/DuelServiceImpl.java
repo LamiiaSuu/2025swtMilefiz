@@ -22,22 +22,22 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
-import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
-import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
-import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
 import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
+import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
+import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
+import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendSlotMachineGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMathGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMonkeyTypeGameUpdateEvent;
-import jakarta.annotation.PreDestroy;
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendSlotMachineGameUpdateEvent;
+import jakarta.annotation.PreDestroy;
 
 @Service
 public class DuelServiceImpl implements DuelService {
@@ -106,7 +106,7 @@ public class DuelServiceImpl implements DuelService {
 
             DuelResolutionService duelResolutionService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
-        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
+        gameFactories.add(() -> new BalloonGame(balloonGameTimeout + 2));
         gameFactories.add(() -> new SlotMachineGame(slotMachineGameTimeout));
         gameFactories.add(() -> new MathGame(mathGameTimeout));
         gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
@@ -341,7 +341,7 @@ public class DuelServiceImpl implements DuelService {
             duelResolutionService.sendLoserHome(lobby, duel, mathGame);
         }
 
-        if (game instanceof QuizGame quiz) {
+        else if (game instanceof QuizGame quiz) {
             var update = new FrontendQuizGameUpdateEvent(duel.getId(), quiz.getPlayer1(), quiz.getPlayer2(),
                     quiz.getQuestionDTO(), quiz.getWinner(),
                     quiz.isFinished());
