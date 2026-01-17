@@ -55,6 +55,15 @@ onMounted(() => {
     doInputFocus(); // fokus
 })
 
+const preventNonNumeric = (e: KeyboardEvent) => {
+  const allowedKeys = [ '0','1','2','3','4','5','6','7','8','9' ];
+
+  if (allowedKeys.includes(e.key)) {
+    return;
+  }
+  e.preventDefault();
+}
+
 const doInputFocus = () => {
     inputRef.value?.focus();
 };
@@ -170,7 +179,7 @@ watch(isFinished, (finished) => {
                 <div class="math-term-value align-center"> = </div>
                 <div class="math-user-value">
                     <input class="value-box math-user-input" :class="validatePlayerInput" :disabled="isInputSend"
-                        name="math-value" type="number" ref="inputRef" v-model="inputValue" />
+                        name="math-value" type="number" step="1" ref="inputRef" v-model="inputValue"  @keydown.stop="preventNonNumeric"/>
                 </div>
             </div>
             <!-- Gegner Wert -->
@@ -178,7 +187,7 @@ watch(isFinished, (finished) => {
                 <div class="math-user-name align-right">{{ players[1]?.playerName ?? 'Player2' }}</div>
                 <div class="math-term-value align-center"> = </div>
                 <div class="math-user-value">
-                    <div class="value-box" :class="validateRivalInput">{{ rivalInput() ?? '' }}</div>
+                    <div class="value-box" :class="validateRivalInput">{{ rivalInput() ?? '&nbsp;' }}</div>
                 </div>
             </div>
             <!-- Button zum Validieren -->

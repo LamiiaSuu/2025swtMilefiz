@@ -319,7 +319,7 @@ const handleKeydown = (e: KeyboardEvent) => {
 
   // Wenn ein Duell aktiv ist → alle Steuerungen blockieren
   if (Object.keys(milefizStore.activeDuels).length > 0) {
-    //e.preventDefault()
+    e.preventDefault()
     return
   }
 

@@ -13,7 +13,7 @@ public class MathGame extends MiniGame {
 
     // Wahrscheinlichkeit (0.0 - 1.0), mit der ein schwerer Term ausgewählt wird
     @Value("${minigame.mathgame.schwerwahrs}")
-    private double schwerwahrs;
+    private static double schwerwahrs;
 
     private UUID player1; // ID des ersten Spielers, Initiator
     private UUID player2; // ID des zweiten Spielers
@@ -30,8 +30,12 @@ public class MathGame extends MiniGame {
      * @param timeOut Timeout in Sekunden, nach Ablauf wird {@link #forceMissingActions()} aufgerufen
      */
     public MathGame(int timeOut) {
-        super(3, "Kopfrechnen-Spiel", timeOut);
-        term = new Term(schwerwahrs);
+        this(timeOut, schwerwahrs, new Random());
+    }
+
+    public MathGame(int timeOut, double schwerwahrs, Random random) {
+       super(3, "Kopfrechnen-Spiel", timeOut);
+        term = new Term(schwerwahrs, random);
     }
 
     /**
@@ -147,7 +151,7 @@ public class MathGame extends MiniGame {
      */
     private class Term {
 
-        private final Random random = new Random();
+        private final Random random;
 
         private double schwerwahrs = 0.1;
 
@@ -162,7 +166,7 @@ public class MathGame extends MiniGame {
          */
         private static final List<GanzSchwer> schwereTerme = List.of(
                 new GanzSchwer(121, 27, 3264, Operations.MUL),
-                new GanzSchwer(226, 79, 147, Operations.SUB),
+                new GanzSchwer(226, 79, 147, Operations.SUB), // wichtig für test
                 new GanzSchwer(132, 4, 528, Operations.MUL),
                 new GanzSchwer(273, 192, 465, Operations.ADD));
 
@@ -179,8 +183,8 @@ public class MathGame extends MiniGame {
                 op = string;
             }
 
-            private static Operations getRandom() {
-                return Operations.values()[new java.util.Random().nextInt(Operations.values().length)];
+            private static Operations getRandom(Random random) {
+                return Operations.values()[random.nextInt(Operations.values().length)];
             }
 
             @Override
@@ -199,8 +203,9 @@ public class MathGame extends MiniGame {
         /**
          * @param schwerwahrs Wahrscheinlichkeit für schweren Term
          */
-        public Term(double schwerwahrs) {
+        public Term(double schwerwahrs, Random random) {
             this.schwerwahrs = schwerwahrs;
+            this.random = random;
             generateTerm();
         }
 
@@ -212,12 +217,13 @@ public class MathGame extends MiniGame {
         private void generateTerm() {
 
             if (random.nextDouble() < schwerwahrs) {
-                GanzSchwer t = schwereTerme.get(random.nextInt(schwereTerme.size() - 1));
+                GanzSchwer t = schwereTerme.get(random.nextInt(schwereTerme.size()));
                 termElement1 = t.termElement1;
                 termElement2 = t.termElement2;
                 termValue = t.termValue;
+                operation = t.operation;
             } else {
-                operation = Operations.getRandom();
+                operation = Operations.getRandom(random);
 
                 switch (operation) {
                     case Operations.ADD:
