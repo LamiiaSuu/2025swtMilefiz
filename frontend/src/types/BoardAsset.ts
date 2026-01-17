@@ -17,7 +17,7 @@ export interface BoardAsset {
  * Positioniert entlang der Ränder und strategischen Punkten
  */
 export const standardBoardAssets: BoardAsset[] = [
-  { type: 'mountains', variant: 'rainbow', position: [22, 18, 130], scale: 8, rotation: 205 },
+  { type: 'mountains', variant: 'rainbow', position: [7, 18, 130], scale: 8, rotation: 180 },
 
   { type: 'easter_eggs', variant: 'supermarket', position: [-100, 0, -100], scale: 2, rotation: 0 },
   { type: 'easter_eggs', variant: 'Bernd', position: [-1, 0, 30], scale: 0.05, rotation: 160 },
