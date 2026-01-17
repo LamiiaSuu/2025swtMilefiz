@@ -95,14 +95,14 @@ public class DuelServiceImpl implements DuelService {
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
            
-            DuelResolutionService duelResolutionService, MonkeyTypeWordService monkeyTypeWordService) {
+            DuelResolutionService duelResolutionService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1)); 
         gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
         gameFactories.add(() -> new QuizGame(quizGameTimeout));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
-        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
+        // gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
@@ -327,10 +327,6 @@ public class DuelServiceImpl implements DuelService {
         }
 
         else if (game instanceof MonkeyTypeGame monkeyTypeGame) {
-            System.out.println("🟢 Sending MonkeyTypeGame update for duel: " + duel.getId());
-            System.out.println("🔍 targetWord: " + monkeyTypeGame.getTargetWord());
-            System.out.println("🔍 targetWord length: "
-                    + (monkeyTypeGame.getTargetWord() != null ? monkeyTypeGame.getTargetWord().length() : "NULL"));
             var update = new FrontendMonkeyTypeGameUpdateEvent(
                     duel.getId(),
                     monkeyTypeGame.getPlayer1(),
@@ -342,8 +338,6 @@ public class DuelServiceImpl implements DuelService {
                     monkeyTypeGame.getCorrectLettersPlayer2(),
                     monkeyTypeGame.getWinner(),
                     monkeyTypeGame.isFinished());
-
-            System.out.println("🔍 Update Event erstellt mit targetWord: " + update.targetWord());
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, monkeyTypeGame);
 
