@@ -15,148 +15,168 @@ const emit = defineEmits<{
 const store = useMilefizStore()
 const showInstructions = ref(true)
 
-// Local Source of Truth
-const localProgress = ref(0)
-const wrongIndex = ref<number | null>(null)
+const inputBuffer = ref<Array<{key: string, timestamp: number}>>([])
+const isProcessingBuffer = ref(false)
 
-// Abzutippendes Wort oder Phrase
-const targetWord = computed(() => props.duel?.state?.targetWord ?? '')
+const localInput = ref('')
 
-const isFinished = computed(() => props.duel?.state?.finished ?? false)
+watch(() => props.duel?.state?.targetWord, (newWord) => {
+  if (newWord) {
+    localInput.value = ''
+    inputBuffer.value = []
+  }
+})
+
+const targetWord = computed(() => {
+  return props.duel?.state?.targetWord || ''
+})
+
+const userInput = computed(() => {
+  const playerId = store.gamedata.playerId
+  const isPlayer1 = playerId === props.duel?.state?.player1
+  return isPlayer1
+    ? props.duel?.state?.player1Input || ''
+    : props.duel?.state?.player2Input || ''
+})
+
+const correctLetters = computed(() => {
+  const playerId = store.gamedata.playerId
+  const isPlayer1 = playerId === props.duel?.state?.player1
+  return isPlayer1
+    ? props.duel?.state?.correctLettersPlayer1 || []
+    : props.duel?.state?.correctLettersPlayer2 || []
+})
+
+// Kombiniere Backend-Input mit lokalen, die noch nicht gesynct sind
+const displayInput = computed(() => {
+  return userInput.value
+})
+
+const isFinished = computed(() => props.duel?.state?.finished || false)
 const isWinner = computed(() => props.duel?.state?.winner === store.gamedata.playerId)
 const winner = computed(() => props.duel?.state?.winner)
 
-const playerId = computed(() => store.gamedata.playerId)
-
-
-// Reset bei neuem Wort
-watch(() => targetWord.value, (newWord) => {
-  localProgress.value = 0
-  wrongIndex.value = null
+// Korrekte Buchstaben zählen
+const correctCount = computed(() => {
+  return correctLetters.value.filter(Boolean).length
 })
 
+// Genauigkeit berechnen
+const accuracy = computed(() => {
+  if (userInput.value.length === 0) return 1
+  return correctCount.value / userInput.value.length
+})
 
-/**
- * Sendet den Fortschritt eines Spielers ans Backend 
- * @param progress Fortschritt des Spielers
- */
-function sendProgressTobackend(progress: number) {
-  const lobbyId = store.gamedata.lobby?.id
-  const duelId = props.duel?.duelId
-
-  if (!lobbyId || !duelId || !playerId.value) return
-
-  store.sendLobbyMessage(
-    `/app/milefiz/lobby/${lobbyId}/duel/${duelId}/monkeyType/progress`, { playerId: playerId.value, progress }
-  )
-}
-/**
- * Visual Feedback bei Fehleingabe -> markiert den aktuell erwarteten Char kurz als falsch an
- * @param index position des Chars in 'targetWord'
- */
-function flashWrongAt(index: number) {
-  wrongIndex.value = index
-
-  window.setTimeout(() => {
-    if (wrongIndex.value === index) wrongIndex.value = null
-  }, 160)
+// Buchstaben-Klasse basierend auf Backend-Daten
+const getCharClass = (index: number): string => {
+  if (index < userInput.value.length) {
+    if (correctLetters.value[index]) {
+      return 'char-correct'
+    } else {
+      return 'char-incorrect'
+    }
+  }
+  return 'char-pending'
 }
 
-/**
- * Überprüft, ob eine Tasteneingabe erlaubt ist
- * @param e zu überpüfende Eingabe
- */
-function isTypableKey(e: KeyboardEvent): boolean {
-  if (e.ctrlKey || e.metaKey || e.altKey) return false
-
-  //handle space
-  if (e.key === ' ') return true
-  if (e.key.length === 1) return true
-
-  return false
-}
-
-/**
- * 
- * @param e 
- */
-function handleKeyDown(e: KeyboardEvent) {
+const handleKeyDown = (e: KeyboardEvent) => {
   e.stopPropagation()
   e.preventDefault()
-
-  if (isFinished.value || showInstructions.value) return
-
-  const word = targetWord.value
-  if (!word || !isTypableKey(e)) return
-
-  // wenn fertig
-  if (localProgress.value >= word.length) return
-
-  // input
-  const typed = e.key
-  const expected = word[localProgress.value]
-
   
-  //  Frontendseitige Validierung: Nur wenn der Fortschritt tatsächlich steigt, d.h wenn der User den nächsten Char korrekt
-  //  eingegeben hat, wird ein der Fortschritt ans Backend gesendet und verwaltet ansonsten wird der Char als kurz als falsch markiert. 
-  if (typed === expected) {
-    localProgress.value += 1
-    wrongIndex.value = null
-    sendProgressTobackend(localProgress.value)
-  } else {
-    flashWrongAt(localProgress.value)
+  if (isFinished.value || showInstructions.value) return
+  if (!targetWord.value || targetWord.value.length === 0) return
+
+
+  // Handle Space
+  if (e.key === ' ') {
+    addToBuffer(' ')
+    return
+  }
+
+  // Handle normale Buchstaben
+  if (e.key.length === 1 && e.key.match(/[a-zA-ZäöüÄÖÜß\-]/i)) {
+    addToBuffer(e.key)
   }
 }
 
-
-// Auto-close wenn fertig
-watch(isFinished, (finished) => {
-  if (finished) {
-    setTimeout(() => emit('close'), 1500)
-  }
-})
-
-
-// Life Cycle
-/**
- * Requested ein Wort, falls keines vorhanden.
- * 
- * Globaler Keydown-Listener in Capture-Phase:
- * - fängt alle Tasteneingaben vor der restlichen UI ab
- * - verhindert Browser-Default (Scrollen, Shortcuts)
- * - sorgt dafür, dass das Minigame exklusiven Fokus hat
- */
-onMounted(() => {
-  if (!targetWord.value) {
-    requestWord()
-  }
-  window.addEventListener('keydown', handleKeyDown, {
-    capture: true, // "Capture-Phase": Exklusiver Fokus --> Minigame fängt Inputs als erstes ab
-    passive: false // erlaubt explizit e.preventDefault
+const addToBuffer = (key: string) => {
+  inputBuffer.value.push({
+    key: key,
+    timestamp: Date.now()
   })
-  setTimeout(() => {
-    showInstructions.value = false
-  }, 2000)
+  
+  if (!isProcessingBuffer.value) {
+    processBuffer()
+  }
+}
+
+const processBuffer = async () => {
+  if (isProcessingBuffer.value || inputBuffer.value.length === 0) return
+  
+  isProcessingBuffer.value = true
+  
+  try {
+    while (inputBuffer.value.length > 0) {
+      const item = inputBuffer.value.shift()!
+      await processSingleKey(item.key)
+      
+      await new Promise(resolve => setTimeout(resolve, 5))
+    }
+  } finally {
+    isProcessingBuffer.value = false
+  }
+}
+
+const processSingleKey = async (key: string) => {
+  const currentPosition = userInput.value.length
+  
+  if (currentPosition >= targetWord.value.length) return
+  
+  const expectedChar = targetWord.value[currentPosition]
+  const isCorrect = (key === expectedChar)
+  
+  if (isCorrect) {
+    await sendToBackend(key, currentPosition)
+  }
+}
+
+const sendToBackend = async (key: string, position: number) => {
+  if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
+  
+  try {
+    store.sendLobbyMessage(
+      `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/monkeyType/input`,
+      {
+        playerId: store.gamedata.playerId,
+        typedChar: key,
+        position: position,
+        timestamp: new Date().toISOString()
+      }
+    )
+  } catch (error) {
+    console.error('Error sending to backend:', error)
+  }
+}
+
+// Event Listener
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown, {
+    capture: true,
+    passive: false
+  })
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown, { capture: true })
 })
 
-/**
- * Fordert das Zielwort für das MonkeyType-Minigame vom Backend an.
- *
- * Wird verwendet, wenn beim Öffnen des Minigames noch kein Zielwort
- * im aktuellen Duel-State vorhanden ist (z. B. bei Reconnects
- * oder inkonsistentem Client-State).
- *
- * Sendet eine STOMP-Nachricht an den Server, der anschließend
- * ein `MonkeyTypeGameUpdate` mit `targetWord` broadcastet.
- *
- * Hinweis:
- * Im Normalfall sollte das Zielwort bereits beim Spielstart
- * serverseitig gesetzt und an alle Clients gesendet werden.
- */
+// Wort anfordern wenn nicht geladen
+onMounted(() => {
+  if (!targetWord.value) {
+    requestWord()
+  }
+})
+
 const requestWord = () => {
   if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
 
@@ -166,25 +186,19 @@ const requestWord = () => {
   )
 }
 
-// UI helpers
-const correctCount = computed(() => localProgress.value)
-
-const progressText = computed(() => `${correctCount.value} / ${targetWord.value.length}`)
-
-
-// Klassen fürs Rendering
-function getCharClass(index: number): string {
-  if (index < localProgress.value) return 'char-correct'
-  if (index === localProgress.value) {
-    return wrongIndex.value === index ? 'char-incorrect' : 'char-current'
+// Auto-close wenn fertig
+watch(isFinished, (finished) => {
+  if (finished) {
+    setTimeout(() => emit('close'), 1500)
   }
-  return 'char-pending'
-}
+})
 
-function renderChar(char: string): string {
-  // Space sichtbar machen
-  return char === ' ' ? '·' : char
-}
+// Instructions nach 2 Sekunden ausblenden
+onMounted(() => {
+  setTimeout(() => {
+    showInstructions.value = false
+  }, 2000)
+})
 </script>
 
 <template>
@@ -199,8 +213,12 @@ function renderChar(char: string): string {
     <!-- Wort-Anzeige -->
     <div class="word-container">
       <div class="word-display">
-        <span v-for="(char, index) in targetWord" :key="index" :class="['word-char', getCharClass(Number(index))]">
-          {{ renderChar(char) }}
+        <span 
+          v-for="(char, index) in targetWord" 
+          :key="index" 
+          :class="['word-char', getCharClass(Number(index))]"
+        >
+          {{ char }}
         </span>
       </div>
     </div>
@@ -208,7 +226,10 @@ function renderChar(char: string): string {
     <!-- Status-Anzeige -->
     <div class="status-bar">
       <div class="progress">
-        {{ progressText }}
+        {{ correctCount }} / {{ targetWord.length }}
+      </div>
+      <div class="accuracy" v-if="displayInput.length > 0">
+        {{ Math.round(accuracy * 100) }}%
       </div>
     </div>
 
@@ -233,6 +254,21 @@ function renderChar(char: string): string {
 </template>
 
 <style scoped>
+.dice-card {
+  position: relative;
+  width: 600px;
+  max-width: 90vw;
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Acme', sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
 .dice-title {
   font-family: "Acme", sans-serif;
   font-size: 1.6rem;
@@ -323,13 +359,6 @@ function renderChar(char: string): string {
   text-shadow: 0 0 5px rgba(77, 255, 110, 0.5);
 }
 
-.char-current {
-  color: #ffffff;
-  opacity: 0.9;
-  text-decoration: underline;
-  text-underline-offset: 6px;
-}
-
 .char-incorrect {
   color: #ff4d4d;
   text-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
@@ -357,6 +386,12 @@ function renderChar(char: string): string {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   gap: 8px;
+}
+
+.progress, .accuracy {
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: 'Acme', sans-serif;
 }
 
 .progress {
@@ -397,33 +432,32 @@ function renderChar(char: string): string {
     width: 95vw;
     padding: 15px;
   }
-
+  
   .dice-title {
     font-size: 1.4rem;
   }
-
+  
   .word-display {
     font-size: 1.6rem;
   }
-
+  
   .word-container {
     min-height: 80px;
     padding: 15px;
   }
-
-  .progress,
-  .accuracy {
+  
+  .progress, .accuracy {
     font-size: 1rem;
   }
-
+  
   .winner-big {
     font-size: 1.5rem;
   }
-
+  
   .instruction-text {
     font-size: 1.3rem;
   }
-
+  
   .subinstruction {
     font-size: 1rem;
   }
