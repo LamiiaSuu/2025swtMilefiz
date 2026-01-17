@@ -21,14 +21,15 @@ import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
+import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendMonkeyTypeGameUpdateEvent;
 import jakarta.annotation.PreDestroy;
-
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
 
 @Service
@@ -78,13 +79,18 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.einarmigerBanditGame.timeout}")
     private int einarmigerBanditGameTimeout;
 
-    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
-            DuelResolutionService duelResolutionService) {
-        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
-        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1));
+    @Value("${minigame.monkeytypegame.timeout}")
+    private int monkeyTypeGameTimout;
 
-        gameFactories.add(() -> new QuizGame(quizGameTimeout));
+    public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
+            DuelResolutionService duelResolutionService, MonkeyTypeWordService monkeyTypeWordService) {
+        // TODO kev 
+        // gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
+        // gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
+        // gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout+ 1));
+        // gameFactories.add(() -> new QuizGame(quizGameTimeout));
+        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout, monkeyTypeWordService));
+
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
         this.duelResolutionService = duelResolutionService;
@@ -274,7 +280,30 @@ public class DuelServiceImpl implements DuelService {
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, quiz);
         }
-        duels.remove(duel.getId());
+
+        else if (game instanceof MonkeyTypeGame monkeyTypeGame) {
+            System.out.println("🟢 Sending MonkeyTypeGame update for duel: " + duel.getId());
+            System.out.println("🔍 targetWord: " + monkeyTypeGame.getTargetWord());
+            System.out.println("🔍 targetWord length: "
+                    + (monkeyTypeGame.getTargetWord() != null ? monkeyTypeGame.getTargetWord().length() : "NULL"));
+            var update = new FrontendMonkeyTypeGameUpdateEvent(
+                    duel.getId(),
+                    monkeyTypeGame.getPlayer1(),
+                    monkeyTypeGame.getPlayer2(),
+                    monkeyTypeGame.getTargetWord(),
+                    monkeyTypeGame.getPlayer1Input(),
+                    monkeyTypeGame.getPlayer2Input(),
+                    monkeyTypeGame.getCorrectLettersPlayer1(),
+                    monkeyTypeGame.getCorrectLettersPlayer2(),
+                    monkeyTypeGame.getWinner(),
+                    monkeyTypeGame.isFinished());
+
+            System.out.println("🔍 Update Event erstellt mit targetWord: " + update.targetWord());
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, monkeyTypeGame);
+
+            duels.remove(duel.getId());
+        }
     }
 
     @PreDestroy

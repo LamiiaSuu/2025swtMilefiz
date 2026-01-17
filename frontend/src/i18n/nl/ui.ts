@@ -64,6 +64,8 @@ export const UI_NL: Record<UIKey, string> = {
     MINIGAME_BALLOON_INSTRUCTION: 'Maak je klaar! Druk zo snel mogelijk op de knop!',
     MINIGAME_BALLOON_CLICK: 'Klikken!',
     MINIGANE_QUIZ_TITLE: 'Weekend Miljonairs',
+    MINIGAME_MONKEY_TYPE_TITLE: 'Apen Tikken',
+    MINIGAME_MONKEY_TYPE_INSTRUCTION: 'Typ het woord correct en zo snel mogelijk!',
     CONFIRM: "Bevestigen",
     MINIMAP_BARRIER_MOVE: "Barrière verplaatsen",
     MINIMAP_OWN_MEEPLE: "Eigen meeple",
