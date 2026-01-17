@@ -1,15 +1,22 @@
 package de.hs_rm.de.milefiz.game.model.minigames;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import de.hs_rm.de.milefiz.game.model.dto.MinigameQuestionDTO;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
@@ -18,7 +25,7 @@ import de.hs_rm.de.milefiz.game.service.QuestionService;
 class QuizGameTest {
 
     @Test
-    void initPlayers_setsPlayersAndLoadsQuestion() throws Exception {
+    void initPlayers_setsPlayersAndLoadsQuestion() {
         QuizGame game = new QuizGame(1);
 
         UUID p1 = UUID.randomUUID();
@@ -42,7 +49,7 @@ class QuizGameTest {
     }
 
     @Test
-    void checkAnswer_correctAnswer_finishesWithWinner() throws Exception {
+    void checkAnswer_correctAnswer_finishesWithWinner(){
         QuizGame game = new QuizGame(10);
 
         UUID p1 = UUID.randomUUID();
@@ -69,7 +76,7 @@ class QuizGameTest {
     }
 
     @Test
-    void checkAnswer_bothWrong_finishesWithNullWinner() throws Exception {
+    void checkAnswer_bothWrong_finishesWithNullWinner(){
         QuizGame game = new QuizGame(10);
 
         UUID p1 = UUID.randomUUID();
@@ -99,7 +106,7 @@ class QuizGameTest {
     }
 
     @Test
-    void checkAnswer_samePlayerAnswersTwice_secondAnswerIgnored() throws Exception {
+    void checkAnswer_samePlayerAnswersTwice_secondAnswerIgnored(){
         QuizGame game = new QuizGame(10);
 
         UUID p1 = UUID.randomUUID();
