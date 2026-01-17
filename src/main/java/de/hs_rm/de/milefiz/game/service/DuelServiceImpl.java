@@ -25,6 +25,7 @@ import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
+import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
@@ -32,6 +33,7 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendSlotMachineGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendMathGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMonkeyTypeGameUpdateEvent;
 import jakarta.annotation.PreDestroy;
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
@@ -86,6 +88,9 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.slotMachineGame.timeout}")
     private int slotMachineGameTimeout;
 
+    @Value("${minigame.mathgame.timeout}")
+    private int mathGameTimeout;
+
     @Value("${minigame.rock.paper.scissors.timeout}")
     private int rockPaperScissorsGameTimeout;
 
@@ -102,6 +107,7 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new SlotMachineGame(slotMachineGameTimeout));
+        gameFactories.add(() -> new MathGame(mathGameTimeout));
         gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
         gameFactories.add(() -> new QuizGame(quizGameTimeout));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
@@ -318,6 +324,20 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, slotMachine);
+        } else if (game instanceof MathGame mathGame) {
+            var update = new FrontendMathGameUpdateEvent(
+                duel.getId(),
+                mathGame.getPlayer1(),
+                mathGame.getPlayer2(),
+                mathGame.getP1Value(),
+                mathGame.getP2Value(),
+                mathGame.getTermRepresentaion(),
+                mathGame.getTermValue(),
+                mathGame.getWinner(),
+                mathGame.isFinished());
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, mathGame);
         }
 
         if (game instanceof QuizGame quiz) {

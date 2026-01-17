@@ -21,15 +21,18 @@ import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
+import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.game.service.DuelResolutionService;
 import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
+import de.hs_rm.de.milefiz.messaging.commands.MathGameCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendSlotMachineGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendMathGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMonkeyTypeGameUpdateEvent;
@@ -344,6 +347,61 @@ public class MiniGameController {
                                 game.isFinished());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
+        }
+
+        /**
+         * Verarbeitet Spieler-Eingaben für das Kopfrechnen-Minispiel.
+         *
+         * @param lobbyId         UUID der Lobby
+         * @param duelId          UUID des Duells
+         * @param mathGameCommand Command mit {@code input}
+         * @param player          Spieler
+         * @throws LobbyNotFoundException
+         */
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/math/input")
+        public void handleMathInput(@DestinationVariable UUID lobbyId,
+                        @DestinationVariable UUID duelId,
+                        MathGameCommand mathGameCommand, Player player) throws LobbyNotFoundException {
+                logger.info("{}", mathGameCommand);
+                logger.info("Player {} locked input {} in math game duel {} (lobby {})",
+                                player.getId(), mathGameCommand.input(), duelId, lobbyId);
+
+                // MiniGame holen (bereits zu diesem Zeitpunkt dem Duell zugewiesen)
+                MathGame game = (MathGame) duelService.getMiniGame(duelId);
+
+                // setze value für spieler
+                game.setValue(player.getId(), mathGameCommand.input());
+        }
+
+        /**
+         * Verarbeitet Anfrage für Term durch Spieler.
+         * Sendet zu Duell zugehörigen Term über STOMP.
+         * 
+         * @param lobbyId UUID der Lobby
+         * @param duelId  UUID des Duells
+         * @param player  Spiele
+         * @throws LobbyNotFoundException
+         */
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/math/term")
+        public void handleMathRequest(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
+                        Player player) throws LobbyNotFoundException {
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+
+                MathGame mathGame = (MathGame) duelService.getMiniGame(duelId);
+
+                var update = new FrontendMathGameUpdateEvent(
+                                duelId,
+                                mathGame.getPlayer1(),
+                                mathGame.getPlayer2(),
+                                null,
+                                null,
+                                mathGame.getTermRepresentaion(),
+                                null,
+                                null,
+                                mathGame.isFinished());
+
+                messaging.sendEvent(new LobbyMessage(lobby, update));
         }
 
         /**
