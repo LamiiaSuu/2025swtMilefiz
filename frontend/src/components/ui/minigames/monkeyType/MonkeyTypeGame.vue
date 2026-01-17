@@ -15,14 +15,11 @@ const emit = defineEmits<{
 const store = useMilefizStore()
 const showInstructions = ref(true)
 
-// 🔴 INPUT BUFFER für schnelles Tippen
 const inputBuffer = ref<Array<{key: string, timestamp: number}>>([])
 const isProcessingBuffer = ref(false)
 
-// 🔴 LOKALER STATE (nur zur Anzeige)
 const localInput = ref('')
 
-// Sync mit Backend bei neuem Wort
 watch(() => props.duel?.state?.targetWord, (newWord) => {
   if (newWord) {
     localInput.value = ''
@@ -30,7 +27,6 @@ watch(() => props.duel?.state?.targetWord, (newWord) => {
   }
 })
 
-// Computed Properties
 const targetWord = computed(() => {
   return props.duel?.state?.targetWord || ''
 })
@@ -51,9 +47,8 @@ const correctLetters = computed(() => {
     : props.duel?.state?.correctLettersPlayer2 || []
 })
 
-// 🔴 FÜR ANZEIGE: Kombiniere Backend-Input mit lokalen, die noch nicht gesynct sind
+// Kombiniere Backend-Input mit lokalen, die noch nicht gesynct sind
 const displayInput = computed(() => {
-  // Zeige Backend-Input an (korrekte + falsche)
   return userInput.value
 })
 
@@ -84,7 +79,6 @@ const getCharClass = (index: number): string => {
   return 'char-pending'
 }
 
-// 🔴 TASTATUR-HANDLING MIT BUFFER
 const handleKeyDown = (e: KeyboardEvent) => {
   e.stopPropagation()
   e.preventDefault()
@@ -92,8 +86,6 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (isFinished.value || showInstructions.value) return
   if (!targetWord.value || targetWord.value.length === 0) return
 
-  // Ignoriere Modifier-Tasten
-  if (e.ctrlKey || e.altKey || e.metaKey) return
 
   // Handle Space
   if (e.key === ' ') {
@@ -107,33 +99,27 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
 }
 
-// 🔴 ZUM BUFFER HINZUFÜGEN
 const addToBuffer = (key: string) => {
-  // Zum Buffer hinzufügen
   inputBuffer.value.push({
     key: key,
     timestamp: Date.now()
   })
   
-  // Sofort verarbeiten (aber nicht blockieren)
   if (!isProcessingBuffer.value) {
     processBuffer()
   }
 }
 
-// 🔴 BUFFER VERARBEITEN
 const processBuffer = async () => {
   if (isProcessingBuffer.value || inputBuffer.value.length === 0) return
   
   isProcessingBuffer.value = true
   
   try {
-    // 🔴 ALLE Puffer-Events verarbeiten
     while (inputBuffer.value.length > 0) {
       const item = inputBuffer.value.shift()!
       await processSingleKey(item.key)
       
-      // 🔴 KURZE PAUSE zwischen Events (nicht blockierend)
       await new Promise(resolve => setTimeout(resolve, 5))
     }
   } finally {
@@ -141,25 +127,19 @@ const processBuffer = async () => {
   }
 }
 
-// 🔴 EINZELNEN TASTENDRUCK VERARBEITEN
 const processSingleKey = async (key: string) => {
   const currentPosition = userInput.value.length
   
-  // Prüfe ob Position gültig
   if (currentPosition >= targetWord.value.length) return
   
   const expectedChar = targetWord.value[currentPosition]
   const isCorrect = (key === expectedChar)
   
-  // 🔴 NUR KORREKTE EINGABEN WEITERGEBEN (Backend-Logik)
-  // (Backend prüft selbst nochmal, aber wir können schon filtern)
   if (isCorrect) {
     await sendToBackend(key, currentPosition)
   }
-  // 🔴 FALSCHE EINGABE: IGNORIEREN (keine Aktion)
 }
 
-// 🔴 AN BACKEND SENDEN (ASYNCHRON)
 const sendToBackend = async (key: string, position: number) => {
   if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
   
