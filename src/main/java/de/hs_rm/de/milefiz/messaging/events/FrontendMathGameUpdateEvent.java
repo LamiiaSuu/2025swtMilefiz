@@ -3,28 +3,23 @@ package de.hs_rm.de.milefiz.messaging.events;
 import java.util.UUID;
 
 /**
- * Frontend-Event für Updates des Mini-Spiels "DiceGame".
+ * Frontend-Event für Updates des Mini-Spiels "MathGame"/"Kopfrechnen".
  *
- * Dieses Event wird immer dann gesendet, wenn:
- * <ul>
- *     <li>ein Spieler würfelt</li>
- *     <li>oder das Mini-Spiel abgeschlossen wird</li>
- * </ul>
+ * Dieses Event wird immer dann gesendet, wenn der aktuelle Term angefragt wird
+ * oder das Mini-Spiel abgeschlossen wird.
+ * 
+ * Im Frontend werden der aktuelle Term, beziehungsweise nach Abschluss der Minispiels die richtige Lösung und
+ * die Eingabe des anderen Spielers agezeigt.
  *
- * Es enthält alle relevanten Informationen, damit das Frontend:
- * <ul>
- *     <li>die gewürfelten Werte anzeigen</li>
- *     <li>den aktuellen Status des Mini-Spiels darstellen</li>
- *     <li>den Gewinner markieren, sobald das Spiel beendet ist</li>
- * </ul>
- *
- * @param type     Typ des Events (DICE_GAME_UPDATE)
- * @param duelId   ID des Duells, zu dem dieses Mini-Spiel gehört
- * @param p1       Spieler 1
- * @param p2       Spieler 2
- * @param rollP1   Würfelergebnis von Spieler 1 (kann null sein, wenn noch nicht gewürfelt)
- * @param rollP2   Würfelergebnis von Spieler 2 (kann null sein, wenn noch nicht gewürfelt)
- * @param winner   Gewinner des Mini-Spiels (null, solange unentschieden oder noch nicht abgeschlossen)
+ * @param type Typ des Events (MATH_GAME_UPDATE)
+ * @param duelId ID des Duells, zu dem dieses Mini-Spiel gehört
+ * @param player1 Spieler 1
+ * @param player2 Spieler 2
+ * @param p1Value Eingabewert des Spieler 1 oder null
+ * @param p2Value Eingabewert des Spieler 2 oder null
+ * @param termRepresentation Representation des Terms als String
+ * @param termValue Lösung des Terms oder null
+ * @param winner Gewinner des Mini-Spiels (oder null, solange unentschieden oder noch nicht abgeschlossen)
  * @param finished Ob das Mini-Spiel abgeschlossen ist
  */
 public record FrontendMathGameUpdateEvent(
