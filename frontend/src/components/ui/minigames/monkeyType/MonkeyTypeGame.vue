@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { tUI } from '@/i18n'
 import { useMilefizStore } from '@/stores/milefizstore'
-import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import CountdownBar from '../CountdownBar.vue'
 
 const props = defineProps<{
@@ -15,32 +15,46 @@ const emit = defineEmits<{
 const store = useMilefizStore()
 const showInstructions = ref(true)
 
+// 🔴 INPUT BUFFER für schnelles Tippen
 const inputBuffer = ref<Array<{key: string, timestamp: number}>>([])
 const isProcessingBuffer = ref(false)
 
+// 🔴 LOKALER STATE (nur zur Anzeige)
 const localInput = ref('')
-const localCorrectLetters = ref<boolean[]>([])
-const localHasError = ref(false)
 
-// Sync mit Backend State 
+// Sync mit Backend bei neuem Wort
 watch(() => props.duel?.state?.targetWord, (newWord) => {
   if (newWord) {
-    // Reset lokalen State bei neuem Wort
     localInput.value = ''
-    localCorrectLetters.value = []
-    localHasError.value = false
     inputBuffer.value = []
   }
 })
 
+// Computed Properties
 const targetWord = computed(() => {
   return props.duel?.state?.targetWord || ''
 })
 
-// Für Anzeige: Kombiniere lokalen State mit Backend State
+const userInput = computed(() => {
+  const playerId = store.gamedata.playerId
+  const isPlayer1 = playerId === props.duel?.state?.player1
+  return isPlayer1
+    ? props.duel?.state?.player1Input || ''
+    : props.duel?.state?.player2Input || ''
+})
+
+const correctLetters = computed(() => {
+  const playerId = store.gamedata.playerId
+  const isPlayer1 = playerId === props.duel?.state?.player1
+  return isPlayer1
+    ? props.duel?.state?.correctLettersPlayer1 || []
+    : props.duel?.state?.correctLettersPlayer2 || []
+})
+
+// 🔴 FÜR ANZEIGE: Kombiniere Backend-Input mit lokalen, die noch nicht gesynct sind
 const displayInput = computed(() => {
-  // Priorität: Lokaler State für sofortiges Feedback
-  return localInput.value
+  // Zeige Backend-Input an (korrekte + falsche)
+  return userInput.value
 })
 
 const isFinished = computed(() => props.duel?.state?.finished || false)
@@ -49,19 +63,19 @@ const winner = computed(() => props.duel?.state?.winner)
 
 // Korrekte Buchstaben zählen
 const correctCount = computed(() => {
-  return localCorrectLetters.value.filter(Boolean).length
+  return correctLetters.value.filter(Boolean).length
 })
 
 // Genauigkeit berechnen
 const accuracy = computed(() => {
-  if (localInput.value.length === 0) return 1
-  return correctCount.value / localInput.value.length
+  if (userInput.value.length === 0) return 1
+  return correctCount.value / userInput.value.length
 })
 
-// Buchstaben-Klasse basierend auf Eingabe
+// Buchstaben-Klasse basierend auf Backend-Daten
 const getCharClass = (index: number): string => {
-  if (index < localInput.value.length) {
-    if (localCorrectLetters.value[index]) {
+  if (index < userInput.value.length) {
+    if (correctLetters.value[index]) {
       return 'char-correct'
     } else {
       return 'char-incorrect'
@@ -70,13 +84,16 @@ const getCharClass = (index: number): string => {
   return 'char-pending'
 }
 
-// TASTATUR-HANDLING MIT BUFFER
+// 🔴 TASTATUR-HANDLING MIT BUFFER
 const handleKeyDown = (e: KeyboardEvent) => {
   e.stopPropagation()
   e.preventDefault()
   
   if (isFinished.value || showInstructions.value) return
   if (!targetWord.value || targetWord.value.length === 0) return
+
+  // Ignoriere Modifier-Tasten
+  if (e.ctrlKey || e.altKey || e.metaKey) return
 
   // Handle Space
   if (e.key === ' ') {
@@ -90,6 +107,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
 }
 
+// 🔴 ZUM BUFFER HINZUFÜGEN
 const addToBuffer = (key: string) => {
   // Zum Buffer hinzufügen
   inputBuffer.value.push({
@@ -103,16 +121,19 @@ const addToBuffer = (key: string) => {
   }
 }
 
-
+// 🔴 BUFFER VERARBEITEN
 const processBuffer = async () => {
   if (isProcessingBuffer.value || inputBuffer.value.length === 0) return
   
   isProcessingBuffer.value = true
   
   try {
+    // 🔴 ALLE Puffer-Events verarbeiten
     while (inputBuffer.value.length > 0) {
       const item = inputBuffer.value.shift()!
       await processSingleKey(item.key)
+      
+      // 🔴 KURZE PAUSE zwischen Events (nicht blockierend)
       await new Promise(resolve => setTimeout(resolve, 5))
     }
   } finally {
@@ -120,47 +141,26 @@ const processBuffer = async () => {
   }
 }
 
+// 🔴 EINZELNEN TASTENDRUCK VERARBEITEN
 const processSingleKey = async (key: string) => {
-  const currentPos = localInput.value.length
+  const currentPosition = userInput.value.length
   
-  if (currentPos >= targetWord.value.length) return
+  // Prüfe ob Position gültig
+  if (currentPosition >= targetWord.value.length) return
   
-  const expectedChar = targetWord.value[currentPos]
+  const expectedChar = targetWord.value[currentPosition]
   const isCorrect = (key === expectedChar)
   
-  if (localHasError.value && currentPos === localInput.value.length - 1) {
-    if (isCorrect) {
-      localInput.value = localInput.value.slice(0, -1) + key
-      localCorrectLetters.value[currentPos] = true
-      localHasError.value = false
-      
-      await sendToBackend(key, currentPos, true)
-    }
-    return
-  }
-  
+  // 🔴 NUR KORREKTE EINGABEN WEITERGEBEN (Backend-Logik)
+  // (Backend prüft selbst nochmal, aber wir können schon filtern)
   if (isCorrect) {
-    localInput.value += key
-    localCorrectLetters.value.push(true)
-    localHasError.value = false
-    
-    await sendToBackend(key, currentPos, true)
-    
-    if (localInput.value === targetWord.value) {
-      sendWinToBackend()
-    }
-    
-  } else {
-    localInput.value += key
-    localCorrectLetters.value.push(false)
-    localHasError.value = true
-    
-    await sendToBackend(key, currentPos, false)
+    await sendToBackend(key, currentPosition)
   }
+  // 🔴 FALSCHE EINGABE: IGNORIEREN (keine Aktion)
 }
 
-// AN BACKEND SENDEN (ASYNCHRON)
-const sendToBackend = async (key: string, position: number, isCorrect: boolean) => {
+// 🔴 AN BACKEND SENDEN (ASYNCHRON)
+const sendToBackend = async (key: string, position: number) => {
   if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
   
   try {
@@ -170,25 +170,12 @@ const sendToBackend = async (key: string, position: number, isCorrect: boolean) 
         playerId: store.gamedata.playerId,
         typedChar: key,
         position: position,
-        isCorrect: isCorrect,
         timestamp: new Date().toISOString()
       }
     )
   } catch (error) {
     console.error('Error sending to backend:', error)
   }
-}
-
-const sendWinToBackend = () => {
-  if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
-  
-  store.sendLobbyMessage(
-    `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/monkeyType/complete`,
-    {
-      playerId: store.gamedata.playerId,
-      timestamp: new Date().toISOString()
-    }
-  )
 }
 
 // Event Listener
@@ -219,6 +206,7 @@ const requestWord = () => {
   )
 }
 
+// Auto-close wenn fertig
 watch(isFinished, (finished) => {
   if (finished) {
     setTimeout(() => emit('close'), 1500)
