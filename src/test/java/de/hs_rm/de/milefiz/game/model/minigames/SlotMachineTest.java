@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import de.hs_rm.de.milefiz.game.model.Color;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
-import static org.awaitility.Awaitility.*;
-import java.time.Duration;
 
 class SlotMachineTest {
 
@@ -107,7 +105,7 @@ class SlotMachineTest {
     }
 
     @Test
-    void testPlayerEnergy_IncreasesOnJackpot() throws Exception {
+    void testPlayerEnergy_IncreasesOnJackpot() {
         // Prüft nur, dass Jackpot-Methode die Energie auf Maximum setzt
         player1.jackpot();
         assertEquals(player1.getMaxEnergy(), player1.getEnergy(),

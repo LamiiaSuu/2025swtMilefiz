@@ -52,7 +52,7 @@ public class SlotMachineGame extends MiniGame {
     private Color resultPlayer2;
     private Color resultComp;
 
-    private Color possibleColorResults[] = new Color[2];
+    private Color[] possibleColorResults = new Color[2];
 
     private Player player1;
     private Player player2;
@@ -128,14 +128,7 @@ public class SlotMachineGame extends MiniGame {
      * <ol>
      * <li>Der Computer zieht ebenfalls eine zufällige Farbe</li>
      * <li>Es wird gezählt, wie oft jede Farbe vorkommt</li>
-     * <li>Der Gewinner wird ermittelt:
-     * <ul>
-     * <li><strong>Jackpot:</strong> Alle 3 Slots zeigen die gleiche Farbe →
-     * Gewinner erhält volle Energie via {@link Player#jackpot()}</li>
-     * <li><strong>Normaler Gewinn:</strong> Spieler mit häufigerer Farbe
-     * gewinnt</li>
-     * </ul>
-     * </li>
+     * <li>Der Gewinner wird ermittelt
      * <li>Das Spiel wird als beendet markiert</li>
      * </ol>
      * </p>
@@ -172,14 +165,15 @@ public class SlotMachineGame extends MiniGame {
      * 
      * <p>
      * Diese Methode wird automatisch aufgerufen, wenn der Timeout-Timer abläuft.
-     * Falls ein oder beide Spieler noch nicht gestoppt haben, werden die fehlenden
+     * Falls ein oder beide Spieler noch nicht ihre eigene Slot gestoppt haben,
+     * werden die fehlenden
      * Ergebnisse automatisch mit der gegnerischen Farbe gefüllt.
      * </p>
      * 
      * Konkret:
      * <ul>
-     * <li>Spieler 1 hat nicht gestoppt → erhält die Farbe von Spieler 2</li>
-     * <li>Spieler 2 hat nicht gestoppt → erhält die Farbe von Spieler 1</li>
+     * <li>Spieler 1 hat nicht gestoppt -> erhält die Farbe von Spieler 2</li>
+     * <li>Spieler 2 hat nicht gestoppt -> erhält die Farbe von Spieler 1</li>
      * </ul>
      * 
      * <p>
@@ -233,10 +227,26 @@ public class SlotMachineGame extends MiniGame {
         return jackpot;
     }
 
+    /**
+     * Slot stop für den Computer
+     * 
+     * @return Eine der beiden möglichen Farben
+     * 
+     * @author Leon Schäfer
+     */
     private Color drawComputerColor() {
         return possibleColorResults[random.nextInt(NUMBER_OF_COLORS)];
     }
 
+    /**
+     * Zählt, wie oft jede Spielerfarbe bei den drei Slots gezogen wurde
+     * 
+     * @return Ein Array mit zwei Elementen
+     *         [0] = Anzahl der gezogenen Farben von Spieler 1
+     *         [1] = Anzahl der gezogenen Farbe von Spieler 2
+     * 
+     * @author Leon Schäfer
+     */
     private int[] countColors() {
         int[] countColor = { 0, 0 };
 
@@ -261,6 +271,14 @@ public class SlotMachineGame extends MiniGame {
         return countColor;
     }
 
+    /**
+     * Bestimmt den Sieger anhand der Anzahl der gezogenen Farben
+     * 
+     * @param countPlayer1Color Anzahl der Slots mit der Farbe von Spieler 1
+     * @param countPlayer2Color Anzahl der Slots mit der Farbe von Spieler 2
+     * 
+     * @author Leon Schäfer
+     */
     private void determineWinner(int countPlayer1Color, int countPlayer2Color) {
         if (countPlayer1Color == JACKPOT_NUMBER) {
             handleJackpot(player1);
@@ -273,6 +291,14 @@ public class SlotMachineGame extends MiniGame {
         }
     }
 
+    /**
+     * Setzt den Jackpot-Gewinn für den angegebenen Spieler und markiert ihn als
+     * Sieger.
+     * 
+     * @param winner Der Spieler, der den Jackpot gewonnen hat
+     * 
+     * @author Leon Schäfer
+     */
     private void handleJackpot(Player winner) {
         logger.info("JACKPOT! Player ({}) wins duel and full energy", winner.getId());
         setWinner(winner.getId());
@@ -280,6 +306,13 @@ public class SlotMachineGame extends MiniGame {
         winner.jackpot();
     }
 
+    /**
+     * Setzt den Gewinner des Minispiels
+     * 
+     * @param winner Der Spieler, der gewonnen hat
+     * 
+     * @author Leon Schäfer
+     */
     private void handleNormalWin(Player winner) {
         logger.info("Player ({}) wins", winner.getId());
         setWinner(winner.getId());

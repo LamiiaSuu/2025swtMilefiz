@@ -92,7 +92,7 @@ public class Player implements Principal {
 
     /**
      * Wird genutzt, wenn in {@link SlotMachineGame#checkFinished()} ein
-     * Jackpot erzielt wurde, um dem Ggewinner volle Energie zu geben.
+     * Jackpot erzielt wurde, um dem Gewinner volle Energie zu geben.
      */
     public void jackpot() {
         this.energy = MAX_ENERGY;
