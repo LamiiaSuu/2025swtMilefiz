@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { tUI } from '@/i18n'
 import { useMilefizStore } from '@/stores/milefizstore'
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import CountdownBar from '../CountdownBar.vue'
 
 const props = defineProps<{
@@ -15,60 +15,53 @@ const emit = defineEmits<{
 const store = useMilefizStore()
 const showInstructions = ref(true)
 
-// Instructions nach 2 Sekunden ausblenden
-onMounted(() => {
-  setTimeout(() => {
-    showInstructions.value = false
-  }, 2000)
+const inputBuffer = ref<Array<{key: string, timestamp: number}>>([])
+const isProcessingBuffer = ref(false)
+
+const localInput = ref('')
+const localCorrectLetters = ref<boolean[]>([])
+const localHasError = ref(false)
+
+// Sync mit Backend State 
+watch(() => props.duel?.state?.targetWord, (newWord) => {
+  if (newWord) {
+    // Reset lokalen State bei neuem Wort
+    localInput.value = ''
+    localCorrectLetters.value = []
+    localHasError.value = false
+    inputBuffer.value = []
+  }
 })
 
-// Computed Properties
 const targetWord = computed(() => {
   return props.duel?.state?.targetWord || ''
 })
 
-const userInput = computed(() => {
-  const playerId = store.gamedata.playerId
-  const isPlayer1 = playerId === props.duel?.state?.player1
-  return isPlayer1
-    ? props.duel?.state?.player1Input || ''
-    : props.duel?.state?.player2Input || ''
-})
-
-const correctLetters = computed(() => {
-  const playerId = store.gamedata.playerId
-  const isPlayer1 = playerId === props.duel?.state?.player1
-  return isPlayer1
-    ? props.duel?.state?.correctLettersPlayer1 || []
-    : props.duel?.state?.correctLettersPlayer2 || []
+// Für Anzeige: Kombiniere lokalen State mit Backend State
+const displayInput = computed(() => {
+  // Priorität: Lokaler State für sofortiges Feedback
+  return localInput.value
 })
 
 const isFinished = computed(() => props.duel?.state?.finished || false)
 const isWinner = computed(() => props.duel?.state?.winner === store.gamedata.playerId)
 const winner = computed(() => props.duel?.state?.winner)
 
-// Prüfe ob an aktueller Position ein Fehler existiert
-const hasErrorAtCurrentPosition = computed(() => {
-  const currentPos = userInput.value.length
-  if (currentPos >= correctLetters.value.length) return false
-  return correctLetters.value[currentPos] === false
-})
-
 // Korrekte Buchstaben zählen
 const correctCount = computed(() => {
-  return correctLetters.value.filter(Boolean).length
+  return localCorrectLetters.value.filter(Boolean).length
 })
 
 // Genauigkeit berechnen
 const accuracy = computed(() => {
-  if (userInput.value.length === 0) return 1
-  return correctCount.value / userInput.value.length
+  if (localInput.value.length === 0) return 1
+  return correctCount.value / localInput.value.length
 })
 
 // Buchstaben-Klasse basierend auf Eingabe
 const getCharClass = (index: number): string => {
-  if (index < userInput.value.length) {
-    if (correctLetters.value[index]) {
+  if (index < localInput.value.length) {
+    if (localCorrectLetters.value[index]) {
       return 'char-correct'
     } else {
       return 'char-incorrect'
@@ -77,7 +70,7 @@ const getCharClass = (index: number): string => {
   return 'char-pending'
 }
 
-// Tastatur-Handling mit Fehlerlogik
+// TASTATUR-HANDLING MIT BUFFER
 const handleKeyDown = (e: KeyboardEvent) => {
   e.stopPropagation()
   e.preventDefault()
@@ -85,59 +78,117 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (isFinished.value || showInstructions.value) return
   if (!targetWord.value || targetWord.value.length === 0) return
 
-  // Ignoriere Modifier-Tasten
-  if (e.ctrlKey || e.altKey || e.metaKey) return
-
   // Handle Space
   if (e.key === ' ') {
-    e.preventDefault()
-    sendKeyPress(' ')
+    addToBuffer(' ')
     return
   }
 
   // Handle normale Buchstaben
   if (e.key.length === 1 && e.key.match(/[a-zA-ZäöüÄÖÜß\-]/i)) {
-    e.preventDefault()
-    sendKeyPress(e.key)
+    addToBuffer(e.key)
   }
 }
 
-const sendKeyPress = (key: string) => {
-  if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
-
-  const currentPosition = userInput.value.length
+const addToBuffer = (key: string) => {
+  // Zum Buffer hinzufügen
+  inputBuffer.value.push({
+    key: key,
+    timestamp: Date.now()
+  })
   
-  // Wenn an aktueller Position ein Fehler existiert
-  if (hasErrorAtCurrentPosition.value) {
-    // Nur weitermachen, wenn der richtige Buchstabe getippt wird
-    const correctChar = targetWord.value[currentPosition]
-    if (key === correctChar) {
-      store.sendLobbyMessage(
-        `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/monkeyType/input`,
-        {
-          playerId: store.gamedata.playerId,
-          typedChar: key,
-          position: currentPosition,
-          timestamp: new Date().toISOString()
-        }
-      )
+  // Sofort verarbeiten (aber nicht blockieren)
+  if (!isProcessingBuffer.value) {
+    processBuffer()
+  }
+}
+
+
+const processBuffer = async () => {
+  if (isProcessingBuffer.value || inputBuffer.value.length === 0) return
+  
+  isProcessingBuffer.value = true
+  
+  try {
+    while (inputBuffer.value.length > 0) {
+      const item = inputBuffer.value.shift()!
+      await processSingleKey(item.key)
+      await new Promise(resolve => setTimeout(resolve, 5))
     }
-    // Falsche Eingabe wird ignoriert
+  } finally {
+    isProcessingBuffer.value = false
+  }
+}
+
+const processSingleKey = async (key: string) => {
+  const currentPos = localInput.value.length
+  
+  if (currentPos >= targetWord.value.length) return
+  
+  const expectedChar = targetWord.value[currentPos]
+  const isCorrect = (key === expectedChar)
+  
+  if (localHasError.value && currentPos === localInput.value.length - 1) {
+    if (isCorrect) {
+      localInput.value = localInput.value.slice(0, -1) + key
+      localCorrectLetters.value[currentPos] = true
+      localHasError.value = false
+      
+      await sendToBackend(key, currentPos, true)
+    }
     return
   }
+  
+  if (isCorrect) {
+    localInput.value += key
+    localCorrectLetters.value.push(true)
+    localHasError.value = false
+    
+    await sendToBackend(key, currentPos, true)
+    
+    if (localInput.value === targetWord.value) {
+      sendWinToBackend()
+    }
+    
+  } else {
+    localInput.value += key
+    localCorrectLetters.value.push(false)
+    localHasError.value = true
+    
+    await sendToBackend(key, currentPos, false)
+  }
+}
 
-  // Normale Eingabe
-  if (currentPosition < targetWord.value.length) {
+// AN BACKEND SENDEN (ASYNCHRON)
+const sendToBackend = async (key: string, position: number, isCorrect: boolean) => {
+  if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
+  
+  try {
     store.sendLobbyMessage(
       `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/monkeyType/input`,
       {
         playerId: store.gamedata.playerId,
         typedChar: key,
-        position: currentPosition,
+        position: position,
+        isCorrect: isCorrect,
         timestamp: new Date().toISOString()
       }
     )
+  } catch (error) {
+    console.error('Error sending to backend:', error)
   }
+}
+
+const sendWinToBackend = () => {
+  if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
+  
+  store.sendLobbyMessage(
+    `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/monkeyType/complete`,
+    {
+      playerId: store.gamedata.playerId,
+      timestamp: new Date().toISOString()
+    }
+  )
 }
 
 // Event Listener
@@ -168,11 +219,17 @@ const requestWord = () => {
   )
 }
 
-// Auto-close wenn fertig
 watch(isFinished, (finished) => {
   if (finished) {
     setTimeout(() => emit('close'), 1500)
   }
+})
+
+// Instructions nach 2 Sekunden ausblenden
+onMounted(() => {
+  setTimeout(() => {
+    showInstructions.value = false
+  }, 2000)
 })
 </script>
 
@@ -203,7 +260,7 @@ watch(isFinished, (finished) => {
       <div class="progress">
         {{ correctCount }} / {{ targetWord.length }}
       </div>
-      <div class="accuracy" v-if="userInput.length > 0">
+      <div class="accuracy" v-if="displayInput.length > 0">
         {{ Math.round(accuracy * 100) }}%
       </div>
     </div>
@@ -229,7 +286,7 @@ watch(isFinished, (finished) => {
 </template>
 
 <style scoped>
-/* .dice-card {
+.dice-card {
   position: relative;
   width: 600px;
   max-width: 90vw;
@@ -242,7 +299,7 @@ watch(isFinished, (finished) => {
   align-items: center;
   font-family: 'Acme', sans-serif;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-} */
+}
 
 .dice-title {
   font-family: "Acme", sans-serif;
@@ -363,12 +420,6 @@ watch(isFinished, (finished) => {
   gap: 8px;
 }
 
-.progress-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .progress, .accuracy {
   font-size: 1.2rem;
   font-weight: 600;
@@ -381,23 +432,6 @@ watch(isFinished, (finished) => {
 
 .accuracy {
   color: #4dff6e;
-}
-
-.error-indicator {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #ff4d4d;
-  background: rgba(255, 77, 77, 0.1);
-  padding: 5px 10px;
-  border-radius: 5px;
-  text-align: center;
-  border: 1px solid rgba(255, 77, 77, 0.3);
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
 }
 
 .winner-big {
@@ -416,11 +450,6 @@ watch(isFinished, (finished) => {
 .loser-text {
   color: #ff4d4d;
   text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
-}
-
-.timeout-text {
-  color: #ffd66b;
-  text-shadow: 0 0 10px rgba(255, 214, 107, 0.5);
 }
 
 .no-select {
@@ -451,10 +480,6 @@ watch(isFinished, (finished) => {
   
   .progress, .accuracy {
     font-size: 1rem;
-  }
-  
-  .error-indicator {
-    font-size: 0.9rem;
   }
   
   .winner-big {

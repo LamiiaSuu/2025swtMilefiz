@@ -84,12 +84,11 @@ public class DuelServiceImpl implements DuelService {
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
             DuelResolutionService duelResolutionService, MonkeyTypeWordService monkeyTypeWordService) {
-        // TODO kev 
-        // gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
-        // gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        // gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout+ 1));
-        // gameFactories.add(() -> new QuizGame(quizGameTimeout));
-        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout, monkeyTypeWordService));
+        gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
+        gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
+        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout+ 1));
+        gameFactories.add(() -> new QuizGame(quizGameTimeout));
+        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
