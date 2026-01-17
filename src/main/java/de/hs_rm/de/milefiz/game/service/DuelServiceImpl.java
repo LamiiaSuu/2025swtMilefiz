@@ -343,8 +343,9 @@ public class DuelServiceImpl implements DuelService {
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, monkeyTypeGame);
 
-            duels.remove(duel.getId());
+            
         }
+        duels.remove(duel.getId());
     }
 
     @PreDestroy
