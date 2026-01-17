@@ -1,9 +1,13 @@
 package de.hs_rm.de.milefiz.game.model;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 class MeepleTest {
@@ -102,8 +106,8 @@ class MeepleTest {
     void equals_otherTypeOrNull_returnsFalse() {
         Meeple meeple = new Meeple(false);
 
-        assertNotEquals(meeple, "not a meeple");
-        assertNotEquals(meeple, null);
+        assertNotEquals("not a meeple", meeple);
+        assertNotEquals(null, meeple);
     }
 
     @Test

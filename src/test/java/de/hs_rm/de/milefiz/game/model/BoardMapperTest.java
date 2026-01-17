@@ -16,7 +16,7 @@ import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
 import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 
-public class BoardMapperTest {
+class BoardMapperTest {
     BoardDTO boardDTO;
 
     @BeforeEach
@@ -38,7 +38,7 @@ public class BoardMapperTest {
     }
 
     @Test
-    public void testSameStartfields() {
+    void testSameStartfields() {
 
         Board board = BoardMapper.mapToBoard(boardDTO);
         boardDTO = BoardMapper.mapToDTO(board);
@@ -59,7 +59,7 @@ public class BoardMapperTest {
     }
 
     @Test
-    public void testBarrier() {
+    void testBarrier() {
         Board board = BoardMapper.mapToBoard(boardDTO);
 
         FieldDTO barrier = boardDTO.getFields().stream()

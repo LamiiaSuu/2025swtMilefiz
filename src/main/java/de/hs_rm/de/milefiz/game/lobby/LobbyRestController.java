@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.hs_rm.de.milefiz.game.model.Board;
-import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
-import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.dto.LobbyDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
 import de.hs_rm.de.milefiz.game.service.BoardService;
 import de.hs_rm.de.milefiz.game.service.BoardValidateException;
@@ -144,7 +144,7 @@ public class LobbyRestController {
     }
 
     @PostMapping("/{lobbyId}/board/set")
-    public ResponseEntity<?> activateBoard(
+    public ResponseEntity<String> activateBoard(
             @PathVariable UUID lobbyId,
             @RequestBody BoardDTO boardDTO
     ) {
@@ -190,7 +190,7 @@ public class LobbyRestController {
     }
 
     @PostMapping("/{lobbyId}/board/setDefault")
-    public ResponseEntity<?> activateDefaultBoard(@PathVariable UUID lobbyId) {
+    public ResponseEntity<String> activateDefaultBoard(@PathVariable UUID lobbyId) {
         try {
             // Standardboard holen
             Board board = gameService.getTestBoard();

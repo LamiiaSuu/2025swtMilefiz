@@ -21,7 +21,7 @@ import de.hs_rm.de.milefiz.game.model.PositionFloat;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.dto.BoardDTO.FieldDTO;
 
-public class PlantingServiceTest {
+class PlantingServiceTest {
     PlantingService plantingService;
     BoardDTO boardDTO;
 

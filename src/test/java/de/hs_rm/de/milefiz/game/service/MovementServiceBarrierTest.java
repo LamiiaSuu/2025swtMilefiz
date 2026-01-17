@@ -34,7 +34,7 @@ import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.game.service.DuelServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-public class MovementServiceBarrierTest {
+class MovementServiceBarrierTest {
     @Mock
     private LobbyManager lobbyManager;
     private DuelService duelService;

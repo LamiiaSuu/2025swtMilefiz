@@ -1,26 +1,38 @@
 package de.hs_rm.de.milefiz.game.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
-import de.hs_rm.de.milefiz.game.model.*;
+import de.hs_rm.de.milefiz.game.model.Board;
+import de.hs_rm.de.milefiz.game.model.Color;
+import de.hs_rm.de.milefiz.game.model.Direction;
+import de.hs_rm.de.milefiz.game.model.Field;
+import de.hs_rm.de.milefiz.game.model.FieldType;
+import de.hs_rm.de.milefiz.game.model.Lobby;
+import de.hs_rm.de.milefiz.game.model.Meeple;
+import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.Position;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
-import de.hs_rm.de.milefiz.messaging.events.*;
+import de.hs_rm.de.milefiz.messaging.events.FrontendCheatedEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 
 @ExtendWith(MockitoExtension.class)
-public class MovementServiceTest {
+class MovementServiceTest {
 
     @Mock
     private LobbyManager lobbyManager;
