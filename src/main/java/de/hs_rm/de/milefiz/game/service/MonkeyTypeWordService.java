@@ -36,7 +36,6 @@ public class MonkeyTypeWordService {
             }
             inputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
             words = List.of("FEHLER", "ERROR");
         }
     }

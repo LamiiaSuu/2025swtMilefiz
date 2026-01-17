@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import DiceMiniGame from "../minigames/DiceMiniGame.vue"
-import EinarmigerBanditMiniGame from '@/components/ui/minigames/EinarmigerBandit/EinarmigerBanditMiniGame.vue'
+import SlotMachineGame from '@/components/ui/minigames/SlotMachineMinigame/SlotMachineMinigame.vue'
 import BalloonMinigame from '../minigames/balloonMinigame/BalloonMinigame.vue';
 import MathMiniGame from '../minigames/MathMiniGame.vue';
 import QuizMinigame from '../minigames/QuizMinigame.vue';
@@ -34,8 +34,8 @@ function resolveComponent(duel: any) {
   switch (duel.miniGameType) {
     case 'DiceGame':
       return DiceMiniGame
-    case "EinarmigerBanditGame":
-      return EinarmigerBanditMiniGame
+    case "SlotMachineGame":
+      return SlotMachineGame
     case 'BalloonGame':
       return BalloonMinigame
     case 'MathGame':

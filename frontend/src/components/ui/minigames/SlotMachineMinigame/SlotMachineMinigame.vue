@@ -4,8 +4,6 @@ import { useMilefizStore } from "@/stores/milefizstore"
 import { tUI } from "@/i18n";
 import CountdownBar from "../CountdownBar.vue"
 import Slot from './Slot.vue'
-import type DuelOverlay from "../../popups/DuelOverlay.vue";
-import { playerColors } from "@/types/colorsAssets";
 
 const props = defineProps<{
   duel: any
@@ -26,7 +24,7 @@ function stop() {
   waiting.value = props.duel.duelId
   console.log('Sending playerId:', store.gamedata.playerId)
   store.sendLobbyMessage(
-    `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/einarmigerBandit/stop`,
+    `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/slotMachine/stop`,
     { playerId: store.gamedata.playerId }
   )
 }
