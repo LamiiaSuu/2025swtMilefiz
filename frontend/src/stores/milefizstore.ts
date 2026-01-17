@@ -53,6 +53,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const jumpTrigger = ref<{ meepleId: string; nonce: number } | null>(null)
 
   function triggerJumpLocally(meepleId: string) {
+    gamedata.isJumping = true
     jumpTrigger.value = { meepleId, nonce: Date.now() }
   }
 
@@ -1092,15 +1093,17 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   * @author Kevin Tran
    */
   function sendEnergyConsume(meepleId: string) {
+    if (gamedata.isJumping) return
     if (!stompclient || !stompclient.connected) {
-      console.error('Cannot save energy: STOMP client not connected.')
+      console.error('Cannot consume energy: STOMP client not connected.')
       return
     }
 
     if (!gamedata.lobby?.id || !gamedata.playerId) {
-      console.error('Cannot save energy: Missing lobbyId or playerId')
+      console.error('Cannot consume energy: Missing lobbyId or playerId')
       return
     }
+    gamedata.isJumping = true
     const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId, meepleId: meepleId }
     const body = JSON.stringify(energyConsumeCommand)
 
