@@ -83,6 +83,8 @@ const handleKeyDown = (e: KeyboardEvent) => {
   // Handle normale Buchstaben
   if (e.key.length === 1 && e.key.match(/[a-zA-ZäöüÄÖÜß\-]/i)) {
     e.preventDefault()
+
+    const upperKey = e.key.toUpperCase()
     sendKeyPress(e.key)
   }
 }

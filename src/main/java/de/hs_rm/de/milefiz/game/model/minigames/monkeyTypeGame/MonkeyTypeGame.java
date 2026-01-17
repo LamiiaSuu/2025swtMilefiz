@@ -60,13 +60,14 @@ public class MonkeyTypeGame extends MiniGame {
 
         if (position < 0 || position >= targetWord.length()) return;
 
+        char upperTypedChar = Character.toUpperCase(typedChar);
         if (playerId.equals(player1)) {
             if (position != player1Input.length()){
                 return;
             }
 
-            boolean correct = typedChar == targetWord.charAt(position);
-            player1Input += typedChar;
+            boolean correct = upperTypedChar == targetWord.charAt(position);
+            player1Input += upperTypedChar;
 
             if (correctLettersPlayer1 != null && position < correctLettersPlayer1.length) {
                 correctLettersPlayer1[position] = correct;
@@ -82,8 +83,8 @@ public class MonkeyTypeGame extends MiniGame {
                 return;
             }
 
-            boolean correct = typedChar == targetWord.charAt(position);
-            player2Input += typedChar;
+            boolean correct = upperTypedChar == targetWord.charAt(position);
+            player2Input += upperTypedChar;
 
             if (correctLettersPlayer2 != null && position < correctLettersPlayer2.length) {
                 correctLettersPlayer2[position] = correct;
