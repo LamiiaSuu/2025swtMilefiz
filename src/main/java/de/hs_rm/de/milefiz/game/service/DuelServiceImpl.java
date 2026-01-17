@@ -19,18 +19,22 @@ import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
+import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMonkeyTypeGameUpdateEvent;
 import jakarta.annotation.PreDestroy;
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
 
 @Service
 public class DuelServiceImpl implements DuelService {
@@ -79,15 +83,25 @@ public class DuelServiceImpl implements DuelService {
     @Value("${minigame.einarmigerBanditGame.timeout}")
     private int einarmigerBanditGameTimeout;
 
+    @Value("${minigame.rock.paper.scissors.timeout}")
+    private int rockPaperScissorsGameTimeout;
+
+    // Timeout fuer ColorbrainGame
+    @Value("${minigame.colorbrain.timeout}")
+    private int colorbrainGameTimeout;
+
     @Value("${minigame.monkeytypegame.timeout}")
     private int monkeyTypeGameTimout;
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
+           
             DuelResolutionService duelResolutionService, MonkeyTypeWordService monkeyTypeWordService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
-        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout+ 1));
+        gameFactories.add(() -> new EinarmigerBanditGame(einarmigerBanditGameTimeout + 1)); 
+        gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
         gameFactories.add(() -> new QuizGame(quizGameTimeout));
+        gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
         gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
 
         this.lobbyManager = lobbyManager;
@@ -105,6 +119,7 @@ public class DuelServiceImpl implements DuelService {
         }
 
         int index = random.nextInt(gameFactories.size());
+
         return gameFactories.get(index).get(); // immer neue Instanz
     }
 
@@ -194,6 +209,21 @@ public class DuelServiceImpl implements DuelService {
         return duel;
     }
 
+    public void initColorBrain(Duel duel, Lobby lobby, ColorbrainGame game) {
+        var event = new FrontendColorbrainGameUpdateEvent(
+                duel.getId(),
+                game.getPlayer1(),
+                game.getPlayer2(),
+                game.getPlayer1Pick(),
+                game.getPlayer2Pick(),
+                game.getSelectedColorNames(), // hier sind die Farben
+                null, // noch kein Gewinner
+                false // noch nicht fertig
+        );
+
+        messaging.sendEvent(new LobbyMessage(lobby, event));
+    }
+
     /**
      * Wird automatisch aufgerufen, wenn ein Mini-Game beendet ist.
      * <p>
@@ -248,6 +278,22 @@ public class DuelServiceImpl implements DuelService {
 
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, balloon);
+        }
+
+        else if (game instanceof ColorbrainGame colorbrainGame) {
+            var update = new FrontendColorbrainGameUpdateEvent(
+                    duel.getId(),
+                    colorbrainGame.getPlayer1(),
+                    colorbrainGame.getPlayer2(),
+                    colorbrainGame.getPlayer1Pick(),
+                    colorbrainGame.getPlayer2Pick(),
+                    colorbrainGame.getSelectedColorNames(),
+                    colorbrainGame.getWinner(),
+                    colorbrainGame.isFinished());
+
+            messaging.sendEvent(new LobbyMessage(lobby, update));
+            duelResolutionService.sendLoserHome(lobby, duel, colorbrainGame);
+
         }
 
         else if (game instanceof EinarmigerBanditGame einarmigerBandit) {

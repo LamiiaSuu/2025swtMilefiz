@@ -65,6 +65,15 @@ export const UI_DE: Record<UIKey, string> = {
     MINIGAME_BALLOON_INSTRUCTION: 'Mach dich bereit! Drück den Button so schnell du kannst!',
     MINIGAME_BALLOON_CLICK: 'Klicken!',
     MINIGANE_QUIZ_TITLE: 'Wer wird Millionär?',
+    MINIGAME_COLORBRAIN_INSTRUCTION: 'Wähle die Schriftfarbe aus',
+    MINIGAME_COLORBRAIN_RED: "Rot",
+    MINIGAME_COLORBRAIN_BLUE: "Blau",
+    MINIGAME_COLORBRAIN_GREEN: "Grün",
+    MINIGAME_COLORBRAIN_YELLOW: "Gelb",
+    MINIGAME_COLORBRAIN_ORANGE: "Orange",
+    MINIGAME_COLORBRAIN_PINK: "Pink",
+    MINIGAME_COLORBRAIN_PURPLE: "Lila",
+    MINIGAME_COLORBRAIN_BLACK: "Schwarz",
     MINIGAME_MONKEY_TYPE_TITLE: 'Abtipp-Affe', 
     MINIGAME_MONKEY_TYPE_INSTRUCTION: 'Tippe das Wort korrekt und so schnell wie möglich ab!',
     WINNING_TAB: 'Gewinnen',
@@ -90,8 +99,11 @@ export const UI_DE: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Nächste Spielfigur',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Vorherige Spielfigur',
     CONTROLS_TUTORIAL_MENU: 'Menü öffnen',
+    CONTROLS_TUTORIAL_MINIMAP_ZOOM: 'Minimap zoomen',
     MINIMAP_BARRIER_MOVE: 'Sperre umplatzieren',
     MINIMAP_OWN_MEEPLE: 'Eigenes Meeple',
     MINIMAP_OCCUPIED: 'Besetzt',
-    MINIMAP_AVAILABLE: 'Frei'
+    MINIMAP_AVAILABLE: 'Frei',
+    MINIGAME_RPS_TITLE: "Schere • Stein • Papier",
+    RPS_DRAW: "Unentschieden"
 }

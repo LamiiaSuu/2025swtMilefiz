@@ -77,20 +77,32 @@ const meepleColors = computed(() => {
 
 })
 
-watchEffect(async () => {
-  if (!state.value?.scene) return
+// Ersetze den großen watchEffect durch separate, spezifische Watchers:
 
-  state.value.scene.scale.set(scale.value, scale.value, scale.value)
+// 1. Scale-Update (nur wenn Model geladen)
+watch(
+  () => state.value?.scene,
+  (scene) => {
+    if (!scene) return
+    scene.scale.set(scale.value, scale.value, scale.value)
+  },
+  { immediate: true }
+)
 
-  const userData = (state.value.scene as any).userData
-  if (!userData?.colorsApplied) {
-    state.value.scene.traverse((child: any) => {
+// 2. Farben setzen (NUR EINMAL beim ersten Laden)
+let colorsApplied = false
+watch(
+  () => state.value?.scene,
+  (scene) => {
+    if (!scene || colorsApplied) return
+    
+    scene.traverse((child: any) => {
       if (!child.isMesh || !child.material) return
 
       const mats = Array.isArray(child.material) ? child.material : [child.material]
 
       mats.forEach((mat: any) => {
-        if (!mat || !mat.color) return
+        if (!mat?.color) return
 
         // Body
         if (mat.name === 'body' || child.name?.includes('body')) {
@@ -99,42 +111,43 @@ watchEffect(async () => {
         }
         // Eyes
         else if (mat.name === 'eye_color' || child.name?.includes('eye')) {
-          mat.color.set(meepleColors.value.eyes) 
+          mat.color.set(meepleColors.value.eyes)
           mat.needsUpdate = true
         }
       })
     })
 
-    ;(state.value.scene as any).userData = {
-      ...userData,
-      colorsApplied: true
+    colorsApplied = true
+  },
+  { immediate: true, flush: 'post' }
+)
+
+// 3. Animation Mixer Setup (async aber nur einmal)
+let mixerInitialized = false
+watch(
+  () => state.value?.animations,
+  async (animations) => {
+    if (!animations?.length || mixerInitialized || !state.value?.scene) return
+    mixerInitialized = true
+
+    const THREE = await import('three')
+    mixer.value = new THREE.AnimationMixer(state.value.scene)
+
+    // Suche nach Jump-Animation
+    const jumpAnimation = animations.find((anim: any) =>
+      anim.name.toLowerCase().includes('jump')
+    )
+
+    if (jumpAnimation) {
+      jumpAction.value = mixer.value.clipAction(jumpAnimation)
+      jumpAction.value.setLoop(THREE.LoopOnce, 1)
+      jumpAction.value.clampWhenFinished = true
+      console.log('Jump animation found:', jumpAnimation.name)
+    } else {
+      console.log('Available animations:', animations.map((a) => a.name))
     }
-  }
-
-    // Animation Mixer einrichten
-    if (state.value.animations && state.value.animations.length > 0) {
-      const THREE = await import('three')
-      mixer.value = new THREE.AnimationMixer(state.value.scene)
-
-      // Suche nach Jump-Animation
-      const jumpAnimation = state.value.animations.find((anim: any) =>
-        anim.name.toLowerCase().includes('jump'),
-      )
-
-      if (jumpAnimation) {
-        jumpAction.value = mixer.value.clipAction(jumpAnimation)
-        jumpAction.value.setLoop(THREE.LoopOnce, 1) // Nur einmal abspielen
-        jumpAction.value.clampWhenFinished = true
-
-        console.log('Jump animation found:', jumpAnimation.name)
-      } else {
-        console.log(
-          'Available animations:',
-          state.value.animations.map((a) => a.name),
-        )
-      }
-    }
-  }
+  },
+  { immediate: true, flush: 'post' }
 )
 
 // Animation updaten
@@ -289,7 +302,7 @@ watch(
     _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
     animateTo(newPos)
   },
-  { deep: true },
+  { deep: true, flush: 'post'},
 )
 
 const speed = 0.08

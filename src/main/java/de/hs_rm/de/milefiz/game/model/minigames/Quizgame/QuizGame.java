@@ -6,13 +6,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.dto.MinigameQuestionDTO;
+import de.hs_rm.de.milefiz.game.service.MovementServiceImpl;
 import de.hs_rm.de.milefiz.game.service.QuestionService;
 
 public class QuizGame extends MiniGame {
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final Logger logger = LoggerFactory.getLogger(QuizGame.class);
     private UUID player1;
     private UUID player2;
     private boolean timeoutStarted = false;
@@ -34,7 +39,7 @@ public class QuizGame extends MiniGame {
             questionService = QuestionService.getQuestionService();
             questionDTO = questionService.randomQuestion();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("Aufruf von QuestionService / QuestionDTO fehlgeschlagen");
         }
 
         if (!timeoutStarted) {

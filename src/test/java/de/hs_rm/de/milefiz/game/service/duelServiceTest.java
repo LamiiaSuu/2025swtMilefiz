@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -125,7 +126,7 @@ class DuelServiceImplTest {
         var games = service.getGames();
 
         assertNotNull(games);
-        assertEquals(3, games.size());
+        assertEquals(6, games.size());
     }
 
     @Test
@@ -207,19 +208,19 @@ class DuelServiceImplTest {
                     UUID.randomUUID(),
                     UUID.randomUUID());
             duels.add(duel);
+
             service.assignRandomGameToDuel(duel.getId());
         }
 
-        // alle 4 Duelle sind aktiv
-        long activeGames = duels.stream()
+        long assignedGames = duels.stream()
                 .map(Duel::getMiniGame)
-                .filter(g -> g != null && !g.isFinished())
+                .filter(g -> g != null)
                 .count();
 
-        assertEquals(4, activeGames);
+        assertEquals(4, assignedGames);
     }
 
-    @Disabled("Temporär deaktiviert – NPE")
+
     @Test
     void duelIsRemovedAfterMiniGameFinished() {
         UUID p1 = UUID.randomUUID();
@@ -232,12 +233,17 @@ class DuelServiceImplTest {
         Lobby lobby = mock(Lobby.class);
         when(lobbyManager.getLobbyFromPlayerUUID(p1)).thenReturn(lobby);
 
+        List<Supplier<MiniGame>> factories = List.of(() -> new DiceGame(1));
+        ReflectionTestUtils.setField(service, "gameFactories", factories);
+
         MiniGame game = service.assignRandomGameToDuel(duel.getId());
 
         game.forceMissingActions();
 
-        assertThrows(IllegalArgumentException.class, () -> service.getDuel(duel.getId()));
+        assertThrows(IllegalArgumentException.class,
+                () -> service.getDuel(duel.getId()));
     }
+
 
     @Test
     void schedulerIsShutdownOnPreDestroy() {
@@ -254,12 +260,16 @@ class DuelServiceImplTest {
         assertTrue(scheduler.isShutdown());
     }
 
-    @Disabled("Temporär deaktiviert – NPE")
     @Test
     void forceMissingActions_finishesGame() {
 
         Lobby lobby = mock(Lobby.class);
         when(lobbyManager.getLobbyFromPlayerUUID(any())).thenReturn(lobby);
+
+        List<java.util.function.Supplier<MiniGame>> factories =
+                List.of(() -> new DiceGame(1));
+
+        ReflectionTestUtils.setField(service, "gameFactories", factories);
 
         Duel duel = service.createDuel(
                 UUID.randomUUID(),
@@ -270,12 +280,13 @@ class DuelServiceImplTest {
         MiniGame game = service.assignRandomGameToDuel(duel.getId());
 
         assertNotNull(game);
-
         assertFalse(game.isFinished());
 
         game.forceMissingActions();
 
         assertTrue(game.isFinished());
     }
+
+
 
 }

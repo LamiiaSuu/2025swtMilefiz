@@ -83,8 +83,10 @@ public class FrontendReceiverController {
      * @param player der authentifizierte Spieler, der die Rotation ausgelöst
      * hat
      *
-     * @return FrontendRotateEvent zur Synchronisation der Meeple-Rotation auf
-     * allen Clients der Lobby
+     * @return FrontendRotateEvent zur Synchronisation der Meeple-Rotation
+     *         auf allen Clients der Lobby
+     * 
+     * @author Maximilian Ressel
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/rotate")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
@@ -201,9 +203,6 @@ public class FrontendReceiverController {
      *
      * @param lobbyId die eindeutige UUID der Lobby in der gewürfelt wird
      * @param command der Würfel-Befehl vom Client, enthält die Spieler-ID
-     * @param requestedValue angefragte Würfelzahl für Demo zwecke, überschreibt
-     * nicht die Regelung von z.B. cooldown | {@link enableRequestedDiceRolls}
-     * muss auf true sein
      * @return {@link FrontendRollDiceEvent} mit Lobby-ID und Würfelergebnis
      * (1-6)
      *
