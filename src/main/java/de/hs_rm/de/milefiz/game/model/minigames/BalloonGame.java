@@ -97,9 +97,7 @@ public class BalloonGame extends MiniGame {
          * </p>
          */
         void updatePhase() {
-            if (this.clicks == 0) {
-                phase = 0;
-            } else if (this.clicks == CLICKS_TO_WIN) {
+            if (this.clicks == CLICKS_TO_WIN) {
                 phase = 4;
             } else if (this.clicks >= PHASE_3_THRESHOLD) {
                 phase = 3;
@@ -107,6 +105,8 @@ public class BalloonGame extends MiniGame {
                 phase = 2;
             } else if (this.clicks >= PHASE_1_THRESHOLD){
                 phase = 1;
+            } else {
+                phase = 0;
             }
         }
 
@@ -143,7 +143,7 @@ public class BalloonGame extends MiniGame {
          * @param playerId
          * @return {@code true}, wenn die UUID gleich ist, sonst {@code false}
          */
-        boolean equals(UUID playerId) {
+        boolean equalsWithPlayerId(UUID playerId) {
             return this.playerId.equals(playerId);
         }
     }
@@ -199,9 +199,9 @@ public class BalloonGame extends MiniGame {
         BalloonPlayer player;
         boolean changed;
 
-        if (player1.equals(playerId)) {
+        if (player1.equalsWithPlayerId(playerId)) {
             player = player1;
-        } else if (player2.equals(playerId)){
+        } else if (player2.equalsWithPlayerId(playerId)){
             player = player2;
         } else {
             return false;
