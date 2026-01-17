@@ -14,7 +14,6 @@ const emit = defineEmits<{
 
 const store = useMilefizStore()
 const showInstructions = ref(true)
-const hasFocus = ref(false)
 
 // Instructions nach 2 Sekunden ausblenden
 onMounted(() => {
@@ -23,6 +22,7 @@ onMounted(() => {
   }, 2000)
 })
 
+// Computed Properties
 const targetWord = computed(() => {
   return props.duel?.state?.targetWord || ''
 })
@@ -47,22 +47,37 @@ const isFinished = computed(() => props.duel?.state?.finished || false)
 const isWinner = computed(() => props.duel?.state?.winner === store.gamedata.playerId)
 const winner = computed(() => props.duel?.state?.winner)
 
+// Prüfe ob an aktueller Position ein Fehler existiert
+const hasErrorAtCurrentPosition = computed(() => {
+  const currentPos = userInput.value.length
+  if (currentPos >= correctLetters.value.length) return false
+  return correctLetters.value[currentPos] === false
+})
+
+// Korrekte Buchstaben zählen
+const correctCount = computed(() => {
+  return correctLetters.value.filter(Boolean).length
+})
+
 // Genauigkeit berechnen
 const accuracy = computed(() => {
   if (userInput.value.length === 0) return 1
-  const correct = correctLetters.value.filter(Boolean).length
-  return correct / userInput.value.length
+  return correctCount.value / userInput.value.length
 })
 
 // Buchstaben-Klasse basierend auf Eingabe
 const getCharClass = (index: number): string => {
   if (index < userInput.value.length) {
-    return correctLetters.value[index] ? 'char-correct' : 'char-incorrect'
+    if (correctLetters.value[index]) {
+      return 'char-correct'
+    } else {
+      return 'char-incorrect'
+    }
   }
   return 'char-pending'
 }
 
-// Tastatur-Handling
+// Tastatur-Handling mit Fehlerlogik
 const handleKeyDown = (e: KeyboardEvent) => {
   e.stopPropagation()
   e.preventDefault()
@@ -83,27 +98,49 @@ const handleKeyDown = (e: KeyboardEvent) => {
   // Handle normale Buchstaben
   if (e.key.length === 1 && e.key.match(/[a-zA-ZäöüÄÖÜß\-]/i)) {
     e.preventDefault()
-
+    
+    // Buchstabe in Großbuchstaben umwandeln
     const upperKey = e.key.toUpperCase()
-    sendKeyPress(e.key)
+    sendKeyPress(upperKey)
   }
 }
 
 const sendKeyPress = (key: string) => {
   if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
 
-  const position = userInput.value.length
-  if (position >= targetWord.value.length) return
-
-  store.sendLobbyMessage(
-    `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/monkeyType/input`,
-    {
-      playerId: store.gamedata.playerId,
-      typedChar: key,
-      position: position,
-      timestamp: new Date().toISOString()
+  const currentPosition = userInput.value.length
+  
+  // Wenn an aktueller Position ein Fehler existiert
+  if (hasErrorAtCurrentPosition.value) {
+    // Nur weitermachen, wenn der richtige Buchstabe getippt wird
+    const correctChar = targetWord.value[currentPosition]
+    if (key === correctChar) {
+      store.sendLobbyMessage(
+        `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/monkeyType/input`,
+        {
+          playerId: store.gamedata.playerId,
+          typedChar: key,
+          position: currentPosition,
+          timestamp: new Date().toISOString()
+        }
+      )
     }
-  )
+    // Falsche Eingabe wird ignoriert
+    return
+  }
+
+  // Normale Eingabe
+  if (currentPosition < targetWord.value.length) {
+    store.sendLobbyMessage(
+      `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/monkeyType/input`,
+      {
+        playerId: store.gamedata.playerId,
+        typedChar: key,
+        position: currentPosition,
+        timestamp: new Date().toISOString()
+      }
+    )
+  }
 }
 
 // Event Listener
@@ -167,17 +204,18 @@ watch(isFinished, (finished) => {
     <!-- Status-Anzeige -->
     <div class="status-bar">
       <div class="progress">
-        {{ userInput.length }} / {{ targetWord.length }}
+        {{ correctCount }} / {{ targetWord.length }}
       </div>
       <div class="accuracy" v-if="userInput.length > 0">
         {{ Math.round(accuracy * 100) }}%
       </div>
     </div>
 
-    <!-- Instructions (erste 2 Sekunden) -->
+    <!-- Instructions -->
     <div v-if="showInstructions" class="instructions-overlay">
       <div class="instructions-popup">
         <p class="instruction-text">{{ tUI('MINIGAME_MONKEY_TYPE_INSTRUCTION') }}</p>
+        <p class="subinstruction">Bei Fehlern: Tippe solange, bis der Buchstabe richtig ist!</p>
       </div>
     </div>
 
@@ -239,18 +277,24 @@ watch(isFinished, (finished) => {
   border-radius: 15px;
   padding: 25px 30px;
   box-shadow: 0 0 30px rgba(255, 204, 0, 0.6);
+  text-align: center;
 }
 
 .instruction-text {
   font-family: 'Acme', sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 900;
   color: #ffcc00;
-  text-shadow:
-    0 0 5px rgba(0, 0, 0, 0.95),
-    2px 2px 5px rgba(0, 0, 0, 0.95);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.95);
+  margin: 0 0 10px 0;
+}
+
+.subinstruction {
+  font-family: 'Acme', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ff6b6b;
   margin: 0;
-  text-align: center;
 }
 
 .word-container {
@@ -279,6 +323,8 @@ watch(isFinished, (finished) => {
   display: inline-block;
   margin: 0 1px;
   transition: color 0.2s ease;
+  min-width: 20px;
+  text-align: center;
 }
 
 .char-pending {
@@ -288,21 +334,42 @@ watch(isFinished, (finished) => {
 
 .char-correct {
   color: #4dff6e;
+  text-shadow: 0 0 5px rgba(77, 255, 110, 0.5);
 }
 
 .char-incorrect {
   color: #ff4d4d;
+  text-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
+  position: relative;
+}
+
+.char-incorrect::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ff4d4d;
+  border-radius: 1px;
 }
 
 .status-bar {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   width: 100%;
   margin-top: 15px;
   padding: 10px 15px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 8px;
+}
+
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .progress, .accuracy {
@@ -317,6 +384,23 @@ watch(isFinished, (finished) => {
 
 .accuracy {
   color: #4dff6e;
+}
+
+.error-indicator {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.1);
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .winner-big {
@@ -372,13 +456,20 @@ watch(isFinished, (finished) => {
     font-size: 1rem;
   }
   
+  .error-indicator {
+    font-size: 0.9rem;
+  }
+  
   .winner-big {
     font-size: 1.5rem;
   }
   
   .instruction-text {
     font-size: 1.3rem;
-    padding: 20px;
+  }
+  
+  .subinstruction {
+    font-size: 1rem;
   }
 }
 </style>

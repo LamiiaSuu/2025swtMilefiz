@@ -30,9 +30,6 @@ public class MonkeyTypeGame extends MiniGame {
 
     private ScheduledExecutorService scheduler;
 
-
-
-
     public MonkeyTypeGame(int timeOut, MonkeyTypeWordService wordsService) {
         super(8, "Monkey Type Game", timeOut);
         this.wordsService = wordsService;
@@ -55,54 +52,50 @@ public class MonkeyTypeGame extends MiniGame {
 
     }
 
-    public void processInput(UUID playerId, char typedChar, int position){
-        if (isFinished()) return;
+    public void processInput(UUID playerId, char typedChar, int position) {
+    if (isFinished()) return;
+    if (position < 0 || position >= targetWord.length()) return;
 
-        if (position < 0 || position >= targetWord.length()) return;
-
-        char upperTypedChar = Character.toUpperCase(typedChar);
-        if (playerId.equals(player1)) {
-            if (position != player1Input.length()){
-                return;
-            }
-
-            boolean correct = upperTypedChar == targetWord.charAt(position);
-            player1Input += upperTypedChar;
-
-            if (correctLettersPlayer1 != null && position < correctLettersPlayer1.length) {
-                correctLettersPlayer1[position] = correct;
-            }
-
-            if (player1Input.equals(targetWord)){
-                setWinner(player1);
-                setFinished(true);
-                notifyFinished();
-            }
-        } else {
-            if (position != player2Input.length()){
-                return;
-            }
-
-            boolean correct = upperTypedChar == targetWord.charAt(position);
-            player2Input += upperTypedChar;
-
-            if (correctLettersPlayer2 != null && position < correctLettersPlayer2.length) {
-                correctLettersPlayer2[position] = correct;
-            }
-
-            if (player2Input.equals(targetWord)){
-                setWinner(player2);
-                setFinished(true);
-                notifyFinished();
-            }
+    char upperTypedChar = Character.toUpperCase(typedChar);
+    
+    if (playerId.equals(player1)) {
+        if (position != player1Input.length()) return;
+        
+        boolean correct = upperTypedChar == targetWord.charAt(position);
+        player1Input += upperTypedChar; 
+        
+        if (correctLettersPlayer1 != null && position < correctLettersPlayer1.length) {
+            correctLettersPlayer1[position] = correct;
+        }
+        
+        if (player1Input.equals(targetWord)) {
+            setWinner(player1);
+            setFinished(true);
+            notifyFinished();
+        }
+        
+    } else if (playerId.equals(player2)) {
+        if (position != player2Input.length()) return;
+        
+        boolean correct = upperTypedChar == targetWord.charAt(position);
+        player2Input += upperTypedChar;  
+        
+        if (correctLettersPlayer2 != null && position < correctLettersPlayer2.length) {
+            correctLettersPlayer2[position] = correct;
+        }
+        
+        if (player2Input.equals(targetWord)) {
+            setWinner(player2);
+            setFinished(true);
+            notifyFinished();
         }
     }
+}
 
-
-    private void startTimer(){
+    private void startTimer() {
         scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.schedule(() -> {
-            if(!isFinished()){
+            if (!isFinished()) {
                 setFinished(true);
                 setWinner(null);
                 notifyFinished();
@@ -112,7 +105,7 @@ public class MonkeyTypeGame extends MiniGame {
 
     @Override
     public void forceMissingActions() {
-        if(!isFinished()) {
+        if (!isFinished()) {
             setFinished(true);
             setWinner(null);
             notifyFinished();
@@ -178,6 +171,5 @@ public class MonkeyTypeGame extends MiniGame {
     public void setCorrectLettersPlayer2(boolean[] correctLettersPlayer2) {
         this.correctLettersPlayer2 = correctLettersPlayer2;
     }
-
 
 }
