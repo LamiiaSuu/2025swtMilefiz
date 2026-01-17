@@ -64,6 +64,17 @@ export const UI_NL: Record<UIKey, string> = {
     MINIGAME_BALLOON_INSTRUCTION: 'Maak je klaar! Druk zo snel mogelijk op de knop!',
     MINIGAME_BALLOON_CLICK: 'Klikken!',
     MINIGANE_QUIZ_TITLE: 'Weekend Miljonairs',
+    MINIGAME_COLORBRAIN_INSTRUCTION: 'Kies de tekstkleur',
+    MINIGAME_COLORBRAIN_RED: "Rood",
+    MINIGAME_COLORBRAIN_BLUE: "Blauw",
+    MINIGAME_COLORBRAIN_GREEN: "Groen",
+    MINIGAME_COLORBRAIN_YELLOW: "Geel",
+    MINIGAME_COLORBRAIN_ORANGE: "Oranje",
+    MINIGAME_COLORBRAIN_PINK: "Roze",
+    MINIGAME_COLORBRAIN_PURPLE: "Paars",
+    MINIGAME_COLORBRAIN_BLACK: "Zwart",
+    MINIGAME_MONKEY_TYPE_TITLE: 'Apen Tikken',
+    MINIGAME_MONKEY_TYPE_INSTRUCTION: 'Typ het woord correct en zo snel mogelijk!',
     CONFIRM: "Bevestigen",
     MINIMAP_BARRIER_MOVE: "Barrière verplaatsen",
     MINIMAP_OWN_MEEPLE: "Eigen meeple",
@@ -92,5 +103,8 @@ export const UI_NL: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Volgend speelstuk',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Vorig speelstuk',
     CONTROLS_TUTORIAL_MENU: 'Menu openen',
+    CONTROLS_TUTORIAL_MINIMAP_ZOOM: 'Minimap in-/uitzoomen',
+    MINIGAME_RPS_TITLE: "Steen • Papier • Schaar",
+    RPS_DRAW: "Tekenen"
 }
 

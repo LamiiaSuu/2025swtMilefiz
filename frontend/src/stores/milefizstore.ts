@@ -161,7 +161,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       }
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe(DEST + gamedata.lobby?.id, (message) => {
-        console.log('Message received: ' + message + '\nBody:\n' + message.body)
+        //console.log('Message received: ' + message + '\nBody:\n' + message.body)
 
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
@@ -343,10 +343,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
-            gamedata.moved = false;
           }
           if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId) {
+            const old = activeDuels[event.duelId] ?? { state: {} }
+
             activeDuels[event.duelId] = {
+              ...old,
               duelId: event.duelId,
 
               firstMeeple: event.firstMeepleId,
@@ -359,8 +361,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
               timeOut: event.timeOut,
 
-              state: {}
+              state: { ...old.state }
             }
+            gamedata.moved = false
             document.exitPointerLock()
           }
 
@@ -375,9 +378,18 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
+        if (event.type === "ROCK_PAPER_SCISSORS_GAME_UPDATE") {
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          duel.state.moveP1 = event.moveP1
+          duel.state.moveP2 = event.moveP2
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
         if (event.type === "SLOT_MACHINE_GAME_UPDATE") {
           console.log("SLOT_MACHINE_GAME_UPDATE received:", event)
-          debugger;
           const duel = activeDuels[event.duelId]
           if (!duel) {
             console.log("Duel not found for ID:", event.duelId)
@@ -425,6 +437,46 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
         }
 
+        if (event.type === "COLORBRAIN_GAME_UPDATE") {
+          if (!activeDuels[event.duelId]) {
+            activeDuels[event.duelId] = { duelId: event.duelId, state: {} }
+          }
+
+          const duel = activeDuels[event.duelId]
+
+          duel.state.player1Pick = event.player1Pick
+          duel.state.player2Pick = event.player2Pick
+          duel.selectedColors = event.selectedColors
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
+        if (event.type === "MONKEY_TYPE_GAME_UPDATE") {
+          console.log("Event details:", {
+            duelId: event.duelId,
+            targetWord: event.targetWord,
+            targetWordLength: event.targetWord?.length,
+            player1Input: event.player1Input,
+            player2Input: event.player2Input
+          })
+
+          const duel = activeDuels[event.duelId]
+          if (!duel) {
+            return
+          }
+
+          duel.state = {
+            ...duel.state,
+            targetWord: event.targetWord || "",
+            player1: event.player1,
+            player2: event.player2,
+            player1Input: event.player1Input || "",
+            player2Input: event.player2Input || "",
+            correctLettersPlayer1: event.correctLettersPlayer1 || [],
+            correctLettersPlayer2: event.correctLettersPlayer2 || [],
+            winner: event.winner,
+            finished: event.finished
+          }
+        }
         if (event.type === "WIN") {
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           gamedata.currentDiceRoll = 0
@@ -682,7 +734,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         destination: DEST_APP + '/rotate',
         body,
       })
-      console.log('Meeple rotated:', body)
+      //console.log('Meeple rotated:', body)
     } catch (err) {
       console.error('Error rotating:', err)
     }

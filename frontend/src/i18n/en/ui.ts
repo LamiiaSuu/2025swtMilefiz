@@ -63,7 +63,17 @@ export const UI_EN: Record<UIKey, string> = {
     MINIGAME_BALLOON_TITLE: 'Pop the Balloon!',
     MINIGAME_BALLOON_INSTRUCTION: 'Get ready! Click the button as fast as you can!',
     MINIGAME_BALLOON_CLICK: 'Click!',
-    MINIGANE_QUIZ_TITLE: 'Who Wants To Be A Millionaire',
+    MINIGAME_COLORBRAIN_INSTRUCTION: 'Choose the text color',
+    MINIGAME_COLORBRAIN_RED: "Red",
+    MINIGAME_COLORBRAIN_BLUE: "Blue",
+    MINIGAME_COLORBRAIN_GREEN: "Green",
+    MINIGAME_COLORBRAIN_YELLOW: "Yellow",
+    MINIGAME_COLORBRAIN_ORANGE: "Orange",
+    MINIGAME_COLORBRAIN_PINK: "Pink",
+    MINIGAME_COLORBRAIN_PURPLE: "Purple",
+    MINIGAME_COLORBRAIN_BLACK: "Black",
+    MINIGANE_QUIZ_TITLE: 'Who Wants To Be A Millionaire',MINIGAME_MONKEY_TYPE_TITLE: 'Monkey Type',
+    MINIGAME_MONKEY_TYPE_INSTRUCTION: 'Type the word correctly as fast as possible!',
     CONFIRM: 'Confirm',
     MINIMAP_BARRIER_MOVE: 'Relocate barrier',
     MINIMAP_OWN_MEEPLE: 'Own Meeple',
@@ -92,5 +102,8 @@ export const UI_EN: Record<UIKey, string> = {
     CONTROLS_TUTORIAL_MEEPLE_TAB: 'Next meeple',
     CONTROLS_TUTORIAL_MEEPLE_SHIFT_TAB: 'Previous meeple',
     CONTROLS_TUTORIAL_MENU: 'Open menu',
+    CONTROLS_TUTORIAL_MINIMAP_ZOOM: 'Zoom minimap',
+    MINIGAME_RPS_TITLE: "Rock • Paper • Scissors",
+    RPS_DRAW: "Draw"
 }
 

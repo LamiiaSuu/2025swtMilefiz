@@ -96,10 +96,9 @@ function prev() {
               </div>
 
               <div class="content-text left-img" v-else-if="active === 'duel'">
-                
+
                 <div class="img-row">
-                  <img class="duel-img" src="/tutorial/meeple-duel-tutorial.png"
-                    alt="2 Meeple in a duel." />
+                  <img class="duel-img" src="/tutorial/meeple-duel-tutorial.png" alt="2 Meeple in a duel." />
                 </div>
 
               </div>
@@ -217,6 +216,20 @@ function prev() {
                       <div class="key">ESC</div>
                     </div>
                     <p>{{ tUI('CONTROLS_TUTORIAL_MENU') }}</p>
+                  </div>
+
+                  <!-- Reihe 5 -->
+                  <div class="controls-row right">
+                    <div class="key-mouse-middle">
+                      <!-- Maus - Icon -->
+                      <svg viewBox="0 0 64 39" width="6vw" height="3vw">
+                        <!-- Maus-Umriss Oben -->
+                        <path d="M8,32 Q33,-19 56,32 Z" fill="#f0f0f0" stroke="#ccc" stroke-width="3" />
+                        <!-- Mittlere Taste  -->
+                        <rect x="28.5" y="11" width="7" height="15" rx="4" ry="4" fill="#fffff" />
+                      </svg>
+                    </div>
+                    <p>{{ tUI('CONTROLS_TUTORIAL_MINIMAP_ZOOM') }}</p>
                   </div>
                 </div>
 
@@ -428,7 +441,7 @@ img {
 .energy-button-img {
   height: 100%;
   max-width: 30%;
-  
+
   border-radius: 6px;
 }
 
@@ -462,7 +475,7 @@ img {
 }
 
 .controls-row.right {
-  grid-template-columns: 18vw 1fr; 
+  grid-template-columns: 18vw 1fr;
 }
 
 .controls-row p {
@@ -474,7 +487,7 @@ img {
   padding-top: 1vh;
 }
 
-.controls-row > :first-child {
+.controls-row> :first-child {
   align-self: start;
   justify-self: end;
 }
@@ -526,6 +539,16 @@ img {
 .key-tab {
   width: 4vw;
 }
+
+.key-mouse-middle {
+  width: 5vw;
+  height: 3vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
 
 .key-w {
   grid-area: w;
