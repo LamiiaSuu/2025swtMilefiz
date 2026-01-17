@@ -46,6 +46,7 @@ public class DuelServiceImpl implements DuelService {
 
     @Autowired
     MonkeyTypeWordService monkeyTypeWordService;
+
     /**
      * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen
      * entstehen).
@@ -354,12 +355,11 @@ public class DuelServiceImpl implements DuelService {
                     monkeyTypeGame.getPlayer1(),
                     monkeyTypeGame.getPlayer2(),
                     monkeyTypeGame.getTargetWord(),
-                    monkeyTypeGame.getPlayer1Input(),
-                    monkeyTypeGame.getPlayer2Input(),
-                    monkeyTypeGame.getCorrectLettersPlayer1(),
-                    monkeyTypeGame.getCorrectLettersPlayer2(),
+                    monkeyTypeGame.getPlayer1Progress(),
+                    monkeyTypeGame.getPlayer2Progress(),
                     monkeyTypeGame.getWinner(),
-                    monkeyTypeGame.isFinished());
+                    monkeyTypeGame.isFinished(),
+                    monkeyTypeGame.getStartedAt());
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, monkeyTypeGame);
 

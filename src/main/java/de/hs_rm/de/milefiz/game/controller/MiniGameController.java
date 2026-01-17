@@ -14,7 +14,7 @@ import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
 import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
-import de.hs_rm.de.milefiz.game.model.dto.minigames.MonkeyTypeInputDTO;
+import de.hs_rm.de.milefiz.game.model.dto.minigames.MonkeyTypeProgressDTO;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
@@ -412,8 +412,8 @@ public class MiniGameController {
          *
          * @param lobbyId ID der Lobby
          * @param duelId  ID des Duells
-         * @param player  Spieler, der das Wort anfordert
-         * @throws LobbyNotFoundException wenn die Lobby nicht gefunden wird
+         * @param player  der Spieler, der das Zielwort anfordert
+         * @throws LobbyNotFoundException wenn die Lobby nicht existiert
          */
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/monkeyType/getWord")
         public void handleGetWordRequest(
@@ -434,59 +434,72 @@ public class MiniGameController {
                         game.initPlayers(duel.getPlayer1(), duel.getPlayer2(), lobby);
                 }
 
-                // Sende Update mit targetWord an alle Clients
                 broadcastMonkeyTypeUpdate(lobby, duelId, game);
         }
 
         /**
-         * Sendet den aktuellen Status des MonkeyTypeGames an alle Clients der Lobby.
-         * 
-         * Diese Methode wird aufgerufen:
-         * 1. Wenn das Wort angefordert wird (/getWord)
-         * 2. Wenn ein Spieler einen Buchstaben tippt (/input)
-         * 3. Wenn das Spiel beendet ist (in handleMiniGameFinished)
+         * Sendet den aktuellen Zustand des MonkeyTypeGames an alle Clients
+         * innerhalb der angegebenen Lobby.
+         * <p>
+         * Diese Methode wird verwendet, um alle Spieler zu synchronisieren, z. B.:
+         * <ul>
+         * <li>nach einer gültigen Fortschrittsmeldung ({@code /progress})</li>
+         * <li>nach der Initialisierung des Spiels (Zielwort/Spieler gesetzt)</li>
+         * <li>nach Spielende (Gewinner ermittelt)</li>
+         * </ul>
          *
          * @param lobby  die Lobby, in der das Duell stattfindet
          * @param duelId ID des Duells
          * @param game   aktueller Zustand des MonkeyTypeGames
          */
         public void broadcastMonkeyTypeUpdate(Lobby lobby, UUID duelId, MonkeyTypeGame game) {
-                logger.info("Broadcasting monkeyType update for duel {}", duelId);
 
                 var event = new FrontendMonkeyTypeGameUpdateEvent(
                                 duelId,
                                 game.getPlayer1(),
                                 game.getPlayer2(),
                                 game.getTargetWord(),
-                                game.getPlayer1Input(),
-                                game.getPlayer2Input(),
-                                game.getCorrectLettersPlayer1(),
-                                game.getCorrectLettersPlayer2(),
+                                game.getPlayer1Progress(),
+                                game.getPlayer2Progress(),
                                 game.getWinner(),
-                                game.isFinished());
+                                game.isFinished(),
+                                game.getStartedAt());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
-                logger.info("MonkeyType update sent for duel {}, word: {}",
-                                duelId, game.getTargetWord());
         }
 
-        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/monkeyType/input")
-        public void handleTypingInput(
+        /**
+         * Verarbeitet Fortschrittsmeldungen (Progress) für das MonkeyType-Minigame.
+         * <p>
+         * Die Validierung einzelner Tasteneingaben erfolgt clientseitig.
+         * Der Server prüft ausschließlich, ob der gemeldete Fortschritt
+         * gültig ist (z. B. keine Sprünge) und entscheidet autoritativ
+         * über Spielende und Gewinner.
+         * <p>
+         * Ein Status-Update wird nur dann an alle Clients gesendet,
+         * wenn sich der Spielzustand durch den Progress geändert hat.
+         *
+         * @param lobbyId  ID der Lobby
+         * @param duelId   ID des Duells
+         * @param progress das übermittelte Progress-DTO (Spieler-ID und neuer
+         *                 Fortschritt)
+         * @throws LobbyNotFoundException wenn die Lobby nicht existiert
+         */
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/monkeyType/progress")
+        public void handleTypingProgress(
                         @DestinationVariable UUID lobbyId,
                         @DestinationVariable UUID duelId,
-                        @Payload MonkeyTypeInputDTO input) throws LobbyNotFoundException {
-
-                logger.info("Player {} typed char '{}' at position {} in duel {}",
-                                input.playerId(), input.typedChar(), input.position(), duelId);
+                        @Payload MonkeyTypeProgressDTO progress) throws LobbyNotFoundException {
 
                 Lobby lobby = lobbyManager.getLobby(lobbyId);
                 MonkeyTypeGame game = (MonkeyTypeGame) duelService.getMiniGame(duelId);
 
                 // Verarbeite die Eingabe
-                game.processInput(input.playerId(), input.typedChar(), input.position());
+                boolean changed = game.processInput(progress.playerId(), progress.progress());
 
-                // Sende Update an alle Clients
-                broadcastMonkeyTypeUpdate(lobby, duelId, game);
+                // Sende Update an alle Clients wenn progress aktualisiert wurde
+                if (changed)
+                        broadcastMonkeyTypeUpdate(lobby, duelId, game);
 
                 // Wenn Spiel beendet, Verlierer zurücksetzen
                 if (game.isFinished()) {
