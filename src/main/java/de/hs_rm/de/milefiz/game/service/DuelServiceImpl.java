@@ -95,14 +95,15 @@ public class DuelServiceImpl implements DuelService {
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
 
-            DuelResolutionService duelResolutionService, MonkeyTypeWordService monkeyTypeWordService) {
+            DuelResolutionService duelResolutionService) {
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout));
         gameFactories.add(() -> new SlotMachineGame(slotMachineGameTimeout));
         gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
         gameFactories.add(() -> new QuizGame(quizGameTimeout));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
-        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
+        // gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2,
+        // monkeyTypeWordService));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
@@ -337,7 +338,6 @@ public class DuelServiceImpl implements DuelService {
                     monkeyTypeGame.getCorrectLettersPlayer2(),
                     monkeyTypeGame.getWinner(),
                     monkeyTypeGame.isFinished());
-
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, monkeyTypeGame);
 
