@@ -349,11 +349,20 @@ public class MiniGameController {
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }
 
+        /**
+         * Verarbeitet Spieler-Eingaben für das Kopfrechnen-Minispiel.
+         *
+         * @param lobbyId         UUID der Lobby
+         * @param duelId          UUID des Duells
+         * @param mathGameCommand Command mit {@code input}
+         * @param player          Spieler
+         * @throws LobbyNotFoundException
+         */
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/math/input")
         public void handleMathInput(@DestinationVariable UUID lobbyId,
                         @DestinationVariable UUID duelId,
                         MathGameCommand mathGameCommand, Player player) throws LobbyNotFoundException {
-                                logger.info("{}", mathGameCommand);
+                logger.info("{}", mathGameCommand);
                 logger.info("Player {} locked input {} in math game duel {} (lobby {})",
                                 player.getId(), mathGameCommand.input(), duelId, lobbyId);
 
@@ -364,6 +373,15 @@ public class MiniGameController {
                 game.setValue(player.getId(), mathGameCommand.input());
         }
 
+        /**
+         * Verarbeitet Anfrage für Term durch Spieler.
+         * Sendet zu Duell zugehörigen Term über STOMP.
+         * 
+         * @param lobbyId UUID der Lobby
+         * @param duelId  UUID des Duells
+         * @param player  Spiele
+         * @throws LobbyNotFoundException
+         */
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/math/term")
         public void handleMathRequest(@DestinationVariable UUID lobbyId, @DestinationVariable UUID duelId,
                         Player player) throws LobbyNotFoundException {
@@ -373,17 +391,17 @@ public class MiniGameController {
                 MathGame mathGame = (MathGame) duelService.getMiniGame(duelId);
 
                 var update = new FrontendMathGameUpdateEvent(
-                duelId,
-                mathGame.getPlayer1(),
-                mathGame.getPlayer2(),
-                null,
-                null,
-                mathGame.getTermRepresentaion(),
-                null,
-                null,
-                mathGame.isFinished());
+                                duelId,
+                                mathGame.getPlayer1(),
+                                mathGame.getPlayer2(),
+                                null,
+                                null,
+                                mathGame.getTermRepresentaion(),
+                                null,
+                                null,
+                                mathGame.isFinished());
 
-            messaging.sendEvent(new LobbyMessage(lobby, update));
+                messaging.sendEvent(new LobbyMessage(lobby, update));
         }
 
         /**
@@ -451,6 +469,7 @@ public class MiniGameController {
                 logger.info("MonkeyType update sent for duel {}, word: {}",
                                 duelId, game.getTargetWord());
         }
+
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/monkeyType/input")
         public void handleTypingInput(
                         @DestinationVariable UUID lobbyId,
@@ -576,9 +595,9 @@ public class MiniGameController {
                         cleaned = cleaned.substring(1, cleaned.length() - 1);
                 }
 
-                if(clickedColorName != null) {
+                if (clickedColorName != null) {
                         ColorbrainGame.ColorbrainColor clickedColor = ColorbrainGame.ColorbrainColor
-                                .valueOf(cleaned.toUpperCase());
+                                        .valueOf(cleaned.toUpperCase());
 
                         game.handlePlayerClick(player.getId(), clickedColor);
 
