@@ -1,5 +1,6 @@
 package de.hs_rm.de.milefiz.messaging.events;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record FrontendMonkeyTypeGameUpdateEvent(
@@ -8,25 +9,23 @@ public record FrontendMonkeyTypeGameUpdateEvent(
         UUID player1,
         UUID player2,
         String targetWord,
-        String player1Input,
-        String player2Input,
-        boolean[] correctLettersPlayer1,
-        boolean[] correctLettersPlayer2,
+        int player1Progress,
+        int player2Progress,
         UUID winner,
-        boolean finished) implements FrontendEvent {
+        boolean finished,
+        Instant startedAt) implements FrontendEvent {
 
     public FrontendMonkeyTypeGameUpdateEvent(
             UUID duelId,
             UUID player1,
             UUID player2,
             String targetWord,
-            String player1Input,
-            String player2Input,
-            boolean[] correctLettersPlayer1,
-            boolean[] correctLettersPlayer2,
+            int player1Progress,
+            int player2Progress,
             UUID winner,
-            boolean finished) {
-        this(EventType.MONKEY_TYPE_GAME_UPDATE.name(), duelId, player1, player2, targetWord, player1Input, player2Input,
-                correctLettersPlayer1, correctLettersPlayer2, winner, finished);
+            boolean finished,
+            Instant startedAt) {
+        this(EventType.MONKEY_TYPE_GAME_UPDATE.name(), duelId, player1, player2, targetWord, player1Progress,
+                player2Progress, winner, finished, startedAt);
     }
 }

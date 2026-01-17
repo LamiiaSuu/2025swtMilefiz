@@ -425,6 +425,21 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.finished = event.finished
         }
 
+          if (event.type === "MATH_GAME_UPDATE") {
+          const duel = activeDuels[event.duelId]
+          if (!duel) return
+
+          console.log(event)
+          duel.state.player1 = event.player1
+          duel.state.player2 = event.player2
+          duel.state.p1Value = event.p1Value
+          duel.state.p2Value = event.p2Value
+          duel.state.termRepresentation = event.termRepresentation
+          duel.state.termValue = event.termValue
+          duel.state.winner = event.winner
+          duel.state.finished = event.finished
+        }
+
         if (event.type === "QUIZ_GAME_UPDATE") {
           const duel = activeDuels[event.duelId]
 
@@ -469,12 +484,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             targetWord: event.targetWord || "",
             player1: event.player1,
             player2: event.player2,
-            player1Input: event.player1Input || "",
-            player2Input: event.player2Input || "",
-            correctLettersPlayer1: event.correctLettersPlayer1 || [],
-            correctLettersPlayer2: event.correctLettersPlayer2 || [],
+            player1Progress: event.player1Progress,
+            player2Progress: event.player2Progress,
             winner: event.winner,
-            finished: event.finished
+            finished: event.finished,
+            startedAt: event.startedAt
           }
         }
         if (event.type === "WIN") {

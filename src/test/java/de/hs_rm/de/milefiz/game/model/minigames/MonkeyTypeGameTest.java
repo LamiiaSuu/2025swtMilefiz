@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
-import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.Word;
-import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.WordsFile;
 import de.hs_rm.de.milefiz.game.service.MonkeyTypeWordService;
 
 class MonkeyTypeGameTest {
@@ -27,7 +25,7 @@ class MonkeyTypeGameTest {
     }
 
     @Test
-    void initPlayers_setsPlayersTargetWordAndResetsInputs() {
+    void initPlayers_setsPlayersTargetWordAndResetsProgressAndStartedAt() {
         when(wordService.getRandomWord()).thenReturn("ABC");
 
         MonkeyTypeGame game = new MonkeyTypeGame(9999, wordService);
@@ -39,23 +37,18 @@ class MonkeyTypeGameTest {
 
         assertEquals(p1, game.getPlayer1());
         assertEquals(p2, game.getPlayer2());
-
         assertEquals("ABC", game.getTargetWord());
-        assertEquals("", game.getPlayer1Input());
-        assertEquals("", game.getPlayer2Input());
 
-        assertNotNull(game.getCorrectLettersPlayer1());
-        assertNotNull(game.getCorrectLettersPlayer2());
-        assertEquals(3, game.getCorrectLettersPlayer1().length);
-        assertEquals(3, game.getCorrectLettersPlayer2().length);
+        assertEquals(0, game.getPlayer1Progress());
+        assertEquals(0, game.getPlayer2Progress());
 
-        // default boolean array ist false
-        assertFalse(game.getCorrectLettersPlayer1()[0]);
-        assertFalse(game.getCorrectLettersPlayer2()[0]);
+        assertNotNull(game.getStartedAt());
+        assertFalse(game.isFinished());
+        assertNull(game.getWinner());
     }
 
     @Test
-    void processInput_correctWordByPlayer1_finishesGameAndSetsWinner_andCallsOnFinished() {
+    void processInput_player1ReachesEnd_finishesGameSetsWinner_andCallsOnFinished() {
         when(wordService.getRandomWord()).thenReturn("AB");
 
         MonkeyTypeGame game = new MonkeyTypeGame(9999, wordService);
@@ -68,76 +61,17 @@ class MonkeyTypeGameTest {
 
         game.initPlayers(p1, p2, lobby);
 
+        assertFalse(game.processInput(p1, 1));
+        assertEquals(1, game.getPlayer1Progress());
         assertFalse(game.isFinished());
         assertNull(game.getWinner());
 
-        game.processInput(p1, 'A', 0);
-        assertEquals("A", game.getPlayer1Input());
-        assertTrue(game.getCorrectLettersPlayer1()[0]);
-
-        game.processInput(p1, 'B', 1);
+        assertTrue(game.processInput(p1, 2));
 
         assertTrue(game.isFinished());
         assertEquals(p1, game.getWinner());
-        assertEquals("AB", game.getPlayer1Input());
-        assertTrue(game.getCorrectLettersPlayer1()[1]);
-
+        assertEquals(2, game.getPlayer1Progress());
         assertTrue(finishedCalled.get());
-    }
-
-    @Test
-    void processInput_wrongChar_marksLetterFalse_butDoesNotFinish() {
-        when(wordService.getRandomWord()).thenReturn("AB");
-
-        MonkeyTypeGame game = new MonkeyTypeGame(9999, wordService);
-
-        UUID p1 = UUID.randomUUID();
-        UUID p2 = UUID.randomUUID();
-
-        game.initPlayers(p1, p2, lobby);
-
-        game.processInput(p1, 'X', 0);
-
-        assertEquals("X", game.getPlayer1Input());
-        assertFalse(game.getCorrectLettersPlayer1()[0]);
-        assertFalse(game.isFinished());
-        assertNull(game.getWinner());
-    }
-
-    @Test
-    void processInput_ignoresInputIfPositionNotNextExpected() {
-        when(wordService.getRandomWord()).thenReturn("ABC");
-
-        MonkeyTypeGame game = new MonkeyTypeGame(9999, wordService);
-
-        UUID p1 = UUID.randomUUID();
-        UUID p2 = UUID.randomUUID();
-
-        game.initPlayers(p1, p2, lobby);
-
-        // player1Input ist leer, also ist nur position=0 erlaubt.
-        game.processInput(p1, 'B', 1);
-
-        assertEquals("", game.getPlayer1Input());
-        assertFalse(game.isFinished());
-    }
-
-    @Test
-    void processInput_ignoresInputOutsideRange() {
-        when(wordService.getRandomWord()).thenReturn("AB");
-
-        MonkeyTypeGame game = new MonkeyTypeGame(9999, wordService);
-
-        UUID p1 = UUID.randomUUID();
-        UUID p2 = UUID.randomUUID();
-
-        game.initPlayers(p1, p2, lobby);
-
-        game.processInput(p1, 'A', -1);
-        game.processInput(p1, 'A', 99);
-
-        assertEquals("", game.getPlayer1Input());
-        assertFalse(game.isFinished());
     }
 
     @Test
@@ -151,14 +85,76 @@ class MonkeyTypeGameTest {
 
         game.initPlayers(p1, p2, lobby);
 
-        game.processInput(p2, 'H', 0);
-        game.processInput(p2, 'I', 1);
+        assertFalse(game.processInput(p2, 1));
+        assertEquals(1, game.getPlayer2Progress());
+        assertFalse(game.isFinished());
+
+        assertTrue(game.processInput(p2, 2));
 
         assertTrue(game.isFinished());
         assertEquals(p2, game.getWinner());
-        assertEquals("HI", game.getPlayer2Input());
-        assertTrue(game.getCorrectLettersPlayer2()[0]);
-        assertTrue(game.getCorrectLettersPlayer2()[1]);
+        assertEquals(2, game.getPlayer2Progress());
+    }
+
+    @Test
+    void processInput_rejectsOutOfRangeProgress() {
+        when(wordService.getRandomWord()).thenReturn("AB");
+
+        MonkeyTypeGame game = new MonkeyTypeGame(9999, wordService);
+
+        UUID p1 = UUID.randomUUID();
+        UUID p2 = UUID.randomUUID();
+
+        game.initPlayers(p1, p2, lobby);
+
+        assertFalse(game.processInput(p1, -1));
+        assertFalse(game.processInput(p1, 3));
+
+        assertEquals(0, game.getPlayer1Progress());
+        assertFalse(game.isFinished());
+        assertNull(game.getWinner());
+    }
+
+    @Test
+    void processInput_rejectsOutOfSyncProgress_notIncremental() {
+        when(wordService.getRandomWord()).thenReturn("ABC");
+
+        MonkeyTypeGame game = new MonkeyTypeGame(9999, wordService);
+
+        UUID p1 = UUID.randomUUID();
+        UUID p2 = UUID.randomUUID();
+
+        game.initPlayers(p1, p2, lobby);
+
+        assertFalse(game.processInput(p1, 2));
+        assertEquals(0, game.getPlayer1Progress());
+
+        assertFalse(game.processInput(p1, 1));
+        assertEquals(1, game.getPlayer1Progress());
+
+        assertFalse(game.processInput(p1, 3));
+        assertEquals(1, game.getPlayer1Progress());
+        assertFalse(game.isFinished());
+    }
+
+    @Test
+    void processInput_unknownPlayerIsIgnored() {
+        when(wordService.getRandomWord()).thenReturn("A");
+
+        MonkeyTypeGame game = new MonkeyTypeGame(9999, wordService);
+
+        UUID p1 = UUID.randomUUID();
+        UUID p2 = UUID.randomUUID();
+        UUID other = UUID.randomUUID();
+
+        game.initPlayers(p1, p2, lobby);
+
+        assertFalse(game.processInput(other, 1));
+
+        assertEquals(0, game.getPlayer1Progress());
+        assertEquals(0, game.getPlayer2Progress());
+        assertFalse(game.isFinished());
+        assertNull(game.getWinner());
     }
 
     @Test
@@ -172,15 +168,13 @@ class MonkeyTypeGameTest {
 
         game.initPlayers(p1, p2, lobby);
 
-        game.processInput(p1, 'A', 0);
-
+        assertTrue(game.processInput(p1, 1));
         assertTrue(game.isFinished());
         assertEquals(p1, game.getWinner());
 
-        // danach sollte nichts mehr passieren
-        game.processInput(p2, 'A', 0);
+        assertFalse(game.processInput(p2, 1));
 
-        assertEquals("", game.getPlayer2Input());
+        assertEquals(0, game.getPlayer2Progress());
         assertEquals(p1, game.getWinner());
     }
 
@@ -206,10 +200,4 @@ class MonkeyTypeGameTest {
         assertNull(game.getWinner());
         assertTrue(finishedCalled.get());
     }
-    @Test
-    void wordRecord_storesValue() {
-        Word w = new Word("ABC");
-        assertEquals("ABC", w.word());
-    }
-
 }
