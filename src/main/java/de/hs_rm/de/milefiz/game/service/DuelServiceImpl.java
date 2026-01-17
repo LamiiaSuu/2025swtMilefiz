@@ -11,6 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,9 @@ public class DuelServiceImpl implements DuelService {
 
     private final ScheduledExecutorService miniGameScheduler = Executors.newScheduledThreadPool(4);
 
+
+    @Autowired
+    MonkeyTypeWordService monkeyTypeWordService;
     /**
      * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen
      * entstehen).
@@ -102,7 +106,7 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
         gameFactories.add(() -> new QuizGame(quizGameTimeout));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
-        // gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
+        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
