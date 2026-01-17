@@ -4,31 +4,32 @@ import java.util.UUID;
 
 import de.hs_rm.de.milefiz.game.model.Color;
 
-public record FrontendEinarmigerBanditGameUpdateEvent(
+public record FrontendSlotMachineGameUpdateEvent(
         String type,
         UUID duelId,
-        UUID p1,
-        UUID p2,
-        Color resultP1,
-        Color resultP2,
+        UUID player1Id,
+        UUID player2Id,
+        Color resultPlayer1,
+        Color resultPlayer2,
         Color resultComp,
         UUID winner,
         boolean jackpot,
         int jackpotEnergy,
         boolean finished) implements FrontendEvent {
 
-    public FrontendEinarmigerBanditGameUpdateEvent(
+    public FrontendSlotMachineGameUpdateEvent(
             UUID duelId,
-            UUID p1,
-            UUID p2,
-            Color resultP1,
-            Color resultP2,
+            UUID player1Id,
+            UUID player2Id,
+            Color resultPlayer1,
+            Color resultPlayer2,
             Color resultComp,
             UUID winner,
             boolean jackpot,
             int jackpotEnergy,
             boolean finished) {
-        this(EventType.EINARMIGER_BANDIT_GAME_UPDATE.name(), duelId, p1, p2, resultP1, resultP2, resultComp, winner,
+        this(EventType.SLOT_MACHINE_GAME_UPDATE.name(), duelId, player1Id, player2Id, resultPlayer1, resultPlayer2,
+                resultComp, winner,
                 jackpot, jackpotEnergy,
                 finished);
     }

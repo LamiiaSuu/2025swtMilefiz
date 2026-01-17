@@ -388,9 +388,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.winner = event.winner
           duel.state.finished = event.finished
         }
-        if (event.type === "EINARMIGER_BANDIT_GAME_UPDATE") {
-          console.log("EINARMIGER_BANDIT_GAME_UPDATE received:", event)
-
+        if (event.type === "SLOT_MACHINE_GAME_UPDATE") {
+          console.log("SLOT_MACHINE_GAME_UPDATE received:", event)
           const duel = activeDuels[event.duelId]
           if (!duel) {
             console.log("Duel not found for ID:", event.duelId)
@@ -398,13 +397,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           }
 
           console.log("Updating duel state:", {
-            resultP1: event.resultP1,
-            resultP2: event.resultP2,
+            resultP1: event.resultPlayer1,
+            resultP2: event.resultPlayer2,
             resultComp: event.resultComp
           })
 
-          duel.state.resultP1 = event.resultP1
-          duel.state.resultP2 = event.resultP2
+          duel.state.resultP1 = event.resultPlayer1
+          duel.state.resultP2 = event.resultPlayer2
           duel.state.resultComp = event.resultComp
           duel.state.winner = event.winner
           duel.state.jackpot = event.jackpot
@@ -462,10 +461,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           const duel = activeDuels[event.duelId]
           if (!duel) {
-            console.error("❌ Kein Duel gefunden für ID:", event.duelId)
             return
           }
-          
+
           duel.state = {
             ...duel.state,
             targetWord: event.targetWord || "",

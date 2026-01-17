@@ -8,12 +8,10 @@ import org.junit.jupiter.api.Test;
 import de.hs_rm.de.milefiz.game.model.Color;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
-import static org.awaitility.Awaitility.*;
-import java.time.Duration;
 
-class EinarmigerBanditTest {
+class SlotMachineTest {
 
-    private EinarmigerBanditGame game;
+    private SlotMachineGame game;
     private Lobby lobby;
     private Player player1;
     private Player player2;
@@ -21,7 +19,7 @@ class EinarmigerBanditTest {
     @BeforeEach
     void setUp() {
         // Initialisiere das Spiel mit 10 Sekunden Timeout
-        game = new EinarmigerBanditGame(10);
+        game = new SlotMachineGame(10);
 
         // Erstelle Test-Lobby mit 2 Spielern
         lobby = new Lobby();
@@ -34,13 +32,13 @@ class EinarmigerBanditTest {
         }, "Lobby join should not throw exception in setup");
 
         // Initialisiere das Spiel
-        game.initPlayers(player1.getId(), player2.getId(), lobby);
+        game.initPlayers(player1, player2);
     }
 
     @Test
     void testInitPlayers_SetsPlayersCorrectly() {
-        assertEquals(player1.getId(), game.getP1());
-        assertEquals(player2.getId(), game.getP2());
+        assertEquals(player1, game.getPlayer1());
+        assertEquals(player2, game.getPlayer2());
     }
 
     @Test
@@ -48,10 +46,10 @@ class EinarmigerBanditTest {
         game.stop(player1.getId());
 
         // Spieler 1 sollte ein Ergebnis haben
-        assertNotNull(game.getResultP1());
+        assertNotNull(game.getResultPlayer1());
         // Ergebnis sollte eine der beiden Spielerfarben sein
         assertTrue(
-                game.getResultP1() == Color.RED || game.getResultP1() == Color.BLUE,
+                game.getResultPlayer1() == Color.RED || game.getResultPlayer1() == Color.BLUE,
                 "Result should be either RED or BLUE");
     }
 
@@ -60,10 +58,10 @@ class EinarmigerBanditTest {
         game.stop(player2.getId());
 
         // Spieler 2 sollte ein Ergebnis haben
-        assertNotNull(game.getResultP2());
+        assertNotNull(game.getResultPlayer2());
         // Ergebnis sollte eine der beiden Spielerfarben sein
         assertTrue(
-                game.getResultP2() == Color.RED || game.getResultP2() == Color.BLUE,
+                game.getResultPlayer2() == Color.RED || game.getResultPlayer2() == Color.BLUE,
                 "Result should be either RED or BLUE");
     }
 
@@ -71,11 +69,11 @@ class EinarmigerBanditTest {
     void testStop_OnlyFirstStopCounts() {
         // Erster Stop
         game.stop(player1.getId());
-        Color firstResult = game.getResultP1();
+        Color firstResult = game.getResultPlayer1();
 
         // Zweiter Stop vom selben Spieler
         game.stop(player1.getId());
-        Color secondResult = game.getResultP1();
+        Color secondResult = game.getResultPlayer1();
 
         // Ergebnis sollte gleich bleiben
         assertEquals(firstResult, secondResult, "Multiple stops should not change result");
@@ -107,7 +105,7 @@ class EinarmigerBanditTest {
     }
 
     @Test
-    void testPlayerEnergy_IncreasesOnJackpot() throws Exception {
+    void testPlayerEnergy_IncreasesOnJackpot() {
         // Prüft nur, dass Jackpot-Methode die Energie auf Maximum setzt
         player1.jackpot();
         assertEquals(player1.getMaxEnergy(), player1.getEnergy(),
@@ -116,6 +114,6 @@ class EinarmigerBanditTest {
 
     @Test
     void testGameName_IsCorrect() {
-        assertEquals("Einarmiger-Bandit-Game", game.getName());
+        assertEquals("Slot-Machine-Game", game.getName());
     }
 }

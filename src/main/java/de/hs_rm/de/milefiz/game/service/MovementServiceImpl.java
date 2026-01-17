@@ -25,7 +25,7 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
-import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
@@ -655,8 +655,8 @@ public class MovementServiceImpl implements MovementService {
 
         if (miniGame instanceof DiceGame dice) {
             dice.initPlayers(player.getId(), rivalPlayer.getId());
-        } else if (miniGame instanceof EinarmigerBanditGame game) {
-            game.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
+        } else if (miniGame instanceof SlotMachineGame game) {
+            game.initPlayers(player, rivalPlayer);
         } else if (miniGame instanceof ColorbrainGame game) {
             game.initGame(player.getId(), rivalPlayer.getId());
             duelService.initColorBrain(duel, lobby, game);

@@ -19,7 +19,7 @@ import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
-import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.service.DuelResolutionService;
@@ -48,8 +48,10 @@ class MiniGameControllerTest {
     private UUID lobbyId;
     private UUID duelId;
     private UUID playerId;
+    private UUID player2Id;
 
     private Player player;
+    private Player player2;
     private Lobby lobby;
 
     @BeforeEach
@@ -57,8 +59,10 @@ class MiniGameControllerTest {
         lobbyId = UUID.randomUUID();
         duelId = UUID.randomUUID();
         playerId = UUID.randomUUID();
+        player2Id = UUID.randomUUID();
 
         player = mock(Player.class);
+        player2 = mock(Player.class);
 
         lobby = mock(Lobby.class);
     }
@@ -102,13 +106,17 @@ class MiniGameControllerTest {
     }
 
     // -------------------------------------------------
-    // Einarmiger Bandit
+    // SlotMachine
     // -------------------------------------------------
 
     @Test
     void handleSlotStop_gameNotFinished_broadcastOnly() throws Exception {
         when(player.getId()).thenReturn(playerId);
-        EinarmigerBanditGame game = mock(EinarmigerBanditGame.class);
+        when(player2.getId()).thenReturn(player2Id);
+        SlotMachineGame game = mock(SlotMachineGame.class);
+
+        when(game.getPlayer1()).thenReturn(player);
+        when(game.getPlayer2()).thenReturn(player2);
 
         when(lobbyManager.getLobby(lobbyId)).thenReturn(lobby);
         when(duelService.getMiniGame(duelId)).thenReturn(game);
@@ -124,8 +132,12 @@ class MiniGameControllerTest {
     @Test
     void handleSlotStop_gameFinished_delegatesToResolutionService() throws Exception {
         when(player.getId()).thenReturn(playerId);
-        EinarmigerBanditGame game = mock(EinarmigerBanditGame.class);
+        when(player2.getId()).thenReturn(player2Id);
+        SlotMachineGame game = mock(SlotMachineGame.class);
         Duel duel = mock(Duel.class);
+
+        when(game.getPlayer1()).thenReturn(player);
+        when(game.getPlayer2()).thenReturn(player2);
 
         when(lobbyManager.getLobby(lobbyId)).thenReturn(lobby);
         when(duelService.getMiniGame(duelId)).thenReturn(game);
@@ -272,7 +284,7 @@ class MiniGameControllerTest {
     }
 
     // -------------------------------------------------
-    // RockPaperScissorsGame 
+    // RockPaperScissorsGame
     // -------------------------------------------------
 
     @Test

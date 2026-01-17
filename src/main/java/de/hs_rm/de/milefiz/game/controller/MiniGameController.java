@@ -20,7 +20,7 @@ import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
 import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
-import de.hs_rm.de.milefiz.game.model.minigames.EinarmigerBanditGame;
+import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.game.service.DuelResolutionService;
 import de.hs_rm.de.milefiz.game.service.DuelService;
@@ -29,7 +29,7 @@ import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendEinarmigerBanditGameUpdateEvent;
+import de.hs_rm.de.milefiz.messaging.events.FrontendSlotMachineGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendQuizGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendRockPaperScissorsGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMonkeyTypeGameUpdateEvent;
@@ -120,7 +120,7 @@ public class MiniGameController {
          * Ablauf:
          * <ol>
          * <li>Lobby wird geladen</li>
-         * <li>Mini-Game (in dem Fall einarmiger Bandit) des Duells wird geholt</li>
+         * <li>Mini-Game (in dem Fall Slot Machine) des Duells wird geholt</li>
          * <li>Spieler stoppt seine Slot</li>
          * <li>Frontend erhält Update</li>
          * <li>Falls Spiel beendet -> Loser-Meeples werden zurück in die Basis
@@ -134,7 +134,7 @@ public class MiniGameController {
          *                                angegebenen LobbyId gefunden wurde
          * @author Leon Schäfer
          */
-        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/einarmigerBandit/stop")
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/slotMachine/stop")
         public void handleSlotStop(
                         @DestinationVariable UUID lobbyId,
                         @DestinationVariable UUID duelId,
@@ -146,15 +146,15 @@ public class MiniGameController {
                 Lobby lobby = lobbyManager.getLobby(lobbyId);
 
                 // MiniGame holen (bereits zu diesem Zeitpunkt dem Duell zugewiesen)
-                EinarmigerBanditGame game = (EinarmigerBanditGame) duelService.getMiniGame(duelId);
+                SlotMachineGame game = (SlotMachineGame) duelService.getMiniGame(duelId);
 
                 // zieht den einarmigen Banditen für diesen Spieler
                 game.stop(player.getId());
 
-                broadcastEinarmigerBanditUpdate(lobby, duelId, game);
+                broadcastSlotMachineGameUpdate(lobby, duelId, game);
 
                 if (game.isFinished()) {
-                        logger.info("Einarmiger Bandit game finished in duel {}, winner: {}",
+                        logger.info("Slot Machine Game finished in duel {}, winner: {}",
                                         duelId, game.getWinner());
                         Duel duel = duelService.getDuel(duelId);
                         duelResolutionService.sendLoserHome(lobby, duel, game);
@@ -212,7 +212,7 @@ public class MiniGameController {
          * Bevor das event erstellt wird, wird die aktuelle Energy des Gewinners
          * gespeichert. Diese wurden zuvor, sofern ein Jackpot erreicht wurde, auf den
          * maximalen Wert gesetzt wurde (Dies geschieht in
-         * {@link EinarmigerBanditGame#checkFinished()})
+         * {@link SlotMachineGame#checkFinished()})
          *
          * <p>
          * Das Frontend erhält dadurch:
@@ -233,18 +233,18 @@ public class MiniGameController {
          * @param game   aktueller Zustand des einarmigen Bandit-Minigames
          * @author Leon Schäfer
          */
-        private void broadcastEinarmigerBanditUpdate(Lobby lobby, UUID duelId, EinarmigerBanditGame game) {
-                logger.info("Broadcasting Einarmiger Bandit update for duel {}", duelId);
+        private void broadcastSlotMachineGameUpdate(Lobby lobby, UUID duelId, SlotMachineGame game) {
+                logger.info("Broadcasting Slot Machine update for duel {}", duelId);
 
                 Integer energy = null;
                 if (game.getWinner() != null) {
                         energy = lobby.getPlayer(game.getWinner()).getEnergy();
                 }
-                var event = new FrontendEinarmigerBanditGameUpdateEvent(duelId,
-                                game.getP1(),
-                                game.getP2(),
-                                game.getResultP1(),
-                                game.getResultP2(),
+                var event = new FrontendSlotMachineGameUpdateEvent(duelId,
+                                game.getPlayer1().getId(),
+                                game.getPlayer2().getId(),
+                                game.getResultPlayer1(),
+                                game.getResultPlayer2(),
                                 game.getResultComp(),
                                 game.getWinner(),
                                 game.isJackpot(),
@@ -252,7 +252,7 @@ public class MiniGameController {
                                 game.isFinished());
                 messaging.sendEvent(new LobbyMessage(lobby, event));
 
-                logger.info("Einarmiger Bandit event sent for duel {}", duelId);
+                logger.info("SlotMachine event sent for duel {}", duelId);
 
         }
 
@@ -411,6 +411,7 @@ public class MiniGameController {
                 logger.info("MonkeyType update sent for duel {}, word: {}",
                                 duelId, game.getTargetWord());
         }
+
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/monkeyType/input")
         public void handleTypingInput(
                         @DestinationVariable UUID lobbyId,
@@ -536,9 +537,9 @@ public class MiniGameController {
                         cleaned = cleaned.substring(1, cleaned.length() - 1);
                 }
 
-                if(clickedColorName != null) {
+                if (clickedColorName != null) {
                         ColorbrainGame.ColorbrainColor clickedColor = ColorbrainGame.ColorbrainColor
-                                .valueOf(cleaned.toUpperCase());
+                                        .valueOf(cleaned.toUpperCase());
 
                         game.handlePlayerClick(player.getId(), clickedColor);
 

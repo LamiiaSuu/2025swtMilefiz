@@ -36,13 +36,13 @@ class DuelServiceImplTest {
     void setup() {
         lobbyManager = mock(LobbyManager.class);
         messaging = mock(FrontendMessagingService.class);
-        duelResolutionService = mock(DuelResolutionService.class); // 🔥 DAS FEHLT
+        duelResolutionService = mock(DuelResolutionService.class);
 
         service = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
 
         ReflectionTestUtils.setField(service, "diceGameTimeout", 5);
         ReflectionTestUtils.setField(service, "balloonGameTimeout", 5);
-        ReflectionTestUtils.setField(service, "einarmigerBanditGameTimeout", 5);
+        ReflectionTestUtils.setField(service, "slotMachineGameTimeout", 5);
     }
 
     @Test
@@ -220,7 +220,6 @@ class DuelServiceImplTest {
         assertEquals(4, assignedGames);
     }
 
-
     @Test
     void duelIsRemovedAfterMiniGameFinished() {
         UUID p1 = UUID.randomUUID();
@@ -244,7 +243,6 @@ class DuelServiceImplTest {
                 () -> service.getDuel(duel.getId()));
     }
 
-
     @Test
     void schedulerIsShutdownOnPreDestroy() {
         DuelServiceImpl localService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
@@ -266,8 +264,7 @@ class DuelServiceImplTest {
         Lobby lobby = mock(Lobby.class);
         when(lobbyManager.getLobbyFromPlayerUUID(any())).thenReturn(lobby);
 
-        List<java.util.function.Supplier<MiniGame>> factories =
-                List.of(() -> new DiceGame(1));
+        List<java.util.function.Supplier<MiniGame>> factories = List.of(() -> new DiceGame(1));
 
         ReflectionTestUtils.setField(service, "gameFactories", factories);
 
@@ -286,7 +283,5 @@ class DuelServiceImplTest {
 
         assertTrue(game.isFinished());
     }
-
-
 
 }
