@@ -39,7 +39,6 @@ import de.hs_rm.de.milefiz.game.service.MonkeyTypeWordService;
  * {@code winner = null} gesetzt. Der Timer wird über einen
  * {@link ScheduledExecutorService}
  * realisiert.
- * </p>
  *
  * <h2>Validierung / Anti-Cheat</h2>
  * <ul>
