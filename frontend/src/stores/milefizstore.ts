@@ -53,9 +53,13 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   const jumpTrigger = ref<{ meepleId: string; nonce: number } | null>(null)
 
   function triggerJumpLocally(meepleId: string) {
+    gamedata.isJumping = true
     jumpTrigger.value = { meepleId, nonce: Date.now() }
   }
 
+  function finishJumpLocally() {
+    gamedata.isJumping = false
+  }
   /** 
    * Gewinndialog
    * @prop {boolean} gameFinished - Wenn 'true' zählt das Spiel als beendet, weil jemand ins Ziel gekommen ist.
@@ -425,7 +429,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.finished = event.finished
         }
 
-          if (event.type === "MATH_GAME_UPDATE") {
+        if (event.type === "MATH_GAME_UPDATE") {
           const duel = activeDuels[event.duelId]
           if (!duel) return
 
@@ -1089,19 +1093,25 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   *
   * @returns void
   * @throws Loggt Fehler in der Konsole und bricht Ausführung ab
-   *
+  *
   * @author Kevin Tran
-   */
+  */
   function sendEnergyConsume(meepleId: string) {
+    if (gamedata.isJumping) {
+      console.warn('Cannot consume energy: player is already jumping.')
+      return
+    }
     if (!stompclient || !stompclient.connected) {
-      console.error('Cannot save energy: STOMP client not connected.')
+      console.error('Cannot consume energy: STOMP client not connected.')
       return
     }
 
     if (!gamedata.lobby?.id || !gamedata.playerId) {
-      console.error('Cannot save energy: Missing lobbyId or playerId')
+      console.error('Cannot consume energy: Missing lobbyId or playerId')
       return
     }
+
+    gamedata.isJumping = true
     const energyConsumeCommand: EnergyCommand = { playerId: gamedata.playerId, meepleId: meepleId }
     const body = JSON.stringify(energyConsumeCommand)
 
@@ -1266,6 +1276,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     selectMinimapField,
     jumpTrigger,
     triggerJumpLocally,
+    finishJumpLocally,
     sendMeepleRotation,
   }
 })

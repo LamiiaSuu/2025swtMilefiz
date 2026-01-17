@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
-import { useMilefizStore } from "@/stores/milefizstore";
-import { useAudioStore } from "@/stores/audioStore";
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue"
+import { useMilefizStore } from "@/stores/milefizstore"
+import { useAudioStore } from "@/stores/audioStore"
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
 const audio = useAudioStore()
 
-const isEnergyFull = computed(() => milefizStore.energy.isEnergyFull);
+const isEnergyFull = computed(() => milefizStore.energy.isEnergyFull)
+const isJumping = computed(() => milefizStore.gamedata.isJumping)
 
 /**
  * - Registriert EventListener für Keyboard Input 
@@ -28,7 +29,7 @@ onUnmounted(() => {
  * → true, solange nicht genügend Energie gesammelt wurde
  */
 const disabled = computed(() =>
-    !isEnergyFull.value
+    !isEnergyFull.value || isJumping.value
 )
 
 // activeMeeple merken
