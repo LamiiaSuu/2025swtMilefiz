@@ -8,6 +8,7 @@ const milefizStore = useMilefizStore()
 const audio = useAudioStore()
 
 const isEnergyFull = computed(() => milefizStore.energy.isEnergyFull);
+const isJumping = computed(() => milefizStore.gamedata.isJumping)
 
 /**
  * - Registriert EventListener für Keyboard Input 
@@ -28,7 +29,7 @@ onUnmounted(() => {
  * → true, solange nicht genügend Energie gesammelt wurde
  */
 const disabled = computed(() =>
-    !isEnergyFull.value
+    !isEnergyFull.value || isJumping.value
 )
 
 // activeMeeple merken
