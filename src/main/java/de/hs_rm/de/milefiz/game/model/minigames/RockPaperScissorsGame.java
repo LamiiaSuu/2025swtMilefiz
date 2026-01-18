@@ -99,7 +99,8 @@ public class RockPaperScissorsGame extends MiniGame {
         return player2;
     }
 
-    private void forceMissingMoves() {
+    @Override
+    public void forceMissingActions() {
 
         // Nur, Wenn nicht gerollt
         if (isFinished())

@@ -139,7 +139,6 @@ class RockPaperScissorsGameTest {
         assertTrue(called.get());
     }
 
-    @Disabled("kurz deaktiviert, geht nicht mehr wegen scheduler weg")
     @Test
     void timeout_forceMissingMoves_setsDefaultRockAndFinishes() throws Exception {
         // Timeout sehr klein, damit der Scheduler schnell auslöst
@@ -149,13 +148,7 @@ class RockPaperScissorsGameTest {
         UUID p2 = UUID.randomUUID();
         game.initPlayers(p1, p2);
 
-        boolean terminated = game
-                .getClass()
-                .getDeclaredField("scheduler") != null; // nur um Sonar zu beruhigen :)
-
-
-        Thread.sleep(50);
-
+        game.forceMissingActions();
 
         assertTrue(game.isFinished());
         assertEquals("ROCK", game.getMoveP1());
