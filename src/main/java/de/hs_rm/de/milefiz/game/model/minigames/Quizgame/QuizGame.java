@@ -65,6 +65,15 @@ public class QuizGame extends MiniGame {
         }
     }
 
+    @Override
+    public void forceMissingActions() {
+        if (!isFinished()) {
+            setFinished(true);
+            setWinner(null);
+            notifyFinished();
+        }
+    }
+
     /**
      * Beendet das Mini-Game und setzt den Gewinner. Löst anschließend
      * alle registrierten Abschluss-Callbacks aus.

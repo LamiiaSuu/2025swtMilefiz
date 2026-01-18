@@ -172,6 +172,8 @@ class QuizGameTest {
         AtomicBoolean finishedCalled = new AtomicBoolean(false);
         game.setOnFinished(() -> finishedCalled.set(true));
 
+        game.forceMissingActions();
+
         assertTrue(game.isFinished(), "Game sollte durch Timeout finished sein");
         assertNull(game.getWinner(), "Timeout => Winner muss null sein");
         assertTrue(finishedCalled.get(), "onFinished callback sollte aufgerufen werden");
