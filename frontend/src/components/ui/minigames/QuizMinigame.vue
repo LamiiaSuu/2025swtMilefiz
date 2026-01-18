@@ -5,8 +5,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import CountdownBar from './CountdownBar.vue'
 import { currentLocale } from '@/i18n/index'
 
-const timerStarted = ref(false)
-
 const props = defineProps<{
   duel: any
 }>()
@@ -66,9 +64,6 @@ onMounted(() => {
     `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/quiz/getQuestion`,
     { id: store.gamedata.playerId }
   )
-  setTimeout(() => {
-    timerStarted.value = true
-  }, 200)
 
 })
 
@@ -99,19 +94,16 @@ watch(isFinished, (finished) => {
   <div class="dice-card no-select">
     <h2 class="dice-title">{{ tUI('MINIGANE_QUIZ_TITLE') }}</h2>
 
-    <CountdownBar v-if="timerStarted" :seconds="duel.timeOut" />
-    <div v-else class="countdown-placeholder"></div>
+    <CountdownBar :seconds="duel.timeOut" />
 
     <div class="quiz-question">{{ question }}</div>
 
     <div class="quiz-answers" role="list">
-      <button class="quiz-answer-button" v-for="(ans, idx) in answers" :key="idx" @click="selectAnswer(idx)"
-        :class="{ 
-          selected: selectedAnswer === Number(idx),
-          correct: isFinished && Number(idx) === correctAnswer,
-          incorrect: isFinished && correctAnswer !== -1 && Number(idx) !== correctAnswer
-        }"
-        :style="selectedAnswer === Number(idx) ? { '--player-color': selectedColor } : {}" role="listitem">
+      <button class="quiz-answer-button" v-for="(ans, idx) in answers" :key="idx" @click="selectAnswer(idx)" :class="{
+        selected: selectedAnswer === Number(idx),
+        correct: isFinished && Number(idx) === correctAnswer,
+        incorrect: isFinished && correctAnswer !== -1 && Number(idx) !== correctAnswer
+      }" :style="selectedAnswer === Number(idx) ? { '--player-color': selectedColor } : {}" role="listitem">
         <span class="answer-letter">{{ String.fromCharCode(65 + Number(idx)) }}</span>
         <span class="answer-text">{{ ans }}</span>
       </button>
@@ -245,11 +237,14 @@ watch(isFinished, (finished) => {
 }
 
 @keyframes pulse-border {
-  0%, 100% { 
+
+  0%,
+  100% {
     border-color: #ffd700;
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
   }
-  50% { 
+
+  50% {
     border-color: #ffed4e;
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
   }
