@@ -71,7 +71,6 @@ public class MonkeyTypeGame extends MiniGame {
     private int player2Progress;
 
     private Instant startedAt;
-    private ScheduledExecutorService scheduler;
 
     /**
      * Erstellt ein MonkeyTypeGame.
@@ -103,7 +102,6 @@ public class MonkeyTypeGame extends MiniGame {
         this.player1Progress = 0;
         this.player2Progress = 0;
         this.startedAt = Instant.now();
-        startTimer();
 
     }
 
@@ -135,7 +133,6 @@ public class MonkeyTypeGame extends MiniGame {
                 setWinner(player1);
                 setFinished(true);
                 notifyFinished();
-                scheduler.shutdownNow();
                 return true;
             }
         } else if (playerId.equals(player2)) {
@@ -148,7 +145,6 @@ public class MonkeyTypeGame extends MiniGame {
                 setWinner(player2);
                 setFinished(true);
                 notifyFinished();
-                scheduler.shutdownNow();
                 return true;
             }
         }
@@ -156,22 +152,6 @@ public class MonkeyTypeGame extends MiniGame {
 
     }
 
-    /**
-     * Startet den Timeout-Timer.
-     *
-     * <p>Nach {@link #getTimeOut()} Sekunden wird das Spiel beendet, sofern es bis dahin nicht
-     * beendet wurde. In diesem Fall wird {@code winner = null} gesetzt.</p>
-     */
-    private void startTimer() {
-        scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.schedule(() -> {
-            if (!isFinished()) {
-                setFinished(true);
-                setWinner(null);
-                notifyFinished();
-            }
-        }, getTimeOut(), TimeUnit.SECONDS);
-    }
 
     @Override
     public void forceMissingActions() {

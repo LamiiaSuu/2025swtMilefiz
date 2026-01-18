@@ -65,7 +65,7 @@ onMounted(() => {
   setTimeout(() => {
     // showInstructions.value = false
     timerStarted.value = true
-  }, 2000)
+  }, 200)
 
 })
 

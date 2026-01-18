@@ -2,21 +2,16 @@ package de.hs_rm.de.milefiz.game.model.minigames.Quizgame;
 
 import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 import de.hs_rm.de.milefiz.game.model.dto.MinigameQuestionDTO;
-import de.hs_rm.de.milefiz.game.service.MovementServiceImpl;
 import de.hs_rm.de.milefiz.game.service.QuestionService;
 
 public class QuizGame extends MiniGame {
 
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Logger logger = LoggerFactory.getLogger(QuizGame.class);
     private UUID player1;
     private UUID player2;
@@ -44,7 +39,6 @@ public class QuizGame extends MiniGame {
 
         if (!timeoutStarted) {
             timeoutStarted = true;
-            scheduler.schedule(this::handleTimeout, getTimeOut() + DELAY, TimeUnit.SECONDS);
         }
     }
 
@@ -54,13 +48,11 @@ public class QuizGame extends MiniGame {
             setFinished(true);
             notifyFinished();
         }
-        scheduler.shutdown();
     }
 
     public void finishGame(UUID winner) {
         setWinner(winner);
         setFinished(true);
-        scheduler.shutdown();
         notifyFinished();
     }
 
@@ -88,10 +80,6 @@ public class QuizGame extends MiniGame {
         if (player1Answered && player2Answered) {
             finishGame(null);
         }
-    }
-
-    public ScheduledExecutorService getScheduler() {
-        return scheduler;
     }
 
     public MinigameQuestionDTO getQuestionDTO() {
