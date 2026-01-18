@@ -110,9 +110,10 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new SlotMachineGame(slotMachineGameTimeout));
         gameFactories.add(() -> new MathGame(mathGameTimeout));
         gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
-        gameFactories.add(() -> new QuizGame(quizGameTimeout));
+        gameFactories.add(() -> new QuizGame(quizGameTimeout + 2));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
-        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
+        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2,
+                monkeyTypeWordService));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
@@ -343,7 +344,7 @@ public class DuelServiceImpl implements DuelService {
 
         else if (game instanceof QuizGame quiz) {
             var update = new FrontendQuizGameUpdateEvent(duel.getId(), quiz.getPlayer1(), quiz.getPlayer2(),
-                    quiz.getQuestionDTO(), quiz.getWinner(),
+                    quiz.getQuestionDTO(), quiz.getCorrectAnswer(), quiz.getWinner(),
                     quiz.isFinished());
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, quiz);

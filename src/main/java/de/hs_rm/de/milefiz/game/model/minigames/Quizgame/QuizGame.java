@@ -85,4 +85,17 @@ public class QuizGame extends MiniGame {
         return player2;
     }
 
+    /**
+     * gibt die korrekte Antwort (Index) für die aktuelle Frage zurück, falls das
+     * Spiel schon zuende ist, sonst -1
+     * 
+     * @return index der antwort (0-3)
+     */
+    public int getCorrectAnswer() {
+        if (isFinished()) {
+            return questionService.getCorrectAnswer(questionDTO.getId());
+        }
+        return -1;
+    }
+
 }

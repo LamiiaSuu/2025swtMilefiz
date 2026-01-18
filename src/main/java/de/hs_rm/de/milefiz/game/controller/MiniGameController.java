@@ -540,7 +540,7 @@ public class MiniGameController {
         public void broadcastQuizUpdate(Lobby lobby, UUID duelId, QuizGame game) {
 
                 var event = new FrontendQuizGameUpdateEvent(duelId, game.getPlayer1(), game.getPlayer2(),
-                                game.getQuestionDTO(), game.getWinner(), game.isFinished());
+                                game.getQuestionDTO(), game.getCorrectAnswer(), game.getWinner(), game.isFinished());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }

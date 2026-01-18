@@ -56,6 +56,11 @@ const selectedColor = computed(() => {
 })
 
 
+const correctAnswer = computed(() => {
+  return props.duel?.state?.correctAnswer ?? -1
+})
+
+
 onMounted(() => {
   store.sendLobbyMessage(
     `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/quiz/getQuestion`,
@@ -101,7 +106,11 @@ watch(isFinished, (finished) => {
 
     <div class="quiz-answers" role="list">
       <button class="quiz-answer-button" v-for="(ans, idx) in answers" :key="idx" @click="selectAnswer(idx)"
-        :class="{ selected: selectedAnswer === Number(idx) }"
+        :class="{ 
+          selected: selectedAnswer === Number(idx),
+          correct: isFinished && Number(idx) === correctAnswer,
+          incorrect: isFinished && correctAnswer !== -1 && Number(idx) !== correctAnswer
+        }"
         :style="selectedAnswer === Number(idx) ? { '--player-color': selectedColor } : {}" role="listitem">
         <span class="answer-letter">{{ String.fromCharCode(65 + Number(idx)) }}</span>
         <span class="answer-text">{{ ans }}</span>
@@ -221,6 +230,29 @@ watch(isFinished, (finished) => {
   background: var(--player-color, #ff4d4d);
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
+}
+
+.quiz-answer-button.correct {
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  animation: pulse-border 1.5s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
+}
+
+.quiz-answer-button.incorrect {
+  opacity: 0.55;
+}
+
+@keyframes pulse-border {
+  0%, 100% { 
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  }
+  50% { 
+    border-color: #ffed4e;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+  }
 }
 
 .winner-big {

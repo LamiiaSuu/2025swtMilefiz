@@ -452,6 +452,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.questionDTO = event.questionDTO
           duel.state.question = event.questionDTO?.question
           duel.state.answers = event.questionDTO?.answers
+          duel.state.correctAnswer = event.correctAnswer ?? -1
           duel.state.winner = event.winner
           duel.state.finished = event.finished
 
