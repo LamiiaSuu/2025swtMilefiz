@@ -20,7 +20,6 @@ public class QuizGame extends MiniGame {
     private QuestionService questionService;
     private boolean player1Answered = false;
     private boolean player2Answered = false;
-    private final int DELAY = 2;
 
     public QuizGame(int timeout) {
         super(2, "Quiz-Spiel", timeout);
@@ -39,14 +38,6 @@ public class QuizGame extends MiniGame {
 
         if (!timeoutStarted) {
             timeoutStarted = true;
-        }
-    }
-
-    private void handleTimeout() {
-        if (!isFinished()) {
-            setWinner(null);
-            setFinished(true);
-            notifyFinished();
         }
     }
 

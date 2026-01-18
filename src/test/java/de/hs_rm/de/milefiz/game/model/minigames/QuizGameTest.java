@@ -1,7 +1,6 @@
 package de.hs_rm.de.milefiz.game.model.minigames;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +48,7 @@ class QuizGameTest {
     }
 
     @Test
-    void checkAnswer_correctAnswer_finishesWithWinner(){
+    void checkAnswer_correctAnswer_finishesWithWinner() {
         QuizGame game = new QuizGame(10);
 
         UUID p1 = UUID.randomUUID();
@@ -76,7 +75,7 @@ class QuizGameTest {
     }
 
     @Test
-    void checkAnswer_bothWrong_finishesWithNullWinner(){
+    void checkAnswer_bothWrong_finishesWithNullWinner() {
         QuizGame game = new QuizGame(10);
 
         UUID p1 = UUID.randomUUID();
@@ -106,7 +105,7 @@ class QuizGameTest {
     }
 
     @Test
-    void checkAnswer_samePlayerAnswersTwice_secondAnswerIgnored(){
+    void checkAnswer_samePlayerAnswersTwice_secondAnswerIgnored() {
         QuizGame game = new QuizGame(10);
 
         UUID p1 = UUID.randomUUID();
@@ -173,10 +172,6 @@ class QuizGameTest {
         AtomicBoolean finishedCalled = new AtomicBoolean(false);
         game.setOnFinished(() -> finishedCalled.set(true));
 
-        // warten bis Timeout durch ist (2s + kleiner Buffer)
-        boolean terminated = game.getScheduler().awaitTermination(3, TimeUnit.SECONDS);
-
-        assertTrue(terminated, "Scheduler sollte nach Timeout beendet sein");
         assertTrue(game.isFinished(), "Game sollte durch Timeout finished sein");
         assertNull(game.getWinner(), "Timeout => Winner muss null sein");
         assertTrue(finishedCalled.get(), "onFinished callback sollte aufgerufen werden");
@@ -204,8 +199,5 @@ class QuizGameTest {
         // randomQuestion wurde 2x aufgerufen (weil initPlayers 2x lädt)
         verify(qs, times(2)).randomQuestion();
 
-        // Timeout-Thread wird nur einmal gestartet und beendet sich selbst
-        boolean terminated = game.getScheduler().awaitTermination(3, TimeUnit.SECONDS);
-        assertTrue(terminated);
     }
 }

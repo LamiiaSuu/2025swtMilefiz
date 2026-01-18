@@ -107,4 +107,8 @@ public class QuestionService {
     public boolean checkAnswer(int questionId, int answerIndex) {
         return correctAnswers.get(questionId) == answerIndex;
     }
+
+    public int getCorrectAnswer(int questionId) {
+        return correctAnswers.get(questionId);
+    }
 }

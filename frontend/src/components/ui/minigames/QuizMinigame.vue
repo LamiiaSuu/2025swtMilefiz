@@ -5,10 +5,10 @@ import { computed, onMounted, ref, watch } from 'vue'
 import CountdownBar from './CountdownBar.vue'
 import { currentLocale } from '@/i18n/index'
 
-const timerStarted = ref(false) 
+const timerStarted = ref(false)
 
 const props = defineProps<{
-  duel: any 
+  duel: any
 }>()
 
 
@@ -27,16 +27,16 @@ const isWinner = computed(() => {
 })
 
 const question = computed(() => {
-    const q = props.duel?.state?.question
-    if (q === undefined) return
-    return q[currentLocale.value]
+  const q = props.duel?.state?.question
+  if (q === undefined) return
+  return q[currentLocale.value]
 })
 
 const answers = computed(() => {
-    const a = props.duel?.state?.answers
+  const a = props.duel?.state?.answers
 
-    if (a === undefined) return
-    return a[currentLocale.value]
+  if (a === undefined) return
+  return a[currentLocale.value]
 })
 
 const selectedAnswer = ref<number | null>(null)
@@ -55,15 +55,13 @@ const selectedColor = computed(() => {
   return colorMap[c.toUpperCase()] ?? colorMap['RED']
 })
 
-// const showInstructions = ref(true) 
 
 onMounted(() => {
-    store.sendLobbyMessage(
-        `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/quiz/getQuestion`,
-        { id: store.gamedata.playerId }
-    )
+  store.sendLobbyMessage(
+    `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/quiz/getQuestion`,
+    { id: store.gamedata.playerId }
+  )
   setTimeout(() => {
-    // showInstructions.value = false
     timerStarted.value = true
   }, 200)
 
@@ -78,7 +76,7 @@ const selectAnswer = (idx: string | number) => {
 
   store.sendLobbyMessage(
     `/app/milefiz/lobby/${store.gamedata.lobby?.id}/duel/${props.duel.duelId}/quiz/sendAnswer/${idx}`,
-    { id: store.gamedata.playerId}
+    { id: store.gamedata.playerId }
   )
 }
 
@@ -102,15 +100,9 @@ watch(isFinished, (finished) => {
     <div class="quiz-question">{{ question }}</div>
 
     <div class="quiz-answers" role="list">
-      <button
-        class="quiz-answer-button"
-        v-for="(ans, idx) in answers"
-        :key="idx"
-        @click="selectAnswer(idx)"
+      <button class="quiz-answer-button" v-for="(ans, idx) in answers" :key="idx" @click="selectAnswer(idx)"
         :class="{ selected: selectedAnswer === Number(idx) }"
-        :style="selectedAnswer === Number(idx) ? { '--player-color': selectedColor } : {}"
-        role="listitem"
-      >
+        :style="selectedAnswer === Number(idx) ? { '--player-color': selectedColor } : {}" role="listitem">
         <span class="answer-letter">{{ String.fromCharCode(65 + Number(idx)) }}</span>
         <span class="answer-text">{{ ans }}</span>
       </button>
@@ -148,7 +140,9 @@ watch(isFinished, (finished) => {
   margin: 0;
 }
 
-.countdown-placeholder { height: 28px; }
+.countdown-placeholder {
+  height: 28px;
+}
 
 .quiz-question {
   font-family: 'Acme', sans-serif;
@@ -158,8 +152,8 @@ watch(isFinished, (finished) => {
   text-align: center;
   padding: 10px 12px;
   border-radius: 10px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
-  box-shadow: inset 0 -6px 18px rgba(0,0,0,0.45);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.04));
+  box-shadow: inset 0 -6px 18px rgba(0, 0, 0, 0.45);
 }
 
 .quiz-answers {
@@ -174,21 +168,21 @@ watch(isFinished, (finished) => {
   align-items: center;
   gap: 14px;
   width: 100%;
-  background: linear-gradient(180deg,#11131a 0%, #0c0f14 100%);
+  background: linear-gradient(180deg, #11131a 0%, #0c0f14 100%);
   border-radius: 12px;
   padding: 14px 16px;
   border: 2px solid rgba(255, 215, 100, 0.09);
   cursor: pointer;
   color: #f3f3f3;
   transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
-  box-shadow: 0 6px 20px rgba(2,6,12,0.6);
+  box-shadow: 0 6px 20px rgba(2, 6, 12, 0.6);
   text-align: left;
   overflow: hidden;
 }
 
 .quiz-answer-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(2,6,12,0.7), 0 0 18px rgba(255,215,100,0.06) inset;
+  box-shadow: 0 14px 30px rgba(2, 6, 12, 0.7), 0 0 18px rgba(255, 215, 100, 0.06) inset;
 }
 
 .answer-letter {
@@ -198,19 +192,23 @@ watch(isFinished, (finished) => {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: linear-gradient(180deg,#ffd66b 0%, #e6b23a 100%);
+  background: linear-gradient(180deg, #ffd66b 0%, #e6b23a 100%);
   color: #111;
   font-weight: 900;
   font-size: 1.05rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
-.answer-text { flex: 1; font-size: 1.05rem; font-weight: 700 }
+.answer-text {
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 700
+}
 
 .quiz-answer-button.selected {
   position: relative;
-  border-color: rgba(255,255,255,0.06);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-color: rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
 }
 
 .quiz-answer-button.selected::before {
@@ -239,9 +237,19 @@ watch(isFinished, (finished) => {
 }
 
 @media (max-width: 640px) {
-  .dice-card { width: auto; padding: 14px }
-  .answer-letter { min-width: 36px; height: 36px; font-size: 0.95rem }
-  .quiz-question { font-size: 1.15rem }
-}
+  .dice-card {
+    width: auto;
+    padding: 14px
+  }
 
+  .answer-letter {
+    min-width: 36px;
+    height: 36px;
+    font-size: 0.95rem
+  }
+
+  .quiz-question {
+    font-size: 1.15rem
+  }
+}
 </style>
