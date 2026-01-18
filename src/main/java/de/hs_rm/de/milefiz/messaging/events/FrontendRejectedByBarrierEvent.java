@@ -16,8 +16,11 @@ import java.util.UUID;
  *
  * Author: Maximilian Ressel
  */
-public record FrontendRejectedByBarrierEvent (String type, UUID playerId, int remainingMoves) implements FrontendEvent{
+public record FrontendRejectedByBarrierEvent (String type, UUID playerId, int remainingMoves, String msg) implements FrontendEvent{
     public FrontendRejectedByBarrierEvent(UUID playerId, int remainingMoves){
-        this(EventType.REJECTED_BY_BARRIER.name(), playerId, remainingMoves);
+        this(EventType.REJECTED_BY_BARRIER.name(), playerId, remainingMoves, null);
+    }
+    public FrontendRejectedByBarrierEvent(UUID playerId, int remainingMoves, String msg){
+        this(EventType.REJECTED_BY_BARRIER.name(), playerId, remainingMoves, msg);
     }
 }

@@ -332,8 +332,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           //TODO rennen in Barriere visualisieren
           console.log("u ran into barrieeer oh no")
           if (event.playerId === gamedata.playerId) {
+            if (event.msg === "MOVE_ERROR_BARRIER_FIELD_OCCUPIED"){
+              showWarning("MOVE_ERROR_BARRIER_FIELD_OCCUPIED")
+            }else{
+              showWarning('REJECTED_BY_BARRIER')
+            }
             audioStore.playSfx('impactBarrier')
-            showWarning('REJECTED_BY_BARRIER')
             gamedata.moved = false
             gamedata.currentDiceRoll = event.remainingMoves
           }
