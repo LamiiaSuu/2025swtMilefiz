@@ -7,7 +7,6 @@ import {
   computed,
   watchEffect,
   type ShallowRef,
-  type ComputedRef,
   type ComponentPublicInstance,
 } from 'vue'
 import { TresCanvas, type TresObject } from '@tresjs/core'
@@ -25,14 +24,13 @@ import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import AssetSprite from './ui/AssetSprite.vue'
 import { standardBoardAssets, STANDARD_BOARD_ID } from '@/types/BoardAsset.ts'
-import { TreesGeometry } from 'three/examples/jsm/Addons.js'
 
 const milefizStore = useMilefizStore()
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
 let started: boolean = false
 
-const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
+const { showWarning } = useErrorHandler()
 
 // record: meepleID -> gameCharRef
 const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
@@ -238,7 +236,7 @@ function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPubl
   registerGameCharRef(id, el as unknown as TresObject | null)
 
   if (!started) {
-    cycleSelection(0)
+    selectMeepleByIndex(1)
     started = true
   }
 }
