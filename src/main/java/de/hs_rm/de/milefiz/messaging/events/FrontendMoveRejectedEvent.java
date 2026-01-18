@@ -24,7 +24,7 @@ import java.util.UUID;
  * @param type     Typ des Events (MOVE_ERROR)
  * @param msg      Beschreibung der Ursache, warum die Bewegung abgelehnt wurde
  *
- *                 Author: Maximilian Ressel
+ * @author Maximilian Ressel
  */
 public record FrontendMoveRejectedEvent(UUID playerId, String type, String msg) implements FrontendEvent {
 

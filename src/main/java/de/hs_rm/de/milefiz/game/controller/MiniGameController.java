@@ -545,6 +545,25 @@ public class MiniGameController {
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }
 
+        /**
+         * Verarbeitet die Zugauswahl eines Spielers im Schere-Stein-Papier-Duell.
+         *
+         * Diese Methode wird aufgerufen, wenn ein Spieler seinen Zug
+         * (ROCK, PAPER oder SCISSORS) an das Backend sendet. Der Zug wird
+         * im entsprechenden Mini-Game gespeichert und der aktuelle
+         * Spielstand an alle Clients im Lobby-Kontext verteilt.
+         *
+         * Sobald das Mini-Game beendet ist, wird die Duellauflösung
+         * angestoßen und der Verlierer auf sein Startfeld zurückgesetzt.
+         *
+         * @param lobbyId ID der Lobby, in der das Duell stattfindet
+         * @param duelId  ID des Duells
+         * @param move    Gewählter Zug des Spielers
+         * @param player  Der Spieler, der den Zug ausgeführt hat
+         * @throws LobbyNotFoundException Falls die angegebene Lobby nicht existiert
+         * 
+         * @author Maximilian Ressel
+         */
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/rockpaperscissors/choose")
         public void handleChooseMove(
                         @DestinationVariable UUID lobbyId,
@@ -554,13 +573,10 @@ public class MiniGameController {
 
                 logger.info("Schere Stein Papier Move from player {} move: {}", player.getId(), move);
 
-                // Lobby laden
                 Lobby lobby = lobbyManager.getLobby(lobbyId);
 
-                // MiniGame holen (bereits zu diesem Zeitpunkt dem Duell zugewiesen)
                 RockPaperScissorsGame game = (RockPaperScissorsGame) duelService.getMiniGame(duelId);
 
-                // wahl für diesen Spieler
                 game.choose(player.getId(), move);
 
                 broadcastRockPaperScissorsUpdate(lobby, duelId, game);
@@ -572,6 +588,19 @@ public class MiniGameController {
 
         }
 
+        /**
+         * Sendet ein Update-Event zum aktuellen Zustand des
+         * Schere-Stein-Papier-Mini-Games an alle Clients der Lobby.
+         *
+         * Das Event enthält die Spieler, ihre Züge, den Gewinner
+         * sowie den Status des Spiels.
+         *
+         * @param lobby  Lobby, an die das Update gesendet wird
+         * @param duelId ID des Duells
+         * @param game   Aktueller Zustand des Mini-Games
+         * 
+         * @author Maximilian Ressel
+         */
         private void broadcastRockPaperScissorsUpdate(Lobby lobby, UUID duelId, RockPaperScissorsGame game) {
 
                 var event = new FrontendRockPaperScissorsGameUpdateEvent(
