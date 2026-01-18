@@ -314,7 +314,8 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' || e.key === 'm') {
+  if (e.key === 'Escape'/*  || e.key === 'm' */) {
+    console.log("ESCAPE KEY PRESSED")
     e.preventDefault()
 
     // Schließt das PopUp-Menu, wenn es offen sind
@@ -327,10 +328,10 @@ const handleKeydown = (e: KeyboardEvent) => {
       return
     }
   }
-
-  // Wenn ein Duell aktiv ist → alle Steuerungen blockieren
-  if (Object.keys(milefizStore.activeDuels).length > 0) {
+  if (milefizStore.isAnyPopUpOpen){
+    console.log("POPUP OPEN STOP PROPAGATION")
     e.preventDefault()
+    e.stopPropagation()
     return
   }
 
@@ -552,14 +553,19 @@ onMounted(() => {
       requestAnimationFrame(waitForCamera)
       return
     }
-    globalThis.addEventListener('keydown', handleKeydown)
+    window.addEventListener('keydown', handleKeydown, {
+    capture: true, // "Capture-Phase": Exklusiver Fokus --> Minigame fängt Inputs als erstes ab
+    passive: false // erlaubt explizit e.preventDefault
+  })
   }
 
   waitForCamera()
 })
 
 onUnmounted(() => {
-  globalThis.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('keydown', handleKeydown, {
+    capture: true, // "Capture-Phase": Exklusiver Fokus --> Minigame fängt Inputs als erstes ab
+  })
 
 })
 
