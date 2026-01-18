@@ -127,6 +127,16 @@ function registerGameCharRef(id: string, el: TresObject | null) {
     }
   }
 }
+/**
+ * Checkt ob ein Meeple noch in seiner Basis steht 
+ * @param id MeepleId
+ * @returns true wenn Meeple in der Basis steht - false wenn Meeple nicht in der Basis steht
+ */
+function meepleIsInBase(id: string): boolean {
+  const fieldId = boardStore.meeplePositions[id]
+  const field = boardStore.board?.fields.find(f => f.id === fieldId)
+  return field?.type?.startsWith('START_') ?? true
+}
 
 /**
  * Überträgt die berechneten 3D-Positionen auf die existierenden
@@ -156,10 +166,11 @@ watch(
         Math.abs(prev[2] - pos[2]) > 1e-6
       if (!changed) continue
 
+      const playSound = !meepleIsInBase(id)
       const ref = gameCharRefs[id]
       const inst: any = ref?.value
       if (inst && typeof inst.animateTo === 'function') {
-        inst.animateTo(pos)
+        inst.animateTo(pos, playSound)
       } else if (inst && typeof inst.setPositionImmediate === 'function') {
         // fallback: snap into position if animateTo not present
         inst.setPositionImmediate(pos)
@@ -168,7 +179,7 @@ watch(
       _prevMeeplePositions.set(id, [pos[0], pos[1], pos[2]])
     }
   },
-  { deep: true, flush:'post' },
+  { deep: true, flush: 'post' },
 )
 
 watch(
@@ -549,7 +560,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   globalThis.removeEventListener('keydown', handleKeydown)
-  
+
 })
 
 // Computed Property für Meeple → PlayerColor Mapping
@@ -700,7 +711,7 @@ const additionalAssets = computed(() => {
     <TresHemisphereLight :intensity="0.75" skyColor="#ffffff" groundColor="#888888" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
-    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" :cast-shadow="false"/>
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" :cast-shadow="false" />
 
     <!-- Berge am Horizont hinzugefügt-->
     <AssetSprite v-for="(mountain, index) in mountains" :key="`mountain-${index}`" type="mountains"
