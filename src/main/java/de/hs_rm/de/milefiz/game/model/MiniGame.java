@@ -19,7 +19,7 @@ public abstract class MiniGame {
      * Dient vor allem zur Anzeige im UI (wird mitgesendet beim Event).
      */
     private final String name;
-    
+
     /**
      * Der Gewinner des Mini-Spiels.
      * <p>
@@ -36,7 +36,7 @@ public abstract class MiniGame {
      * Gibt an, ob das Mini-Spiel abgeschlossen wurde.
      * <p>
      * {@code false} = Spiel läuft oder wurde noch nicht gestartet.<br>
-     * {@code true}  = Spiel ist beendet.
+     * {@code true} = Spiel ist beendet.
      */
     private boolean finished;
 
@@ -46,8 +46,8 @@ public abstract class MiniGame {
      * Ein neu erstelltes Mini-Spiel ist standardmäßig
      * noch nicht beendet ({@code finished = false}).
      *
-     * @param id    eindeutige ID des Mini-Spiels
-     * @param name  Anzeigename des Mini-Spiels
+     * @param id   eindeutige ID des Mini-Spiels
+     * @param name Anzeigename des Mini-Spiels
      */
     public MiniGame(int id, String name, int timeOut) {
         this.id = id;
@@ -91,7 +91,7 @@ public abstract class MiniGame {
     public void setWinner(UUID winner) {
         this.winner = winner;
     }
-    
+
     /**
      * Gibt zurück, ob das Mini-Spiel bereits beendet wurde.
      *
@@ -121,28 +121,29 @@ public abstract class MiniGame {
      *
      * @return Timeout in Sekunden
      */
-    public int getTimeOut(){
+    public int getTimeOut() {
         return timeOut;
     }
 
-    
     /**
      * Registriert einen Callback, der ausgeführt wird,
      * sobald das Mini-Game vollständig beendet ist.
      * <p>
      * Typische Anwendungsfälle:
      * <ul>
-     *   <li>Updates an das Frontend senden</li>
-     *   <li>Verlierer-Meeples zurücksetzen</li>
-     *   <li>Duell als abgeschlossen markieren</li>
+     * <li>Updates an das Frontend senden</li>
+     * <li>Verlierer-Meeples zurücksetzen</li>
+     * <li>Duell als abgeschlossen markieren</li>
      * </ul>
      *
      * @param onFinished Code, der beim Abschluss ausgeführt werden soll
      */
     public void setOnFinished(Runnable onFinished) {
         this.onFinished = onFinished;
+        if (onFinished != null && isFinished()) {
+            onFinished.run();
+        }
     }
-
 
     /**
      * Benachrichtigt alle Listener, dass das Mini-Game
@@ -151,8 +152,8 @@ public abstract class MiniGame {
      * Diese Methode wird normalerweise von der Subklasse
      * (z. B. {@code DiceGame}) aufgerufen, nachdem:
      * <ul>
-     *   <li>ein Gewinner bestimmt wurde</li>
-     *   <li>oder ein Timeout ausgelöst hat</li>
+     * <li>ein Gewinner bestimmt wurde</li>
+     * <li>oder ein Timeout ausgelöst hat</li>
      * </ul>
      *
      * Ruft intern den registrierten {@link Runnable}
@@ -165,10 +166,10 @@ public abstract class MiniGame {
     }
 
     public void forceMissingActions() {
-        if (isFinished()) return;
+        if (isFinished())
+            return;
         setFinished(true);
         notifyFinished();
     }
 
 }
-

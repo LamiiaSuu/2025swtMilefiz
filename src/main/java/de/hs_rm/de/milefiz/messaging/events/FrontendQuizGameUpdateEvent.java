@@ -10,6 +10,7 @@ public record FrontendQuizGameUpdateEvent(
                 UUID player1,
                 UUID player2,
                 MinigameQuestionDTO questionDTO,
+                int correctAnswer,
                 UUID winner,
                 boolean finished) implements FrontendEvent {
 
@@ -18,8 +19,10 @@ public record FrontendQuizGameUpdateEvent(
                         UUID player1,
                         UUID player2,
                         MinigameQuestionDTO questionDTO,
+                        int correctAnswer,
                         UUID winner,
                         boolean finished) {
-                this(EventType.QUIZ_GAME_UPDATE.name(), duelId, player1, player2, questionDTO, winner, finished);
+                this(EventType.QUIZ_GAME_UPDATE.name(), duelId, player1, player2, questionDTO, correctAnswer, winner,
+                                finished);
         }
 }
