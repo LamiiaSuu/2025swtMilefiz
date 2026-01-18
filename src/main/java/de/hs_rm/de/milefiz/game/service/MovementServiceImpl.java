@@ -443,6 +443,7 @@ public class MovementServiceImpl implements MovementService {
     /**
      * Prüft, ob der Versuch, ein Feld mit einer Barriere zu betreten, erfolgreich
      * ist.
+     * Steht auf dem Barrierefeld bereits ein anderer Meeple, wird der Zug abgelehnt
      * Bei Erfolg darf die Barriere verschoben werden.
      * Bei Misserfolg wird der Zug abgelehnt; steht auf dem aktuellen Feld ein
      * gegnerischer Meeple, kann stattdessen ein Duell gestartet werden.
@@ -465,6 +466,12 @@ public class MovementServiceImpl implements MovementService {
     private FrontendEvent tryMovingOnBarrier(Meeple meeple, Meeple barrier, Field currentField, Field targetField,
             Player player,
             Set<Field> otherOwnMeepleFields, Set<Field> rivalMeepleFields, Set<Meeple> rivalMeeples, Lobby lobby) {
+        // Prüfe, ob das Zielfeld von einem Meeple besetzt ist
+        if (player.getRemainingMoves() == LAST_MOVE && isOccupiedByMeeple(lobby, targetField)) {
+            endTurnWithMove(player, meeple, currentField);
+            logger.info("Cannot move barrier: field {} is occupied by a meeple", targetField.getId());
+            return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves(), "MOVE_ERROR_BARRIER_FIELD_OCCUPIED");
+        }
         // wenn man genau drauf landet, darf man sie verschieben
         if (player.getRemainingMoves() == LAST_MOVE) {
             endTurnWithMove(player, meeple, targetField);

@@ -24,5 +24,6 @@ export const ERRORS_EN: Record<ErrorCode, string> = {
     MEEPLE_IN_DUEL: 'The opposing meeple is already in a duel. Please wait until the duel is finished!',
     MOVE_ERROR_NO_VALID_FIELDS: 'There are no valid moves possible in this direction',
     MINIGAME_SLOT_JACKPOT_SUCCESS_MESSAGE: 'JACKPOT!!! Your energy has been replenished!',
+    MOVE_ERROR_BARRIER_FIELD_OCCUPIED: 'Oh man! There\'s already someone standing in the barrier.'
 
 }
