@@ -181,10 +181,6 @@ function getCharClass(index: number): string {
   return 'char-pending'
 }
 
-function renderChar(char: string): string {
-  // Space sichtbar machen
-  return char === ' ' ? '·' : char
-}
 </script>
 
 <template>
@@ -200,7 +196,7 @@ function renderChar(char: string): string {
     <div class="word-container">
       <div class="word-display">
         <span v-for="(char, index) in targetWord" :key="index" :class="['word-char', getCharClass(Number(index))]">
-          {{ renderChar(char) }}
+          {{ char }}
         </span>
       </div>
     </div>

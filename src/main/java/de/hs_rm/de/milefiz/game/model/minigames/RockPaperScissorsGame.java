@@ -1,9 +1,6 @@
 package de.hs_rm.de.milefiz.game.model.minigames;
 
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import de.hs_rm.de.milefiz.game.model.MiniGame;
 
@@ -13,9 +10,6 @@ public class RockPaperScissorsGame extends MiniGame {
         ROCK, PAPER, SCISSORS
     }
 
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-    private boolean timeoutStarted = false;
 
     private UUID player1;
     private UUID player2;
@@ -35,12 +29,6 @@ public class RockPaperScissorsGame extends MiniGame {
         this.player1 = p1;
         this.player2 = p2;
 
-        // Starte den Timeout
-        if (!timeoutStarted) {
-            timeoutStarted = true;
-
-            scheduler.schedule(this::forceMissingMoves, getTimeOut(), TimeUnit.SECONDS);
-        }
     }
 
     /**
@@ -93,7 +81,6 @@ public class RockPaperScissorsGame extends MiniGame {
 
         setFinished(true);
         notifyFinished();
-        scheduler.shutdownNow();
     }
 
     public String getMoveP1() {
