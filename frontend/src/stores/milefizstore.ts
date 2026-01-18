@@ -297,23 +297,19 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
             showWarning(`REMAINING_MOVES_LOST`)
-            //TODO moveloss animieren
             console.warn("lost remaining moves")
           }
 
         }
         if (event.type === "TRIGGER_BARRIER_MOVE") {
-          //TODO verschieben der barriere implementieren
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = false;
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
-            //TODO minimap öffnen
             openMinimap(event.barrierId, event.playerId, event.currentField)
           }
-          //moveBarrier(event.barrierId, crypto.randomUUID())
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
@@ -332,9 +328,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           //TODO rennen in Barriere visualisieren
           console.log("u ran into barrieeer oh no")
           if (event.playerId === gamedata.playerId) {
-            if (event.msg === "MOVE_ERROR_BARRIER_FIELD_OCCUPIED"){
+            if (event.msg === "MOVE_ERROR_BARRIER_FIELD_OCCUPIED") {
               showWarning("MOVE_ERROR_BARRIER_FIELD_OCCUPIED")
-            }else{
+            } else {
               showWarning('REJECTED_BY_BARRIER')
             }
             audioStore.playSfx('impactBarrier')
@@ -430,7 +426,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.finished = event.finished
         }
 
-          if (event.type === "MATH_GAME_UPDATE") {
+        if (event.type === "MATH_GAME_UPDATE") {
           const duel = activeDuels[event.duelId]
           if (!duel) return
 
@@ -754,7 +750,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         destination: DEST_APP + '/rotate',
         body,
       })
-      //console.log('Meeple rotated:', body)
     } catch (err) {
       console.error('Error rotating:', err)
     }

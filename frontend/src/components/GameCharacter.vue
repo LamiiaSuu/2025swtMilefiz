@@ -20,7 +20,7 @@ const props = defineProps<{
   position?: [number, number, number]
   meepleId: string
   barrier?: boolean
-  playerColor?:  string
+  playerColor?: string
   hidden?: boolean
 }>()
 
@@ -67,7 +67,7 @@ const scale = computed(() => (props.barrier ? 1.5 : 0.55))
 
 
 const meepleColors = computed(() => {
-   // Spieler nutzen playerColor
+  // Spieler nutzen playerColor
   const playerColors = getPlayerColors(props.playerColor)
 
   return {
@@ -95,7 +95,7 @@ watch(
   () => state.value?.scene,
   (scene) => {
     if (!scene || colorsApplied) return
-    
+
     scene.traverse((child: any) => {
       if (!child.isMesh || !child.material) return
 
@@ -185,6 +185,16 @@ const lerp = (a: number, b: number, t: number) => {
   return a + (b - a) * t
 }
 
+/**
+ * Animiert die Rotation eines Charakters in Richtung der Zielrotation.
+ *
+ * Die aktuelle Rotation wird schrittweise per Linear Interpolation (lerp)
+ * an die Zielrotation angenähert. Die Animation läuft so lange,
+ * bis der Zielwert mit ausreichender Genauigkeit erreicht ist.
+ *
+ * Die Animationsgeschwindigkeit wird über den Smoothing-Faktor
+ * im lerp-Aufruf gesteuert.
+ */
 const animateRotation = () => {
   if (!isRotating) return
 
@@ -213,7 +223,22 @@ const setRotation = (yRotation: number) => {
 }
 
 
-// Sprung-Animation
+/**
+ * Führt eine benutzerdefinierte Sprung-Animation aus.
+ *
+ * Die Animation besteht aus einer Aufwärts- und einer Abwärtsbewegung
+ * mit jeweils eigener Dauer und Easing-Funktion.
+ * Während der Animation wird `jumpOffset` kontinuierlich angepasst.
+ *
+ * Nach Abschluss der Animation wird der Sprungzustand zurückgesetzt
+ * und optional ein Callback ausgeführt.
+ *
+ * @param height     Maximale Sprunghöhe
+ * @param upMs       Dauer der Aufwärtsbewegung in Millisekunden
+ * @param downMs     Dauer der Abwärtsbewegung in Millisekunden
+ * @param onComplete Optionaler Callback, der nach Abschluss der Animation
+ *                   ausgeführt wird
+ */
 const animateCustomJump = (
   height = defaultJumpHeight,
   upMs = defaultUpDuration,
@@ -302,7 +327,7 @@ watch(
     _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
     animateTo(newPos)
   },
-  { deep: true, flush: 'post'},
+  { deep: true, flush: 'post' },
 )
 
 const speed = 0.08
@@ -407,11 +432,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <TresGroup
-    ref="characterPosition"
-    :position="currentPosition"
-    :rotation="[0, characterRotation, 0]"
-  >
+  <TresGroup ref="characterPosition" :position="currentPosition" :rotation="[0, characterRotation, 0]">
     <primitive v-if="state" :object="state?.scene" />
   </TresGroup>
 </template>

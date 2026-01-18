@@ -188,8 +188,20 @@ watch(
   { deep: true },
 )
 
-// Rotation-Updates aus dem Store auf die GameCharacter anwenden
+
 const _prevMeepleRotations = new Map<string, number>()
+
+/**
+ * Synchronisiert Rotations-Updates aus dem Board-Store mit den GameCharacter-Instanzen.
+ *
+ * Der Watcher reagiert auf Änderungen an den gespeicherten Meeple-Rotationen
+ * und wendet diese auf die entsprechenden GameCharacter an.
+ *
+ * Um unnötige Updates zu vermeiden, wird die neue Rotation mit der zuletzt
+ * angewendeten Rotation verglichen und nur bei relevanten Änderungen
+ * weitergegeben.
+ *
+ */
 watch(
   () => boardStore.meepleRotations,
   (rots) => {
@@ -215,6 +227,14 @@ watchEffect(() => {
   }
 })
 
+/**
+ * Beobachtet den Jump-Trigger im Store und löst eine Sprunganimation aus.
+ *
+ * Sobald im Store ein Jump-Event für einen Meeple gesetzt wird,
+ * wird die zugehörige Meeple-Instanz ermittelt und deren
+ * `jump()`-Methode aufgerufen.
+ *
+ */
 watch(
   () => milefizStore.jumpTrigger,
   (t) => {
@@ -455,7 +475,6 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   }
 
   const cam = fpsCamera.value?.camera
-  // const meepleId = gameCharRef.value?.meepleId
   const meepleId = selectedMeepleId.value
   if (!cam || !meepleId) return
 
@@ -479,12 +498,12 @@ const handleMoveKeys = (e: KeyboardEvent) => {
       break
     case 'ArrowLeft':
     case 'KeyA':
-      // Links = Kreuzprodukt von Up-Vektor × Blickrichtung
+      // Links = Kreuzprodukt von Up-Vektor X Blickrichtung
       moveDir.crossVectors(new Vector3(0, 1, 0), lookDir).normalize()
       break
     case 'ArrowRight':
     case 'KeyD':
-      // Rechts = Kreuzprodukt von Blickrichtung × Up-Vektor
+      // Rechts = Kreuzprodukt von Blickrichtung X Up-Vektor
       moveDir.crossVectors(lookDir, new Vector3(0, 1, 0)).normalize()
       break
     default:
@@ -508,13 +527,26 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   milefizStore.sendMove(meepleId, direction)
 }
 
+
+/*******************************************************************/
 let lastRotSent = 0
 const ROT_SEND_MS = 200
 
 let lastSentRotation = 0
 const MIN_ROT_DELTA = 0.1
-
-// Updated die Rotation vom Meeple
+/**
+ * Verarbeitet Rotationsänderungen eines Meeples.
+ *
+ * Die Rotation wird lokal sofort aktualisiert, um eine flüssige
+ * Darstellung zu gewährleisten. Zusätzlich wird die Rotation
+ * in festen Zeitabständen und nur bei relevanten Änderungen
+ * an andere Clients gesendet.
+ *
+ * Dadurch werden Netzwerk-Updates gedrosselt, ohne die
+ * Benutzerinteraktion zu beeinträchtigen.
+ *
+ * @param yRotation Aktuelle Zielrotation des Meeples
+ */
 const onRotateCharacter = (yRotation: number) => {
   const id = selectedMeepleId.value
   if (!id) return
@@ -539,7 +571,6 @@ onMounted(() => {
    *
    * Sobald die Kamera verfügbar ist:
    * - werden globale Event-Listener für Tastatur und Mausklicks aktiviert
-   * - startet die Hover-Erkennung (checkHoverTile)
    *
    * Diese Schleife verhindert Fehler, falls die Kamera-Referenz
    * beim Mounten der Komponente noch nicht gesetzt wurde.
