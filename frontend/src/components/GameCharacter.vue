@@ -318,12 +318,12 @@ let moveAnimationFrame: number | null = null
  *
  * @param target - Zielkoordinaten im 3D-Raum [x, y, z], zu denen sich der Charakter bewegen soll
  */
-const animateTo = (target: [number, number, number]) => {
+const animateTo = (target: [number, number, number], playSound = false) => {
   if (moveAnimationFrame) cancelAnimationFrame(moveAnimationFrame)
 
   if (!isJumping.value) {
     isJumping.value = true
-    if(hasInitializedMoved.value) {
+    if (hasInitializedMoved.value && playSound) {
       setTimeout(() => {
         audioEngine.play3D('meepleMove', {
           x: target[0],
@@ -331,9 +331,9 @@ const animateTo = (target: [number, number, number]) => {
           z: target[2]
         })
       }, 200)
-      }else{
-        hasInitializedMoved.value = true
-      }
+    } else {
+      hasInitializedMoved.value = true
+    }
     // starte kleinen Sprung und binde Bewegungsende an das Sprungende
     animateCustomJump(smallJumpHeight, smallUpDuration, smallFallDuration, () => {
       // Nach der Landung Position fixieren
