@@ -96,7 +96,7 @@ function handleKeyDown(e: KeyboardEvent) {
   const typed = e.key
   const expected = word[localProgress.value]
 
-  
+
   //  Frontendseitige Validierung: Nur wenn der Fortschritt tatsächlich steigt, d.h wenn der User den nächsten Char korrekt
   //  eingegeben hat, wird ein der Fortschritt ans Backend gesendet und verwaltet ansonsten wird der Char als kurz als falsch markiert. 
   if (typed === expected) {
@@ -229,6 +229,11 @@ function getCharClass(index: number): string {
 </template>
 
 <style scoped>
+.dice-card {
+  position: relative;
+  overflow: hidden;
+}
+
 .dice-title {
   font-family: "Acme", sans-serif;
   font-size: 1.6rem;
