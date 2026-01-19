@@ -18,7 +18,6 @@ const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${windo
 const DEST = '/topic/milefiz/lobby/'
 
 let stompclient: Client | null = null
-let keepAliveInterval: number | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
   const audioStore = useAudioStore()
@@ -163,7 +162,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         console.error('Geht nicht')
         return
       }
-      startKeepAlive()
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe(DEST + gamedata.lobby?.id, (message) => {
         //console.log('Message received: ' + message + '\nBody:\n' + message.body)
@@ -535,7 +533,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     stompclient.onDisconnect = () => {
       /* Verbindung abgebaut*/
       console.log('Disconnected')
-      stopKeepAlive()
     }
     // Verbindung zum Broker aufbauen
     stompclient.activate()
@@ -679,43 +676,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           }
         }
       }
-    }
-  }
-
-  function startKeepAlive() {
-
-    if (keepAliveInterval !== null) return
-    if (!gamedata.lobby?.id) return
-
-    keepConnected()
-    keepAliveInterval = window.setInterval(() => {
-      keepConnected()
-    }, 25_000)
-  }
-
-  function stopKeepAlive() {
-    if (keepAliveInterval === null) return
-    window.clearInterval(keepAliveInterval)
-    keepAliveInterval = null
-  }
-
-  function keepConnected() {
-    if (!stompclient || !stompclient.connected) {
-      console.error('Cannot send move: STOMP client not connected.')
-      return
-    }
-
-    const body = JSON.stringify("connec")
-
-    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
-
-    try {
-      stompclient.publish({
-        destination: DEST_APP + '/keepconnected',
-        body,
-      })
-    } catch (err) {
-      console.error('Error rotating:', err)
     }
   }
 
@@ -1259,7 +1219,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
   function disconnectAndReset() {
-    stopKeepAlive()
     // WebSocket-Verbindung trennen
     if (stompclient && stompclient.connected) {
       stompclient.deactivate()

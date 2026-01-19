@@ -66,16 +66,6 @@ public class FrontendReceiverController {
         this.messagingService = frontendMessagingServiceImpl;
     }
 
-    @MessageMapping("/milefiz/lobby/{lobbyId}/keepconnected")
-    @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public String handleConnection(
-            @DestinationVariable("lobbyId") UUID lobbyId, String connec,
-            Player player) {
-
-        logger.info("Connec from player {}", player.getId());
-        return "KEEP CONNEC";
-    }
-
     /**
      * WebSocket Message Handler für Rotations-Updates eines Meeples in einer
      * Lobby.
