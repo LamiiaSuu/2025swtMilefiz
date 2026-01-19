@@ -86,6 +86,7 @@ function handleKeydown(e: KeyboardEvent) {
       return
     }
   } else { // ein beliebiges PopUp Offen
+    e.preventDefault()
     if (e.key === 'm' || e.key === 'M') { // M betätigt
       if (milefizStore.isAnyMenuOpen) { // beliebiges Menü offen
         relockInProgress = true
@@ -118,31 +119,6 @@ function handleKeydown(e: KeyboardEvent) {
     }
   }
   return
-
-
-  // if (e.key === 'm' || e.key === 'M') { // Hotkey zum Öffnen des Menüs
-  //   e.preventDefault()
-  //   if (milefizStore.isAnyMenuOpen) {
-  //     relockInProgress = true
-  //     milefizStore.closePopUpMenu()
-
-  //     requestPointerLock()
-  //     return
-  //   } else if (!milefizStore.isAnyDuelActive) { // Menü öffnen, nur wenn kein Spiel aktiv. Grund: MonkeyType muss auf "M" listenen
-  //     milefizStore.openPopUpMenu()
-  //     return
-  //   }
-  //   e.stopPropagation() // Blockiert alle bisherigen Keyevents
-  //   return
-  // }
-  // if (milefizStore.isAnyNonMenuOpen) {
-  //   e.preventDefault()
-  //   if (milefizStore.isAnyDuelActive) return
-  //   e.stopPropagation()
-  //   console.log("STOPPING PROPAGATION")
-  // }
-  // return
-
 }
 
 onMounted(() => {
