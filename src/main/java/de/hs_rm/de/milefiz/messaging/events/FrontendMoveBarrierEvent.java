@@ -19,7 +19,7 @@ import java.util.UUID;
  * @param id          ID der Barriere, die verschoben wurde
  * @param targetField ID des Feldes, auf das die Barriere gesetzt wurde
  *
- *                    Author: Maximilian Ressel
+ * @author Maximilian Ressel
  */
 public record FrontendMoveBarrierEvent(String type, UUID id, UUID currentField, UUID targetField)
         implements FrontendEvent {

@@ -111,6 +111,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     activeMeeple: string
     lobby: Lobby | null
     moved: boolean
+    selectRandomMinigame: boolean
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
@@ -120,7 +121,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     currentField: "",
     activeMeeple: "",
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
-    moved: false
+    moved: false,
+    selectRandomMinigame: true
   })
   const activeDuels = reactive<Record<string, any>>({})
 
@@ -165,7 +167,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe(DEST + gamedata.lobby?.id, (message) => {
         //console.log('Message received: ' + message + '\nBody:\n' + message.body)
-
+        if (message.body === "KEEP CONNEC") return
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
@@ -299,23 +301,19 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
             showWarning(`REMAINING_MOVES_LOST`)
-            //TODO moveloss animieren
             console.warn("lost remaining moves")
           }
 
         }
         if (event.type === "TRIGGER_BARRIER_MOVE") {
-          //TODO verschieben der barriere implementieren
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = false;
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
-            //TODO minimap öffnen
             openMinimap(event.barrierId, event.playerId, event.currentField)
           }
-          //moveBarrier(event.barrierId, crypto.randomUUID())
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
@@ -334,8 +332,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           //TODO rennen in Barriere visualisieren
           console.log("u ran into barrieeer oh no")
           if (event.playerId === gamedata.playerId) {
+            if (event.msg === "MOVE_ERROR_BARRIER_FIELD_OCCUPIED") {
+              showWarning("MOVE_ERROR_BARRIER_FIELD_OCCUPIED")
+            } else {
+              showWarning('REJECTED_BY_BARRIER')
+            }
             audioStore.playSfx('impactBarrier')
-            showWarning('REJECTED_BY_BARRIER')
             gamedata.moved = false
             gamedata.currentDiceRoll = event.remainingMoves
           }
@@ -450,6 +452,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.questionDTO = event.questionDTO
           duel.state.question = event.questionDTO?.question
           duel.state.answers = event.questionDTO?.answers
+          duel.state.correctAnswer = event.correctAnswer ?? -1
           duel.state.winner = event.winner
           duel.state.finished = event.finished
 
@@ -751,7 +754,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         destination: DEST_APP + '/rotate',
         body,
       })
-      //console.log('Meeple rotated:', body)
     } catch (err) {
       console.error('Error rotating:', err)
     }
@@ -980,6 +982,40 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     const lobby = gamedata.lobby
     if (!lobby) return null
     return lobby.players.find(p => p.id === playerId)?.color ?? null
+  }
+
+  /**
+   * Zu Demo-Zwecken
+   * Sendet einen ToggleMinigameSelectionMode Befehl ans Backend, um zwischen random
+   * und inorder Auswahl zu wechseln.
+   * 
+   */
+  function sendToggleSelectionMode() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot toggle selection mode: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id || !gamedata.playerId) {
+      console.error('Cannot roll dice: Missing lobbyId or playerId')
+      return
+    }
+    gamedata.selectRandomMinigame = !gamedata.selectRandomMinigame
+    const toggleSelectionModeCommand: any = {
+      selectRandomMinigame: gamedata.selectRandomMinigame
+    }
+
+    try {
+      stompclient.publish({
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/toggleMinigameSelectionMode`,
+        body: JSON.stringify(toggleSelectionModeCommand)
+      })
+      console.log('toggleSelectionModeCommand sent, selectRandomMinigame:', gamedata.selectRandomMinigame)
+    } catch (err) {
+      console.error('Error sending toggleSelectionModeCommand:', err)
+    }
+
+    gamedata.selectRandomMinigame ? showSuccess(`MINIGAME_SELECTION_MODE_RANDOM`) : showSuccess(`MINIGAME_SELECTION_MODE_INORDER`)
   }
 
   function sendRollDice(requestedValue?: number) {
@@ -1238,6 +1274,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     gamedata,
     isJoined,
     startMilefizLiveUpdate,
+    sendToggleSelectionMode,
     sendRollDice,
     sendLobbyMessage,
     joinLobby,

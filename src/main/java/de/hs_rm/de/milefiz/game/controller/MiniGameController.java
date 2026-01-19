@@ -28,6 +28,7 @@ import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.commands.MathGameCommand;
+import de.hs_rm.de.milefiz.messaging.commands.ToggleSelectionModeCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
@@ -73,6 +74,45 @@ public class MiniGameController {
                 this.messaging = messaging;
                 this.lobbyManager = lobbyManager;
                 this.duelResolutionService = duelResolutionService;
+        }
+
+        /**
+         * Schaltet den Auswahlmodus für Minispiele zwischen
+         * zufällig (RANDOM) und festgelegter Reihenfolge (IN_ORDER) um.
+         *
+         * 
+         * Diese Methode wird über einen STOMP-WebSocket-Endpunkt vom Frontend
+         * ausgelöst (z. B. per Hotkey).
+         * Der Client übermittelt dabei, ob Minispiele zufällig ausgewählt werden
+         * sollen.
+         * 
+         *
+         * 
+         * Ablauf:
+         * 
+         * Empfängt den Toggle-Befehl aus dem Frontend
+         * Liest den gewünschten Auswahlmodus aus dem Command
+         * Delegiert die eigentliche Umschaltung an den {@link DuelService}
+         * 
+         * 
+         *
+         * 
+         * Die {@code lobbyId} wird aktuell nur zur Routing-Zuordnung verwendet.
+         * Die eigentliche Zustandsänderung erfolgt zentral im {@code DuelService}.
+         * 
+         *
+         * @param lobbyId
+         *        Die eindeutige ID der Lobby, aus der der Toggle-Befehl stammt
+         * @param command
+        *         Enthält die Information, ob Minispiele zufällig ausgewählt werden sollen ({@code true} = RANDOM, {@code false} = IN_ORDER)
+         *
+         * @see DuelService#setSelectRandom(boolean)
+         */
+        @MessageMapping("/milefiz/lobby/{lobbyId}/toggleMinigameSelectionMode")
+        public void toggleMinigameSelection(
+                        @DestinationVariable UUID lobbyId, ToggleSelectionModeCommand command) {
+                System.out.println("CONTROLLER: command.selectRandom = " + command.selectRandomMinigame());
+                duelService.setSelectRandom(command.selectRandomMinigame());
         }
 
         /**
@@ -540,11 +580,30 @@ public class MiniGameController {
         public void broadcastQuizUpdate(Lobby lobby, UUID duelId, QuizGame game) {
 
                 var event = new FrontendQuizGameUpdateEvent(duelId, game.getPlayer1(), game.getPlayer2(),
-                                game.getQuestionDTO(), game.getWinner(), game.isFinished());
+                                game.getQuestionDTO(), game.getCorrectAnswer(), game.getWinner(), game.isFinished());
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }
 
+        /**
+         * Verarbeitet die Zugauswahl eines Spielers im Schere-Stein-Papier-Duell.
+         *
+         * Diese Methode wird aufgerufen, wenn ein Spieler seinen Zug
+         * (ROCK, PAPER oder SCISSORS) an das Backend sendet. Der Zug wird
+         * im entsprechenden Mini-Game gespeichert und der aktuelle
+         * Spielstand an alle Clients im Lobby-Kontext verteilt.
+         *
+         * Sobald das Mini-Game beendet ist, wird die Duellauflösung
+         * angestoßen und der Verlierer auf sein Startfeld zurückgesetzt.
+         *
+         * @param lobbyId ID der Lobby, in der das Duell stattfindet
+         * @param duelId  ID des Duells
+         * @param move    Gewählter Zug des Spielers
+         * @param player  Der Spieler, der den Zug ausgeführt hat
+         * @throws LobbyNotFoundException Falls die angegebene Lobby nicht existiert
+         * 
+         * @author Maximilian Ressel
+         */
         @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/rockpaperscissors/choose")
         public void handleChooseMove(
                         @DestinationVariable UUID lobbyId,
@@ -554,13 +613,10 @@ public class MiniGameController {
 
                 logger.info("Schere Stein Papier Move from player {} move: {}", player.getId(), move);
 
-                // Lobby laden
                 Lobby lobby = lobbyManager.getLobby(lobbyId);
 
-                // MiniGame holen (bereits zu diesem Zeitpunkt dem Duell zugewiesen)
                 RockPaperScissorsGame game = (RockPaperScissorsGame) duelService.getMiniGame(duelId);
 
-                // wahl für diesen Spieler
                 game.choose(player.getId(), move);
 
                 broadcastRockPaperScissorsUpdate(lobby, duelId, game);
@@ -572,6 +628,19 @@ public class MiniGameController {
 
         }
 
+        /**
+         * Sendet ein Update-Event zum aktuellen Zustand des
+         * Schere-Stein-Papier-Mini-Games an alle Clients der Lobby.
+         *
+         * Das Event enthält die Spieler, ihre Züge, den Gewinner
+         * sowie den Status des Spiels.
+         *
+         * @param lobby  Lobby, an die das Update gesendet wird
+         * @param duelId ID des Duells
+         * @param game   Aktueller Zustand des Mini-Games
+         * 
+         * @author Maximilian Ressel
+         */
         private void broadcastRockPaperScissorsUpdate(Lobby lobby, UUID duelId, RockPaperScissorsGame game) {
 
                 var event = new FrontendRockPaperScissorsGameUpdateEvent(

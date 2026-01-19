@@ -44,6 +44,9 @@ public class DuelServiceImpl implements DuelService {
 
     private final ScheduledExecutorService miniGameScheduler = Executors.newScheduledThreadPool(4);
 
+    private boolean selectRandom;
+    private int currentGameIndex;
+
     @Autowired
     MonkeyTypeWordService monkeyTypeWordService;
 
@@ -110,13 +113,16 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new SlotMachineGame(slotMachineGameTimeout));
         gameFactories.add(() -> new MathGame(mathGameTimeout));
         gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
-        gameFactories.add(() -> new QuizGame(quizGameTimeout));
+        gameFactories.add(() -> new QuizGame(quizGameTimeout + 3));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
-        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2, monkeyTypeWordService));
+        gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2,
+                monkeyTypeWordService));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
         this.duelResolutionService = duelResolutionService;
+        this.currentGameIndex = 0;
+        this.selectRandom = true;
     }
 
     /**
@@ -131,6 +137,26 @@ public class DuelServiceImpl implements DuelService {
         int index = random.nextInt(gameFactories.size());
 
         return gameFactories.get(index).get(); // immer neue Instanz
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MiniGame inorderGame() {
+        if (gameFactories.isEmpty()) {
+            throw new IllegalStateException("No mini games registered.");
+        }
+        System.out.println("NEXT GAME: currentGameIndex = " + this.currentGameIndex);
+        MiniGame game = gameFactories.get(currentGameIndex).get();
+
+        if (currentGameIndex < gameFactories.size()-1) {
+            currentGameIndex++;
+        } else {
+            currentGameIndex = 0;
+        }
+
+        return game;
     }
 
     @Override
@@ -156,14 +182,20 @@ public class DuelServiceImpl implements DuelService {
      * {@inheritDoc}
      */
     @Override
-    public MiniGame assignRandomGameToDuel(UUID duelId) {
+    public MiniGame assignGameToDuel(UUID duelId) {
+        System.out.println("ASSIGN: selectRandomMinigame = " + selectRandom);
         Duel duel = duels.get(duelId);
 
         if (duel == null) {
             throw new IllegalStateException("Duel not found: " + duelId);
         }
+        MiniGame game;
+        if (selectRandom) {
+             game = randomGame();
+        } else {
+            game = inorderGame();
+        }
 
-        MiniGame game = randomGame();
         duel.setMiniGame(game);
 
         game.setOnFinished(() -> handleMiniGameFinished(duel));
@@ -343,7 +375,7 @@ public class DuelServiceImpl implements DuelService {
 
         else if (game instanceof QuizGame quiz) {
             var update = new FrontendQuizGameUpdateEvent(duel.getId(), quiz.getPlayer1(), quiz.getPlayer2(),
-                    quiz.getQuestionDTO(), quiz.getWinner(),
+                    quiz.getQuestionDTO(), quiz.getCorrectAnswer(), quiz.getWinner(),
                     quiz.isFinished());
             messaging.sendEvent(new LobbyMessage(lobby, update));
             duelResolutionService.sendLoserHome(lobby, duel, quiz);
@@ -384,4 +416,16 @@ public class DuelServiceImpl implements DuelService {
     public void shutdownScheduler() {
         miniGameScheduler.shutdownNow();
     }
+
+    @Override
+    public boolean isSelectRandom() {
+        return selectRandom;
+    }
+
+    @Override
+    public void setSelectRandom(boolean selectRandom) {
+        System.out.println("SETTER selectRandomMinigame = " + selectRandom);
+        this.selectRandom = selectRandom;
+    }
+
 }

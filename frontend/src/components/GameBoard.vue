@@ -7,7 +7,6 @@ import {
   computed,
   watchEffect,
   type ShallowRef,
-  type ComputedRef,
   type ComponentPublicInstance,
 } from 'vue'
 import { TresCanvas, type TresObject } from '@tresjs/core'
@@ -25,14 +24,13 @@ import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import AssetSprite from './ui/AssetSprite.vue'
 import { standardBoardAssets, STANDARD_BOARD_ID } from '@/types/BoardAsset.ts'
-import { TreesGeometry } from 'three/examples/jsm/Addons.js'
 
 const milefizStore = useMilefizStore()
 const fpsCamera = shallowRef<any | null>(null)
 const boardStore = useBoardStore()
 let started: boolean = false
 
-const { showError, showWarning, showCriticalError, showSuccess } = useErrorHandler()
+const { showWarning } = useErrorHandler()
 
 // record: meepleID -> gameCharRef
 const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
@@ -127,6 +125,16 @@ function registerGameCharRef(id: string, el: TresObject | null) {
     }
   }
 }
+/**
+ * Checkt ob ein Meeple noch in seiner Basis steht 
+ * @param id MeepleId
+ * @returns true wenn Meeple in der Basis steht - false wenn Meeple nicht in der Basis steht
+ */
+function meepleIsInBase(id: string): boolean {
+  const fieldId = boardStore.meeplePositions[id]
+  const field = boardStore.board?.fields.find(f => f.id === fieldId)
+  return field?.type?.startsWith('START_') ?? true
+}
 
 /**
  * Überträgt die berechneten 3D-Positionen auf die existierenden
@@ -156,10 +164,11 @@ watch(
         Math.abs(prev[2] - pos[2]) > 1e-6
       if (!changed) continue
 
+      const playSound = !meepleIsInBase(id)
       const ref = gameCharRefs[id]
       const inst: any = ref?.value
       if (inst && typeof inst.animateTo === 'function') {
-        inst.animateTo(pos)
+        inst.animateTo(pos, playSound)
       } else if (inst && typeof inst.setPositionImmediate === 'function') {
         // fallback: snap into position if animateTo not present
         inst.setPositionImmediate(pos)
@@ -168,7 +177,7 @@ watch(
       _prevMeeplePositions.set(id, [pos[0], pos[1], pos[2]])
     }
   },
-  { deep: true, flush:'post' },
+  { deep: true, flush: 'post' },
 )
 
 watch(
@@ -179,8 +188,20 @@ watch(
   { deep: true },
 )
 
-// Rotation-Updates aus dem Store auf die GameCharacter anwenden
+
 const _prevMeepleRotations = new Map<string, number>()
+
+/**
+ * Synchronisiert Rotations-Updates aus dem Board-Store mit den GameCharacter-Instanzen.
+ *
+ * Der Watcher reagiert auf Änderungen an den gespeicherten Meeple-Rotationen
+ * und wendet diese auf die entsprechenden GameCharacter an.
+ *
+ * Um unnötige Updates zu vermeiden, wird die neue Rotation mit der zuletzt
+ * angewendeten Rotation verglichen und nur bei relevanten Änderungen
+ * weitergegeben.
+ *
+ */
 watch(
   () => boardStore.meepleRotations,
   (rots) => {
@@ -206,6 +227,14 @@ watchEffect(() => {
   }
 })
 
+/**
+ * Beobachtet den Jump-Trigger im Store und löst eine Sprunganimation aus.
+ *
+ * Sobald im Store ein Jump-Event für einen Meeple gesetzt wird,
+ * wird die zugehörige Meeple-Instanz ermittelt und deren
+ * `jump()`-Methode aufgerufen.
+ *
+ */
 watch(
   () => milefizStore.jumpTrigger,
   (t) => {
@@ -227,7 +256,7 @@ function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPubl
   registerGameCharRef(id, el as unknown as TresObject | null)
 
   if (!started) {
-    cycleSelection(0)
+    selectMeepleByIndex(1)
     started = true
   }
 }
@@ -332,6 +361,12 @@ const handleKeydown = (e: KeyboardEvent) => {
     }
     cycleSelection(e.shiftKey ? -1 : 1)
     return
+  }
+
+  // Toggle für MinigameSelectionMode
+  if (e.key === 'F1'){
+    e.preventDefault()
+    milefizStore.sendToggleSelectionMode()
   }
 
   toggleCamera(e)
@@ -446,7 +481,6 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   }
 
   const cam = fpsCamera.value?.camera
-  // const meepleId = gameCharRef.value?.meepleId
   const meepleId = selectedMeepleId.value
   if (!cam || !meepleId) return
 
@@ -470,12 +504,12 @@ const handleMoveKeys = (e: KeyboardEvent) => {
       break
     case 'ArrowLeft':
     case 'KeyA':
-      // Links = Kreuzprodukt von Up-Vektor × Blickrichtung
+      // Links = Kreuzprodukt von Up-Vektor X Blickrichtung
       moveDir.crossVectors(new Vector3(0, 1, 0), lookDir).normalize()
       break
     case 'ArrowRight':
     case 'KeyD':
-      // Rechts = Kreuzprodukt von Blickrichtung × Up-Vektor
+      // Rechts = Kreuzprodukt von Blickrichtung X Up-Vektor
       moveDir.crossVectors(lookDir, new Vector3(0, 1, 0)).normalize()
       break
     default:
@@ -499,13 +533,26 @@ const handleMoveKeys = (e: KeyboardEvent) => {
   milefizStore.sendMove(meepleId, direction)
 }
 
+
+/*******************************************************************/
 let lastRotSent = 0
 const ROT_SEND_MS = 200
 
 let lastSentRotation = 0
 const MIN_ROT_DELTA = 0.1
-
-// Updated die Rotation vom Meeple
+/**
+ * Verarbeitet Rotationsänderungen eines Meeples.
+ *
+ * Die Rotation wird lokal sofort aktualisiert, um eine flüssige
+ * Darstellung zu gewährleisten. Zusätzlich wird die Rotation
+ * in festen Zeitabständen und nur bei relevanten Änderungen
+ * an andere Clients gesendet.
+ *
+ * Dadurch werden Netzwerk-Updates gedrosselt, ohne die
+ * Benutzerinteraktion zu beeinträchtigen.
+ *
+ * @param yRotation Aktuelle Zielrotation des Meeples
+ */
 const onRotateCharacter = (yRotation: number) => {
   const id = selectedMeepleId.value
   if (!id) return
@@ -530,7 +577,6 @@ onMounted(() => {
    *
    * Sobald die Kamera verfügbar ist:
    * - werden globale Event-Listener für Tastatur und Mausklicks aktiviert
-   * - startet die Hover-Erkennung (checkHoverTile)
    *
    * Diese Schleife verhindert Fehler, falls die Kamera-Referenz
    * beim Mounten der Komponente noch nicht gesetzt wurde.
@@ -549,7 +595,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   globalThis.removeEventListener('keydown', handleKeydown)
-  
+
 })
 
 // Computed Property für Meeple → PlayerColor Mapping
@@ -700,7 +746,7 @@ const additionalAssets = computed(() => {
     <TresHemisphereLight :intensity="0.75" skyColor="#ffffff" groundColor="#888888" />
 
     <!-- Directional Licht von "vorne rechts" 200%-->
-    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" :cast-shadow="false"/>
+    <TresDirectionalLight :position="[10, 15, 10]" :intensity="2" :cast-shadow="false" />
 
     <!-- Berge am Horizont hinzugefügt-->
     <AssetSprite v-for="(mountain, index) in mountains" :key="`mountain-${index}`" type="mountains"

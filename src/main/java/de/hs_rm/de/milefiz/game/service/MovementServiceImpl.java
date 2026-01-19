@@ -167,7 +167,7 @@ public class MovementServiceImpl implements MovementService {
         // Meeple ist stuck, Zug wird zurückgesetzt, sodass der Spieler der Meeple
         // wechseln kann
         if (!existsLegalStopWithinRemainingMoves(currentField, lastField, player.getRemainingMoves(),
-                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, lobby)) {
 
             endTurnWithMove(player, meeple, currentField);
             return meepleIsStuck(player, meeple, currentField, rivalMeepleFields, rivalMeeples, lobby);
@@ -345,6 +345,25 @@ public class MovementServiceImpl implements MovementService {
         return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
     }
 
+    /**
+     * Prüft, ob ein Meeple auf einem Feld feststeckt und ggf. ein Duell ausgelöst
+     * wird.
+     *
+     * Befindet sich auf dem aktuellen Feld ein gegnerischer Meeple, wird ein Duell
+     * zwischen beiden Spielern gestartet. Andernfalls wird ein Event erzeugt,
+     * das einen Bewegungsverlust für den aktuellen Spieler signalisiert.
+     *
+     * @param player            Aktueller Spieler
+     * @param meeple            Meeple des aktuellen Spielers
+     * @param currentField      Feld, auf dem sich der Meeple befindet
+     * @param rivalMeepleFields Felder, die von gegnerischen Meeples belegt sind
+     * @param rivalMeeples      Gegnerische Meeples
+     * @param lobby             Aktuelle Lobby
+     * @return FrontendEvent, das entweder den Start eines Duells oder
+     *         einen Bewegungsverlust repräsentiert
+     * 
+     * @author Maximilian Ressel
+     */
     private FrontendEvent meepleIsStuck(Player player, Meeple meeple, Field currentField, Set<Field> rivalMeepleFields,
             Set<Meeple> rivalMeeples, Lobby lobby) {
 
@@ -443,6 +462,7 @@ public class MovementServiceImpl implements MovementService {
     /**
      * Prüft, ob der Versuch, ein Feld mit einer Barriere zu betreten, erfolgreich
      * ist.
+     * Steht auf dem Barrierefeld bereits ein anderer Meeple, wird der Zug abgelehnt
      * Bei Erfolg darf die Barriere verschoben werden.
      * Bei Misserfolg wird der Zug abgelehnt; steht auf dem aktuellen Feld ein
      * gegnerischer Meeple, kann stattdessen ein Duell gestartet werden.
@@ -461,23 +481,33 @@ public class MovementServiceImpl implements MovementService {
      *         Duellstart)
      * 
      * @author Maximilian Ressel
+     * @author Leon Schäfer
      */
     private FrontendEvent tryMovingOnBarrier(Meeple meeple, Meeple barrier, Field currentField, Field targetField,
             Player player,
             Set<Field> otherOwnMeepleFields, Set<Field> rivalMeepleFields, Set<Meeple> rivalMeeples, Lobby lobby) {
-        // wenn man genau drauf landet, darf man sie verschieben
-        if (player.getRemainingMoves() == LAST_MOVE) {
-            endTurnWithMove(player, meeple, targetField);
-            logger.info("Direct hit on barrier {} with meeple {}", barrier.getId(), meeple.getId());
-            return new FrontendTriggerBarrierMoveEvent(
-                    player.getId(),
-                    meeple.getId(),
-                    targetField.getId(),
-                    player.getRemainingMoves(),
-                    barrier.getId());
+
+        if (!(player.getRemainingMoves() == LAST_MOVE)) {
+            return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
         }
 
-        return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
+        // Prüfe, ob das Zielfeld von einem Meeple besetzt ist
+        if (isOccupiedByMeeple(lobby, targetField)) {
+            endTurnWithMove(player, meeple, currentField);
+            logger.info("Cannot move barrier: field {} is occupied by a meeple", targetField.getId());
+            return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves(),
+                    "MOVE_ERROR_BARRIER_FIELD_OCCUPIED");
+        }
+
+        // wenn man genau drauf landet, darf man sie verschieben
+        endTurnWithMove(player, meeple, targetField);
+        logger.info("Direct hit on barrier {} with meeple {}", barrier.getId(), meeple.getId());
+        return new FrontendTriggerBarrierMoveEvent(
+                player.getId(),
+                meeple.getId(),
+                targetField.getId(),
+                player.getRemainingMoves(),
+                barrier.getId());
     }
 
     /**
@@ -529,7 +559,7 @@ public class MovementServiceImpl implements MovementService {
             Set<Field> rivalMeepleFields, Lobby lobby) {
 
         if (existsLegalStopWithinRemainingMoves(targetField, currentField, player.getRemainingMoves() - 1,
-                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, lobby)) {
             return Optional.empty();
         }
 
@@ -652,7 +682,7 @@ public class MovementServiceImpl implements MovementService {
                 ownMeeple.getId(),
                 rivalMeeple.getId());
 
-        var miniGame = duelService.assignRandomGameToDuel(duel.getId());
+        var miniGame = duelService.assignGameToDuel(duel.getId());
 
         if (miniGame instanceof DiceGame dice) {
             dice.initPlayers(player.getId(), rivalPlayer.getId());
@@ -751,11 +781,11 @@ public class MovementServiceImpl implements MovementService {
      */
     private boolean existsLegalStopWithinRemainingMoves(Field startingField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
-            Set<Field> rivalMeepleFields) {
+            Set<Field> rivalMeepleFields, Lobby lobby) {
         Map<String, Boolean> memo = new HashMap<>();
         return existsLegalStopWithinRemainingMovesDfs(
                 startingField, lastField, remainingMoves, ownMeepleFields, barrierFields, rivalMeeples,
-                rivalMeepleFields, memo);
+                rivalMeepleFields, lobby, memo);
     }
 
     /**
@@ -808,7 +838,7 @@ public class MovementServiceImpl implements MovementService {
      */
     private boolean existsLegalStopWithinRemainingMovesDfs(Field startingField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
-            Set<Field> rivalMeepleFields, Map<String, Boolean> memo) {
+            Set<Field> rivalMeepleFields, Lobby lobby, Map<String, Boolean> memo) {
 
         if (remainingMoves == 0) {
             return false;
@@ -833,7 +863,7 @@ public class MovementServiceImpl implements MovementService {
             }
 
             if (!isLegalTarget(neighbourField, lastField, remainingMoves, ownMeepleFields, barrierFields, rivalMeeples,
-                    rivalMeepleFields)) {
+                    rivalMeepleFields, lobby)) {
                 continue;
             }
 
@@ -843,7 +873,7 @@ public class MovementServiceImpl implements MovementService {
             }
 
             if (existsLegalStopWithinRemainingMovesDfs(neighbourField, startingField, remainingMoves - 1,
-                    ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, memo)) {
+                    ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, lobby, memo)) {
                 memo.put(key, true);
                 return true;
             }
@@ -880,7 +910,7 @@ public class MovementServiceImpl implements MovementService {
      */
     private boolean isLegalTarget(Field nextField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
-            Set<Field> rivalMeepleFields) {
+            Set<Field> rivalMeepleFields, Lobby lobby) {
 
         // FELD EXISTIERT NICHT
         if (nextField == null) {
@@ -909,6 +939,13 @@ public class MovementServiceImpl implements MovementService {
         // BARRIERE
         if (barrierFields.contains(nextField) && remainingMoves != LAST_MOVE) {
             logger.info("Field blocked by barrier (not your last move)!");
+            return false;
+        }
+
+        // BARRIERE UND ANDERER MEEPLE
+        if (barrierFields.contains(nextField) && remainingMoves == LAST_MOVE
+                && isOccupiedByMeeple(lobby, nextField)) {
+            logger.info("Field blocked by barrier and meeple!");
             return false;
         }
 
@@ -962,6 +999,8 @@ public class MovementServiceImpl implements MovementService {
      * @param field das zu prüfende Feld
      * @return true, wenn sich ein Meeple auf dem Feld befindet,
      *         sonst false
+     * 
+     * @author Maximilian Ressel
      */
     private boolean isOccupiedByMeeple(Lobby lobby, Field field) {
         return lobby.getPlayers().stream()
@@ -980,6 +1019,8 @@ public class MovementServiceImpl implements MovementService {
      * @param field das zu prüfende Feld
      * @return true, wenn das Feld durch einen Meeple oder eine Barriere belegt ist,
      *         sonst false
+     * 
+     * @author Maximilian Ressel
      */
     private boolean isOccupied(Lobby lobby, Board board, Field field) {
 
@@ -1002,6 +1043,8 @@ public class MovementServiceImpl implements MovementService {
      * @param player der aktuelle Spieler
      * @return eine Menge aller Felder, auf denen eigene (nicht aktive) Meeples
      *         stehen
+     * 
+     * @author Maximilian Ressel
      */
     private Set<Field> getOtherOwnMeepleFields(Player player) {
         Meeple activeMeeple = player.getActiveMeeple();
@@ -1019,6 +1062,8 @@ public class MovementServiceImpl implements MovementService {
      * @param player der Spieler selbst, dessen eigene Meeple ignoriert werden
      *               sollen
      * @return eine Menge aller gegnerischen Meeples
+     * 
+     * @author Maximilian Ressel
      */
     private Set<Meeple> getRivalMeeples(Lobby lobby, Player player) {
         Set<Meeple> rivalMeeples = new HashSet<>();
@@ -1040,6 +1085,8 @@ public class MovementServiceImpl implements MovementService {
      * @param player der Spieler selbst, dessen eigene Meeple ignoriert werden
      *               sollen
      * @return eine Menge aller Felder, auf denen gegnerische Meeples stehen
+     * 
+     * @author Maximilian Ressel
      */
     private Set<Field> getRivalMeepleFields(Lobby lobby, Player player) {
         return getRivalMeeples(lobby, player).stream()
@@ -1052,6 +1099,8 @@ public class MovementServiceImpl implements MovementService {
      *
      * @param board das Spielbrett mit allen Barrieren
      * @return eine Menge aller Felder, auf denen sich Barrieren befinden
+     * 
+     * @author Maximilian Ressel
      */
     private Set<Field> getBarrierFields(Board board) {
         return board.getBarriers().stream()
@@ -1067,6 +1116,8 @@ public class MovementServiceImpl implements MovementService {
      * @param field das Feld, auf dem die Barriere gesucht wird
      * @return die gefundene Barriere oder null, wenn sich keine Barriere auf dem
      *         Feld befindet
+     * 
+     * @author Maximilian Ressel
      */
     private Meeple getBarrierByField(Board board, Field field) {
         return board.getBarriers().stream()
@@ -1082,6 +1133,8 @@ public class MovementServiceImpl implements MovementService {
      * @param rivalMeeples die Menge aller gegnerischen Meeples
      * @return der gefundene gegnerische Meeple oder null, wenn sich keiner auf dem
      *         Feld befindet
+     * 
+     * @author Maximilian Ressel
      */
     private Meeple getRivalMeepleByField(Field field, Set<Meeple> rivalMeeples) {
         return rivalMeeples.stream()
@@ -1096,6 +1149,8 @@ public class MovementServiceImpl implements MovementService {
      * @param lobby  die aktuelle Lobby mit allen Spielern
      * @param meeple der Meeple, dessen Besitzer ermittelt werden soll
      * @return der zugehörige Spieler oder null, wenn kein Spieler gefunden wird
+     * 
+     * @author Maximilian Ressel
      */
     private Player getPlayerByMeeple(Lobby lobby, Meeple meeple) {
         if (meeple == null)
@@ -1106,5 +1161,4 @@ public class MovementServiceImpl implements MovementService {
                 .findFirst()
                 .orElse(null);
     }
-
 }
