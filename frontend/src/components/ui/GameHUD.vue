@@ -139,6 +139,9 @@ onUnmounted(() => {
 
 <template>
   <div class="hud-container">
+    <template v-if="!milefizStore.gameFinished">
+      
+
     <!-- Minimap Popup-->
     <transition name="fade">
       <MiniMapPopUp :is-open="milefizStore.minimap.isMiniMapOpen"
@@ -154,10 +157,6 @@ onUnmounted(() => {
         </template>
 
       </MiniMapPopUp>
-    </transition>
-    <!-- Win Popup -->
-    <transition name="fade">
-      <WinPopUp v-if="milefizStore.gameFinished" />
     </transition>
 
     <!-- Menu Popup -->
@@ -175,7 +174,6 @@ onUnmounted(() => {
     <transition name="fade">
       <TutorialPopUp v-if="milefizStore.popUpTutorialOpen" />
     </transition>
-
     <!-- Meeple Bar -->
     <div style="position: absolute; top: 2vw; right: 0px;" class="meeple-icon-bar">
       <MeepleBar />
@@ -220,8 +218,13 @@ onUnmounted(() => {
       </div>
     </div>
 
+    </template>
 
-
+    
+    <!-- Win Popup -->
+    <transition name="fade">
+      <WinPopUp v-if="milefizStore.gameFinished" />
+    </transition>
   </div>
 </template>
 
