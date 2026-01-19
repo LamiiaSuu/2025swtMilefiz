@@ -18,6 +18,7 @@ const wsurl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${windo
 const DEST = '/topic/milefiz/lobby/'
 
 let stompclient: Client | null = null
+let keepAliveInterval: number | null = null
 
 export const useMilefizStore = defineStore('milefizstore', () => {
   const audioStore = useAudioStore()
@@ -111,6 +112,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     activeMeeple: string
     lobby: Lobby | null
     moved: boolean
+    selectRandomMinigame: boolean
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
@@ -120,7 +122,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     currentField: "",
     activeMeeple: "",
     lobby: null, // DummyLobby: 271c95db-3737-496f-9081-ae920e8ebbf7
-    moved: false
+    moved: false,
+    selectRandomMinigame: true
   })
   const activeDuels = reactive<Record<string, any>>({})
 
@@ -160,10 +163,11 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         console.error('Geht nicht')
         return
       }
+      startKeepAlive()
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe(DEST + gamedata.lobby?.id, (message) => {
         //console.log('Message received: ' + message + '\nBody:\n' + message.body)
-
+        if (message.body === "KEEP CONNEC") return
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
@@ -531,6 +535,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     stompclient.onDisconnect = () => {
       /* Verbindung abgebaut*/
       console.log('Disconnected')
+      stopKeepAlive()
     }
     // Verbindung zum Broker aufbauen
     stompclient.activate()
@@ -674,6 +679,43 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           }
         }
       }
+    }
+  }
+
+  function startKeepAlive() {
+
+    if (keepAliveInterval !== null) return
+    if (!gamedata.lobby?.id) return
+
+    keepConnected()
+    keepAliveInterval = window.setInterval(() => {
+      keepConnected()
+    }, 25_000)
+  }
+
+  function stopKeepAlive() {
+    if (keepAliveInterval === null) return
+    window.clearInterval(keepAliveInterval)
+    keepAliveInterval = null
+  }
+
+  function keepConnected() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot send move: STOMP client not connected.')
+      return
+    }
+
+    const body = JSON.stringify("connec")
+
+    const DEST_APP = '/app/milefiz/lobby/' + gamedata.lobby?.id
+
+    try {
+      stompclient.publish({
+        destination: DEST_APP + '/keepconnected',
+        body,
+      })
+    } catch (err) {
+      console.error('Error rotating:', err)
     }
   }
 
@@ -980,6 +1022,40 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     return lobby.players.find(p => p.id === playerId)?.color ?? null
   }
 
+  /**
+   * Zu Demo-Zwecken
+   * Sendet einen ToggleMinigameSelectionMode Befehl ans Backend, um zwischen random
+   * und inorder Auswahl zu wechseln.
+   * 
+   */
+  function sendToggleSelectionMode() {
+    if (!stompclient || !stompclient.connected) {
+      console.error('Cannot toggle selection mode: STOMP client not connected.')
+      return
+    }
+
+    if (!gamedata.lobby?.id || !gamedata.playerId) {
+      console.error('Cannot roll dice: Missing lobbyId or playerId')
+      return
+    }
+    gamedata.selectRandomMinigame = !gamedata.selectRandomMinigame
+    const toggleSelectionModeCommand: any = {
+      selectRandomMinigame: gamedata.selectRandomMinigame
+    }
+
+    try {
+      stompclient.publish({
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/toggleMinigameSelectionMode`,
+        body: JSON.stringify(toggleSelectionModeCommand)
+      })
+      console.log('toggleSelectionModeCommand sent, selectRandomMinigame:', gamedata.selectRandomMinigame)
+    } catch (err) {
+      console.error('Error sending toggleSelectionModeCommand:', err)
+    }
+
+    gamedata.selectRandomMinigame ? showSuccess(`MINIGAME_SELECTION_MODE_RANDOM`) : showSuccess(`MINIGAME_SELECTION_MODE_INORDER`)
+  }
+
   function sendRollDice(requestedValue?: number) {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot roll dice: STOMP client not connected.')
@@ -1205,6 +1281,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * Trennt die WebSocket-Verbindung und setzt den pinia-Store zurück
    */
   function disconnectAndReset() {
+    stopKeepAlive()
     // WebSocket-Verbindung trennen
     if (stompclient && stompclient.connected) {
       stompclient.deactivate()
@@ -1258,6 +1335,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     gamedata,
     isJoined,
     startMilefizLiveUpdate,
+    sendToggleSelectionMode,
     sendRollDice,
     sendLobbyMessage,
     joinLobby,

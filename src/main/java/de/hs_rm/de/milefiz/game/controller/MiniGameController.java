@@ -28,6 +28,7 @@ import de.hs_rm.de.milefiz.game.service.DuelService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.commands.MathGameCommand;
+import de.hs_rm.de.milefiz.messaging.commands.ToggleSelectionModeCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDiceGameUpdateEvent;
@@ -73,6 +74,45 @@ public class MiniGameController {
                 this.messaging = messaging;
                 this.lobbyManager = lobbyManager;
                 this.duelResolutionService = duelResolutionService;
+        }
+
+        /**
+         * Schaltet den Auswahlmodus für Minispiele zwischen
+         * zufällig (RANDOM) und festgelegter Reihenfolge (IN_ORDER) um.
+         *
+         * 
+         * Diese Methode wird über einen STOMP-WebSocket-Endpunkt vom Frontend
+         * ausgelöst (z. B. per Hotkey).
+         * Der Client übermittelt dabei, ob Minispiele zufällig ausgewählt werden
+         * sollen.
+         * 
+         *
+         * 
+         * Ablauf:
+         * 
+         * Empfängt den Toggle-Befehl aus dem Frontend
+         * Liest den gewünschten Auswahlmodus aus dem Command
+         * Delegiert die eigentliche Umschaltung an den {@link DuelService}
+         * 
+         * 
+         *
+         * 
+         * Die {@code lobbyId} wird aktuell nur zur Routing-Zuordnung verwendet.
+         * Die eigentliche Zustandsänderung erfolgt zentral im {@code DuelService}.
+         * 
+         *
+         * @param lobbyId
+         *        Die eindeutige ID der Lobby, aus der der Toggle-Befehl stammt
+         * @param command
+        *         Enthält die Information, ob Minispiele zufällig ausgewählt werden sollen ({@code true} = RANDOM, {@code false} = IN_ORDER)
+         *
+         * @see DuelService#setSelectRandom(boolean)
+         */
+        @MessageMapping("/milefiz/lobby/{lobbyId}/toggleMinigameSelectionMode")
+        public void toggleMinigameSelection(
+                        @DestinationVariable UUID lobbyId, ToggleSelectionModeCommand command) {
+                System.out.println("CONTROLLER: command.selectRandom = " + command.selectRandomMinigame());
+                duelService.setSelectRandom(command.selectRandomMinigame());
         }
 
         /**

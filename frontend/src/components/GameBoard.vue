@@ -345,6 +345,12 @@ const handleKeydown = (e: KeyboardEvent) => {
     return
   }
 
+  // Toggle für MinigameSelectionMode
+  if (e.key === 'F1'){
+    e.preventDefault()
+    milefizStore.sendToggleSelectionMode()
+  }
+
   toggleCamera(e)
   handleMoveKeys(e)
   handleMeepleSelectionKeydown(e)

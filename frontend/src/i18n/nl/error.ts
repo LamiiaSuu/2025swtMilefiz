@@ -24,5 +24,7 @@ export const ERRORS_NL: Record<ErrorCode, string> = {
     MEEPLE_IN_DUEL: 'De tegenstander zit al in een duel. Wacht tot het duel is afgelopen!',
     MOVE_ERROR_NO_VALID_FIELDS: 'Er zijn geen geldige treinen mogelijk in deze richting',
     MINIGAME_SLOT_JACKPOT_SUCCESS_MESSAGE: 'JACKPOT!!! Je energie is weer opgeladen!',
-    MOVE_ERROR_BARRIER_FIELD_OCCUPIED: 'Ach man! Er staat al iemand in de barrière.'
+    MOVE_ERROR_BARRIER_FIELD_OCCUPIED: 'Ach man! Er staat al iemand in de barrière.',
+    MINIGAME_SELECTION_MODE_INORDER: 'MINIGAME-SELECTIEMODUS: VOLGORDE',
+    MINIGAME_SELECTION_MODE_RANDOM: 'MINIGAME-SELECTIEMODUS: WILLEKEURIG'
 }

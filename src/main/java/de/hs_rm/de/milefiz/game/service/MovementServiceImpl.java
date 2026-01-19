@@ -167,7 +167,7 @@ public class MovementServiceImpl implements MovementService {
         // Meeple ist stuck, Zug wird zurückgesetzt, sodass der Spieler der Meeple
         // wechseln kann
         if (!existsLegalStopWithinRemainingMoves(currentField, lastField, player.getRemainingMoves(),
-                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, lobby)) {
 
             endTurnWithMove(player, meeple, currentField);
             return meepleIsStuck(player, meeple, currentField, rivalMeepleFields, rivalMeeples, lobby);
@@ -483,26 +483,28 @@ public class MovementServiceImpl implements MovementService {
     private FrontendEvent tryMovingOnBarrier(Meeple meeple, Meeple barrier, Field currentField, Field targetField,
             Player player,
             Set<Field> otherOwnMeepleFields, Set<Field> rivalMeepleFields, Set<Meeple> rivalMeeples, Lobby lobby) {
+
+        if (!(player.getRemainingMoves() == LAST_MOVE)) {
+            return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
+        }
+
         // Prüfe, ob das Zielfeld von einem Meeple besetzt ist
-        if (player.getRemainingMoves() == LAST_MOVE && isOccupiedByMeeple(lobby, targetField)) {
+        if (isOccupiedByMeeple(lobby, targetField)) {
             endTurnWithMove(player, meeple, currentField);
             logger.info("Cannot move barrier: field {} is occupied by a meeple", targetField.getId());
             return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves(),
                     "MOVE_ERROR_BARRIER_FIELD_OCCUPIED");
         }
-        // wenn man genau drauf landet, darf man sie verschieben
-        if (player.getRemainingMoves() == LAST_MOVE) {
-            endTurnWithMove(player, meeple, targetField);
-            logger.info("Direct hit on barrier {} with meeple {}", barrier.getId(), meeple.getId());
-            return new FrontendTriggerBarrierMoveEvent(
-                    player.getId(),
-                    meeple.getId(),
-                    targetField.getId(),
-                    player.getRemainingMoves(),
-                    barrier.getId());
-        }
 
-        return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves());
+        // wenn man genau drauf landet, darf man sie verschieben
+        endTurnWithMove(player, meeple, targetField);
+        logger.info("Direct hit on barrier {} with meeple {}", barrier.getId(), meeple.getId());
+        return new FrontendTriggerBarrierMoveEvent(
+                player.getId(),
+                meeple.getId(),
+                targetField.getId(),
+                player.getRemainingMoves(),
+                barrier.getId());
     }
 
     /**
@@ -554,7 +556,7 @@ public class MovementServiceImpl implements MovementService {
             Set<Field> rivalMeepleFields, Lobby lobby) {
 
         if (existsLegalStopWithinRemainingMoves(targetField, currentField, player.getRemainingMoves() - 1,
-                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields)) {
+                otherOwnMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, lobby)) {
             return Optional.empty();
         }
 
@@ -677,7 +679,7 @@ public class MovementServiceImpl implements MovementService {
                 ownMeeple.getId(),
                 rivalMeeple.getId());
 
-        var miniGame = duelService.assignRandomGameToDuel(duel.getId());
+        var miniGame = duelService.assignGameToDuel(duel.getId());
 
         if (miniGame instanceof DiceGame dice) {
             dice.initPlayers(player.getId(), rivalPlayer.getId());
@@ -776,11 +778,11 @@ public class MovementServiceImpl implements MovementService {
      */
     private boolean existsLegalStopWithinRemainingMoves(Field startingField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
-            Set<Field> rivalMeepleFields) {
+            Set<Field> rivalMeepleFields, Lobby lobby) {
         Map<String, Boolean> memo = new HashMap<>();
         return existsLegalStopWithinRemainingMovesDfs(
                 startingField, lastField, remainingMoves, ownMeepleFields, barrierFields, rivalMeeples,
-                rivalMeepleFields, memo);
+                rivalMeepleFields, lobby, memo);
     }
 
     /**
@@ -833,7 +835,7 @@ public class MovementServiceImpl implements MovementService {
      */
     private boolean existsLegalStopWithinRemainingMovesDfs(Field startingField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
-            Set<Field> rivalMeepleFields, Map<String, Boolean> memo) {
+            Set<Field> rivalMeepleFields, Lobby lobby, Map<String, Boolean> memo) {
 
         if (remainingMoves == 0) {
             return false;
@@ -858,7 +860,7 @@ public class MovementServiceImpl implements MovementService {
             }
 
             if (!isLegalTarget(neighbourField, lastField, remainingMoves, ownMeepleFields, barrierFields, rivalMeeples,
-                    rivalMeepleFields)) {
+                    rivalMeepleFields, lobby)) {
                 continue;
             }
 
@@ -868,7 +870,7 @@ public class MovementServiceImpl implements MovementService {
             }
 
             if (existsLegalStopWithinRemainingMovesDfs(neighbourField, startingField, remainingMoves - 1,
-                    ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, memo)) {
+                    ownMeepleFields, barrierFields, rivalMeeples, rivalMeepleFields, lobby, memo)) {
                 memo.put(key, true);
                 return true;
             }
@@ -905,7 +907,7 @@ public class MovementServiceImpl implements MovementService {
      */
     private boolean isLegalTarget(Field nextField, Field lastField, int remainingMoves,
             Set<Field> ownMeepleFields, Set<Field> barrierFields, Set<Meeple> rivalMeeples,
-            Set<Field> rivalMeepleFields) {
+            Set<Field> rivalMeepleFields, Lobby lobby) {
 
         // FELD EXISTIERT NICHT
         if (nextField == null) {
@@ -934,6 +936,13 @@ public class MovementServiceImpl implements MovementService {
         // BARRIERE
         if (barrierFields.contains(nextField) && remainingMoves != LAST_MOVE) {
             logger.info("Field blocked by barrier (not your last move)!");
+            return false;
+        }
+
+        // BARRIERE UND ANDERER MEEPLE
+        if (barrierFields.contains(nextField) && remainingMoves == LAST_MOVE
+                && isOccupiedByMeeple(lobby, nextField)) {
+            logger.info("Field blocked by barrier and meeple!");
             return false;
         }
 
@@ -1131,5 +1140,4 @@ public class MovementServiceImpl implements MovementService {
                 .findFirst()
                 .orElse(null);
     }
-
 }

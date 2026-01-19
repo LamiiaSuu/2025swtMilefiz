@@ -47,6 +47,8 @@ public class RockPaperScissorsGame extends MiniGame {
     public void initPlayers(UUID p1, UUID p2) {
         this.player1 = p1;
         this.player2 = p2;
+        this.moveP1 = null;
+        this.moveP2 = null;
 
     }
 
@@ -152,11 +154,6 @@ public class RockPaperScissorsGame extends MiniGame {
         if (isFinished())
             return;
 
-        if (moveP1 == null)
-            moveP1 = Move.ROCK;
-        if (moveP2 == null)
-            moveP2 = Move.ROCK;
-
         checkFinished();
     }
 
@@ -168,6 +165,15 @@ public class RockPaperScissorsGame extends MiniGame {
      * @return true, wenn x y schlägt, sonst false
      */
     private boolean beats(Move x, Move y) {
+
+        if (x == null) {
+            return false;
+        }
+
+        if (y == null) {
+            return true;
+        }
+
         return (x == Move.SCISSORS && y == Move.PAPER)
                 || (x == Move.PAPER && y == Move.ROCK)
                 || (x == Move.ROCK && y == Move.SCISSORS);
