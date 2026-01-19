@@ -26,6 +26,7 @@ import { useErrorHandler } from '@/composables/useErrorHandler'
 import AssetSprite from './ui/AssetSprite.vue'
 import { standardBoardAssets, STANDARD_BOARD_ID } from '@/types/BoardAsset.ts'
 import { TreesGeometry } from 'three/examples/jsm/Addons.js'
+import { routeLocationKey } from 'vue-router'
 
 const milefizStore = useMilefizStore()
 const fpsCamera = shallowRef<any | null>(null)
@@ -314,8 +315,7 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape'/*  || e.key === 'm' */) {
-    console.log("ESCAPE KEY PRESSED")
+  /* if (e.key === 'Escape') { 
     e.preventDefault()
 
     // Schließt das PopUp-Menu, wenn es offen sind
@@ -327,13 +327,12 @@ const handleKeydown = (e: KeyboardEvent) => {
       milefizStore.openPopUpMenu()
       return
     }
-  }
-  if (milefizStore.isAnyPopUpOpen){
-    console.log("POPUP OPEN STOP PROPAGATION")
+  } */
+  /* if (milefizStore.isAnyPopUpOpen) {
     e.preventDefault()
     e.stopPropagation()
     return
-  }
+  } */
 
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
@@ -553,20 +552,15 @@ onMounted(() => {
       requestAnimationFrame(waitForCamera)
       return
     }
-    window.addEventListener('keydown', handleKeydown, {
-    capture: true, // "Capture-Phase": Exklusiver Fokus --> Minigame fängt Inputs als erstes ab
-    passive: false // erlaubt explizit e.preventDefault
-  })
   }
 
   waitForCamera()
+
+  window.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown, {
-    capture: true, // "Capture-Phase": Exklusiver Fokus --> Minigame fängt Inputs als erstes ab
-  })
-
+  window.removeEventListener('keydown', handleKeydown)
 })
 
 // Computed Property für Meeple → PlayerColor Mapping

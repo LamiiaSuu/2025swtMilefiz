@@ -19,15 +19,72 @@ import MiniMapGraph from './popups/MiniMapGraph.vue';
 import ErrorMessage from './ErrorMessage.vue';
 import { useBoardStore } from '@/stores/boardStore';
 import TutorialPopUp from './popups/TutorialPopUp.vue';
+import { onMounted, onUnmounted } from 'vue';
+import { useAudioStore } from '@/stores/audioStore';
 
 const milefizStore = useMilefizStore()
 const boardStore = useBoardStore()
+const audio = useAudioStore()
 const { board, ok } = storeToRefs(boardStore)
 
+let relockInProgress = false
 
 function colorToCss(c: string) {
-  return { RED:"#e11", GREEN:"#2a6", BLUE:"#16f", YELLOW:"#fc0" }[c] ?? "#e11"
+  return { RED: "#e11", GREEN: "#2a6", BLUE: "#16f", YELLOW: "#fc0" }[c] ?? "#e11"
 }
+
+function openMenu() {
+  audio.playSfx('click')
+  milefizStore.openPopUpMenu()
+}
+
+async function requestPointerLock() {
+  try {
+    if (!document.pointerLockElement) {
+      if (!milefizStore.popUpMenuOpen || milefizStore.popUpTutorialOpen || milefizStore.popUpSettingsOpen) {
+        await document.body.requestPointerLock()
+      }
+    }
+  } catch {
+
+  } finally {
+    relockInProgress = false
+  }
+}
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'm' || e.key === 'M') {
+    e.preventDefault()
+    if (milefizStore.isAnyMenuOpen) {
+      relockInProgress = true
+      milefizStore.closePopUpMenu()
+
+      requestPointerLock()
+      return
+    } else if (!milefizStore.isAnyDuelActive) {
+      milefizStore.openPopUpMenu()
+      return
+    }
+    e.stopPropagation()
+    return
+  }
+  if (milefizStore.isAnyNonMenuOpen) {
+    e.preventDefault()
+    if (milefizStore.isAnyDuelActive) return
+    e.stopPropagation()
+    console.log("STOPPING PROPAGATION")
+  }
+  return
+
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 
 </script>
 
@@ -38,8 +95,7 @@ function colorToCss(c: string) {
     <transition name="fade">
       <MiniMapPopUp :is-open="milefizStore.minimap.isMiniMapOpen"
         :selected-field-id="milefizStore.minimap.selectedFieldId"
-        :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
-        @confirm="milefizStore.confirmMinimapSelection" 
+        :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId" @confirm="milefizStore.confirmMinimapSelection"
         :style="{ '--own-color': colorToCss(milefizStore.minimap.ownColor) }">
         <template #map>
           <MiniMapGraph v-if="board" :board="board" :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
@@ -58,7 +114,8 @@ function colorToCss(c: string) {
 
     <!-- Menu Popup -->
     <transition name="fade">
-      <MenuPopUp v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.popUpTutorialOpen" />
+      <MenuPopUp
+        v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.popUpTutorialOpen" />
     </transition>
 
     <!-- Settings Popup -->
@@ -77,10 +134,13 @@ function colorToCss(c: string) {
     </div>
 
     <!-- Menu Button -->
-    <div class="ingame-menu-button" >
-      <img src="@/assets/hud/menus_white.png" class="ingame-menu-icon" />
-      <span class="ingame-hotkey">esc</span>
+    <div>
+      <button class="ingame-menu-button" @click="openMenu()">
+        <img src="@/assets/hud/menus_white.png" class="ingame-menu-icon" alt="menu" />
+        <span class="ingame-hotkey">[ M ]</span>
+      </button>
     </div>
+
 
     <!-- Spielerliste -->
     <div class="spielerliste-container">
@@ -147,35 +207,33 @@ function colorToCss(c: string) {
 }
 
 .ingame-menu-button {
-  position: relative;
-  margin-left: 25px;
-  padding: 5px;
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: filter 120ms ease-out, transform 120ms ease-out;
+  position: fixed;
+  top: 2vh;
+  left: 3vw;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  justify-content: center;
+
+  background: transparent;
+  cursor: pointer;
+  border: none;
 }
 
 .ingame-menu-icon {
   position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: filter 120ms ease-out, transform 120ms ease-out;
-  padding: 5px;
+  width: 6vh;
+  height: 6vh;
 }
 
 .ingame-hotkey {
-  position: absolute;
-  bottom: -3px;
-  left: 3px;
-  font-size: 18px;
+  font-size: 2vh;
   font-weight: bold;
   color: #ffffff;
-  border-radius: 3px;
   font-family: "AcmeFont", sans-serif;
+  line-height: 1;
 }
 
 

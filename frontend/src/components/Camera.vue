@@ -80,10 +80,11 @@ const onMouseMove = (e: MouseEvent) => {
   if (!props.useFirstPerson) return // Keine Maussteurung
 
   // PointerLock verlassen, wenn ein PopUp offen ist
-  if (milefizStore.popUpMenuOpen || milefizStore.popUpSettingsOpen || milefizStore.gameFinished || milefizStore.minimap.isMiniMapOpen) {
+  if (milefizStore.isAnyPopUpOpen) {
     if (document.pointerLockElement) {
       document.exitPointerLock()
     }
+    props.useFirstPerson
     return
   }
 

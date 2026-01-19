@@ -332,9 +332,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           //TODO rennen in Barriere visualisieren
           console.log("u ran into barrieeer oh no")
           if (event.playerId === gamedata.playerId) {
-            if (event.msg === "MOVE_ERROR_BARRIER_FIELD_OCCUPIED"){
+            if (event.msg === "MOVE_ERROR_BARRIER_FIELD_OCCUPIED") {
               showWarning("MOVE_ERROR_BARRIER_FIELD_OCCUPIED")
-            }else{
+            } else {
               showWarning('REJECTED_BY_BARRIER')
             }
             audioStore.playSfx('impactBarrier')
@@ -430,7 +430,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.finished = event.finished
         }
 
-          if (event.type === "MATH_GAME_UPDATE") {
+        if (event.type === "MATH_GAME_UPDATE") {
           const duel = activeDuels[event.duelId]
           if (!duel) return
 
@@ -1148,10 +1148,23 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
 
   /**
-   * Pop Up Menu Funktionen
+   * Pop Up Funktionen
   */
+  const isAnyDuelActive = computed(() => Object.keys(activeDuels).length > 0)
 
-  const isAnyPopUpOpen = computed (() => 
+  const isAnyMenuOpen = computed(() =>
+    popUpMenuOpen.value ||
+    popUpSettingsOpen.value ||
+    popUpTutorialOpen.value
+  )
+
+  const isAnyNonMenuOpen = computed(() =>
+    minimap.isMiniMapOpen ||
+    gameFinished.value ||
+    Object.keys(activeDuels).length > 0
+  )
+
+  const isAnyPopUpOpen = computed(() =>
     popUpMenuOpen.value ||
     popUpSettingsOpen.value ||
     popUpTutorialOpen.value ||
@@ -1265,7 +1278,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName,
     gameFinished,
     getWinnerColor,
+    isAnyDuelActive,
     isAnyPopUpOpen,
+    isAnyMenuOpen,
+    isAnyNonMenuOpen,
     popUpMenuOpen,
     popUpSettingsOpen,
     popUpTutorialOpen,
