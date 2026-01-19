@@ -25,7 +25,7 @@ public class StompWebMessageBrokerConfiguration implements WebSocketMessageBroke
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic")
-                .setHeartbeatValue(new long[]{10000, 10000})
+                .setHeartbeatValue(new long[]{10000, 10000}) // Alle 10 Sekunden incoming/outgoing Heartbeats für keepalive
                 .setTaskScheduler(heartbeatScheduler());
         registry.setApplicationDestinationPrefixes("/app");
     }
@@ -40,11 +40,15 @@ public class StompWebMessageBrokerConfiguration implements WebSocketMessageBroke
         registration.interceptors(playerTokenInterceptor);
     }
 
+    /**
+     * Scheduler welcher die Heartbeat-Pings verwaltet. Verhindert, dass bei Inaktivität die Verbindung automatisch geschlossen wird
+     * @return TaskScheduler mit ThreadPool (standard 1 Thread)
+     * 
+     * @see MessageBrokerRegistry#setHeartbeatValue(long[])
+     */
     @Bean
     public TaskScheduler heartbeatScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        // scheduler.setPoolSize(1);
-        // scheduler.setThreadNamePrefix("websocket-heartbeat-");
         scheduler.initialize();
         return scheduler;
     }
