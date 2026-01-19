@@ -333,24 +333,6 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
-  /* if (e.key === 'Escape') { 
-    e.preventDefault()
-
-    // Schließt das PopUp-Menu, wenn es offen sind
-    if (milefizStore.popUpMenuOpen) {
-      milefizStore.closePopUpMenu()
-      return
-    } else {
-      // Oeffnet das PopUp-Menu
-      milefizStore.openPopUpMenu()
-      return
-    }
-  } */
-  /* if (milefizStore.isAnyPopUpOpen) {
-    e.preventDefault()
-    e.stopPropagation()
-    return
-  } */
 
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {

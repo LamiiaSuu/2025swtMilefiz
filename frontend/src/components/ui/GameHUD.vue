@@ -33,18 +33,45 @@ function colorToCss(c: string) {
   return { RED: "#e11", GREEN: "#2a6", BLUE: "#16f", YELLOW: "#fc0" }[c] ?? "#e11"
 }
 
+/**
+ * Hilfsfunktion zum Öffnen des Menüs
+ */
 function openMenu() {
   audio.playSfx('click')
   milefizStore.openPopUpMenu()
 }
 
+/**
+ * Fordert den Browser auf, den Pointer Lock erneut zu aktivieren.
+ *
+ * Der Pointer Lock wird **nur dann** angefordert, wenn:
+ * - aktuell **kein Pointer Lock aktiv** ist (`document.pointerLockElement === null`)
+ * - **kein Menü / Overlay geöffnet** ist (`isAnyMenuOpen === false`)
+ *
+ * Hintergrund:
+ * - Browser erlauben `requestPointerLock()` nur im Kontext einer
+ *   gültigen Benutzerinteraktion (z. B. Keydown, Click).
+ * - Diese Funktion wird daher ausschließlich aus solchen Events heraus aufgerufen
+ *   (z. B. beim Schließen des Ingame-Menüs per Tastatur).
+ *
+ * Fehlerbehandlung:
+ * - Pointer-Lock-Anfragen können vom Browser abgelehnt werden
+ *   (z. B. Race-Conditions nach Escape oder fehlende User-Activation).
+ * - Diese Fehler werden bewusst abgefangen und ignoriert,
+ *   da sie kein inkonsistentes Spielverhalten verursachen.
+ *
+ * Cleanup:
+ * - Setzt das interne `relockInProgress`-Flag unabhängig vom Erfolg zurück,
+ *   um Folgelogik (z. B. PointerLockChange-Handler) wieder zu erlauben.
+ *
+ * @returns Promise<void>
+ */
 async function requestPointerLock() {
   try {
-    if (!document.pointerLockElement) {
-      if (!milefizStore.popUpMenuOpen || milefizStore.popUpTutorialOpen || milefizStore.popUpSettingsOpen) {
-        await document.body.requestPointerLock()
-      }
+    if (!document.pointerLockElement && !milefizStore.isAnyMenuOpen) {
+      await document.body.requestPointerLock()
     }
+
   } catch {
 
   } finally {
@@ -53,7 +80,7 @@ async function requestPointerLock() {
 }
 
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'm' || e.key === 'M') {
+  if (e.key === 'm' || e.key === 'M') { // Hotkey zum Öffnen des Menüs
     e.preventDefault()
     if (milefizStore.isAnyMenuOpen) {
       relockInProgress = true
@@ -61,11 +88,11 @@ function handleKeydown(e: KeyboardEvent) {
 
       requestPointerLock()
       return
-    } else if (!milefizStore.isAnyDuelActive) {
+    } else if (!milefizStore.isAnyDuelActive) { // Menü öffnen, nur wenn kein Spiel aktiv. Grund: MonkeyType muss auf "M" listenen
       milefizStore.openPopUpMenu()
       return
     }
-    e.stopPropagation()
+    e.stopPropagation() // Blockiert alle bisherigen Keyevents
     return
   }
   if (milefizStore.isAnyNonMenuOpen) {
