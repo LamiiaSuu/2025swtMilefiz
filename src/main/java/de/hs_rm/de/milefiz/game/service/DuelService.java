@@ -42,6 +42,23 @@ public interface DuelService {
     MiniGame randomGame();
 
     /**
+     * Wählt ein das nächste Mini-Spiel aus der aktuellen Spieleliste aus.
+     * <p>
+     * Typische Verwendung:
+     * <ul>
+     *   <li>Auswahl des Mini-Spiels beim Start eines Duells</li>
+     * </ul>
+     *
+     * @return das nächste {@link MiniGame}-Objekt.
+     *
+     * @throws IllegalStateException
+     *         wenn keine Mini-Spiele registriert sind und somit keine Auswahl
+     *         getroffen werden kann.
+     *
+     */
+    MiniGame inorderGame();
+
+    /**
      * Gibt die aktuell verfügbaren Mini-Spiele zurück.
      * <p>
      * Die zurückgegebene Liste repräsentiert den aktuellen Zustand der
@@ -103,7 +120,7 @@ public interface DuelService {
     Duel createDuel(UUID player1, UUID player2, UUID meeple1, UUID meeple2);
 
     /**
-     * Weist einem bestehenden Duell ein zufälliges Mini-Spiel zu.
+     * Weist einem bestehenden Duell ein Mini-Spiel zu.
      * <p>
      * Das gewählte Mini-Spiel bleibt während des gesamten Duells bestehen.
      *
@@ -112,8 +129,7 @@ public interface DuelService {
      *
      * @throws IllegalStateException wenn das Duell nicht existiert
      */
-    MiniGame assignRandomGameToDuel(UUID duelId);
-
+    MiniGame assignGameToDuel(UUID duelId);
     /**
      * Liefert das aktuell einem Duell zugewiesene Mini-Spiel zurück.
      *
@@ -144,4 +160,39 @@ public interface DuelService {
     Duel getDuel(UUID duelId);
 
     public void initColorBrain(Duel duel, Lobby lobby, ColorbrainGame game);
-}
+
+    /**
+     * Setzt den Auswahlmodus für die Bestimmung des nächsten Minispiels.
+     *
+     * <p>
+     * Ist {@code selectRandom} auf {@code true} gesetzt, wird das nächste Minispiel
+     * zufällig aus den verfügbaren Minigames ausgewählt.
+     * Ist der Wert {@code false}, erfolgt die Auswahl in einer festen,
+     * zyklischen Reihenfolge (IN_ORDER).
+     * </p>
+     *
+     * <p>
+     * Diese Einstellung wirkt sich global auf die Minigame-Auswahl innerhalb
+     * des {@code DuelService} aus.
+     * </p>
+     *
+     * @param selectRandom
+     *        {@code true} für zufällige Auswahl (RANDOM),
+     *        {@code false} für Auswahl in fester Reihenfolge (IN_ORDER)
+     */
+    public void setSelectRandom(boolean selectRandom);
+
+    /**
+     * Gibt zurück, ob die Auswahl der Minispiele aktuell zufällig erfolgt.
+     *
+     * <p>
+     * {@code true} bedeutet, dass Minispiele zufällig ausgewählt werden.
+     * {@code false} bedeutet, dass Minispiele in einer festen Reihenfolge
+     * durchlaufen werden.
+     * </p>
+     *
+     * @return {@code true}, wenn der RANDOM-Modus aktiv ist,
+     *         {@code false}, wenn der IN_ORDER-Modus aktiv ist
+     */
+    public boolean isSelectRandom();
+    }
