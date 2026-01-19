@@ -20,7 +20,7 @@ import de.hs_rm.de.milefiz.game.model.Color;
  * @param playerName  der Name des Spielers, der das Spiel gewonnen hat
  * @param playerColor die Farbe des Spielers, der das Spiel gewonnen hat
  *
- * Author: Maximilian Ressel / Jaqueline Huth
+ * @author Maximilian Ressel / Jaqueline Huth
  */
 public record FrontendPlayerHasWonEvent(String type, String playerName, Color playerColor, UUID meepleId,
         UUID targetField) implements FrontendEvent {

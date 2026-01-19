@@ -121,7 +121,7 @@ export const useBoardStore = defineStore('board', {
         return;
       }
 
-      //Reaktivität erzwingen (damit Vue neu rendert)
+      //Re-render erzwingen 
       this.board = {
         ...this.board,
         fields: [...this.board.fields],

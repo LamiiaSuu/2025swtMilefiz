@@ -345,6 +345,23 @@ public class MovementServiceImpl implements MovementService {
         return new FrontendMoveBarrierEvent(barrier.getId(), currentField.getId(), targetField.getId());
     }
 
+    /**
+     * Prüft, ob ein Meeple auf einem Feld feststeckt und ggf. ein Duell ausgelöst
+     * wird.
+     *
+     * Befindet sich auf dem aktuellen Feld ein gegnerischer Meeple, wird ein Duell
+     * zwischen beiden Spielern gestartet. Andernfalls wird ein Event erzeugt,
+     * das einen Bewegungsverlust für den aktuellen Spieler signalisiert.
+     *
+     * @param player            Aktueller Spieler
+     * @param meeple            Meeple des aktuellen Spielers
+     * @param currentField      Feld, auf dem sich der Meeple befindet
+     * @param rivalMeepleFields Felder, die von gegnerischen Meeples belegt sind
+     * @param rivalMeeples      Gegnerische Meeples
+     * @param lobby             Aktuelle Lobby
+     * @return FrontendEvent, das entweder den Start eines Duells oder
+     *         einen Bewegungsverlust repräsentiert
+     */
     private FrontendEvent meepleIsStuck(Player player, Meeple meeple, Field currentField, Set<Field> rivalMeepleFields,
             Set<Meeple> rivalMeeples, Lobby lobby) {
 
@@ -470,7 +487,8 @@ public class MovementServiceImpl implements MovementService {
         if (player.getRemainingMoves() == LAST_MOVE && isOccupiedByMeeple(lobby, targetField)) {
             endTurnWithMove(player, meeple, currentField);
             logger.info("Cannot move barrier: field {} is occupied by a meeple", targetField.getId());
-            return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves(), "MOVE_ERROR_BARRIER_FIELD_OCCUPIED");
+            return new FrontendRejectedByBarrierEvent(player.getId(), player.getRemainingMoves(),
+                    "MOVE_ERROR_BARRIER_FIELD_OCCUPIED");
         }
         // wenn man genau drauf landet, darf man sie verschieben
         if (player.getRemainingMoves() == LAST_MOVE) {

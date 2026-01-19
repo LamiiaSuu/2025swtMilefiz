@@ -297,23 +297,19 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
             showWarning(`REMAINING_MOVES_LOST`)
-            //TODO moveloss animieren
             console.warn("lost remaining moves")
           }
 
         }
         if (event.type === "TRIGGER_BARRIER_MOVE") {
-          //TODO verschieben der barriere implementieren
           boardStore.updateMeeplePosition(event.meepleId, event.targetField)
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
             gamedata.moved = false;
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
-            //TODO minimap öffnen
             openMinimap(event.barrierId, event.playerId, event.currentField)
           }
-          //moveBarrier(event.barrierId, crypto.randomUUID())
         }
         if (event.type === "MOVE_BARRIER") {
           console.log("MOVE_BARRIER event received:", event);
@@ -452,6 +448,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.questionDTO = event.questionDTO
           duel.state.question = event.questionDTO?.question
           duel.state.answers = event.questionDTO?.answers
+          duel.state.correctAnswer = event.correctAnswer ?? -1
           duel.state.winner = event.winner
           duel.state.finished = event.finished
 
@@ -753,7 +750,6 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         destination: DEST_APP + '/rotate',
         body,
       })
-      //console.log('Meeple rotated:', body)
     } catch (err) {
       console.error('Error rotating:', err)
     }
