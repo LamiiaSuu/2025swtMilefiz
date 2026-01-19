@@ -68,14 +68,12 @@ public class FrontendReceiverController {
 
     @MessageMapping("/milefiz/lobby/{lobbyId}/keepconnected")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleConnection(
-            @DestinationVariable("lobbyId") UUID lobbyId,
+    public String handleConnection(
+            @DestinationVariable("lobbyId") UUID lobbyId, String connec,
             Player player) {
 
-        logger.debug("Connec from player {}", player.getId());
-        return new FrontendEvent() {
-
-        };
+        logger.info("Connec from player {}", player.getId());
+        return "KEEP CONNEC";
     }
 
     /**
