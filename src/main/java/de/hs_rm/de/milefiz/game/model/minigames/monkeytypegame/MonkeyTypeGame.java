@@ -1,10 +1,8 @@
-package de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame;
+package de.hs_rm.de.milefiz.game.model.minigames.monkeytypegame;
 
 import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
