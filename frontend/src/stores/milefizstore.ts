@@ -143,6 +143,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       connectHeaders: {
         'player-token': gamedata.playerToken,
       },
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)
@@ -426,7 +428,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           duel.state.finished = event.finished
         }
 
-          if (event.type === "MATH_GAME_UPDATE") {
+        if (event.type === "MATH_GAME_UPDATE") {
           const duel = activeDuels[event.duelId]
           if (!duel) return
 
