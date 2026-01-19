@@ -80,37 +80,82 @@ async function requestPointerLock() {
 }
 
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'm' || e.key === 'M') { // Hotkey zum Öffnen des Menüs
-    e.preventDefault()
-    if (milefizStore.isAnyMenuOpen) {
-      relockInProgress = true
-      milefizStore.closePopUpMenu()
-
-      requestPointerLock()
-      return
-    } else if (!milefizStore.isAnyDuelActive) { // Menü öffnen, nur wenn kein Spiel aktiv. Grund: MonkeyType muss auf "M" listenen
+  if (!milefizStore.isAnyPopUpOpen) { // Kein PopUp offen
+    if (e.key === 'm' || e.key === 'M') { // Öffne Menü mit M
       milefizStore.openPopUpMenu()
       return
     }
-    e.stopPropagation() // Blockiert alle bisherigen Keyevents
-    return
-  }
-  if (milefizStore.isAnyNonMenuOpen) {
-    e.preventDefault()
-    if (milefizStore.isAnyDuelActive) return
-    e.stopPropagation()
-    console.log("STOPPING PROPAGATION")
+  } else { // ein beliebiges PopUp Offen
+    if (e.key === 'm' || e.key === 'M') { // M betätigt
+      if (milefizStore.isAnyMenuOpen) { // beliebiges Menü offen
+        relockInProgress = true
+        milefizStore.closePopUpMenu() // Menü(s) schließen
+
+        requestPointerLock() // pointerLock requesten
+        return
+      }
+      if (milefizStore.isAnyDuelActive) { // Minigame(s) aktiv
+        e.stopPropagation()
+        console.log("DUEL ACTIVE! CAN'T OPEN MENU")
+        return
+      }
+      if (milefizStore.minimap.isMiniMapOpen) { // Minimap offen
+        milefizStore.openPopUpMenu() // Menü öffnen
+      }
+    } else { // Alles andere als M betätigt & beliebiges Pop Up offen
+      if (milefizStore.isAnyDuelActive) {
+        e.stopPropagation()
+        console.log("DUEL ACTIVE! CAN'T PERFORM PLAYER ACTIONS")
+      } else if (milefizStore.minimap.isMiniMapOpen) {
+        e.stopPropagation()
+        console.log("MINIMAP OPEN! CAN'T PERFORM PLAYER ACTIONS")
+      } else if (milefizStore.gameFinished) {
+        e.stopPropagation()
+        console.log("GAME FINISHED! CAN'T PERFORM PLAYER ACTIONS")
+      } else if (milefizStore.isAnyMenuOpen){
+        e.stopPropagation()
+        console.log("MENU OPEN! CAN'T PERFORM PLAYER ACTIONS")}
+    }
   }
   return
+
+
+  // if (e.key === 'm' || e.key === 'M') { // Hotkey zum Öffnen des Menüs
+  //   e.preventDefault()
+  //   if (milefizStore.isAnyMenuOpen) {
+  //     relockInProgress = true
+  //     milefizStore.closePopUpMenu()
+
+  //     requestPointerLock()
+  //     return
+  //   } else if (!milefizStore.isAnyDuelActive) { // Menü öffnen, nur wenn kein Spiel aktiv. Grund: MonkeyType muss auf "M" listenen
+  //     milefizStore.openPopUpMenu()
+  //     return
+  //   }
+  //   e.stopPropagation() // Blockiert alle bisherigen Keyevents
+  //   return
+  // }
+  // if (milefizStore.isAnyNonMenuOpen) {
+  //   e.preventDefault()
+  //   if (milefizStore.isAnyDuelActive) return
+  //   e.stopPropagation()
+  //   console.log("STOPPING PROPAGATION")
+  // }
+  // return
 
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('keydown', handleKeydown, {
+    capture: true, // "Capture-Phase": Exklusiver Fokus --> Minigame fängt Inputs als erstes ab
+    passive: false // erlaubt explizit e.preventDefault
+  })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('keydown', handleKeydown, {
+    capture: true, // "Capture-Phase": Exklusiver Fokus --> Minigame fängt Inputs als erstes ab
+  })
 })
 
 </script>
