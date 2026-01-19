@@ -1012,6 +1012,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     } catch (err) {
       console.error('Error sending toggleSelectionModeCommand:', err)
     }
+    
+    gamedata.selectRandomMinigame ? showSuccess(`MINIGAME_SELECTION_MODE_RANDOM`) : showSuccess(`MINIGAME_SELECTION_MODE_INORDER`)
   }
 
   function sendRollDice(requestedValue?: number) {

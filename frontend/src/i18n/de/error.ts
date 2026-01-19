@@ -24,5 +24,7 @@ export const ERRORS_DE: Record<ErrorCode, string> = {
     BOARD_COULD_NOT_BE_IMPORTED: 'Map konnte nicht importiert werden: ',
     MOVE_ERROR_NO_VALID_FIELDS: 'Keine gültigen Züge in diese Richtung möglich',
     MINIGAME_SLOT_JACKPOT_SUCCESS_MESSAGE: 'JACKPOT!!! Deine Energie hat sich aufgefüllt!',
-    MOVE_ERROR_BARRIER_FIELD_OCCUPIED: 'Ach Mensch! Da steht schon einer in der Barriere'
+    MOVE_ERROR_BARRIER_FIELD_OCCUPIED: 'Ach Mensch! Da steht schon einer in der Barriere',
+    MINIGAME_SELECTION_MODE_INORDER: 'MINIGAME SELECTION MODE: INORDER',
+    MINIGAME_SELECTION_MODE_RANDOM: 'MINIGAME SELECTION MODE: RANDOM'
 }
