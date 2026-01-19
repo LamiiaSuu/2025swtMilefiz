@@ -44,7 +44,6 @@ public class StompWebMessageBrokerConfiguration implements WebSocketMessageBroke
      * Scheduler welcher die Heartbeat-Pings verwaltet. Verhindert, dass bei Inaktivität die Verbindung automatisch geschlossen wird
      * @return TaskScheduler mit ThreadPool (standard 1 Thread)
      * 
-     * @see MessageBrokerRegistry#setHeartbeatValue(long[])
      */
     @Bean
     public TaskScheduler heartbeatScheduler() {
