@@ -5,13 +5,11 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,14 +29,16 @@ class DuelServiceImplTest {
     private FrontendMessagingService messaging;
     private DuelServiceImpl service;
     private DuelResolutionService duelResolutionService;
+    private MonkeyTypeWordService monkeyTypeWordService;
 
     @BeforeEach
     void setup() {
         lobbyManager = mock(LobbyManager.class);
         messaging = mock(FrontendMessagingService.class);
         duelResolutionService = mock(DuelResolutionService.class);
+        monkeyTypeWordService = mock(MonkeyTypeWordService.class);
 
-        service = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
+        service = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService, monkeyTypeWordService);
 
         ReflectionTestUtils.setField(service, "diceGameTimeout", 5);
         ReflectionTestUtils.setField(service, "balloonGameTimeout", 5);
@@ -143,7 +143,7 @@ class DuelServiceImplTest {
 
     @Test
     void randomGame_noFactories_throws() {
-        DuelServiceImpl emptyService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
+        DuelServiceImpl emptyService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService, monkeyTypeWordService);
 
         ReflectionTestUtils.setField(emptyService, "gameFactories", new ArrayList<>());
 
@@ -245,7 +245,7 @@ class DuelServiceImplTest {
 
     @Test
     void schedulerIsShutdownOnPreDestroy() {
-        DuelServiceImpl localService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
+        DuelServiceImpl localService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService, monkeyTypeWordService);
 
         ScheduledExecutorService scheduler = (ScheduledExecutorService) ReflectionTestUtils
                 .getField(localService, "miniGameScheduler");

@@ -11,7 +11,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -44,11 +45,10 @@ public class DuelServiceImpl implements DuelService {
 
     private final ScheduledExecutorService miniGameScheduler = Executors.newScheduledThreadPool(4);
 
+    private final Logger logger = LoggerFactory.getLogger(DuelServiceImpl.class);
+
     private boolean selectRandom;
     private int currentGameIndex;
-
-    @Autowired
-    MonkeyTypeWordService monkeyTypeWordService;
 
     /**
      * Registry möglicher Mini-Spiele (Factory-Ansatz, damit immer neue Instanzen
@@ -72,6 +72,8 @@ public class DuelServiceImpl implements DuelService {
     private final LobbyManager lobbyManager;
     private final FrontendMessagingService messaging;
     private final DuelResolutionService duelResolutionService;
+
+    private final MonkeyTypeWordService monkeyTypeWordService;
 
     /**
      * Die Timeouts aus den Spring application properties werden hier
@@ -106,8 +108,10 @@ public class DuelServiceImpl implements DuelService {
     private int monkeyTypeGameTimout;
 
     public DuelServiceImpl(LobbyManager lobbyManager, FrontendMessagingService messaging,
+            DuelResolutionService duelResolutionService, MonkeyTypeWordService monkeyTypeWordService) {
 
-            DuelResolutionService duelResolutionService) {
+        this.monkeyTypeWordService = monkeyTypeWordService;
+
         gameFactories.add(() -> new DiceGame(diceGameTimeout + 1));
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout + 2));
         gameFactories.add(() -> new SlotMachineGame(slotMachineGameTimeout));
@@ -116,7 +120,7 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new QuizGame(quizGameTimeout + 3));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
         gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2,
-                monkeyTypeWordService));
+                this.monkeyTypeWordService));
 
         this.lobbyManager = lobbyManager;
         this.messaging = messaging;
@@ -147,7 +151,7 @@ public class DuelServiceImpl implements DuelService {
         if (gameFactories.isEmpty()) {
             throw new IllegalStateException("No mini games registered.");
         }
-        System.out.println("NEXT GAME: currentGameIndex = " + this.currentGameIndex);
+        logger.info("NEXT GAME: currentGameIndex = {}", this.currentGameIndex);
         MiniGame game = gameFactories.get(currentGameIndex).get();
 
         if (currentGameIndex < gameFactories.size()-1) {
@@ -183,7 +187,7 @@ public class DuelServiceImpl implements DuelService {
      */
     @Override
     public MiniGame assignGameToDuel(UUID duelId) {
-        System.out.println("ASSIGN: selectRandomMinigame = " + selectRandom);
+        logger.info("ASSIGN: selectRandomMinigame = {}", selectRandom);
         Duel duel = duels.get(duelId);
 
         if (duel == null) {
@@ -424,7 +428,7 @@ public class DuelServiceImpl implements DuelService {
 
     @Override
     public void setSelectRandom(boolean selectRandom) {
-        System.out.println("SETTER selectRandomMinigame = " + selectRandom);
+        logger.info("SETTER selectRandomMinigame = {}", selectRandom);
         this.selectRandom = selectRandom;
     }
 

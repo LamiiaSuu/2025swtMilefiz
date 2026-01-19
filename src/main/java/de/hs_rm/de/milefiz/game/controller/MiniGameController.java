@@ -111,7 +111,7 @@ public class MiniGameController {
         @MessageMapping("/milefiz/lobby/{lobbyId}/toggleMinigameSelectionMode")
         public void toggleMinigameSelection(
                         @DestinationVariable UUID lobbyId, ToggleSelectionModeCommand command) {
-                System.out.println("CONTROLLER: command.selectRandom = " + command.selectRandomMinigame());
+                logger.info("command.selectRandom = {}", command.selectRandomMinigame());
                 duelService.setSelectRandom(command.selectRandomMinigame());
         }
 

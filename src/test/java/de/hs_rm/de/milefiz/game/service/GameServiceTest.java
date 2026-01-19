@@ -54,15 +54,13 @@ class GameServiceTest {
     @Mock
     private MovementServiceImpl movementService;
 
-    private PlantingService plantingService;
 
     private GameService gameService;
 
     @BeforeEach
 
     void setUp() throws StreamReadException, DatabindException, IOException {
-        plantingService = new PlantingServiceImpl();
-        gameService = new GameServiceImpl(diceService, publisher, cooldownService, movementService, plantingService);
+        gameService = new GameServiceImpl(diceService, publisher, cooldownService, movementService);
 
     }
 

@@ -6,10 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
-import de.hs_rm.de.milefiz.messaging.LobbyMessage;
-import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 
 public class ColorbrainGame extends MiniGame {
 
