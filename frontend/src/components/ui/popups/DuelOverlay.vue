@@ -19,6 +19,7 @@ import QuizMinigame from '../minigames/QuizMinigame.vue';
 import SchereSteinPapier from "../minigames//SchereSteinPapier/SchereSteinPapier.vue";
 import ColorbrainMiniGame from "../minigames/colorbrain/ColorbrainMiniGame.vue";
 import MonkeyTypeGame from "../minigames/monkeyType/MonkeyTypeGame.vue";
+import type { Component } from "vue";
 
 const props = defineProps<{
   duels: any[]
@@ -28,7 +29,7 @@ const emit = defineEmits<{
   (e: 'close', duelId: string): void
 }>()
 
-function resolveComponent(duel: any) {
+function resolveComponent(duel: any): Component | undefined {
   console.log('Resolving component for duel:', duel)
   console.log('miniGameType:', duel.miniGameType)
   switch (duel.miniGameType) {
@@ -49,7 +50,7 @@ function resolveComponent(duel: any) {
     case 'MonkeyTypeGame':
       return MonkeyTypeGame
     default:
-      return MonkeyTypeGame
+      return undefined
   }
 }
 </script>

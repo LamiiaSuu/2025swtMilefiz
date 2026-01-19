@@ -79,9 +79,9 @@ public class FrontendReceiverController {
      * der Lobby gesendet
      *
      * @param lobbyId die UUID der Lobby, in der die Rotation stattfindet
-     * @param rtnCmd das Rotationskommando mit Meeple-ID und Y-Rotation
-     * @param player der authentifizierte Spieler, der die Rotation ausgelöst
-     * hat
+     * @param rtnCmd  das Rotationskommando mit Meeple-ID und Y-Rotation
+     * @param player  der authentifizierte Spieler, der die Rotation ausgelöst
+     *                hat
      *
      * @return FrontendRotateEvent zur Synchronisation der Meeple-Rotation
      *         auf allen Clients der Lobby
@@ -108,9 +108,9 @@ public class FrontendReceiverController {
      * automatisch an alle Clients der entsprechenden Lobby gesendet.
      *
      * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt
-     * wird
+     *                wird
      * @param moveCmd das Bewegungskommando mit Meeple-ID und Bewegungsrichtung
-     * @param player der Spieler, der den Zug ausgelöst hat
+     * @param player  der Spieler, der den Zug ausgelöst hat
      *
      * @return ein {@link FrontendEvent}, das den Ausgang des Zuges beschreibt
      *
@@ -139,13 +139,13 @@ public class FrontendReceiverController {
      * Das vom {@link GameService} erzeugte {@link FrontendEvent} wird an alle
      * Clients der Lobby verteilt.
      *
-     * @param lobbyId die eindeutige ID der Lobby, in der die Barriere bewegt
-     * wird
+     * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere bewegt
+     *                    wird
      * @param moveBarrCmd das Kommando mit Barrieren-ID und Ziel-Feld-ID
-     * @param player der Spieler, der die Aktion ausgelöst hat
+     * @param player      der Spieler, der die Aktion ausgelöst hat
      *
      * @return ein {@link FrontendEvent}, das den Ausgang der Barrierenbewegung
-     * beschreibt
+     *         beschreibt
      *
      * @see GameService#moveBarrier(UUID, MoveBarrierCommand, Player)
      *
@@ -204,7 +204,7 @@ public class FrontendReceiverController {
      * @param lobbyId die eindeutige UUID der Lobby in der gewürfelt wird
      * @param command der Würfel-Befehl vom Client, enthält die Spieler-ID
      * @return {@link FrontendRollDiceEvent} mit Lobby-ID und Würfelergebnis
-     * (1-6)
+     *         (1-6)
      *
      * @see GameService#rollDice()
      * @see FrontendRollDiceEvent
@@ -228,12 +228,15 @@ public class FrontendReceiverController {
             int number;
             if (command.requestedValue().isPresent()) {
                 if (!enableRequestedDiceRolls) {
-                    logger.warn("Player {} wanted to roll the dice with a specific value, but developermode.enableRequestedDiceRolls is false", command.playerId());
+                    logger.warn(
+                            "Player {} wanted to roll the dice with a specific value, but developermode.enableRequestedDiceRolls is false",
+                            command.playerId());
                     return new FrontendRollDiceRejectedEvent(command.playerId(), 0);
                 }
                 // Requested Würfelzahl, nur wenn es enabled ist
                 number = command.requestedValue().get();
-                number = Math.max(1, Math.min(6, number)); // Min. 1, Max. 6 -> wird auf min oder max gesetzt bei Verstoß
+                number = Math.max(1, Math.min(6, number)); // Min. 1, Max. 6 -> wird auf min oder max gesetzt bei
+                                                           // Verstoß
                 logger.info("Würfelzahl {} wurde requested von {}", number, command.playerId());
             } else {
                 // Zufallszahl
@@ -270,7 +273,8 @@ public class FrontendReceiverController {
      */
     @MessageMapping("/milefiz/lobby/{lobbyId}/startGame")
     @SendTo("/topic/milefiz/lobby/{lobbyId}")
-    public FrontendEvent handleStartGame(@DestinationVariable("lobbyId") UUID lobbyId, Player player) throws LobbyNotFoundException {
+    public FrontendEvent handleStartGame(@DestinationVariable("lobbyId") UUID lobbyId, Player player)
+            throws LobbyNotFoundException {
 
         Lobby lobby = lobbyManager.getLobby(lobbyId);
 
@@ -434,13 +438,13 @@ public class FrontendReceiverController {
      * </ul>
      *
      * @param lobbyId die eindeutige UUID der Lobby in der Energie gespeichert
-     * wird
+     *                wird
      * @param command der Energie-Befehl vom Client, enthält die Spieler-ID
-     * @param player der authentifizierte Spieler, der Energie speichern möchte
+     * @param player  der authentifizierte Spieler, der Energie speichern möchte
      *
      * @return {@link FrontendSaveEnergyEvent} bei Erfolg mit Lobby-ID und neuer
-     * Energie, oder {@link FrontendSaveEnergyRejectedEvent} bei ungültiger
-     * Anfrage
+     *         Energie, oder {@link FrontendSaveEnergyRejectedEvent} bei ungültiger
+     *         Anfrage
      *
      * @see Player#saveEnergy()
      * @see Player#hasFullEnergy()
@@ -535,14 +539,14 @@ public class FrontendReceiverController {
      * </ul>
      *
      * @param lobbyId die eindeutige UUID der Lobby, in der die Aktion
-     * ausgeführt wird
+     *                ausgeführt wird
      * @param command der Energie-Befehl vom Client, enthält die Spieler-ID
-     * @param player der authentifizierte Spieler, der Energie verbrauchen
-     * möchte
+     * @param player  der authentifizierte Spieler, der Energie verbrauchen
+     *                möchte
      *
      * @return {@link FrontendConsumeEnergyEvent} bei erfolgreichem
-     * Energieverbrauch oder {@link FrontendConsumeEnergyRejectedEvent} bei
-     * ungültiger Anfrage
+     *         Energieverbrauch oder {@link FrontendConsumeEnergyRejectedEvent} bei
+     *         ungültiger Anfrage
      *
      * @see Player#consumeEnergy()
      * @see Player#hasFullEnergy()
@@ -583,9 +587,9 @@ public class FrontendReceiverController {
      * WebSocket: Eingang /milefiz/lobby/{lobbyId}/rename Weiterleitung
      * /topic/milefiz/lobby/{lobbyId}
      *
-     * @param lobbyId die UUID der zu aktualisierenden Lobby
+     * @param lobbyId                die UUID der zu aktualisierenden Lobby
      * @param lobbyUpdateSettingsCmd Command mit newLobbyName und maxPlayers
-     * @param player der authentifizierte Leader-Spieler
+     * @param player                 der authentifizierte Leader-Spieler
      * @return FrontendLobbyUpdateEvent mit aktualisiertem Lobby-DTO
      * @throws PlayerHasNoPermissionException falls Spieler nicht Leader ist
      * @see FrontendLobbyUpdateEvent
@@ -625,10 +629,11 @@ public class FrontendReceiverController {
      * Verarbeitet Anfragen zu Änderungen des Usernamen/Playernamen. Update wird
      * an alle Clients der Lobby gesendet.
      *
-     * @param lobbyId die UUID der zu aktualisierenden Lobby
+     * @param lobbyId                 die UUID der zu aktualisierenden Lobby
      * @param updatePlayerNameCommand Command mit newPlayerName
-     * @param player der authentifizierte Spieler, der seinen Namen ändern
-     * möchte
+     * @param player                  der authentifizierte Spieler, der seinen Namen
+     *                                ändern
+     *                                möchte
      * @return FrontendLobbyUpdateEvent mit aktualisiertem Lobby-DTO
      * @see FrontendLobbyUpdateEvent
      * @see LobbyMapper

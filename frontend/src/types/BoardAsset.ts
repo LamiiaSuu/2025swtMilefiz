@@ -24,7 +24,7 @@ export const standardBoardAssets: BoardAsset[] = [
 
   { type: 'animals', variant: 'Little_Fox', position: [2, 0.2, 8], scale: 0.5, rotation: 0 },
   { type: 'animals', variant: 'deer', position: [14, 0, 4], scale: 0.5, rotation: 160 },
-  { type: 'animals', variant: 'blue_jay', position: [11.9, 1.3, 28.5], scale: 0.1, rotation: 0 },
+  { type: 'animals', variant: 'blue_jay', position: [12, 1.3, 28], scale: 0.1, rotation: 0 },
 
   { type: 'buildings', variant: 'cabin_1', position: [13, 0.7, 12.5], scale: 0.6, rotation: 200 },
   { type: 'buildings', variant: 'camp_1', position: [22, 0, 11], scale: 0.6, rotation: 180 },

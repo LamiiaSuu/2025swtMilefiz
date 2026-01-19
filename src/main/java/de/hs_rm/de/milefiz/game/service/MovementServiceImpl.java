@@ -361,6 +361,8 @@ public class MovementServiceImpl implements MovementService {
      * @param lobby             Aktuelle Lobby
      * @return FrontendEvent, das entweder den Start eines Duells oder
      *         einen Bewegungsverlust repräsentiert
+     * 
+     * @author Maximilian Ressel
      */
     private FrontendEvent meepleIsStuck(Player player, Meeple meeple, Field currentField, Set<Field> rivalMeepleFields,
             Set<Meeple> rivalMeeples, Lobby lobby) {
@@ -479,6 +481,7 @@ public class MovementServiceImpl implements MovementService {
      *         Duellstart)
      * 
      * @author Maximilian Ressel
+     * @author Leon Schäfer
      */
     private FrontendEvent tryMovingOnBarrier(Meeple meeple, Meeple barrier, Field currentField, Field targetField,
             Player player,
@@ -996,6 +999,8 @@ public class MovementServiceImpl implements MovementService {
      * @param field das zu prüfende Feld
      * @return true, wenn sich ein Meeple auf dem Feld befindet,
      *         sonst false
+     * 
+     * @author Maximilian Ressel
      */
     private boolean isOccupiedByMeeple(Lobby lobby, Field field) {
         return lobby.getPlayers().stream()
@@ -1014,6 +1019,8 @@ public class MovementServiceImpl implements MovementService {
      * @param field das zu prüfende Feld
      * @return true, wenn das Feld durch einen Meeple oder eine Barriere belegt ist,
      *         sonst false
+     * 
+     * @author Maximilian Ressel
      */
     private boolean isOccupied(Lobby lobby, Board board, Field field) {
 
@@ -1036,6 +1043,8 @@ public class MovementServiceImpl implements MovementService {
      * @param player der aktuelle Spieler
      * @return eine Menge aller Felder, auf denen eigene (nicht aktive) Meeples
      *         stehen
+     * 
+     * @author Maximilian Ressel
      */
     private Set<Field> getOtherOwnMeepleFields(Player player) {
         Meeple activeMeeple = player.getActiveMeeple();
@@ -1053,6 +1062,8 @@ public class MovementServiceImpl implements MovementService {
      * @param player der Spieler selbst, dessen eigene Meeple ignoriert werden
      *               sollen
      * @return eine Menge aller gegnerischen Meeples
+     * 
+     * @author Maximilian Ressel
      */
     private Set<Meeple> getRivalMeeples(Lobby lobby, Player player) {
         Set<Meeple> rivalMeeples = new HashSet<>();
@@ -1074,6 +1085,8 @@ public class MovementServiceImpl implements MovementService {
      * @param player der Spieler selbst, dessen eigene Meeple ignoriert werden
      *               sollen
      * @return eine Menge aller Felder, auf denen gegnerische Meeples stehen
+     * 
+     * @author Maximilian Ressel
      */
     private Set<Field> getRivalMeepleFields(Lobby lobby, Player player) {
         return getRivalMeeples(lobby, player).stream()
@@ -1086,6 +1099,8 @@ public class MovementServiceImpl implements MovementService {
      *
      * @param board das Spielbrett mit allen Barrieren
      * @return eine Menge aller Felder, auf denen sich Barrieren befinden
+     * 
+     * @author Maximilian Ressel
      */
     private Set<Field> getBarrierFields(Board board) {
         return board.getBarriers().stream()
@@ -1101,6 +1116,8 @@ public class MovementServiceImpl implements MovementService {
      * @param field das Feld, auf dem die Barriere gesucht wird
      * @return die gefundene Barriere oder null, wenn sich keine Barriere auf dem
      *         Feld befindet
+     * 
+     * @author Maximilian Ressel
      */
     private Meeple getBarrierByField(Board board, Field field) {
         return board.getBarriers().stream()
@@ -1116,6 +1133,8 @@ public class MovementServiceImpl implements MovementService {
      * @param rivalMeeples die Menge aller gegnerischen Meeples
      * @return der gefundene gegnerische Meeple oder null, wenn sich keiner auf dem
      *         Feld befindet
+     * 
+     * @author Maximilian Ressel
      */
     private Meeple getRivalMeepleByField(Field field, Set<Meeple> rivalMeeples) {
         return rivalMeeples.stream()
@@ -1130,6 +1149,8 @@ public class MovementServiceImpl implements MovementService {
      * @param lobby  die aktuelle Lobby mit allen Spielern
      * @param meeple der Meeple, dessen Besitzer ermittelt werden soll
      * @return der zugehörige Spieler oder null, wenn kein Spieler gefunden wird
+     * 
+     * @author Maximilian Ressel
      */
     private Player getPlayerByMeeple(Lobby lobby, Meeple meeple) {
         if (meeple == null)

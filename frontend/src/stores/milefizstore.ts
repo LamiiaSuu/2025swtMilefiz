@@ -111,7 +111,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     activeMeeple: string
     lobby: Lobby | null
     moved: boolean
-    selectRandomMinigame: boolean 
+    selectRandomMinigame: boolean
   }>({
     playerId: '', // UUID vom eigenen Spieler
     playerToken: '',
@@ -145,6 +145,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       connectHeaders: {
         'player-token': gamedata.playerToken,
       },
+      heartbeatIncoming: 10000, // Alle 10 Sekunden
+      heartbeatOutgoing: 10000, // Alle 10 Sekunden
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)
@@ -165,7 +167,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe(DEST + gamedata.lobby?.id, (message) => {
         //console.log('Message received: ' + message + '\nBody:\n' + message.body)
-
+        if (message.body === "KEEP CONNEC") return
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
@@ -988,7 +990,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
    * und inorder Auswahl zu wechseln.
    * 
    */
-  function sendToggleSelectionMode(){
+  function sendToggleSelectionMode() {
     if (!stompclient || !stompclient.connected) {
       console.error('Cannot toggle selection mode: STOMP client not connected.')
       return
@@ -1002,17 +1004,17 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     const toggleSelectionModeCommand: any = {
       selectRandomMinigame: gamedata.selectRandomMinigame
     }
-    
+
     try {
       stompclient.publish({
-      destination:`/app/milefiz/lobby/${gamedata.lobby?.id}/toggleMinigameSelectionMode`,
-      body: JSON.stringify(toggleSelectionModeCommand)
-    })
+        destination: `/app/milefiz/lobby/${gamedata.lobby?.id}/toggleMinigameSelectionMode`,
+        body: JSON.stringify(toggleSelectionModeCommand)
+      })
       console.log('toggleSelectionModeCommand sent, selectRandomMinigame:', gamedata.selectRandomMinigame)
     } catch (err) {
       console.error('Error sending toggleSelectionModeCommand:', err)
     }
-    
+
     gamedata.selectRandomMinigame ? showSuccess(`MINIGAME_SELECTION_MODE_RANDOM`) : showSuccess(`MINIGAME_SELECTION_MODE_INORDER`)
   }
 
