@@ -220,9 +220,9 @@ onUnmounted(() => {
 }
 
 .spielerliste-container {
-  position: absolute;
-  top: 2 vw;
-  left: 0;
+  position: fixed;
+  top: calc(2vh + 6vh + 4vh);
+  left: 1vw;
 }
 
 .error-message-container {
@@ -238,6 +238,8 @@ onUnmounted(() => {
   top: 2vh;
   left: 3vw;
 
+  width: 50px;
+  height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,8 +253,8 @@ onUnmounted(() => {
 
 .ingame-menu-icon {
   position: relative;
-  width: 6vh;
-  height: 6vh;
+  width: 100%;
+  height: auto;
 }
 
 .ingame-hotkey {
