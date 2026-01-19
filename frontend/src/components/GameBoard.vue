@@ -23,6 +23,7 @@ import { Vector3 } from 'three'
 import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import AssetSprite from './ui/AssetSprite.vue'
+import StaticBatch from './StaticBatch.vue'
 import { standardBoardAssets, STANDARD_BOARD_ID } from '@/types/BoardAsset.ts'
 
 const milefizStore = useMilefizStore()
@@ -31,6 +32,19 @@ const boardStore = useBoardStore()
 let started: boolean = false
 
 const { showWarning } = useErrorHandler()
+
+// Guarded debug logger — only prints in development builds
+const debugLog = (...args: unknown[]) => {
+  try {
+    // Vite exposes `import.meta.env.DEV`; cast to any to avoid TS parse issues in some environments
+    if ((import.meta as any).env?.DEV) {
+      // eslint-disable-next-line no-console
+      console.log(...args)
+    }
+  } catch {
+    // import.meta not available — ignore in non-ESM runtimes
+  }
+}
 
 // record: meepleID -> gameCharRef
 const gameCharRefs: Record<string, ShallowRef<TresObject | null, TresObject | null>> = {}
@@ -118,10 +132,10 @@ function registerGameCharRef(id: string, el: TresObject | null) {
   }
 
   const prev = gameCharRefs[id].value
-  if (prev !== el) {
+    if (prev !== el) {
     gameCharRefs[id].value = el
     if (el) {
-      console.log('GameCharacter created:', id, el)
+      debugLog('GameCharacter created:', id, el)
     }
   }
 }
@@ -177,16 +191,10 @@ watch(
       _prevMeeplePositions.set(id, [pos[0], pos[1], pos[2]])
     }
   },
-  { deep: true, flush: 'post' },
+  { flush: 'post' },
 )
 
-watch(
-  () => boardStore.meeplePositions,
-  (val) => {
-    console.log('boardStore.meeplePositions changed:', JSON.stringify(val))
-  },
-  { deep: true },
-)
+// NOTE: removed deep watcher on `boardStore.meeplePositions` (it was debug-only)
 
 
 const _prevMeepleRotations = new Map<string, number>()
@@ -202,10 +210,13 @@ const _prevMeepleRotations = new Map<string, number>()
  * weitergegeben.
  *
  */
+// Watch rotation entries (avoid deep watcher on the rotations object)
+const _meepleRotationEntries = computed(() => Object.entries(boardStore.meepleRotations))
+
 watch(
-  () => boardStore.meepleRotations,
-  (rots) => {
-    for (const [id, rot] of Object.entries(rots)) {
+  _meepleRotationEntries,
+  (entries) => {
+    for (const [id, rot] of entries as Array<[string, number]>) {
       const prev = _prevMeepleRotations.get(id)
       if (prev !== undefined && Math.abs(prev - rot) < 1e-6) continue
 
@@ -218,7 +229,7 @@ watch(
       _prevMeepleRotations.set(id, rot)
     }
   },
-  { deep: true, immediate: true, flush: 'post' }
+  { immediate: true, flush: 'post' }
 )
 
 watchEffect(() => {
@@ -236,19 +247,16 @@ watchEffect(() => {
  *
  */
 watch(
-  () => milefizStore.jumpTrigger,
-  (t) => {
-    const meepleId = t?.meepleId
-    console.log('Meeple in jump:')
-    console.log(meepleId)
+  () => milefizStore.jumpTrigger?.meepleId,
+  (meepleId) => {
+    debugLog('Meeple in jump:', meepleId)
     if (!meepleId) return
 
     const ref = gameCharRefs[meepleId]
     const inst: any = ref?.value
     if (inst?.jump) inst.jump()
-    console.log('instanz im watcher: ' + inst)
-  },
-  { deep: true },
+    debugLog('instanz im watcher: ' + inst)
+  }
 )
 
 function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPublicInstance | null) {
@@ -261,10 +269,26 @@ function registerGameCharRefFromTemplate(id: string, el: Element | ComponentPubl
   }
 }
 
+// Cache of stable ref callbacks per meeple id to avoid creating a new
+// arrow function on every render (which triggers repeated ref calls).
+const _gameCharRefCallbacks = new Map<
+  string,
+  (el: Element | ComponentPublicInstance | null) => void
+>()
+
+function getGameCharRef(id: string) {
+  let cb = _gameCharRefCallbacks.get(id)
+  if (!cb) {
+    cb = (el: Element | ComponentPublicInstance | null) => registerGameCharRefFromTemplate(id, el)
+    _gameCharRefCallbacks.set(id, cb)
+  }
+  return cb
+}
+
 // Board erst laden, wenn Meeples verfügbar sind
 const meeplesReady = computed(() => {
   const lobby = milefizStore.gamedata.lobby
-  console.log('meeplesReady check:', {
+  debugLog('meeplesReady check:', {
     hasLobby: !!lobby,
     playersLength: lobby?.players?.length,
     players: lobby?.players,
@@ -273,10 +297,10 @@ const meeplesReady = computed(() => {
   if (!lobby || !lobby.players?.length) return false
   const ready = lobby.players.some((p) => {
     const hasMeeples = Array.isArray(p.meeples) && p.meeples.length > 0
-    console.log(`Player ${p.id}: meeples=${p.meeples?.length}, hasMeeples=${hasMeeples}`)
+    debugLog(`Player ${p.id}: meeples=${p.meeples?.length}, hasMeeples=${hasMeeples}`)
     return hasMeeples
   })
-  console.log('→ meeplesReady result:', ready)
+  debugLog('→ meeplesReady result:', ready)
   return ready
 })
 
@@ -284,9 +308,9 @@ const meeplesReady = computed(() => {
 watch(
   meeplesReady,
   async (ready) => {
-    console.log('meeplesReady changed to:', ready, 'boardStore.ok:', boardStore.ok)
+    debugLog('meeplesReady changed to:', ready, 'boardStore.ok:', boardStore.ok)
     if (ready && !boardStore.ok) {
-      console.log('Meeples detected — loading board data now...')
+      debugLog('Meeples detected — loading board data now...')
       await boardStore.getBoard()
     }
   },
@@ -302,6 +326,9 @@ const ownMeepleIds = computed(() => {
   if (!me) return [] as string[]
   return me.meeples.map((m) => m.id)
 })
+
+// Set for O(1) membership checks; use in templates and hot paths
+const ownMeepleIdSet = computed(() => new Set(ownMeepleIds.value))
 
 // activeMeeple merken
 const selectedMeepleId = computed(() => {
@@ -323,7 +350,7 @@ watch(ownMeepleIds, (ids) => {
     // erste Meeple als active setzen
     if (me.meeples[0]) {
       me.activeMeeple = me.meeples[0]
-      console.log('Set initial activeMeeple to', me.activeMeeple.id)
+      debugLog('Set initial activeMeeple to', me.activeMeeple.id)
     }
   }
 })
@@ -395,7 +422,7 @@ function cycleSelection(offset: number = 1) {
   const nextMeeple = me.meeples.find((m) => m.id === ids[next])
   if (nextMeeple) {
     me.activeMeeple = nextMeeple
-    console.log('Cycled activeMeeple ->', nextMeeple.id)
+    debugLog('Cycled activeMeeple ->', nextMeeple.id)
   }
 }
 
@@ -437,7 +464,7 @@ function selectMeepleByIndex(index: number) {
   if (!meeple) return
 
   me.activeMeeple = meeple
-  console.log('Selected meeple ->', meeple.id)
+  debugLog('Selected meeple ->', meeple.id)
 }
 
 // Keyboard toggle listener
@@ -620,16 +647,13 @@ const connectionSegments = computed(() => {
   const board = boardStore.board
   if (!board)
     return [] as Array<{
-      x: number
-      y: number
-      z: number
+      position: [number, number, number]
       length: number
       rotY: number
       key: string
     }>
 
-  const out: Array<{ x: number; y: number; z: number; length: number; rotY: number; key: string }> =
-    []
+  const out: Array<{ position: [number, number, number]; length: number; rotY: number; key: string }> = []
   const seen = new Set<string>()
 
   for (const f of board.fields) {
@@ -656,7 +680,7 @@ const connectionSegments = computed(() => {
 
       const rotY = Math.atan2(dz, dx)
 
-      out.push({ x: midX, y: 0, z: midZ, length, rotY, key })
+      out.push({ position: [midX, 0, midZ] as [number, number, number], length, rotY, key })
     }
   }
 
@@ -719,6 +743,36 @@ const isStandardBoard = computed(() => {
 const additionalAssets = computed(() => {
   return isStandardBoard.value ? standardBoardAssets : []
 })
+
+// Memoized foliage elements to avoid inline `.map()` in the template
+const foliageElements = computed((): Array<{ position: [number, number, number]; type: any }> => {
+  const board = boardStore.board
+  if (!board?.trees) return []
+  return board.trees.map((tree) => ({
+    position: [tree.treePosition.x, 0, tree.treePosition.y] as [number, number, number],
+    type: tree.treeType as any,
+  }))
+})
+
+// Map of fieldId -> position tuple to avoid recreating arrays in template
+const fieldPositionMap = computed(() => {
+  const out = new Map<string, [number, number, number]>()
+  const board = boardStore.board
+  if (!board) return out
+  for (const f of board.fields) {
+    out.set(f.id, [f.position.x, 0, f.position.y])
+  }
+  return out
+})
+
+// Computed barrier positions derived from board to avoid getter churn
+const barrierPositions = computed(() => {
+  const board = boardStore.board
+  if (!board) return [] as Array<{ fieldId: string; position: [number, number, number] }>
+  return board.fields
+    .filter((f) => f.barrier)
+    .map((field) => ({ fieldId: field.id, position: [field.position.x, 0, field.position.y] as [number, number, number] }))
+})
 </script>
 
 <template>
@@ -757,28 +811,24 @@ const additionalAssets = computed(() => {
       :variant="asset.variant" :position="asset.position" :scale="asset.scale" :rotation="asset.rotation" />
 
     <!--Spawnen der Meeple (one persistent component per meeple id) -->
-    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="(el) => registerGameCharRefFromTemplate(id, el)"
+    <GameCharacter v-for="id in allMeepleIds" :key="id" :ref="getGameCharRef(id)"
       :meepleId="id" :playerColor="meepleColorMap.get(id)"
-      :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIds.includes(id)" />
+      :hidden="useFirstPerson && id === selectedMeepleId && ownMeepleIdSet.has(id)" />
 
     <!--Spawnen von Barrieren-->
-    <GameCharacter v-for="barrier in boardStore.barriersWithPositions" :key="barrier.fieldId"
+    <GameCharacter v-for="barrier in barrierPositions" :key="barrier.fieldId"
       :position="barrier.position" bodyColor="gray" eyeColor="red" :meepleId="barrier.fieldId" :barrier="true" />
 
     <!-- Verbindungspfade zwischen verbundenen Tiles -->
-    <Path v-for="seg in connectionSegments" :key="seg.key" :position="[seg.x, 0, seg.z]" :rotationY="seg.rotY"
+    <Path v-for="seg in connectionSegments" :key="seg.key" :position="seg.position" :rotationY="seg.rotY"
       :length="seg.length" />
 
     <!-- Spielfeldtiles rendern -->
     <Tile v-for="field in boardStore.board?.fields" :key="field.id" :id="field.id"
-      :position="[field.position.x, 0, field.position.y]" :type="field.type" />
+      :position="fieldPositionMap.get(field.id) ?? [0, 0, 0]" :type="field.type" />
 
     <!-- Pflanzen und Bäume -->
-    <Foliage :elements="boardStore.board?.trees.map((tree) => ({
-      position: [tree.treePosition.x, 0, tree.treePosition.y],
-      type: tree.treeType,
-    }))
-      " :board-id="boardStore.board?.id" />
+    <Foliage :elements="foliageElements" :board-id="boardStore.board?.id" />
   </TresCanvas>
 
   <!-- Fadenkreuz -->

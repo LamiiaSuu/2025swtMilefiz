@@ -9,6 +9,61 @@ import type { ITreeDTD } from './ITreeDTD'
 
 const gameBoardTiles = ref<IFieldDTD[]>()
 const gameTrees = ref<ITreeDTD[]>()
+// Pending update buffers (non-reactive) to batch frequent updates
+const _pendingPositionUpdates: Record<string, string> = {}
+const _pendingRotationUpdates: Record<string, number> = {}
+let _flushScheduled = false
+let _lastFlushAt = 0
+const _FLUSH_THROTTLE_MS = 33 // ~30 FPS maximum for store flushes
+
+function scheduleFlush(store: any) {
+  if (_flushScheduled) return
+  const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
+  const elapsed = now - _lastFlushAt
+
+  const doFlush = () => {
+    _flushScheduled = false
+    _lastFlushAt = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
+
+    // Apply pending positions in a single reactive burst
+    const positionKeys = Object.keys(_pendingPositionUpdates)
+    for (const id of positionKeys) {
+      const newField = _pendingPositionUpdates[id]
+      const prev = store.meeplePositions[id] ?? null
+      if (prev === newField) continue
+      if (prev) store.lastFields[id] = prev
+      store.meeplePositions[id] = newField
+    }
+    // clear applied positions
+    for (const k of positionKeys) delete _pendingPositionUpdates[k]
+
+    // Apply pending rotations
+    const rotKeys = Object.keys(_pendingRotationUpdates)
+    for (const id of rotKeys) {
+      const newRot = _pendingRotationUpdates[id]
+      if (newRot === undefined) continue
+      const prev = store.meepleRotations[id]
+      if (prev !== undefined && Math.abs(prev - newRot) < 1e-4) continue
+      store.meepleRotations[id] = newRot
+    }
+    for (const k of rotKeys) delete _pendingRotationUpdates[k]
+  }
+
+  // If enough time has passed since last flush, run on next animation frame.
+  if (elapsed >= _FLUSH_THROTTLE_MS) {
+    _flushScheduled = true
+    requestAnimationFrame(doFlush)
+    return
+  }
+
+  // Otherwise schedule a delayed flush to hit the throttle boundary.
+  _flushScheduled = true
+  const delay = Math.max(1, Math.ceil(_FLUSH_THROTTLE_MS - elapsed))
+  setTimeout(() => {
+    // ensure we flush on an animation frame for smoother visuals
+    requestAnimationFrame(doFlush)
+  }, delay)
+}
 /**
  *
  * Pinia Store für das Spielbrett.
@@ -26,6 +81,8 @@ export const useBoardStore = defineStore('board', {
     lastFields: {} as Record<string, string | null>,
     /** meeple rotationen */
     meepleRotations: {} as Record<string, number>,
+    /** cached barrier positions to avoid allocating new arrays on each getter access */
+    barriersWithPositions: [] as Array<{ fieldId: string; position: [number, number, number] }>,
   }),
   actions: {
     /**
@@ -33,7 +90,8 @@ export const useBoardStore = defineStore('board', {
      * Setzt ok=true bei Erfolg, leert bei Fehler den State.
      */
     async getBoard() {
-      console.log('Start receiving Gameboard Data...')
+      // guarded log — avoid noisy output in production
+      if (import.meta && import.meta.env && import.meta.env.DEV) console.log('Start receiving Gameboard Data...')
       try {
         const milefizStore = useMilefizStore()
         const lobbyId = milefizStore.gamedata.lobby?.id
@@ -52,7 +110,13 @@ export const useBoardStore = defineStore('board', {
 
         this.ok = true
 
-        console.log('GameBoard successfully loaded')
+        if (import.meta && import.meta.env && import.meta.env.DEV) console.log('GameBoard successfully loaded')
+
+        // cache barrier positions once when board is loaded to provide a stable
+        // reference for UI consumers instead of recomputing on every access
+        this.barriersWithPositions = this.board.fields
+          .filter((f) => f.barrier)
+          .map((field) => ({ fieldId: field.id, position: [field.position.x, 0, field.position.y] as [number, number, number] }))
 
         // noch zum testen
         if (this.board) {
@@ -69,8 +133,8 @@ export const useBoardStore = defineStore('board', {
                 this.lastFields[meeple.id] = null
                 this.meepleRotations[meeple.id] ??= 0
               }
-              // Debug: Meeple Positionen loggen nach assignment
-              console.log('boardStore.getBoard: meeplePositions after init:', JSON.stringify(this.meeplePositions))
+              // Debug: Meeple Positionen loggen nach assignment (guarded)
+              if (import.meta && import.meta.env && import.meta.env.DEV) console.log('boardStore.getBoard: meeplePositions after init:', JSON.stringify(this.meeplePositions))
             }
           }
         }
@@ -88,19 +152,24 @@ export const useBoardStore = defineStore('board', {
       this.meeplePositions = {}
       this.lastFields = {}
       this.meepleRotations = {}
+      this.barriersWithPositions = []
     },
 
     // meeple bewegen und letztes Feld merken
     updateMeeplePosition(meepleId: string, fieldId: string) {
+      // Buffer the update and flush in rAF to collapse many rapid updates
       const previousField = this.meeplePositions[meepleId] ?? null
-      if (previousField) {
-        this.lastFields[meepleId] = previousField
-      }
-      this.meeplePositions[meepleId] = fieldId
+      if (previousField === fieldId) return
+      _pendingPositionUpdates[meepleId] = fieldId
+      scheduleFlush(this)
     },
 
     updateMeepleRotation(meepleId: string, rotation: number) {
-      this.meepleRotations[meepleId] = rotation
+      // Buffer rotation updates and flush in rAF
+      const prev = this.meepleRotations[meepleId]
+      if (prev !== undefined && Math.abs(prev - rotation) < 1e-4) return
+      _pendingRotationUpdates[meepleId] = rotation
+      scheduleFlush(this)
     },
 
     updateBarrierPosition(barrierId: string, currentFieldId: string, targetFieldId: string) {
@@ -128,6 +197,11 @@ export const useBoardStore = defineStore('board', {
       };
 
       console.log(`Barrier moved to field ${targetFieldId}`);
+
+      // update cached barrier positions to keep a stable array reference for consumers
+      this.barriersWithPositions = this.board.fields
+        .filter((f) => f.barrier)
+        .map((field) => ({ fieldId: field.id, position: [field.position.x, 0, field.position.y] as [number, number, number] }))
     }
   },
   // Getter um alle Barriere-Meeple ans Frontend zu übergeben
@@ -149,17 +223,9 @@ export const useBoardStore = defineStore('board', {
     },
 
     /**
-     * Gibt alle Barrieren mit ihren 3D-Positionen für das Rendering zurück
-     */
+    /** Returns cached barrier positions (stable array reference) */
     barriersWithPositions: (state) => {
-      if (!state.board) return []
-
-      return state.board.fields
-        .filter((f) => f.barrier)
-        .map((field) => ({
-          fieldId: field.id,
-          position: [field.position.x, 0, field.position.y] as [number, number, number],
-        }))
+      return state.barriersWithPositions || []
     },
   },
 })

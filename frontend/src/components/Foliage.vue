@@ -79,9 +79,20 @@ const isCollidingWithAsset = (element: Element): boolean => {
 /**
  * Gefilterte Elemente ohne Kollisionen
  */
-const filteredElements = computed(() => {
-  if (!elements) return []
-  return elements.filter(e => !isCollidingWithAsset(e))
+// Group elements by `type`, excluding colliding assets.
+// This avoids repeated per-part filtering work and allocations.
+const groupedElements = computed(() => {
+  const map = new Map<any, ElementWithScale[] | Element[]>()
+  if (!elements) return map
+  for (let i = 0; i < elements.length; i++) {
+    const e = elements[i]
+    if (!e) continue
+    if (isCollidingWithAsset(e)) continue
+    const arr = map.get(e.type) || []
+    arr.push(e)
+    map.set(e.type, arr)
+  }
+  return map
 })
 
 /**
@@ -133,7 +144,12 @@ const parts = computed<Part[]>(() => {
 const getRef = (el: any, index: number) => {
   if (!el) return
   imRefs.value[index] = el
+  // optimal usage for frequent instance updates
   el.instanceMatrix.setUsage(DynamicDrawUsage)
+  // we control instance matrices manually
+  el.matrixAutoUpdate = false
+  // allow three.js frustum culling on the instanced mesh (default true)
+  el.frustumCulled = true
 }
 
 
@@ -149,17 +165,19 @@ function rotationFromPosition(pos: [number, number, number]) {
 }
 
 watch(
-  [parts, filteredElements],
+  [parts, groupedElements],
   () => {
     parts.value.forEach((part, partIndex) => {
       const ref = imRefs.value[partIndex]
       if (!ref) return
 
-      const list = filteredElements.value.filter(e => e.type === part.type)
+      const list = (groupedElements.value.get(part.type) as Element[] | undefined) || []
 
       ref.count = list.length
 
-      list.forEach((e, i) => {
+      for (let i = 0; i < list.length; i++) {
+        const e = list[i]
+        if (!e) continue
         dummy.position.set(...e.position)
         dummy.quaternion.copy(part.quaternion)
 
@@ -171,17 +189,17 @@ watch(
 
         dummy.updateMatrix()
         ref.setMatrixAt(i, dummy.matrix)
-      })
+      }
 
       ref.instanceMatrix.needsUpdate = true
     })
   },
-  { deep: true, flush: 'post' }
+  { flush: 'post' }
 )
 
 
 </script>
 <template>
   <TresInstancedMesh v-for="(part, index) in parts" :key="index" :ref="(el: any) => getRef(el, index)"
-    :args="[part.geometry, part.material, (filteredElements?.filter(e => e.type === part.type))?.length ?? 0]" />
+    :args="[part.geometry, part.material, (groupedElements.get(part.type)?.length ?? 0)]" />
 </template>
