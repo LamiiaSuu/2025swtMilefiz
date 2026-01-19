@@ -677,7 +677,7 @@ public class MovementServiceImpl implements MovementService {
                 ownMeeple.getId(),
                 rivalMeeple.getId());
 
-        var miniGame = duelService.assignRandomGameToDuel(duel.getId());
+        var miniGame = duelService.assignGameToDuel(duel.getId());
 
         if (miniGame instanceof DiceGame dice) {
             dice.initPlayers(player.getId(), rivalPlayer.getId());

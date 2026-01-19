@@ -76,14 +76,14 @@ class DuelServiceImplTest {
     }
 
     @Test
-    void assignRandomGameToDuel_setsMiniGame() {
+    void assignGameToDuel_setsMiniGame() {
         Duel duel = service.createDuel(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID());
 
-        MiniGame game = service.assignRandomGameToDuel(duel.getId());
+        MiniGame game = service.assignGameToDuel(duel.getId());
 
         assertNotNull(game);
         assertEquals(game, duel.getMiniGame());
@@ -97,7 +97,7 @@ class DuelServiceImplTest {
                 UUID.randomUUID(),
                 UUID.randomUUID());
 
-        MiniGame assigned = service.assignRandomGameToDuel(duel.getId());
+        MiniGame assigned = service.assignGameToDuel(duel.getId());
 
         MiniGame fetched = service.getMiniGame(duel.getId());
 
@@ -130,9 +130,9 @@ class DuelServiceImplTest {
     }
 
     @Test
-    void assignRandomGameToDuel_unknownDuel_throws() {
+    void assignGameToDuel_unknownDuel_throws() {
         assertThrows(IllegalStateException.class,
-                () -> service.assignRandomGameToDuel(UUID.randomUUID()));
+                () -> service.assignGameToDuel(UUID.randomUUID()));
     }
 
     @Test
@@ -182,14 +182,14 @@ class DuelServiceImplTest {
     }
 
     @Test
-    void assignRandomGameToDuel_registersOnFinishedCallback() {
+    void assignGameToDuel_registersOnFinishedCallback() {
         Duel duel = service.createDuel(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID());
 
-        MiniGame game = service.assignRandomGameToDuel(duel.getId());
+        MiniGame game = service.assignGameToDuel(duel.getId());
 
         assertNotNull(game);
 
@@ -209,7 +209,7 @@ class DuelServiceImplTest {
                     UUID.randomUUID());
             duels.add(duel);
 
-            service.assignRandomGameToDuel(duel.getId());
+            service.assignGameToDuel(duel.getId());
         }
 
         long assignedGames = duels.stream()
@@ -235,7 +235,7 @@ class DuelServiceImplTest {
         List<Supplier<MiniGame>> factories = List.of(() -> new DiceGame(1));
         ReflectionTestUtils.setField(service, "gameFactories", factories);
 
-        MiniGame game = service.assignRandomGameToDuel(duel.getId());
+        MiniGame game = service.assignGameToDuel(duel.getId());
 
         game.forceMissingActions();
 
@@ -274,7 +274,7 @@ class DuelServiceImplTest {
                 UUID.randomUUID(),
                 UUID.randomUUID());
 
-        MiniGame game = service.assignRandomGameToDuel(duel.getId());
+        MiniGame game = service.assignGameToDuel(duel.getId());
 
         assertNotNull(game);
         assertFalse(game.isFinished());
