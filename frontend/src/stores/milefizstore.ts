@@ -147,6 +147,8 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       connectHeaders: {
         'player-token': gamedata.playerToken,
       },
+      heartbeatIncoming: 10000, // Alle 10 Sekunden
+      heartbeatOutgoing: 10000, // Alle 10 Sekunden
     })
     stompclient.onWebSocketError = (event) => {
       console.error(event)

@@ -144,20 +144,6 @@ public class RockPaperScissorsGame extends MiniGame {
     }
 
     /**
-     * Erzwingt fehlende Spielzüge, falls das Spiel noch nicht beendet ist.
-     *
-     * Spieler ohne gesetzten Zug erhalten automatisch ROCK.
-     * Anschließend wird das Spiel beendet.
-     */
-    private void forceMissingMoves() {
-
-        if (isFinished())
-            return;
-
-        checkFinished();
-    }
-
-    /**
      * Prüft, ob ein Zug einen anderen schlägt.
      *
      * @param x Erster Zug
