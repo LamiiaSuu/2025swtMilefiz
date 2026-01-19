@@ -78,28 +78,28 @@ public class MiniGameController {
 
         /**
          * Schaltet den Auswahlmodus für Minispiele zwischen
-         * <b>zufällig (RANDOM)</b> und <b>festgelegter Reihenfolge (IN_ORDER)</b> um.
+         * zufällig (RANDOM) und festgelegter Reihenfolge (IN_ORDER) um.
          *
-         * <p>
+         * 
          * Diese Methode wird über einen STOMP-WebSocket-Endpunkt vom Frontend
          * ausgelöst (z. B. per Hotkey).
          * Der Client übermittelt dabei, ob Minispiele zufällig ausgewählt werden
          * sollen.
-         * </p>
+         * 
          *
-         * <p>
+         * 
          * Ablauf:
-         * <ul>
-         * <li>Empfängt den Toggle-Befehl aus dem Frontend</li>
-         * <li>Liest den gewünschten Auswahlmodus aus dem Command</li>
-         * <li>Delegiert die eigentliche Umschaltung an den {@link DuelService}</li>
-         * </ul>
-         * </p>
+         * 
+         * Empfängt den Toggle-Befehl aus dem Frontend
+         * Liest den gewünschten Auswahlmodus aus dem Command
+         * Delegiert die eigentliche Umschaltung an den {@link DuelService}
+         * 
+         * 
          *
-         * <p>
+         * 
          * Die {@code lobbyId} wird aktuell nur zur Routing-Zuordnung verwendet.
          * Die eigentliche Zustandsänderung erfolgt zentral im {@code DuelService}.
-         * </p>
+         * 
          *
          * @param lobbyId
          *        Die eindeutige ID der Lobby, aus der der Toggle-Befehl stammt
