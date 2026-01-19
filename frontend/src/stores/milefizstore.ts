@@ -167,7 +167,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       // Callback: erfolgreicher Verbindugsaufbau zu Broker
       stompclient.subscribe(DEST + gamedata.lobby?.id, (message) => {
         //console.log('Message received: ' + message + '\nBody:\n' + message.body)
-
+        if (message.body === "KEEP CONNEC") return
         // Fängt die JSON message ab und bildet die Schnittstelle des Front- und Backends für den Cooldown des Würfelns
         const event = JSON.parse(message.body)
         const boardStore = useBoardStore()
@@ -683,7 +683,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
   }
 
   function startKeepAlive() {
-  
+
     if (keepAliveInterval !== null) return
     if (!gamedata.lobby?.id) return
 
