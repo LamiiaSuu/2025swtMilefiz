@@ -56,7 +56,7 @@ public class PlantingServiceImpl implements PlantingService {
         // Parameter die noch angepasst werden können
 
         // Rand um die Felder herum, wo noch Bäume gepflanzt werden sollen
-        final int TREE_BORDER = 65;
+        final int TREE_BORDER = 25;
 
         // wieviele Bäume können innerhalb einer koordinaten einheit stehen. bestimmt,
         // wie nah Bäume beieinander stehen
@@ -66,7 +66,7 @@ public class PlantingServiceImpl implements PlantingService {
 
         // wert zwischen 0 und 1. wieviel weniger Bäume sollen am rand stehen?
         // 0.5 == 50% weniger
-        final double LESS_TREES_ON_BORDER = 0.99;
+        final double LESS_TREES_ON_BORDER = 0.85;
 
         final int NO_OF_TYPES = TreeType.values().length;
         boardDTO.deleteAllTrees();
