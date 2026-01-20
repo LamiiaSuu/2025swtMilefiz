@@ -20,7 +20,7 @@ public class Player implements Principal {
     private Meeple activeMeeple;
     private int remainingMoves = 0;
     private int energy = 0;
-    private final int MAX_ENERGY = 6;
+    private final static int MAX_ENERGY = 6;
     private boolean moved = false;
 
     public Player(Color color, int noOfMeeples) {

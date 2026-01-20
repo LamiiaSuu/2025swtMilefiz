@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import de.hs_rm.de.milefiz.game.model.Lobby;
-import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
+import de.hs_rm.de.milefiz.game.model.minigames.monkeytypegame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.game.service.MonkeyTypeWordService;
 
 class MonkeyTypeGameTest {

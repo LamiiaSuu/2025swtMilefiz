@@ -1,6 +1,7 @@
 import type { ErrorCode } from '@/errors/errorCodes'
 
 export const ERRORS_DE: Record<ErrorCode, string> = {
+    ROLL_DICE_ERROR: 'Cooldown aktiv - Würfeln nicht erlaubt.',
     ROLL_DICE_ERROR_MOVES_LEFT: 'Noch Züge offen - Würfeln nicht erlaubt.',
     REMAINING_MOVES_LOST: 'Kein Zug mehr möglich - Verbleibende Züge verloren!',
     CHEATED: 'Du kleiner Cheater.',
@@ -14,7 +15,9 @@ export const ERRORS_DE: Record<ErrorCode, string> = {
     MOVE_BARRIER_REJECTED_START_OR_END: 'Barriere kann nicht auf Start- oder Zielfeld gesetzt werden',
     MOVE_BARRIER_OCCUPIED: 'Barriere kann nicht auf besetztes Feld gesetzt werden',
     REJECTED_BY_BARRIER: 'Autsch! Das sah schmerzhaft aus...',
-    SAVE_ENERGY_ERROR: 'Maximale Energie oder Meeple bereits bewegt!',
+    SAVE_ENERGY_ERROR_MAX_ENERGY: 'Maximale Energie bereits erreicht!',
+    SAVE_ENERGY_ERROR_MEEPLE_MOVED: 'Meeple bereits bewegt!',
+    SAVE_ENERGY_ERROR_DICE_NOT_ROLLED: 'Nicht gewürfelt - Keine Energie zu speichern!',
     CONSUME_ENERGY_ERROR: 'Nicht genug Energie für einen Sprung!',
     MEEPLE_IN_DUEL: 'Gegnerischer Meeple bereits im Duell. Warte bis das Duell entschieden wurde!',
     NO_LOBBY_FOUND: 'Lobby nicht gefunden!',

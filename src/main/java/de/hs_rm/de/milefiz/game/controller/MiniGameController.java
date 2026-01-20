@@ -19,7 +19,7 @@ import de.hs_rm.de.milefiz.game.model.minigames.BalloonGame;
 import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
-import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
+import de.hs_rm.de.milefiz.game.model.minigames.monkeytypegame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
 import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
@@ -111,7 +111,6 @@ public class MiniGameController {
         @MessageMapping("/milefiz/lobby/{lobbyId}/toggleMinigameSelectionMode")
         public void toggleMinigameSelection(
                         @DestinationVariable UUID lobbyId, ToggleSelectionModeCommand command) {
-                System.out.println("CONTROLLER: command.selectRandom = " + command.selectRandomMinigame());
                 duelService.setSelectRandom(command.selectRandomMinigame());
         }
 
