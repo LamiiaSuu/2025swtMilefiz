@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -57,6 +58,8 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMonkeyTypeGameUpdateEvent;
  */
 @Controller
 public class MiniGameController {
+        @Value("${developermode.toggleMinigameSelectionMode:false}")
+        private boolean toggleMinigameSelectionMode;
 
         private static final Logger logger = LoggerFactory.getLogger(MiniGameController.class);
 
@@ -102,16 +105,20 @@ public class MiniGameController {
          * 
          *
          * @param lobbyId
-         *        Die eindeutige ID der Lobby, aus der der Toggle-Befehl stammt
+         *                Die eindeutige ID der Lobby, aus der der Toggle-Befehl stammt
          * @param command
-        *         Enthält die Information, ob Minispiele zufällig ausgewählt werden sollen ({@code true} = RANDOM, {@code false} = IN_ORDER)
+         *                Enthält die Information, ob Minispiele zufällig ausgewählt
+         *                werden sollen ({@code true} = RANDOM, {@code false} =
+         *                IN_ORDER)
          *
          * @see DuelService#setSelectRandom(boolean)
          */
         @MessageMapping("/milefiz/lobby/{lobbyId}/toggleMinigameSelectionMode")
         public void toggleMinigameSelection(
                         @DestinationVariable UUID lobbyId, ToggleSelectionModeCommand command) {
-                duelService.setSelectRandom(command.selectRandomMinigame());
+                if (toggleMinigameSelectionMode) {
+                        duelService.setSelectRandom(command.selectRandomMinigame());
+                }
         }
 
         /**

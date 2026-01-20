@@ -1020,11 +1020,14 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       console.error('Cannot toggle selection mode: STOMP client not connected.')
       return
     }
-
+    
     if (!gamedata.lobby?.id || !gamedata.playerId) {
       console.error('Cannot roll dice: Missing lobbyId or playerId')
       return
     }
+
+    if (!isOwnLeader()) return
+    
     gamedata.selectRandomMinigame = !gamedata.selectRandomMinigame
     const toggleSelectionModeCommand: any = {
       selectRandomMinigame: gamedata.selectRandomMinigame
