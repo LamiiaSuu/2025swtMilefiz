@@ -116,7 +116,7 @@ public class DuelServiceImpl implements DuelService {
         gameFactories.add(() -> new BalloonGame(balloonGameTimeout + 2));
         gameFactories.add(() -> new SlotMachineGame(slotMachineGameTimeout));
         gameFactories.add(() -> new MathGame(mathGameTimeout));
-        gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
+        // gameFactories.add(() -> new ColorbrainGame(colorbrainGameTimeout + 1));
         gameFactories.add(() -> new QuizGame(quizGameTimeout + 3));
         gameFactories.add(() -> new RockPaperScissorsGame(rockPaperScissorsGameTimeout + 1));
         gameFactories.add(() -> new MonkeyTypeGame(monkeyTypeGameTimout + 2,
