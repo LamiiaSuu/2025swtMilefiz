@@ -24,7 +24,7 @@ const playerMeeples = computed(() => {
     const fieldId = boardStore.meeplePositions[meeple.id]
     const field = boardStore.board?.fields.find(f => f.id === fieldId)
     
-    console.log(`🔍 Meeple ${index + 1}:`, {
+    console.log(`Meeple ${index + 1}:`, {
       id: meeple.id,
       fieldId: fieldId,
       fieldType: field?.type,
@@ -77,7 +77,7 @@ const playerMeeples = computed(() => {
 
 .meeple-icons {
   display: flex;
-  flex-direction: row; /* ← Horizontal */
+  flex-direction: row;
   gap: 12px;
   align-items: center;
 }

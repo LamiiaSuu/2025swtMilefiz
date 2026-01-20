@@ -24,7 +24,6 @@ import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import AssetSprite from './ui/AssetSprite.vue'
 import { standardBoardAssets, STANDARD_BOARD_ID } from '@/types/BoardAsset.ts'
-import { routeLocationKey } from 'vue-router'
 
 const milefizStore = useMilefizStore()
 const fpsCamera = shallowRef<any | null>(null)
@@ -646,7 +645,7 @@ const connectionSegments = computed(() => {
 })
 
 const mountains = [
-  // Norden (oben) - 7 Berge statt 13 (größere Abstände)
+  // Norden (oben)
   { x: -150, y: -3, z: -200, variant: 'mountain_1', scale: 21, rotation: 180 },
   { x: -100, y: -4, z: -200, variant: 'mountain_1', scale: 23, rotation: 175 },
   { x: -50, y: -5, z: -200, variant: 'mountain_1', scale: 20, rotation: 185 },
@@ -655,7 +654,7 @@ const mountains = [
   { x: 100, y: -5, z: -200, variant: 'mountain_1', scale: 21, rotation: 175 },
   { x: 150, y: -3, z: -200, variant: 'mountain_1', scale: 19, rotation: 185 },
 
-  // Westen (links) - 6 Berge statt 13
+  // Westen (links)
   { x: -200, y: -4, z: -150, variant: 'mountain_1', scale: 21, rotation: 90 },
   { x: -200, y: -2, z: -90, variant: 'mountain_1', scale: 23, rotation: 85 },
   { x: -200, y: 0, z: -30, variant: 'mountain_1', scale: 24, rotation: 90 },
@@ -663,7 +662,7 @@ const mountains = [
   { x: -200, y: -5, z: 90, variant: 'mountain_1', scale: 23, rotation: 90 },
   { x: -200, y: -4, z: 150, variant: 'mountain_1', scale: 20, rotation: 85 },
 
-  // Osten (rechts) - 6 Berge statt 13
+  // Osten (rechts)
   { x: 200, y: -3, z: -150, variant: 'mountain_1', scale: 22, rotation: -90 },
   { x: 200, y: -2, z: -90, variant: 'mountain_1', scale: 23, rotation: -85 },
   { x: 200, y: 0, z: -30, variant: 'mountain_1', scale: 23, rotation: -90 },
@@ -671,7 +670,7 @@ const mountains = [
   { x: 200, y: -5, z: 90, variant: 'mountain_1', scale: 24, rotation: -90 },
   { x: 200, y: -3, z: 150, variant: 'mountain_1', scale: 20, rotation: -85 },
 
-  // Süden (unten) - 7 Berge statt 13
+  // Süden (unten)
   { x: -150, y: -4, z: 200, variant: 'mountain_1', scale: 20, rotation: 5 },
   { x: -100, y: -3, z: 200, variant: 'mountain_1', scale: 22, rotation: -10 },
   { x: -50, y: -5, z: 200, variant: 'mountain_1', scale: 21, rotation: 10 },
@@ -679,11 +678,12 @@ const mountains = [
   { x: 50, y: -4, z: 200, variant: 'mountain_1', scale: 23, rotation: -5 },
   { x: 100, y: -5, z: 200, variant: 'mountain_1', scale: 21, rotation: 15 },
   { x: 150, y: -3, z: 200, variant: 'mountain_1', scale: 19, rotation: -10 },
-  // Ecken - 4 zusätzliche Berge
-  { x: -180, y: -3, z: -180, variant: 'mountain_1', scale: 22, rotation: 135 }, // Nordwest
-  { x: 180, y: -4, z: -180, variant: 'mountain_1', scale: 23, rotation: -135 }, // Nordost
-  { x: -180, y: -3, z: 180, variant: 'mountain_1', scale: 21, rotation: 45 },   // Südwest
-  { x: 180, y: -4, z: 180, variant: 'mountain_1', scale: 22, rotation: -45 },   // Südost
+
+  // Ecken
+  { x: -180, y: -3, z: -180, variant: 'mountain_1', scale: 22, rotation: 135 },
+  { x: 180, y: -4, z: -180, variant: 'mountain_1', scale: 23, rotation: -135 },
+  { x: -180, y: -3, z: 180, variant: 'mountain_1', scale: 21, rotation: 45 },
+  { x: 180, y: -4, z: 180, variant: 'mountain_1', scale: 22, rotation: -45 }, 
 ]
 
 
@@ -735,6 +735,7 @@ const additionalAssets = computed(() => {
       :variant="mountain.variant" :position="[mountain.x, mountain.y, mountain.z]" :scale="mountain.scale"
       :rotation="mountain.rotation" />
 
+    <!-- Assets für das Standardboard, nur geladen wenn Standadboard das Board ist-->
     <AssetSprite v-for="(asset, index) in additionalAssets" :key="`standard-asset-${index}`" :type="asset.type"
       :variant="asset.variant" :position="asset.position" :scale="asset.scale" :rotation="asset.rotation" />
 
@@ -788,7 +789,6 @@ const additionalAssets = computed(() => {
   height: 8px;
   border-radius: 50%;
   background: white;
-  /* <-- immer weiß */
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
   transition:
     background 0.1s ease,
