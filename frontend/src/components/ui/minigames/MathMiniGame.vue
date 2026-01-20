@@ -64,6 +64,14 @@ const preventNonNumeric = (e: KeyboardEvent) => {
   e.preventDefault();
 }
 
+const sendOnEnter = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        sendInput();
+        return;
+    }
+    preventNonNumeric(e);
+}
+
 const doInputFocus = () => {
     inputRef.value?.focus();
 };
@@ -175,16 +183,16 @@ watch(isFinished, (finished) => {
             </div>
             <!-- Spieler Eingabe und Wert -->
             <div class="math-item-container">
-                <div class="math-user-name align-right">{{ players[0]?.playerName ?? 'Player1' }} ({{ tUI('MINIGAME_MATH_YOURSELF') }})</div>
+                <div class="math-user-name align-right" :style="{ color: players[0]?.color }">{{ players[0]?.playerName ?? 'Player1' }} ({{ tUI('MINIGAME_MATH_YOURSELF') }})</div>
                 <div class="math-term-value align-center"> = </div>
                 <div class="math-user-value">
                     <input class="value-box math-user-input" :class="validatePlayerInput" :disabled="isInputSend"
-                        name="math-value" type="number" step="1" ref="inputRef" v-model="inputValue"  @keydown.stop="preventNonNumeric"/>
+                        name="math-value" type="number" step="1" ref="inputRef" v-model="inputValue"  @keypress.stop="sendOnEnter" @keydown.stop="preventNonNumeric"/>
                 </div>
             </div>
             <!-- Gegner Wert -->
             <div v-if="duel.state?.finished" class="math-item-container">
-                <div class="math-user-name align-right">{{ players[1]?.playerName ?? 'Player2' }}</div>
+                <div class="math-user-name align-right"  :style="{ color: players[1]?.color }">{{ players[1]?.playerName ?? 'Player2' }}</div>
                 <div class="math-term-value align-center"> = </div>
                 <div class="math-user-value">
                     <div class="value-box" :class="validateRivalInput">{{ rivalInput() ?? '&nbsp;' }}</div>
@@ -286,6 +294,22 @@ watch(isFinished, (finished) => {
 
 .math-user-input:disabled {
     background-color: #a5a5a5;
+}
+
+.math-user-name {
+        font-size: 1.4rem;
+    font-weight: 900;
+    margin: 6px 0 0 0;
+    font-family: "Acme", sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow:
+        0 0 1px rgba(0, 0, 0, .95),
+        1px 0 1px rgba(0, 0, 0, .9),
+        -1px 0 1px rgba(0, 0, 0, .9),
+        0 1px 1px rgba(0, 0, 0, .9),
+        0 -1px 1px rgba(0, 0, 0, .9);
 }
 
 .math-title {
