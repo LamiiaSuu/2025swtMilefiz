@@ -484,7 +484,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
         }
 
         if (event.type === "COLORBRAIN_GAME_UPDATE") {
-          if (!activeDuels[event.duelId] && event.player1 === gamedata.playerId || event.player2 === gamedata.playerId) {
+          if (!activeDuels[event.duelId] && (event.player1 === gamedata.playerId || event.player2 === gamedata.playerId)) {
             activeDuels[event.duelId] = { duelId: event.duelId, state: {} }
           }
           const duel = activeDuels[event.duelId]
