@@ -686,23 +686,26 @@ public class MovementServiceImpl implements MovementService {
 
         if (miniGame instanceof DiceGame dice) {
             dice.initPlayers(player.getId(), rivalPlayer.getId());
-        } else if (miniGame instanceof SlotMachineGame game) {
+        } 
+        else if (miniGame instanceof SlotMachineGame game) {
             game.initPlayers(player, rivalPlayer);
-        } else if (miniGame instanceof ColorbrainGame game) {
+        } 
+        else if (miniGame instanceof ColorbrainGame game) {
             game.initGame(player.getId(), rivalPlayer.getId());
         }
-        if (miniGame instanceof BalloonGame game) {
+        else if (miniGame instanceof BalloonGame game) {
             game.initPlayers(player.getId(), rivalPlayer.getId());
-        } else if (miniGame instanceof MathGame game) {
+        } 
+        else if (miniGame instanceof MathGame game) {
             game.initPlayers(player.getId(), rivalPlayer.getId());
         }
-        if (miniGame instanceof QuizGame quiz) {
+        else if (miniGame instanceof QuizGame quiz) {
             quiz.initPlayers(player.getId(), rivalPlayer.getId());
         }
-        if (miniGame instanceof RockPaperScissorsGame game) {
+        else if (miniGame instanceof RockPaperScissorsGame game) {
             game.initPlayers(player.getId(), rivalPlayer.getId());
         }
-        if (miniGame instanceof MonkeyTypeGame monkeyTypeGame) {
+        else if (miniGame instanceof MonkeyTypeGame monkeyTypeGame) {
             monkeyTypeGame.initPlayers(player.getId(), rivalPlayer.getId(), lobby);
         }
 

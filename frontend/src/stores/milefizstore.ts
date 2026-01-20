@@ -441,6 +441,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           if (gamedata.playerId === event.winner && event.jackpot) {
             gamedata.energy = event.jackpotEnergy
+            energy.isEnergyFull = true
             showSuccess("MINIGAME_SLOT_JACKPOT_SUCCESS_MESSAGE")
           }
         }
