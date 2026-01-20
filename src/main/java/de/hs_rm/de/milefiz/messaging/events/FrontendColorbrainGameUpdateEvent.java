@@ -3,6 +3,9 @@ package de.hs_rm.de.milefiz.messaging.events;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * FrontendEvent zum Updaten des Colorbrain Minigames
+ */
 public record FrontendColorbrainGameUpdateEvent(
         String type,
         UUID duelId,

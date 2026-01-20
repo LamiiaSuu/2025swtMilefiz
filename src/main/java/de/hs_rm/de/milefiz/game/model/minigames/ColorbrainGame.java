@@ -40,6 +40,7 @@ public class ColorbrainGame extends MiniGame {
     private ColorbrainColor correctColor;
 
     /**
+     * Konstruktor
      * 
      * @param timeOut
      */
@@ -137,7 +138,7 @@ public class ColorbrainGame extends MiniGame {
     }
 
     /**
-     * 
+     * Prueft ob einer der beiden Spieler gewonnen hat.
      */
     private void checkWinCondition() {
         // erst auswerten wenn beide geklickt haben
@@ -158,8 +159,10 @@ public class ColorbrainGame extends MiniGame {
     /**
      * Prueft welcher der beiden Spieler gewonnen hat.
      * 
-     * @param player1Correct Wahr, wenn Spieler 1 die richtige Farbe geklickt hat, sonst falsch
-     * @param player2Correct Wahr, wenn Spieler 2 die richtige Farbe geklickt hat, sonst falsch
+     * @param player1Correct Wahr, wenn Spieler 1 die richtige Farbe geklickt hat,
+     *                       sonst falsch
+     * @param player2Correct Wahr, wenn Spieler 2 die richtige Farbe geklickt hat,
+     *                       sonst falsch
      */
     private void findWinner(boolean player1Correct, boolean player2Correct) {
         if (player1Correct && !player2Correct) {

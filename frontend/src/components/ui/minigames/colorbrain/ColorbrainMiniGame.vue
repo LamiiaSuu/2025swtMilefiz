@@ -159,8 +159,6 @@ function getPlayerNameByColor(color: string) {
   return clickedBy.join("& ") // falls beide dasselbe geklickt haben
 }
 
-
-
 </script>
 
 <template>
