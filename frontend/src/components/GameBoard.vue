@@ -24,6 +24,7 @@ import { watch } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import AssetSprite from './ui/AssetSprite.vue'
 import { standardBoardAssets, STANDARD_BOARD_ID } from '@/types/BoardAsset.ts'
+import { routeLocationKey } from 'vue-router'
 
 const milefizStore = useMilefizStore()
 const fpsCamera = shallowRef<any | null>(null)
@@ -332,25 +333,6 @@ const useFirstPerson = ref(true) // Kamera-Mode-Flag
 
 //Methode um alle Keyboard Events zu verwalten
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' || e.key === 'm') {
-    e.preventDefault()
-
-    // Schließt das PopUp-Menu, wenn es offen sind
-    if (milefizStore.popUpMenuOpen) {
-      milefizStore.closePopUpMenu()
-      return
-    } else {
-      // Oeffnet das PopUp-Menu
-      milefizStore.openPopUpMenu()
-      return
-    }
-  }
-
-  // Wenn ein Duell aktiv ist → alle Steuerungen blockieren
-  if (Object.keys(milefizStore.activeDuels).length > 0) {
-    e.preventDefault()
-    return
-  }
 
   // Tab zum wechseln verwenden + default verhalten verhindern
   if (e.key === 'Tab') {
@@ -587,15 +569,15 @@ onMounted(() => {
       requestAnimationFrame(waitForCamera)
       return
     }
-    globalThis.addEventListener('keydown', handleKeydown)
   }
 
   waitForCamera()
+
+  window.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
-  globalThis.removeEventListener('keydown', handleKeydown)
-
+  window.removeEventListener('keydown', handleKeydown)
 })
 
 // Computed Property für Meeple → PlayerColor Mapping

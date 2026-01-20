@@ -43,7 +43,7 @@ const onBackClick = () => {
         <Header>{{ tUI('POPUP_MENU') }}</Header>
 
         <!-- Close Button -->
-        <PopUpCloseButton>(Esc)</PopUpCloseButton>
+        <PopUpCloseButton></PopUpCloseButton>
 
         <div class="popup">
 

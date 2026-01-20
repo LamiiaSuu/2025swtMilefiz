@@ -1213,8 +1213,30 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
 
   /**
-   * Pop Up Menu Funktionen
+   * Pop Up Funktionen
   */
+  const isAnyDuelActive = computed(() => Object.keys(activeDuels).length > 0)
+
+  const isAnyMenuOpen = computed(() =>
+    popUpMenuOpen.value ||
+    popUpSettingsOpen.value ||
+    popUpTutorialOpen.value
+  )
+
+  const isAnyNonMenuOpen = computed(() =>
+    minimap.isMiniMapOpen ||
+    gameFinished.value ||
+    Object.keys(activeDuels).length > 0
+  )
+
+  const isAnyPopUpOpen = computed(() =>
+    popUpMenuOpen.value ||
+    popUpSettingsOpen.value ||
+    popUpTutorialOpen.value ||
+    minimap.isMiniMapOpen ||
+    gameFinished.value ||
+    Object.keys(activeDuels).length > 0
+  )
 
   // Oeffnet PopUp Menu
   function openPopUpMenu() {
@@ -1322,6 +1344,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName,
     gameFinished,
     getWinnerColor,
+    isAnyDuelActive,
+    isAnyPopUpOpen,
+    isAnyMenuOpen,
+    isAnyNonMenuOpen,
     popUpMenuOpen,
     popUpSettingsOpen,
     popUpTutorialOpen,

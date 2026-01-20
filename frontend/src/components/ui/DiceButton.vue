@@ -201,16 +201,6 @@ function triggerErrorAnimation() {
     image-rendering: crisp-edges;
 }
 
-.hotkey {
-    position: absolute;
-    bottom: -3px;
-    left: 3px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #ffffff;
-    border-radius: 3px;
-    font-family: "AcmeFont", sans-serif;
-}
 
 .cooldown-overlay {
     position: absolute;

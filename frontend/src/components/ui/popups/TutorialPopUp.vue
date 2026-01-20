@@ -24,7 +24,7 @@ const onBackClick = () => {
     <div class="overlay">
 
         <!-- Close Button -->
-        <PopUpCloseButton>(Esc)</PopUpCloseButton>
+        <PopUpCloseButton></PopUpCloseButton>
 
         <div class="header">
             <button class="menu-button" disabled>{{ tUI('TUTORIAL') }}</button>
