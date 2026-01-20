@@ -20,7 +20,7 @@ public class RockPaperScissorsGame extends MiniGame {
      * Mögliche Spielzüge im Schere-Stein-Papier-Spiel.
      */
     public enum Move {
-        ROCK, PAPER, SCISSORS
+        ROCK, PAPER, SCISSORS, LEER
     }
 
     private UUID player1;
@@ -49,7 +49,6 @@ public class RockPaperScissorsGame extends MiniGame {
         this.player2 = p2;
         this.moveP1 = null;
         this.moveP2 = null;
-
     }
 
     /**
@@ -59,6 +58,8 @@ public class RockPaperScissorsGame extends MiniGame {
      * @param choice   Wahl
      */
     public void choose(UUID playerId, String choice) {
+        if (isFinished())
+            return;
 
         choice = choice.replace("\"", "").trim().toUpperCase();
 
@@ -89,20 +90,55 @@ public class RockPaperScissorsGame extends MiniGame {
      * Bei identischen Zügen endet das Spiel unentschieden.
      */
     private void checkFinished() {
+        if (isFinished())
+            return;
 
         if (moveP1 == null || moveP2 == null) {
             return;
         }
+        decideWinner();
+    }
 
+    /**
+     * Erzwingt fehlende Aktionen bei Timeout.
+     *
+     * Für Spieler ohne Wahl wird der Zug auf LEER gesetzt.
+     * Anschließend wird das Spiel ausgewertet und beendet.
+     * Hat nur ein Spieler gewählt, gewinnt dieser.
+     * Haben beide nicht gewählt, endet das Spiel unentschieden.
+     */
+    @Override
+    public void forceMissingActions() {
+        if (isFinished())
+            return;
+
+        if (moveP1 == null) {
+            moveP1 = Move.LEER;
+        }
+        if (moveP2 == null) {
+            moveP2 = Move.LEER;
+        }
+
+        decideWinner();
+    }
+
+    /**
+     * Ermittelt den Gewinner anhand der gesetzten Spielzüge
+     * und beendet das Spiel.
+     *
+     * Setzt den Gewinner gemäß den Schere-Stein-Papier-Regeln
+     * oder auf null bei Gleichstand.
+     */
+    private void decideWinner() {
+        if (isFinished())
+            return;
         if (beats(moveP1, moveP2)) {
             setWinner(player1);
         } else if (beats(moveP2, moveP1)) {
             setWinner(player2);
-        } else if (moveP1.equals(moveP2)) {
-
+        } else if (moveP1 == moveP2) {
             setWinner(null);
         }
-
         setFinished(true);
         notifyFinished();
     }
@@ -152,11 +188,11 @@ public class RockPaperScissorsGame extends MiniGame {
      */
     private boolean beats(Move x, Move y) {
 
-        if (x == null) {
+        if (x == Move.LEER) {
             return false;
         }
 
-        if (y == null) {
+        if (y == Move.LEER) {
             return true;
         }
 
