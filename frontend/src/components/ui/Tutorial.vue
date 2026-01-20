@@ -212,8 +212,7 @@ function prev() {
                   <div class="controls-row right">
 
                     <div class="keyboard-layout">
-                      <div class="key">2 x</div>
-                      <div class="key">ESC</div>
+                      <div class="key">M</div>
                     </div>
                     <p>{{ tUI('CONTROLS_TUTORIAL_MENU') }}</p>
                   </div>
