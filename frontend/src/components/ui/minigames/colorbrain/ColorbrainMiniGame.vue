@@ -165,7 +165,7 @@ function getPlayerNameByColor(color: string) {
   if (props.duel?.state?.player2Pick === color) {
     clickedBy.push(String(getPlayerNameByMeeple(props.duel.secondMeeple)))
   }
-requestColor
+
   return clickedBy.join("& ") // falls beide dasselbe geklickt haben
 }
 
