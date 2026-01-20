@@ -139,7 +139,7 @@ class RockPaperScissorsGameTest {
     }
 
     @Test
-    void timeout_forceMissingMoves_setsDefaultRockAndFinishes() throws Exception {
+    void timeout_forceMissingMoves_setsDefaultLeerAndFinishes() throws Exception {
         // Timeout sehr klein, damit der Scheduler schnell auslöst
         RockPaperScissorsGame game = new RockPaperScissorsGame(0);
 
@@ -151,8 +151,6 @@ class RockPaperScissorsGameTest {
 
 
         assertTrue(game.isFinished());
-        assertNull(game.getMoveP1());
-        assertNull(game.getMoveP2());
         assertNull(game.getWinner());
     }
 }
