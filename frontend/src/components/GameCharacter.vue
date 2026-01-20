@@ -4,9 +4,14 @@ import { useGLTF } from '@tresjs/cientos'
 import { watchEffect, watch, ref, computed, onMounted } from 'vue'
 import { useMilefizStore } from '@/stores/milefizstore'
 import { getPlayerColors } from '@/types/colorsAssets';
+import { audioEngine } from '@/composables/audioEngine'
+import type { TresObject } from '@tresjs/core'
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
+
+// Für Move-Sound am Anfang des Spiels
+const hasInitializedMoved = ref(false)
 
 //Definierte Props für Augen, Körperfarbe und Position
 const props = defineProps<{
@@ -15,11 +20,12 @@ const props = defineProps<{
   position?: [number, number, number]
   meepleId: string
   barrier?: boolean
-  playerColor?:  string
+  playerColor?: string
+  hidden?: boolean
 }>()
 
 const characterRotation = ref(0)
-const characterPosition = ref(null)
+const characterPosition = ref<TresObject | null>(null)
 
 //Variablen für Anpassung des Sprungs definiert
 const jumpOffset = ref(0)
@@ -27,8 +33,8 @@ const isJumping = ref(false)
 const isJumpAllowed = computed(() => milefizStore.energy.isEnergyFull)
 
 // Standard-Sprunghöhe (wird für große Sprünge verwendet)
-const defaultJumpHeight = 4
-const defaultUpDuration = 300
+const defaultJumpHeight = 6
+const defaultUpDuration = 800
 const defaultFallDuration = 2000
 
 // Kleine Hüpfer (bei Bewegung)
@@ -61,7 +67,7 @@ const scale = computed(() => (props.barrier ? 1.5 : 0.55))
 
 
 const meepleColors = computed(() => {
-   // Spieler nutzen playerColor
+  // Spieler nutzen playerColor
   const playerColors = getPlayerColors(props.playerColor)
 
   return {
@@ -71,20 +77,32 @@ const meepleColors = computed(() => {
 
 })
 
-watchEffect(async () => {
-  if (!state.value?.scene) return
+// Ersetze den großen watchEffect durch separate, spezifische Watchers:
 
-  state.value.scene.scale.set(scale.value, scale.value, scale.value)
+// 1. Scale-Update (nur wenn Model geladen)
+watch(
+  () => state.value?.scene,
+  (scene) => {
+    if (!scene) return
+    scene.scale.set(scale.value, scale.value, scale.value)
+  },
+  { immediate: true }
+)
 
-  const userData = (state.value.scene as any).userData
-  if (!userData?.colorsApplied) {
-    state.value.scene.traverse((child: any) => {
+// 2. Farben setzen (NUR EINMAL beim ersten Laden)
+let colorsApplied = false
+watch(
+  () => state.value?.scene,
+  (scene) => {
+    if (!scene || colorsApplied) return
+
+    scene.traverse((child: any) => {
       if (!child.isMesh || !child.material) return
 
       const mats = Array.isArray(child.material) ? child.material : [child.material]
 
       mats.forEach((mat: any) => {
-        if (!mat || !mat.color) return
+        if (!mat?.color) return
 
         // Body
         if (mat.name === 'body' || child.name?.includes('body')) {
@@ -93,42 +111,43 @@ watchEffect(async () => {
         }
         // Eyes
         else if (mat.name === 'eye_color' || child.name?.includes('eye')) {
-          mat.color.set(meepleColors.value.eyes) 
+          mat.color.set(meepleColors.value.eyes)
           mat.needsUpdate = true
         }
       })
     })
 
-    ;(state.value.scene as any).userData = {
-      ...userData,
-      colorsApplied: true
+    colorsApplied = true
+  },
+  { immediate: true, flush: 'post' }
+)
+
+// 3. Animation Mixer Setup (async aber nur einmal)
+let mixerInitialized = false
+watch(
+  () => state.value?.animations,
+  async (animations) => {
+    if (!animations?.length || mixerInitialized || !state.value?.scene) return
+    mixerInitialized = true
+
+    const THREE = await import('three')
+    mixer.value = new THREE.AnimationMixer(state.value.scene)
+
+    // Suche nach Jump-Animation
+    const jumpAnimation = animations.find((anim: any) =>
+      anim.name.toLowerCase().includes('jump')
+    )
+
+    if (jumpAnimation) {
+      jumpAction.value = mixer.value.clipAction(jumpAnimation)
+      jumpAction.value.setLoop(THREE.LoopOnce, 1)
+      jumpAction.value.clampWhenFinished = true
+      console.log('Jump animation found:', jumpAnimation.name)
+    } else {
+      console.log('Available animations:', animations.map((a) => a.name))
     }
-  }
-
-    // Animation Mixer einrichten
-    if (state.value.animations && state.value.animations.length > 0) {
-      const THREE = await import('three')
-      mixer.value = new THREE.AnimationMixer(state.value.scene)
-
-      // Suche nach Jump-Animation
-      const jumpAnimation = state.value.animations.find((anim: any) =>
-        anim.name.toLowerCase().includes('jump'),
-      )
-
-      if (jumpAnimation) {
-        jumpAction.value = mixer.value.clipAction(jumpAnimation)
-        jumpAction.value.setLoop(THREE.LoopOnce, 1) // Nur einmal abspielen
-        jumpAction.value.clampWhenFinished = true
-
-        console.log('Jump animation found:', jumpAnimation.name)
-      } else {
-        console.log(
-          'Available animations:',
-          state.value.animations.map((a) => a.name),
-        )
-      }
-    }
-  }
+  },
+  { immediate: true, flush: 'post' }
 )
 
 // Animation updaten
@@ -149,12 +168,77 @@ watchEffect(async () => {
   }
 })
 
-// Updated die Rotation des Charakters
-const setRotation = (yRotation: number) => {
-  characterRotation.value = yRotation
+watch(
+  () => props.hidden,
+  (hidden) => {
+    if (characterPosition.value) {
+      characterPosition.value.visible = !hidden
+    }
+  },
+  { immediate: true }
+)
+
+let targetRotation = 0
+let isRotating = false
+
+const lerp = (a: number, b: number, t: number) => {
+  return a + (b - a) * t
 }
 
-// Sprung-Animation
+/**
+ * Animiert die Rotation eines Charakters in Richtung der Zielrotation.
+ *
+ * Die aktuelle Rotation wird schrittweise per Linear Interpolation (lerp)
+ * an die Zielrotation angenähert. Die Animation läuft so lange,
+ * bis der Zielwert mit ausreichender Genauigkeit erreicht ist.
+ *
+ * Die Animationsgeschwindigkeit wird über den Smoothing-Faktor
+ * im lerp-Aufruf gesteuert.
+ */
+const animateRotation = () => {
+  if (!isRotating) return
+
+  characterRotation.value = lerp(
+    characterRotation.value,
+    targetRotation,
+    0.065 // smoothing factor (niedriger = langsamer, smoother)
+  )
+
+  // Stop wenn nah genug am Wert
+  if (Math.abs(characterRotation.value - targetRotation) < 0.001) {
+    characterRotation.value = targetRotation
+    isRotating = false
+    return
+  }
+
+  requestAnimationFrame(animateRotation)
+}
+
+const setRotation = (yRotation: number) => {
+  targetRotation = yRotation
+  if (!isRotating) {
+    isRotating = true
+    requestAnimationFrame(animateRotation)
+  }
+}
+
+
+/**
+ * Führt eine benutzerdefinierte Sprung-Animation aus.
+ *
+ * Die Animation besteht aus einer Aufwärts- und einer Abwärtsbewegung
+ * mit jeweils eigener Dauer und Easing-Funktion.
+ * Während der Animation wird `jumpOffset` kontinuierlich angepasst.
+ *
+ * Nach Abschluss der Animation wird der Sprungzustand zurückgesetzt
+ * und optional ein Callback ausgeführt.
+ *
+ * @param height     Maximale Sprunghöhe
+ * @param upMs       Dauer der Aufwärtsbewegung in Millisekunden
+ * @param downMs     Dauer der Abwärtsbewegung in Millisekunden
+ * @param onComplete Optionaler Callback, der nach Abschluss der Animation
+ *                   ausgeführt wird
+ */
 const animateCustomJump = (
   height = defaultJumpHeight,
   upMs = defaultUpDuration,
@@ -193,9 +277,13 @@ const animateCustomJump = (
 }
 
 const jump = () => {
-  if (!isJumpAllowed.value) return //Nur dann Jump Animation starten, wenn Sprung auch erlaubt ist, also Spieler maxEnergy gesammelt hat
+  console.log("jump wird erreicht")
   if (isJumping.value) return
-  
+  audioEngine.play3D('meepleJump', {
+    x: currentPosition.value[0],
+    y: currentPosition.value[1],
+    z: currentPosition.value[2]
+  })
   isJumping.value = true
   milefizStore.gamedata.isJumping = true
 
@@ -229,11 +317,17 @@ watch(
       return
     }
 
+    if (props.barrier) {
+      _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
+      setPositionImmediate(newPos)
+      return
+    }
+
     // record and animate
     _lastPropPosition.value = [newPos[0], newPos[1], newPos[2]]
     animateTo(newPos)
   },
-  { deep: true },
+  { deep: true, flush: 'post' },
 )
 
 const speed = 0.08
@@ -242,23 +336,29 @@ let moveAnimationFrame: number | null = null
 /**
  * Animiert die Bewegung des Charakters zu einer Zielposition auf dem Spielfeld.
  *
- * - inkl. Sprung und Drehung
- *
  * Ablauf:
  * 1. Vorherige Bewegungsanimation (falls vorhanden) wird abgebrochen.
- * 2. Charakter wird in Richtung des Ziels gedreht (`rotateToward`).
- * 3. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.
- * 4. Die Position wird frameweise geglättet interpoliert, bis das Ziel erreicht ist.
+ * 2. Ein kurzer Sprung wird ausgeführt, während sich die Figur bewegt.
+ * 3. Die Position wird frameweise geglättet interpoliert, bis das Ziel erreicht ist.
  *
  * @param target - Zielkoordinaten im 3D-Raum [x, y, z], zu denen sich der Charakter bewegen soll
  */
-const animateTo = (target: [number, number, number]) => {
+const animateTo = (target: [number, number, number], playSound = false) => {
   if (moveAnimationFrame) cancelAnimationFrame(moveAnimationFrame)
-
-  rotateToward(target)
 
   if (!isJumping.value) {
     isJumping.value = true
+    if (hasInitializedMoved.value && playSound) {
+      setTimeout(() => {
+        audioEngine.play3D('meepleMove', {
+          x: target[0],
+          y: target[1],
+          z: target[2]
+        })
+      }, 200)
+    } else {
+      hasInitializedMoved.value = true
+    }
     // starte kleinen Sprung und binde Bewegungsende an das Sprungende
     animateCustomJump(smallJumpHeight, smallUpDuration, smallFallDuration, () => {
       // Nach der Landung Position fixieren
@@ -285,61 +385,6 @@ const animateTo = (target: [number, number, number]) => {
       // Wenn Sprung beendet oder das Ziel erreicht ist, Position fixieren
       animatedPosition.value = target
       moveAnimationFrame = null
-    }
-  }
-
-  animate()
-}
-
-/**
- * Dreht den Charakter sanft in Richtung einer Zielposition.
- *
- * Berechnet den Winkel zwischen der aktuellen Position und der Zielposition
- * und interpoliert die Y-Rotation über eine kurze Zeitspanne, um
- * eine fließende Drehbewegung zu erzeugen.
- *
- * - wählt immer den kürzesten Drehweg
- * - Verwendet `Math.atan2()` zur Winkelberechnung im XZ-Raum.
- * - Normalisiert Winkel auf den Bereich [-π, π], um Sprünge zu vermeiden.
- * - Führt die Drehung innerhalb von ~200 ms aus (Ease-in/Ease-out Kurve).
- *
- * @param target - Zielkoordinaten [x, y, z], in deren Richtung der Charakter schauen soll
- */
-const rotateToward = (target: [number, number, number]) => {
-  const [x, , z] = animatedPosition.value
-  const [tx, , tz] = target
-
-  const dx = tx - x
-  const dz = tz - z
-
-  const targetRotation = Math.atan2(dx, dz)
-  let startRotation = characterRotation.value
-
-  // --- beide Winkel normalisieren auf [-π, π] ---
-  const normalize = (angle: number) => ((angle + Math.PI) % (2 * Math.PI)) - Math.PI
-  startRotation = normalize(startRotation)
-  const normalizedTarget = normalize(targetRotation)
-
-  // --- Differenz auf kürzesten Weg ---
-  let diff = normalizedTarget - startRotation
-  if (diff > Math.PI) diff -= 2 * Math.PI
-  if (diff < -Math.PI) diff += 2 * Math.PI
-
-  const duration = 200
-  const startTime = Date.now()
-
-  const animate = () => {
-    const elapsed = Date.now() - startTime
-    const progress = Math.min(elapsed / duration, 1)
-
-    // weiches Interpolieren (Ease in/out optional)
-    const easedProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI)
-    characterRotation.value = startRotation + diff * easedProgress
-
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    } else {
-      characterRotation.value = normalizedTarget
     }
   }
 
@@ -387,11 +432,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <TresGroup
-    ref="characterPosition"
-    :position="currentPosition"
-    :rotation="[0, characterRotation, 0]"
-  >
+  <TresGroup ref="characterPosition" :position="currentPosition" :rotation="[0, characterRotation, 0]">
     <primitive v-if="state" :object="state?.scene" />
   </TresGroup>
 </template>

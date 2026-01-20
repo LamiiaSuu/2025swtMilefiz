@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyJoinException;
 import de.hs_rm.de.milefiz.game.lobby.PlayerNotFoundException;
+import de.hs_rm.de.milefiz.game.service.NamingService;
 
 public class Lobby {
 
@@ -20,7 +21,7 @@ public class Lobby {
     public Lobby() {
         id = UUID.randomUUID();
         players = new ArrayList<>();
-        lobbyName = "Neue Lobby";
+        lobbyName = NamingService.generateRandomLobbyName();
         maxPlayers = Color.values().length;
         gameStarted = false;
     }
@@ -150,4 +151,35 @@ public class Lobby {
     public void setGameStarted(boolean gameStarted) {
         this.gameStarted = gameStarted;
     }
+
+    public Meeple getMeepleById(UUID meepleId) {
+        return players.stream()
+                .flatMap(p -> java.util.Arrays.stream(p.getMeeples()))
+                .filter(m -> m.getId().equals(meepleId))
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Meeple " + meepleId + " not found in lobby " + id
+                        )
+                );
+    }
+
+    /**
+     * Liefert einen Spieler anhand seiner UUID zurück.
+     *
+     * @param playerId ID des gesuchten Spielers
+     * @return Player mit passender ID
+     * @throws IllegalArgumentException falls kein Spieler gefunden wird
+     */
+    public Player getPlayer(UUID playerId) {
+        return players.stream()
+                .filter(p -> p.getId().equals(playerId))
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Player " + playerId + " not found in lobby " + id
+                        )
+                );
+    }
+
 }

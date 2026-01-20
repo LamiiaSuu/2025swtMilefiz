@@ -3,24 +3,36 @@ package de.hs_rm.de.milefiz.game.service;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
+
+import de.hs_rm.de.milefiz.game.model.Board;
+import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
+import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
+import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 
 
 // Mockito erstellt echten GameService mit Fake-Abhängigkeiten:
@@ -41,6 +53,7 @@ class GameServiceTest {
 
     @Mock
     private MovementServiceImpl movementService;
+
 
     private GameService gameService;
 
@@ -85,4 +98,61 @@ class GameServiceTest {
             assertEquals(testValue, result, "GameService sollte Wert unverändert zurückgeben");
         }
     }
+
+    @Test
+    @DisplayName("getRollDiceCooldown delegiert an CooldownService")
+    void getRollDiceCooldown_delegatesToCooldownService() {
+        UUID playerId = UUID.randomUUID();
+        when(cooldownService.getCooldown(playerId)).thenReturn(5);
+
+        int result = gameService.getRollDiceCooldown(playerId);
+
+        assertEquals(5, result);
+        verify(cooldownService).getCooldown(playerId);
+    }
+
+    @Test
+    @DisplayName("addRollDiceCooldown delegiert an CooldownService")
+    void addRollDiceCooldown_delegatesToCooldownService() {
+        UUID playerId = UUID.randomUUID();
+
+        gameService.addRollDiceCooldown(playerId);
+
+        verify(cooldownService).addCooldown(playerId);
+    }
+
+    @Test
+    @DisplayName("moveMeeple delegiert an MovementService")
+    void moveMeeple_delegatesToMovementService() {
+        UUID lobbyId = UUID.randomUUID();
+        MovementCommand cmd = mock(MovementCommand.class);
+        Player player = mock(Player.class);
+        FrontendEvent event = mock(FrontendEvent.class);
+
+        when(movementService.moveMeeple(lobbyId, cmd, player))
+                .thenReturn(event);
+
+        FrontendEvent result = gameService.moveMeeple(lobbyId, cmd, player);
+
+        assertSame(event, result);
+        verify(movementService).moveMeeple(lobbyId, cmd, player);
+    }
+
+    @Test
+    @DisplayName("moveBarrier delegiert an MovementService")
+    void moveBarrier_delegatesToMovementService() {
+        UUID lobbyId = UUID.randomUUID();
+        MoveBarrierCommand cmd = mock(MoveBarrierCommand.class);
+        Player player = mock(Player.class);
+        FrontendEvent event = mock(FrontendEvent.class);
+
+        when(movementService.moveBarrier(lobbyId, cmd, player))
+                .thenReturn(event);
+
+        FrontendEvent result = gameService.moveBarrier(lobbyId, cmd, player);
+
+        assertSame(event, result);
+        verify(movementService).moveBarrier(lobbyId, cmd, player);
+    }
+
 }

@@ -16,6 +16,12 @@ public class Meeple {
         this.isBarrier = isBarrier;
     }
 
+    public Meeple(Meeple other) {
+        this.id = other.id;
+        this.isBarrier = other.isBarrier;
+        this.currentField = other.currentField;
+    }
+
     public UUID getId() {
         return id;
     }

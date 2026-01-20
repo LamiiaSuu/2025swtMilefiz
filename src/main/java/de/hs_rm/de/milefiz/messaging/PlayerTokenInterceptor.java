@@ -2,6 +2,8 @@ package de.hs_rm.de.milefiz.messaging;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -21,6 +23,8 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
     @Autowired
     private LobbyManager lobbyManager;
 
+    private final Logger logger = LoggerFactory.getLogger(PlayerTokenInterceptor.class);
+
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = org.springframework.messaging.support.MessageHeaderAccessor
@@ -28,16 +32,14 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
         if (accessor == null) {
             accessor = StompHeaderAccessor.wrap(message);
         }
+        Map<String, Object> sessionAttrs = accessor.getSessionAttributes();
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String token = accessor.getFirstNativeHeader("player-token");
 
             // Falls kein Header, versuche Query-Parameter
-            if (token == null) {
-                Map<String, Object> sessionAttrs = accessor.getSessionAttributes();
-                if (sessionAttrs != null) {
-                    token = (String) sessionAttrs.get("player-token");
-                }
+            if (token == null && sessionAttrs != null) {
+                token = (String) sessionAttrs.get("player-token");
             }
 
             try {
@@ -48,40 +50,35 @@ public class PlayerTokenInterceptor implements ChannelInterceptor {
 
                 accessor.setLeaveMutable(true);
                 accessor.setUser(player);
-                accessor.getSessionAttributes().put("player-token", player.getPlayerToken());
-                accessor.getSessionAttributes().put("player", player);
+                if (sessionAttrs != null) {sessionAttrs.put("player-token", player.getPlayerToken());
+                    sessionAttrs.put("player", player);
+                }
             } catch (PlayerNotFoundException | IllegalArgumentException e) {
-                e.printStackTrace();
-                // Verbindung ablehnen bei ungültigem Token
+                logger.error("Player not found", e);
                 return null;
             }
         }
 
-        // Für MESSAGE und SEND Commands: Token aus Session-Attributen oder Header holen
         if (StompCommand.SEND.equals(accessor.getCommand()) || StompCommand.MESSAGE.equals(accessor.getCommand())) {
-            String token = (String) accessor.getSessionAttributes().get("player-token");
+            String token = sessionAttrs != null ? (String) sessionAttrs.get("player-token") : null;
 
-            // Falls nicht in Session, versuche aus Header zu lesen
             if (token == null) {
                 token = accessor.getFirstNativeHeader("player-token");
             }
 
-            // Versuche Player aus Session zu holen
-            Player player = (Player) accessor.getSessionAttributes().get("player");
+            Player player = sessionAttrs != null ? (Player) sessionAttrs.get("player") : null;
 
             if (player == null && token != null) {
                 try {
                     player = lobbyManager.getPlayerByTokenFromLobbies(token);
                 } catch (PlayerNotFoundException e) {
-                    e.printStackTrace();
+                    logger.error("Player not found", e);
                 }
             }
 
+            accessor.setLeaveMutable(true);
             if (player != null) {
-                accessor.setLeaveMutable(true);
                 accessor.setUser(player);
-            } else {
-                accessor.setLeaveMutable(true);
             }
 
             return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());

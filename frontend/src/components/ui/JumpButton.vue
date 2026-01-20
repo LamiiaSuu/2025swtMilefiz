@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
+import { useAudioStore } from "@/stores/audioStore";
+import { useErrorHandler } from "@/composables/useErrorHandler";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
+const audio = useAudioStore()
 
-const isEnergyFull = computed(()=> milefizStore.energy.isEnergyFull);
+const isEnergyFull = computed(() => milefizStore.energy.isEnergyFull);
+const isJumping = computed(() => milefizStore.gamedata.isJumping)
+const { showWarning } = useErrorHandler()
 
 /**
  * - Registriert EventListener für Keyboard Input 
@@ -18,7 +23,7 @@ onMounted(() => {
  * Beim unmounten wird Listener removed
  */
 onUnmounted(() => {
-  window.removeEventListener("keydown", onKeypress)
+    window.removeEventListener("keydown", onKeypress)
 })
 
 /**
@@ -26,13 +31,23 @@ onUnmounted(() => {
  * → true, solange nicht genügend Energie gesammelt wurde
  */
 const disabled = computed(() =>
-    !isEnergyFull.value
+    !isEnergyFull.value || isJumping.value
 )
+
+// activeMeeple merken
+const selectedMeepleId = computed(() => {
+    const lobby = milefizStore.gamedata.lobby
+    const myId = milefizStore.gamedata.playerId
+    if (!lobby || !myId) return null
+    const me = lobby.players.find((p) => p.id === myId)
+    return (me?.activeMeeple?.id) ?? null
+})
 
 
 /* Hüpfen Hotkey Mapping auf Key " " (Spacebar)*/
 const onKeypress = (e: KeyboardEvent) => {
     if (e.key === " ") {
+        audio.playSfx('gameHUD')
         jump()
     }
 }
@@ -46,10 +61,14 @@ function jump() {
     if (disabled.value) {
         console.log("Hüpfen nicht erlaubt!")
         triggerErrorAnimation()
+        showWarning('CONSUME_ENERGY_ERROR')
+        return
     }
-    
+
     console.log("Hüpfen Request gesendet.")
-    milefizStore.sendEnergyConsume()
+    if (selectedMeepleId.value) {
+        milefizStore.sendEnergyConsume(selectedMeepleId.value)
+    }
     /* Press Animation für den Button*/
     triggerPressAnimation();
 }
@@ -77,7 +96,7 @@ function triggerErrorAnimation() {
 
 </script>
 <template>
-    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled, error: isError}">
+    <div class="action-button" :class="{ pressed: isPressed, disabled: disabled, error: isError }">
         <img src="@/assets/hud/JumpingMeeple.png" class="action-icon" />
         <img src="@/assets/hud/spacebar_icon_light.png" class="hotkey-space" />
     </div>
@@ -141,13 +160,4 @@ function triggerErrorAnimation() {
     image-rendering: crisp-edges;
 }
 
-.hotkey {
-    position: absolute;
-    bottom: -3px;
-    left: 3px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #ffffff;
-    border-radius: 3px;
-}
 </style>

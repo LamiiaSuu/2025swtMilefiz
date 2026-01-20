@@ -1,11 +1,23 @@
 <template>
   <div class="home">
+    <!--MI'lefiz Header -->
     <Header overlay></Header>
+
+    <!-- Language Selection-->
+    <LanguageSelection></LanguageSelection>
+
+    <!-- Settings Button-->
+    <button class="settings-button" @mouseenter="onHover" @click="goToSettings">
+      <!-- cog by Fabio Nucatolo from https://thenounproject.com/browse/icons/term/cog/" - Noun Project (CC BY 3.0) -->
+      <img src="@/assets/buttons/settings_icon.png" alt="Settings" />
+    </button>
+
+    <!-- Menu Buttons -->
     <div class="button-container">
-      <button class="menu-button" @click="newGameStart">Neues Spiel</button>
-      <button class="menu-button" @click="goToJoinGame">Spiel beitreten</button>
-      <button class="menu-button" @click="goToMapEditor">Map erstellen</button>
-      <button class="menu-button" @click="goToSettings">Einstellungen</button>
+      <button class="menu-button" @mouseenter="onHover" @click="newGameStart">{{ tUI('NEW_GAME') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToJoinGame">{{ tUI('JOIN_GAME') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToMapEditor">{{ tUI('MAP_EDITOR') }}</button>
+      <button class="menu-button" @mouseenter="onHover" @click="goToTutorial">{{ tUI('TUTORIAL') }}</button>
     </div>
   </div>
 </template>
@@ -13,23 +25,40 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import Header from '@/components/ui/pages/Header.vue'
+import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
+import LanguageSelection from '@/components/ui/LanguageSelection.vue'
 
 const router = useRouter()
+const audio = useAudioStore()
 
 const newGameStart = () => {
+  audio.playSfx('click')
   router.push({ name: 'game-start' })
 }
 
 const goToJoinGame = () => {
+  audio.playSfx('click')
   router.push('/join-game')
 }
 
 const goToMapEditor = () => {
+  audio.playSfx('click')
   router.push('map-editor')
 }
 
+const goToTutorial = () => {
+  audio.playSfx('click')
+  router.push('/tutorial')
+}
+
 const goToSettings = () => {
+  audio.playSfx('click')
   router.push('/settings')
+}
+
+function onHover() {
+  audio.playSfx('hover')
 }
 </script>
 
@@ -66,10 +95,60 @@ const goToSettings = () => {
   flex-direction: column;
   gap: 2vh;
   align-items: center;
+  margin-top: -5vh;
+
+  z-index: 2;
 }
 
 .menu-button:hover {
   transform: scale(1.05);
   transition: transform 0.2s ease;
+}
+
+.settings-button {
+  position: absolute;
+  top: 2.6rem; 
+  right: -12.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.settings-button img {
+  width: 15%;
+  height: 15%;
+  filter: brightness(0) invert(1);
+}
+
+.settings-button:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+@keyframes wiggle {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(15deg);
+  }
+
+  50% {
+    transform: rotate(-10deg);
+  }
+
+  75% {
+    transform: rotate(15deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.settings-button:hover img {
+  animation: wiggle 1.2s ease-in-out infinite;
 }
 </style>

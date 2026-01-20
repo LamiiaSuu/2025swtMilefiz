@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { tUI } from '@/i18n';
+import { useAudioStore } from '@/stores/audioStore';
 import { useMilefizStore } from '@/stores/milefizstore';
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -9,30 +11,33 @@ const router = useRouter()
 const base = globalThis.location.origin
 
 const lobbyId = computed(() => milefizStore.gamedata.lobby?.id ?? '---')
-
+const audio = useAudioStore()
 /**
  * copyToClipboard()
  * Diese Funktion kopiert den Join-Link mit der Lobby-ID ins Clipboard.
  */
 const copyToClipboard = async () => {
     try {
-        await navigator.clipboard.writeText(lobbyId.value)
+        await navigator.clipboard.writeText(`${base}/join/${lobbyId.value}`)
+        audio.playSfx('copyLobby')
     } catch (err) {
         console.error('Fehler beim Kopieren der Lobby-ID:', err)
     }
 }
 
-
+function onHover() {
+  audio.playSfx('hover')
+}
 </script>
 
 <template>
     <!-- Lobby-ID -->
     <div class="form-row">
-        <label>Lobby-ID</label>
+        <label>{{ tUI('LOBBY_ID') }}</label>
 
         <div class="input-with-button">
             <input type="text" v-model="lobbyId" disabled class="form-input">
-            <button type="button" @click="copyToClipboard" class="copy-button" title="In Zwischenablage kopieren">
+            <button type="button" @mouseenter="onHover" @click="copyToClipboard" class="copy-button" title="In Zwischenablage kopieren">
                 <img src="@/assets/buttons/copy-clipboard-icon.png" alt="Copy" width="20" height="20">
             </button>
         </div>

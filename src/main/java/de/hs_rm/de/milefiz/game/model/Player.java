@@ -6,6 +6,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
+import de.hs_rm.de.milefiz.game.service.NamingService;
+
 public class Player implements Principal {
 
     private UUID id;
@@ -17,13 +20,13 @@ public class Player implements Principal {
     private Meeple activeMeeple;
     private int remainingMoves = 0;
     private int energy = 0;
-    private final int MAX_ENERGY = 6;
+    private final static int MAX_ENERGY = 6;
     private boolean moved = false;
 
     public Player(Color color, int noOfMeeples) {
         meeples = new Meeple[noOfMeeples];
         isLeader = false;
-        playerName = "Anonymer Kek";
+        playerName = NamingService.generateRandomName();
         id = UUID.randomUUID();
         for (int i = 0; i < noOfMeeples; i++) {
             meeples[i] = new Meeple(false);
@@ -85,6 +88,14 @@ public class Player implements Principal {
 
     public int getMaxEnergy() {
         return MAX_ENERGY;
+    }
+
+    /**
+     * Wird genutzt, wenn in {@link SlotMachineGame#checkFinished()} ein
+     * Jackpot erzielt wurde, um dem Gewinner volle Energie zu geben.
+     */
+    public void jackpot() {
+        this.energy = MAX_ENERGY;
     }
 
     public boolean hasMoved() {
@@ -160,9 +171,9 @@ public class Player implements Principal {
      *
      * <p>
      * Ein Spieler kann sich bewegen, wenn er noch mindestens einen
-     * verbleibenden Zug ({@code remainingMoves > 0}) zur Verfügung hat. Die
+     * verbleibenden Schritt ({@code remainingMoves > 0}) zur Verfügung hat. Die
      * Anzahl der verfügbaren Züge wird normalerweise durch einen Würfelwurf
-     * bestimmt und nach jedem ausgeführten Zug mit {@link #useMove()}
+     * bestimmt und nach jedem ausgeführten Schritt mit {@link #useMove()}
      * reduziert.
      * </p>
      *
@@ -177,7 +188,7 @@ public class Player implements Principal {
     }
 
     /**
-     * Verbraucht einen Zug des Spielers.
+     * Verbraucht einen Schritt des Spielers.
      *
      * <p>
      * Reduziert die Anzahl der verbleibenden Züge ({@code remainingMoves}) um
@@ -304,7 +315,8 @@ public class Player implements Principal {
      * @author Kevin Tran
      */
     public void consumeEnergy() {
-        if (hasFullEnergy()) energy = 0;
+        if (hasFullEnergy())
+            energy = 0;
     }
 
     @Override

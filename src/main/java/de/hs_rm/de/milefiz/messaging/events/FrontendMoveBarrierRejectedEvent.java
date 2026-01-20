@@ -8,7 +8,8 @@ package de.hs_rm.de.milefiz.messaging.events;
  * Dieses Event wird vom Server an den Client gesendet, wenn die
  * geplante Barrierenbewegung gegen die Spielregeln verstößt – z. B.:
  * - das Ziel-Feld ein Start- oder Zielfeld ist,
- * - das Ziel-Feld bereits durch eine andere Barriere oder einen Meeple belegt ist
+ * - das Ziel-Feld bereits durch eine andere Barriere oder einen Meeple belegt
+ * ist
  *
  * Das Frontend kann dieses Ereignis verwenden, um dem Spieler
  * eine entsprechende Fehlermeldung anzuzeigen und die
@@ -18,11 +19,11 @@ package de.hs_rm.de.milefiz.messaging.events;
  * @param msg  eine beschreibende Fehlermeldung, die den Grund
  *             für die Ablehnung angibt
  *
- * Author: Maximilian Ressel
+ * @author Maximilian Ressel
  */
 public record FrontendMoveBarrierRejectedEvent(String type, String msg) implements FrontendEvent {
 
-        public FrontendMoveBarrierRejectedEvent(String msg) {
+    public FrontendMoveBarrierRejectedEvent(String msg) {
         this(EventType.BARRIER_MOVE_ERROR.name(), msg);
     }
 }

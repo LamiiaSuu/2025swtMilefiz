@@ -4,7 +4,8 @@ import java.util.UUID;
 
 /**
  * Frontend-Event, das ausgelöst wird, wenn ein Meeple erfolgreich bewegt wurde,
- * der Spieler danach jedoch keine weiteren gültigen Bewegungen mehr ausführen kann
+ * der Spieler danach jedoch keine weiteren gültigen Bewegungen mehr ausführen
+ * kann
  * und der letzte verbleibende Schritt daher verfällt.
  *
  * Dieses Ereignis informiert das Frontend darüber, dass die Bewegung zwar
@@ -13,8 +14,9 @@ import java.util.UUID;
  * sinnvollen oder regelkonformen Bewegungen mehr möglich sind.
  *
  * Typische Ursachen für diesen Fall sind:
- * - das Zielfeld ist ausschließlich von Barrieren umgeben und es ist mehr als ein Zug übrig, 
- *   man kann also nicht genau auf einer Barriere landen.
+ * - das Zielfeld ist ausschließlich von Barrieren umgeben und es ist mehr als
+ * ein Zug übrig,
+ * man kann also nicht genau auf einer Barriere landen.
  * - das Zielfeld führt nur auf Felder mit eigenen Meeples
  * - jede weitere Bewegung wäre regelwidrig
  *
@@ -24,12 +26,14 @@ import java.util.UUID;
  * @param type           Typ des Events (MOVE_WITH_LOSS)
  * @param id             ID des bewegten Meeple
  * @param targetField    ID des Zielfelds, auf das der Meeple gesetzt wurde
- * @param remainingMoves Anzahl der verbleibenden Züge nach der Bewegung (in der Regel 0)
+ * @param remainingMoves Anzahl der verbleibenden Züge nach der Bewegung (in der
+ *                       Regel 0)
  *
- * Author: Maximilian Ressel
+ * @author Maximilian Ressel
  */
-public record FrontendMoveWithLossEvent (String type, UUID playerId, UUID id, UUID targetField, int remainingMoves) implements FrontendEvent{
-    public FrontendMoveWithLossEvent(UUID playerId, UUID id, UUID targetField, int remainingMoves) {
-        this(EventType.MOVE_WITH_LOSS.name(), playerId, id, targetField, remainingMoves);
+public record FrontendMoveWithLossEvent(String type, UUID playerId, UUID id, UUID targetField, int remainingMoves,
+        boolean moved) implements FrontendEvent {
+    public FrontendMoveWithLossEvent(UUID playerId, UUID id, UUID targetField, int remainingMoves, boolean moved) {
+        this(EventType.MOVE_WITH_LOSS.name(), playerId, id, targetField, remainingMoves, moved);
     }
 }

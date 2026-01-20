@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
+import { useAudioStore } from "@/stores/audioStore";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
+const audio = useAudioStore()
 
 /** Zugriff auf Cooldown-State
  * remainingSceonds: Wert vom Server
@@ -11,12 +13,13 @@ const milefizStore = useMilefizStore()
  */
 const remainingSeconds = computed(() => milefizStore.cooldown.remainingSeconds)
 const isCooldownActive = computed(() => milefizStore.cooldown.active)
+const isMovesLeft = computed(() => (milefizStore.gamedata?.currentDiceRoll ?? 0) > 0)
 /**
  * steuert, ob der Würfelbutton deaktiviert wird/bleibt
  * → true, solange Cooldown aktiv ist
  */
 const disabled = computed(() =>
-    isCooldownActive.value
+    isCooldownActive.value || isMovesLeft.value
 )
 
 /**
@@ -79,22 +82,35 @@ onUnmounted(() => {
 const onKeypress = (e: KeyboardEvent) => {
     if (e.key.toLocaleLowerCase() === "r") {
         console.log("Würfeln angestoßen")
+        audio.playSfx('gameHUD')
         rollDice()
     }
-}
 
+    // shift+1 - shift+6 für requested Dice rolls
+    if (e.shiftKey) {
+        const match = e.code.match(/^Digit([1-6])$/)
+        if (match) {
+            e.preventDefault()
+            const requestedValue = parseInt(match[1]!)
+            console.log("Würfeln mit gewünschten Wert:", requestedValue)
+            audio.playSfx('gameHUD')
+            rollDice(requestedValue)
+        }
+    }
+}
 
 /**
  * Versucht einen Würfelwurf im Backend auszulösen.
  * - wenn disabled: Abbruch
  * - sonst Anfrage ans Backend senden
  * - und visuelles Feedback für das Aktivieren des Buttons 
+ * @param requestedValue optionaler spezifischer Würfelwert (1-6)
  */
-function rollDice() {
+function rollDice(requestedValue?: number) {
     if (disabled.value) {
         triggerErrorAnimation()
     }
-    milefizStore.sendRollDice();
+    milefizStore.sendRollDice(requestedValue);
     triggerPressAnimation();
 }
 
@@ -185,16 +201,6 @@ function triggerErrorAnimation() {
     image-rendering: crisp-edges;
 }
 
-.hotkey {
-    position: absolute;
-    bottom: -3px;
-    left: 3px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #ffffff;
-    border-radius: 3px;
-    font-family: "AcmeFont", sans-serif;
-}
 
 .cooldown-overlay {
     position: absolute;

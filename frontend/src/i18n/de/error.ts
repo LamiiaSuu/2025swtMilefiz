@@ -1,0 +1,33 @@
+import type { ErrorCode } from '@/errors/errorCodes'
+
+export const ERRORS_DE: Record<ErrorCode, string> = {
+    ROLL_DICE_ERROR: 'Cooldown aktiv - Würfeln nicht erlaubt.',
+    ROLL_DICE_ERROR_MOVES_LEFT: 'Noch Züge offen - Würfeln nicht erlaubt.',
+    REMAINING_MOVES_LOST: 'Kein Schritt mehr möglich - Verbleibende Schritte verloren!',
+    CHEATED: 'Du kleiner Cheater.',
+    MEEPLE_SELECTION_REJECTED: 'Meeple bereits bewegt - Wechsel nicht möglich.',
+    MOVE_ERROR_INTO_START: 'Startfelder können nicht betreten werden!',
+    MOVE_ERROR_NO_FIELD_IN_DIRECTION: 'Kein Feld in diese Richtung!',
+    MOVE_ERROR_NO_MOVES_LEFT: 'Keine verbleindenden Züge!',
+    MOVE_ERROR_CANT_CHANGE_DIRECTION: 'Richtungswechsel nicht erlaubt!',
+    MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL: 'Ziel kann nur mit dem letzten Schritt betreten werden!',
+    MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE: 'Feld bereits durch eigenen Meeple besetzt!',
+    MOVE_BARRIER_REJECTED_START_OR_END: 'Barriere kann nicht auf Start- oder Zielfeld gesetzt werden',
+    MOVE_BARRIER_OCCUPIED: 'Barriere kann nicht auf besetztes Feld gesetzt werden',
+    REJECTED_BY_BARRIER: 'Autsch! Das sah schmerzhaft aus...',
+    SAVE_ENERGY_ERROR_MAX_ENERGY: 'Maximale Energie bereits erreicht!',
+    SAVE_ENERGY_ERROR_MEEPLE_MOVED: 'Meeple bereits bewegt!',
+    SAVE_ENERGY_ERROR_DICE_NOT_ROLLED: 'Nicht gewürfelt - Keine Energie zu speichern!',
+    CONSUME_ENERGY_ERROR: 'Nicht genug Energie für einen Sprung!',
+    MEEPLE_IN_DUEL: 'Gegnerischer Meeple bereits im Duell. Warte bis das Duell entschieden wurde!',
+    NO_LOBBY_FOUND: 'Lobby nicht gefunden!',
+    NO_FILE_CHOSEN: 'Keine Datei ausgewählt!',
+    BOARD_INVALID: 'Map Validierung fehlgeschlagen: Eine Map brauch 4 Startfelder verbunden mit mindestens einem Zielfeld.',
+    BOARD_SUCCESSFULLY_IMPORTED: 'Map erfolgreich importiert!',
+    BOARD_COULD_NOT_BE_IMPORTED: 'Map konnte nicht importiert werden: ',
+    MOVE_ERROR_NO_VALID_FIELDS: 'Keine gültigen Züge in diese Richtung möglich',
+    MINIGAME_SLOT_JACKPOT_SUCCESS_MESSAGE: 'JACKPOT!!! Deine Energie hat sich aufgefüllt!',
+    MOVE_ERROR_BARRIER_FIELD_OCCUPIED: 'Ach Mensch! Da steht schon einer in der Barriere',
+    MINIGAME_SELECTION_MODE_INORDER: 'MINIGAME SELECTION MODE: INORDER',
+    MINIGAME_SELECTION_MODE_RANDOM: 'MINIGAME SELECTION MODE: RANDOM'
+}

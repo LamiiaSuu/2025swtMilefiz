@@ -4,6 +4,9 @@ import ComponentList from '@/components/ui/pages/ComponentList.vue'
 import LobbyList, { type Lobby } from '@/components/ui/pages/LobbyList.vue'
 import BackButton from '@/components/ui/pages/BackButton.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useAudioStore } from '@/stores/audioStore'
+import { tUI } from '@/i18n'
+import LanguageSelection from '@/components/ui/LanguageSelection.vue'
 
 const lobbies = ref<Lobby[]>([])
 const lobbyid = ref<string>('')
@@ -12,6 +15,7 @@ let interval: number
 
 const username = ref<string>('')
 const selectedLobby = ref<string>('')
+const audio = useAudioStore()
 
 const fetchLobbies = async () => {
   try {
@@ -45,31 +49,36 @@ onUnmounted(() => {
   selectedLobby.value = ''
 })
 
+
+function onHover() {
+  audio.playSfx('hover')
+}
 </script>
 
 <template>
   <div class="lobbylist">
-    <Header>Spiel Beitreten</Header>
+    <Header>{{ tUI('JOIN_GAME') }}</Header>
+    <LanguageSelection></LanguageSelection>
       <ComponentList>
         <div class="game-container">
-          <div class="game-label">Username</div>
+          <div class="game-label">{{ tUI('USERNAME') }}</div>
           <div class="username-input game-content">
-            <input type="text" v-model="username" placeholder="Username"></div>
+            <input type="text" v-model="username" :placeholder="tUI('USERNAME') " maxlength="16"></div>
         </div>
         <div class="game-container">
-          <div class="game-label">Suche</div>
+          <div class="game-label">{{ tUI('SEARCH') }}</div>
           <div class="lobbyid-input game-content">
-            <input type="text" v-model="lobbyid" placeholder="nach Lobby-ID oder Name">
+            <input type="text" v-model="lobbyid" :placeholder="tUI('FOR_LOBBY_ID_OR_NAME')">
             <svg viewBox="0 -960 960 960"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
           </div>
         </div>
         <LobbyList v-model:lobbyid="selectedLobby" :lobbies="filteredLobbies" label="Lobbys" />
         <div class="game-container">
           <div class="button-container">
-          <button class="start-game-button game-content" :disabled="!selectedLobby" @click="$router.push({ name: 'game' })">
-            Spiel Starten
+          <button class="start-game-button game-content" :disabled="!selectedLobby" @mouseenter="onHover" @click="() => {$router.push({ path: `/join/${selectedLobby}`, query: { username } }); audio.playSfx('joinGame')}">
+            {{ tUI('JOIN_GAME') }}
           </button>
-          <BackButton :to="{ name: 'Homepage' }" />
+          <BackButton @mouseenter="onHover" :to="{ name: 'Homepage' }" />
         </div>
         </div>
       </ComponentList>
@@ -116,6 +125,7 @@ onUnmounted(() => {
   font-size: 1.3rem;
   cursor: pointer;
   transition: background-color 0.2s;
+    font-family: "AcmeFont", sans-serif;
 }
 
 .start-game-button:hover {

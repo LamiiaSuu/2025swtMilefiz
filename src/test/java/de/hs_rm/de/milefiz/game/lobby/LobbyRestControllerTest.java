@@ -1,29 +1,40 @@
 package de.hs_rm.de.milefiz.game.lobby;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import de.hs_rm.de.milefiz.game.model.Board;
 import de.hs_rm.de.milefiz.game.model.Color;
 import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
 import de.hs_rm.de.milefiz.game.model.dto.LobbyDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.game.model.mapper.LobbyMapper;
+import de.hs_rm.de.milefiz.game.service.BoardService;
+import de.hs_rm.de.milefiz.game.service.BoardValidateException;
 import de.hs_rm.de.milefiz.game.service.GameService;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingServiceImpl;
 
@@ -44,6 +55,9 @@ class LobbyRestControllerTest {
 
     @InjectMocks
     private LobbyRestController lobbyRestController;
+
+    @Mock
+    private BoardService boardService;
 
     private Lobby testLobby;
     private UUID testLobbyId;
@@ -105,7 +119,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
         when(lobbyMapper.toDTO(testLobby)).thenReturn(lobbyDTO);
         
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, "Anonymer Kek");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -126,7 +140,7 @@ class LobbyRestControllerTest {
         UUID nonExistentId = UUID.randomUUID();
         when(lobbyManager.getLobby(nonExistentId)).thenThrow(new LobbyNotFoundException());
         try {
-            lobbyRestController.joinLobby(nonExistentId);
+            lobbyRestController.joinLobby(nonExistentId, "Anonymer Kek");
         } catch (LobbyNotFoundException ex) {
             // Expected exception
             assertNotNull(ex);
@@ -142,7 +156,7 @@ class LobbyRestControllerTest {
         testLobby.join(new Player(Color.BLUE));
         
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, "Anonymer Kek");
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -163,7 +177,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
         when(lobbyMapper.toDTO(testLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId);
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinLobby(testLobbyId, "Anonymer Kek");
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         
@@ -200,7 +214,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobby(newLobbyId)).thenReturn(newLobby);
         when(lobbyMapper.toDTO(newLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby();
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby("Anonymer Kek");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -228,7 +242,7 @@ class LobbyRestControllerTest {
         when(lobbyManager.getLobby(newLobbyId)).thenReturn(newLobby);
         when(lobbyMapper.toDTO(newLobby)).thenReturn(lobbyDTO);
 
-        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby();
+        ResponseEntity<LobbyJoinEvent> response = lobbyRestController.joinRandomLobby("Anonymer Kek");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -238,4 +252,81 @@ class LobbyRestControllerTest {
         assertEquals(newLobbyId, event.lobby().getId());
         verify(lobbyManager).createLobby();
     }
+
+    @Test
+    @DisplayName("activateBoard sollte BAD_REQUEST bei ungültigem Board zurückgeben")
+    void activateBoard_invalidBoard_returnsBadRequest() throws Exception {
+        BoardDTO boardDTO = new BoardDTO();
+        Board board = mock(Board.class);
+
+        when(boardService.validateBoard(board))
+                .thenThrow(new BoardValidateException("Ungültig"));
+
+        try (MockedStatic<BoardMapper> mapper = mockStatic(BoardMapper.class)) {
+            mapper.when(() -> BoardMapper.mapToBoard(boardDTO))
+                .thenReturn(board);
+
+            ResponseEntity<?> response =
+                    lobbyRestController.activateBoard(testLobbyId, boardDTO);
+
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            assertEquals("Ungültig", response.getBody());
+        }
+    }
+
+    @Test
+    @DisplayName("activateBoard sollte NOT_FOUND zurückgeben wenn Lobby fehlt")
+    void activateBoard_lobbyNotFound_returnsNotFound() throws Exception {
+        BoardDTO boardDTO = new BoardDTO();
+        Board board = mock(Board.class);
+
+        when(lobbyManager.getLobby(testLobbyId))
+                .thenThrow(new LobbyNotFoundException());
+
+        try (MockedStatic<BoardMapper> mapper = mockStatic(BoardMapper.class)) {
+            mapper.when(() -> BoardMapper.mapToBoard(boardDTO))
+                .thenReturn(board);
+
+            ResponseEntity<?> response =
+                    lobbyRestController.activateBoard(testLobbyId, boardDTO);
+
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        }
+    }
+
+    @Test
+    @DisplayName("activateDefaultBoard sollte Standardboard setzen")
+    void activateDefaultBoard_setsBoard() throws Exception {
+        Board board = mock(Board.class);
+
+        when(gameService.getTestBoard()).thenReturn(board);
+        when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
+
+        ResponseEntity<?> response =
+                lobbyRestController.activateDefaultBoard(testLobbyId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(gameService).getTestBoard();
+    }
+
+    @Test
+    @DisplayName("getBoard sollte BoardDTO zurückgeben")
+    void getBoard_returnsBoardDTO() throws Exception {
+        Board board = mock(Board.class);
+        BoardDTO boardDTO = new BoardDTO();
+
+        testLobby.setBoard(board);
+        when(lobbyManager.getLobby(testLobbyId)).thenReturn(testLobby);
+
+        try (MockedStatic<BoardMapper> mapper = mockStatic(BoardMapper.class)) {
+            mapper.when(() -> BoardMapper.mapToDTO(board))
+                .thenReturn(boardDTO);
+
+            BoardDTO result = lobbyRestController.getBoard(testLobbyId);
+
+            assertNotNull(result);
+            assertEquals(boardDTO, result);
+        }
+    }
+
 }

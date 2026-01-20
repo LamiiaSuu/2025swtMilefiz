@@ -36,7 +36,7 @@ import java.util.UUID;
  * 
  * @author Kevin Tran
  */
-public record FrontendConsumeEnergyEvent(String type, UUID playerId, int energy, boolean hasFullEnergy)
+public record FrontendConsumeEnergyEvent(String type, UUID playerId,UUID meepleId, int energy, boolean hasFullEnergy)
         implements FrontendEvent {
 
     /**
@@ -46,7 +46,7 @@ public record FrontendConsumeEnergyEvent(String type, UUID playerId, int energy,
      * @param energy        aktuelle Energie des Spielers nach Verbrauch
      * @param hasFullEnergy {@code false}, nach aktuellen Spielregeln
      */
-    public FrontendConsumeEnergyEvent(UUID playerId, int energy, boolean hasFullEnergy) {
-        this(EventType.CONSUME_ENERGY.name(), playerId, energy, hasFullEnergy);
+    public FrontendConsumeEnergyEvent(UUID playerId, UUID meepleId, int energy, boolean hasFullEnergy) {
+        this(EventType.CONSUME_ENERGY.name(), playerId, meepleId, energy, hasFullEnergy);
     }
 }

@@ -1,28 +1,23 @@
 package de.hs_rm.de.milefiz.game.service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.Principal;
 
 import de.hs_rm.de.milefiz.game.model.Board;
-import de.hs_rm.de.milefiz.game.model.Field;
 import de.hs_rm.de.milefiz.game.model.Player;
+import de.hs_rm.de.milefiz.game.model.dto.BoardDTO;
+import de.hs_rm.de.milefiz.game.model.mapper.BoardMapper;
 import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
-import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
-import de.hs_rm.de.milefiz.game.model.BoardDTO;
-import de.hs_rm.de.milefiz.game.model.BoardMapper;
 
 /**
  * Standard-Implementierung des GameService Interface.
@@ -59,7 +54,9 @@ public class GameServiceImpl implements GameService {
     public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher,
             CooldownServiceImpl cooldownService, MovementService movementService)
             throws IOException {
-        final String BOARD_PATH = "boards/dummyBoard.json";
+
+
+        final String BOARD_PATH = "boards/standardBoard.json";
         ObjectMapper objectMapper = new ObjectMapper();
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(BOARD_PATH);
@@ -69,8 +66,7 @@ public class GameServiceImpl implements GameService {
         }
 
         try {
-            BoardDTO testBoardDTO = objectMapper.readValue(inputStream,
-                    BoardDTO.class);
+            BoardDTO testBoardDTO = objectMapper.readValue(inputStream, BoardDTO.class);
             testBoard = BoardMapper.mapToBoard(testBoardDTO);
             logger.info("Test board loaded successfully from: {}", BOARD_PATH);
         } finally {
@@ -111,7 +107,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Board getTestBoard() {
-        return testBoard;
+        return new Board(testBoard);
     }
 
     @Override
@@ -123,11 +119,11 @@ public class GameServiceImpl implements GameService {
      * Verarbeitet ein Meeple-Bewegungskommando und delegiert die
      * Ausführung an den {@link MovementService}.
      *
-     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
+     * @param lobbyId die eindeutige ID der Lobby, in der der Schritt ausgeführt wird
      * @param moveCmd das Bewegungskommando mit Meeple-ID und Bewegungsrichtung
-     * @param player  der Spieler, der den Zug ausführt
+     * @param player  der Spieler, der den Schritt ausführt
      *
-     * @return ein {@link FrontendEvent}, das den Ausgang des Zuges beschreibt
+     * @return ein {@link FrontendEvent}, das den Ausgang des Schrittes beschreibt
      *
      * @see MovementService#moveMeeple(UUID, MovementCommand, Player)
      *
@@ -136,7 +132,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public FrontendEvent moveMeeple(UUID lobbyId, MovementCommand moveCmd, Player player) {
 
-        logger.info("Processing movement command in lobby {} from player '{}': meeple {} moving {} (sessionId={})",
+        logger.info("Processing movement command in lobby {} from player '{}': meeple {} moving {}",
                 lobbyId,
                 player != null ? player.getName() : "anonymous",
                 moveCmd.meepleId(),
@@ -165,7 +161,7 @@ public class GameServiceImpl implements GameService {
     public FrontendEvent moveBarrier(UUID lobbyId, MoveBarrierCommand moveBarrCmd, Player player) {
 
         logger.info(
-                "Processing MoveBarrierCommand in lobby {} from player '{}': barrier {} moving to field {} (sessionId={})",
+                "Processing MoveBarrierCommand in lobby {} from player '{}': barrier {} moving to field {}",
                 lobbyId,
                 player != null ? player.getName() : "anonymous",
                 moveBarrCmd.barrierId(),

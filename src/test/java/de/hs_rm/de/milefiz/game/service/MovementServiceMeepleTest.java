@@ -1,20 +1,18 @@
 package de.hs_rm.de.milefiz.game.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
@@ -27,6 +25,7 @@ import de.hs_rm.de.milefiz.game.model.Lobby;
 import de.hs_rm.de.milefiz.game.model.Meeple;
 import de.hs_rm.de.milefiz.game.model.Player;
 import de.hs_rm.de.milefiz.game.model.Position;
+import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.commands.MovementCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendDuelEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
@@ -34,14 +33,18 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveRejectedEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveWithLossEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendPlayerHasWonEvent;
-import de.hs_rm.de.milefiz.messaging.events.FrontendRejectedByBarrierEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
-public class MovementServiceMeepleTest {
+class MovementServiceMeepleTest {
 
     @Mock
     private LobbyManager lobbyManager;
+    private DuelService duelService;
+
+    @Autowired
+    private MonkeyTypeWordService monkeyTypeWordService;
 
     private MovementService movementService;
     private Lobby lobby;
@@ -54,10 +57,16 @@ public class MovementServiceMeepleTest {
     private final int NO_MOVES = 0;
     private final int LAST_MOVE = 1;
     private final int SECOND_TO_LAST_MOVE = 2;
+    @Mock
+    private FrontendMessagingService messaging;
+
+    @Mock
+    private DuelResolutionService duelResolutionService;
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        movementService = new MovementServiceImpl(lobbyManager);
+        duelService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService, monkeyTypeWordService);
+        movementService = new MovementServiceImpl(lobbyManager, duelService);
 
         // Felder
         currentField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 0));
@@ -118,7 +127,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("no moves left", evt.msg());
+        assertEquals("MOVE_ERROR_NO_MOVES_LEFT", evt.msg());
     }
 
     // Versuch in eine Richtung zu ziehen, in der kein Feld ist.
@@ -133,12 +142,15 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("No Field in this Direction", evt.msg());
+        assertEquals("MOVE_ERROR_NO_FIELD_IN_DIRECTION", evt.msg());
     }
 
     // Versuch die Richtung innerhalb eines Zuges zu wechseln
     @Test
     void moveMeepleChangeDirectionIsRejected() {
+
+        Field furtherField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
+        nextField.addNeighbour(furtherField, Direction.NORTH);
 
         meeple.setCurrentField(nextField);
 
@@ -150,7 +162,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("Cant change direction!", evt.msg());
+        assertEquals("MOVE_ERROR_CANT_CHANGE_DIRECTION", evt.msg());
     }
 
     // Versuch auf ein Startfeld zu gehen
@@ -168,7 +180,7 @@ public class MovementServiceMeepleTest {
         assertInstanceOf(FrontendMoveRejectedEvent.class, result);
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("Cant go back to a starting field!", evt.msg());
+        assertEquals("MOVE_ERROR_INTO_START", evt.msg());
     }
 
     // Versuch Endfeld mit Restzügen zu betreten
@@ -187,7 +199,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("Cant enter End with remaining Moves", evt.msg());
+        assertEquals("MOVE_ERROR_TOO_MANY_MOVES_FOR_GOAL", evt.msg());
     }
 
     // Sieg, wenn erster Meeple das Ziel erreicht
@@ -325,28 +337,6 @@ public class MovementServiceMeepleTest {
         assertInstanceOf(FrontendMoveEvent.class, result);
     }
 
-    // Verlust der restlichen Moves, wenn man in eine Barriere rennt
-    @Test
-    void moveMeepleRunsIntoBarrierLosesRemainingMoves() {
-
-        Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
-        nextField.addNeighbour(dummyField, Direction.NORTH);
-
-        Meeple barrier = new Meeple(true);
-        barrier.setCurrentField(nextField);
-        board.addBarrier(barrier);
-
-        MovementCommand cmd = new MovementCommand(meeple.getId(), Direction.NORTH);
-
-        FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
-
-        assertInstanceOf(FrontendRejectedByBarrierEvent.class, result);
-
-        assertEquals(currentField, meeple.getCurrentField());
-
-        assertEquals(0, player.getRemainingMoves());
-    }
-
     // Wenn man genau auf einer Barriere landet, darf man sie verschieben
     @Test
     void moveMeepleHitsBarrierOnLastMoveTriggersBarrierMove() {
@@ -382,6 +372,9 @@ public class MovementServiceMeepleTest {
 
         player.setRemainingMoves(LAST_MOVE);
 
+        Field furtherField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
+        currentField.addNeighbour(furtherField, Direction.SOUTH);
+
         Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
         nextField.addNeighbour(dummyField, Direction.NORTH);
 
@@ -396,7 +389,7 @@ public class MovementServiceMeepleTest {
 
         FrontendMoveRejectedEvent evt = (FrontendMoveRejectedEvent) result;
         assertEquals("MOVE_ERROR", evt.type());
-        assertEquals("Attempt to occupy a field with multiple meeple failed", evt.msg());
+        assertEquals("MOVE_ERROR_OCCUPIED_BY_OWN_MEEPLE", evt.msg());
 
         assertEquals(currentField, meeple.getCurrentField());
     }
@@ -510,13 +503,13 @@ public class MovementServiceMeepleTest {
 
         FrontendEvent result = movementService.moveMeeple(lobby.getId(), cmd, player);
 
-        assertInstanceOf(FrontendMoveEvent.class, result);
+        assertInstanceOf(FrontendMoveWithLossEvent.class, result);
 
-        FrontendMoveEvent evt = (FrontendMoveEvent) result;
+        FrontendMoveWithLossEvent evt = (FrontendMoveWithLossEvent) result;
 
         assertEquals(nextField.getId(), evt.targetField());
 
-        assertEquals(MOVES - 1, evt.remainingMoves());
+        assertEquals(NO_MOVES, evt.remainingMoves());
     }
 
     // Duell, wenn man mit dem letzte Move auf einem Feld mit einem gegnerischen
@@ -526,11 +519,21 @@ public class MovementServiceMeepleTest {
         player.setRemainingMoves(LAST_MOVE);
 
         Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
+        Field dummyField2 = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(2, 2));
         nextField.addNeighbour(dummyField, Direction.NORTH);
 
         Player rival = new Player(Color.BLUE);
-        Meeple rivalMeeple = rival.getMeeples()[0];
-        rivalMeeple.setCurrentField(nextField);
+        Meeple rivalMeeple2 = rival.getMeeples()[1];
+        Meeple rivalMeeple3 = rival.getMeeples()[2];
+        Meeple rivalMeeple4 = rival.getMeeples()[3];
+        Meeple rivalMeeple5 = rival.getMeeples()[4];
+        rivalMeeple2.setCurrentField(dummyField2);
+        rivalMeeple3.setCurrentField(dummyField2);
+        rivalMeeple4.setCurrentField(dummyField2);
+        rivalMeeple5.setCurrentField(dummyField2);
+
+        Meeple rivalMeeple1 = rival.getMeeples()[0];
+        rivalMeeple1.setCurrentField(nextField);
 
         lobby.setPlayers(List.of(player, rival));
 
@@ -542,13 +545,13 @@ public class MovementServiceMeepleTest {
 
         FrontendDuelEvent evt = (FrontendDuelEvent) result;
         assertEquals(meeple.getId(), evt.firstMeepleId());
-        assertEquals(rivalMeeple.getId(), evt.secondMeepleId());
+        assertEquals(rivalMeeple1.getId(), evt.secondMeepleId());
         assertEquals(nextField.getId(), evt.targetField());
-        assertEquals(0, evt.remainingMoves());
+        assertEquals(NO_MOVES, evt.remainingMoves());
 
         assertEquals(nextField, meeple.getCurrentField());
 
-        assertEquals(0, player.getRemainingMoves());
+        assertEquals(NO_MOVES, player.getRemainingMoves());
     }
 
     // gegnerischer Meeple wird uebersprungen, wenn man nicht mit dem letzten Move
@@ -558,8 +561,19 @@ public class MovementServiceMeepleTest {
 
         Field dummyField = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(0, 2));
         nextField.addNeighbour(dummyField, Direction.NORTH);
+        Field dummyField2 = new Field(UUID.randomUUID(), FieldType.NORMAL, new Position(2, 2));
 
         Player rival = new Player(Color.BLUE);
+
+        Meeple rivalMeeple2 = rival.getMeeples()[1];
+        Meeple rivalMeeple3 = rival.getMeeples()[2];
+        Meeple rivalMeeple4 = rival.getMeeples()[3];
+        Meeple rivalMeeple5 = rival.getMeeples()[4];
+        rivalMeeple2.setCurrentField(dummyField2);
+        rivalMeeple3.setCurrentField(dummyField2);
+        rivalMeeple4.setCurrentField(dummyField2);
+        rivalMeeple5.setCurrentField(dummyField2);
+
         Meeple rivalMeeple = rival.getMeeples()[0];
         rivalMeeple.setCurrentField(nextField);
 

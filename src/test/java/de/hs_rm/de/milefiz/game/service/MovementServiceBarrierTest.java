@@ -30,11 +30,14 @@ import de.hs_rm.de.milefiz.messaging.commands.MoveBarrierCommand;
 import de.hs_rm.de.milefiz.messaging.events.FrontendEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveBarrierEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendMoveBarrierRejectedEvent;
+import de.hs_rm.de.milefiz.game.service.DuelService;
+import de.hs_rm.de.milefiz.game.service.DuelServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-public class MovementServiceBarrierTest {
+class MovementServiceBarrierTest {
     @Mock
     private LobbyManager lobbyManager;
+    private DuelService duelService;
 
     private MovementService movementService;
     private Lobby lobby;
@@ -50,7 +53,7 @@ public class MovementServiceBarrierTest {
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        movementService = new MovementServiceImpl(lobbyManager);
+        movementService = new MovementServiceImpl(lobbyManager, duelService);
 
         // Felder
         startField = new Field(UUID.randomUUID(), FieldType.START_GREEN, new Position(0, 0));
@@ -118,7 +121,7 @@ public class MovementServiceBarrierTest {
 
         FrontendMoveBarrierRejectedEvent evt = (FrontendMoveBarrierRejectedEvent) result;
         assertEquals("BARRIER_MOVE_ERROR", evt.type());
-        assertEquals("Cant place a barrier on Start or End", evt.msg());
+        assertEquals("MOVE_BARRIER_REJECTED_START_OR_END", evt.msg());
     }
 
     // Versuch Barriere auf Endfeld zu setzen
@@ -132,7 +135,7 @@ public class MovementServiceBarrierTest {
 
         FrontendMoveBarrierRejectedEvent evt = (FrontendMoveBarrierRejectedEvent) result;
         assertEquals("BARRIER_MOVE_ERROR", evt.type());
-        assertEquals("Cant place a barrier on Start or End", evt.msg());
+        assertEquals("MOVE_BARRIER_REJECTED_START_OR_END", evt.msg());
     }
 
     // Versuch eine Barriere auf Feld mit Meeple zu setzen
@@ -147,7 +150,7 @@ public class MovementServiceBarrierTest {
 
         FrontendMoveBarrierRejectedEvent evt = (FrontendMoveBarrierRejectedEvent) result;
         assertEquals("BARRIER_MOVE_ERROR", evt.type());
-        assertEquals("Cant place a barrier on an occupied Field", evt.msg());
+        assertEquals("MOVE_BARRIER_OCCUPIED", evt.msg());
     }
 
     // Versuch Barriere auf Feld mit Barriere zu setzen
@@ -166,7 +169,7 @@ public class MovementServiceBarrierTest {
 
         FrontendMoveBarrierRejectedEvent evt = (FrontendMoveBarrierRejectedEvent) result;
         assertEquals("BARRIER_MOVE_ERROR", evt.type());
-        assertEquals("Cant place a barrier on an occupied Field", evt.msg());
+        assertEquals("MOVE_BARRIER_OCCUPIED", evt.msg());
     }
 
 }
