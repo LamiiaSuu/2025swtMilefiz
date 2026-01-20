@@ -106,6 +106,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     playerToken: string
     energy: number
     isJumping: boolean
+    hasRolled: boolean
     currentDiceRoll?: number
     currentField: string
     activeMeeple: string
@@ -117,6 +118,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     playerToken: '',
     energy: 0, //Energy des Spielers
     isJumping: false, //Flag, ob sich der Spieler in einer Sprungaktion befindet
+    hasRolled: false,
     currentDiceRoll: undefined, //Würfel ergebnis
     currentField: "",
     activeMeeple: "",
@@ -179,6 +181,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           cooldown.active = true
           cooldown.remainingSeconds = event.cooldown
           energy.isEnergyFresh = true
+          gamedata.hasRolled = true
         }
 
         // Wenn der Spieler im Moment noch nicht Würfeln darf
@@ -186,6 +189,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           console.log(`Player ${event.playerId} cannot roll their dice!`,)
           audioStore.playSfx('eventError')
           cooldown.remainingSeconds = event.seconds
+          showWarning(`ROLL_DICE_ERROR`)
         }
 
         // Wenn der Spieler im Moment noch nicht Würfeln darf, weil er noch Moves übrig hat, wird hier die Nachricht abgefangen und die verbleibenden Sekunden werden geupdatet.
@@ -247,6 +251,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.moved = event.moved
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
+            if (event.remainingMoves === 0) {
+              gamedata.hasRolled = false
+            }
           }
         }
         // LOBBY_UPDATE wird immer ausgerufen, wenn sich Werte der Lobby (außer das Board) geupdatet haben. Dazu zählt auch, wenn neue Spieler gejoint sind
@@ -272,15 +279,21 @@ export const useMilefizStore = defineStore('milefizstore', () => {
           }
           return
         } else if (event.type === 'SAVE_ENERGY_ERROR') {
-          if (event.playerId == gamedata.playerId) {
+          if (event.playerId === gamedata.playerId) {
             console.warn('Energy save rejected:', event.msg)
-            showWarning(`SAVE_ENERGY_ERROR`)
+            if (gamedata.moved) {
+              console.log("Meeple already moved")
+              showWarning(`SAVE_ENERGY_ERROR_MEEPLE_MOVED`)
+            } else if (energy.isEnergyFull) {
+              console.log("Max energy already reached")
+              showWarning(`SAVE_ENERGY_ERROR_MAX_ENERGY`)
+            }
           }
           return
         }
         // Wenn energy erfolgreich konsumiert wurde, wird die energy auch frontendseitig resettet
         else if (event.type === 'CONSUME_ENERGY') {
-          if (event.playerId == gamedata.playerId) {
+          if (event.playerId === gamedata.playerId) {
             gamedata.energy = event.energy
             energy.isEnergyFull = event.hasFullEnergy
           }
@@ -288,7 +301,7 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             triggerJumpLocally(event.meepleId)
           }
         } else if (event.type === 'CONSUME_ENERGY_ERROR') {
-          if (event.playerId == gamedata.playerId) {
+          if (event.playerId === gamedata.playerId) {
             console.warn('Consume energy rejected:', event.msg)
             //audioStore.playSfx('eventError')
             showWarning(`CONSUME_ENERGY_ERROR`)
@@ -300,6 +313,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.moved = event.moved
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
+            if (event.remainingMoves === 0) {
+              gamedata.hasRolled = false
+            }
             showWarning(`REMAINING_MOVES_LOST`)
             console.warn("lost remaining moves")
           }
@@ -313,6 +329,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             gamedata.currentField = event.targetField
             gamedata.activeMeeple = event.id
             openMinimap(event.barrierId, event.playerId, event.currentField)
+            if (event.remainingMoves === 0) {
+              gamedata.hasRolled = false
+            }
           }
         }
         if (event.type === "MOVE_BARRIER") {
@@ -340,6 +359,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
             audioStore.playSfx('impactBarrier')
             gamedata.moved = false
             gamedata.currentDiceRoll = event.remainingMoves
+            if (event.remainingMoves === 0) {
+              gamedata.hasRolled = false
+            }
           }
         }
         if (event.type === "DUEL") {
@@ -348,6 +370,9 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
           if (event.playerId === gamedata.playerId) {
             gamedata.currentDiceRoll = event.remainingMoves
+            if (event.remainingMoves === 0) {
+              gamedata.hasRolled = false
+            }
           }
           if (event.playerId === gamedata.playerId || event.rivalId === gamedata.playerId) {
             const old = activeDuels[event.duelId] ?? { state: {} }
@@ -1096,6 +1121,12 @@ export const useMilefizStore = defineStore('milefizstore', () => {
       return
     }
 
+    if (!gamedata.hasRolled) {
+      console.error('Cannot save energy: Player has not yet rolled')
+      showWarning(`SAVE_ENERGY_ERROR_DICE_NOT_ROLLED`)
+      return
+    }
+
     const energySaveCommand: EnergyCommand = { playerId: gamedata.playerId, meepleId: "" }
 
     const body = JSON.stringify(energySaveCommand)
@@ -1182,8 +1213,30 @@ export const useMilefizStore = defineStore('milefizstore', () => {
 
 
   /**
-   * Pop Up Menu Funktionen
+   * Pop Up Funktionen
   */
+  const isAnyDuelActive = computed(() => Object.keys(activeDuels).length > 0)
+
+  const isAnyMenuOpen = computed(() =>
+    popUpMenuOpen.value ||
+    popUpSettingsOpen.value ||
+    popUpTutorialOpen.value
+  )
+
+  const isAnyNonMenuOpen = computed(() =>
+    minimap.isMiniMapOpen ||
+    gameFinished.value ||
+    Object.keys(activeDuels).length > 0
+  )
+
+  const isAnyPopUpOpen = computed(() =>
+    popUpMenuOpen.value ||
+    popUpSettingsOpen.value ||
+    popUpTutorialOpen.value ||
+    minimap.isMiniMapOpen ||
+    gameFinished.value ||
+    Object.keys(activeDuels).length > 0
+  )
 
   // Oeffnet PopUp Menu
   function openPopUpMenu() {
@@ -1291,6 +1344,10 @@ export const useMilefizStore = defineStore('milefizstore', () => {
     winnerName,
     gameFinished,
     getWinnerColor,
+    isAnyDuelActive,
+    isAnyPopUpOpen,
+    isAnyMenuOpen,
+    isAnyNonMenuOpen,
     popUpMenuOpen,
     popUpSettingsOpen,
     popUpTutorialOpen,

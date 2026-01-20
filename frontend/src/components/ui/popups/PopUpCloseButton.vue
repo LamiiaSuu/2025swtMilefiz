@@ -25,20 +25,22 @@ function closePopUps() {
 <template>
     <!-- Close icons created by Rutmer Zijlstra - Flaticon: https://www.flaticon.com/free-icon/cross_9675141?term=close&page=2&position=64&origin=search&related_id=9675141 -->
     <button class="close-button" @click="closePopUps()">
-        <slot></slot>
-        <img class="close-icon" src="@/assets/buttons/close_button_icon.png" alt="X"/>
+        <img class="close-icon" src="@/assets/buttons/close_button_icon.png" alt="X" />
+        <span class="close-hotkey">[ M ]</span>
     </button>
 </template>
 
 <style scoped>
 .close-button {
     position: fixed;
-    top: 5vh;
-    right: 1vw;
+    top: 2vh;
+    right: 3vw;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: -1vh;
+    justify-content: center;
 
     background: transparent;
     cursor: pointer;
@@ -51,11 +53,20 @@ function closePopUps() {
 
 
 .close-icon {
-    width: 10vh;
-    height: 10vh;
+    position: relative;
+    width: 6vh;
+    height: 6vh;
 
     filter: brightness(0) invert(1);
-    flex-shrink: 0;
+    /* flex-shrink: 0; */
+}
+
+.close-hotkey {
+    font-size: 2vh;
+    font-weight: bold;
+    color: #ffffff;
+    font-family: "AcmeFont", sans-serif;
+    line-height: 1;
 }
 
 

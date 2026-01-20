@@ -1,4 +1,4 @@
-package de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame;
+package de.hs_rm.de.milefiz.game.model.minigames.monkeytypegame;
 
 import java.time.Instant;
 import java.util.UUID;

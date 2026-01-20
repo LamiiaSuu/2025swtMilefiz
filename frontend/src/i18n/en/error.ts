@@ -1,6 +1,7 @@
 import type { ErrorCode } from '@/errors/errorCodes'
 
 export const ERRORS_EN: Record<ErrorCode, string> = {
+    ROLL_DICE_ERROR: "Cooldown active - cannot yet roll the dice",
     ROLL_DICE_ERROR_MOVES_LEFT: 'Moves remaining - cannot roll the dice yet!',
     REMAINING_MOVES_LOST: 'No possible moves left - remaining moves lost!',
     CHEATED: 'You little cheater!',
@@ -14,7 +15,9 @@ export const ERRORS_EN: Record<ErrorCode, string> = {
     MOVE_BARRIER_REJECTED_START_OR_END: 'Barrier cannot be placed on start or goal spaces',
     MOVE_BARRIER_OCCUPIED: 'Barrier cannot be placed on an occupied space',
     REJECTED_BY_BARRIER: 'Ouch! That looked painful...',
-    SAVE_ENERGY_ERROR: 'Maximum energy reached or meeple already moved!',
+    SAVE_ENERGY_ERROR_MAX_ENERGY: "Maximum energy already reached!",
+    SAVE_ENERGY_ERROR_MEEPLE_MOVED: "Meeple has already been moved!",
+    SAVE_ENERGY_ERROR_DICE_NOT_ROLLED: "Dice not rolled - no energy to store!",
     CONSUME_ENERGY_ERROR: 'Not enough energy for a jump!',
     NO_LOBBY_FOUND: 'Lobby not found!',
     NO_FILE_CHOSEN: 'No file selected!',

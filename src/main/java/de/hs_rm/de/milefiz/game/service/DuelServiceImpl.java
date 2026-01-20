@@ -25,9 +25,9 @@ import de.hs_rm.de.milefiz.game.model.minigames.ColorbrainGame;
 import de.hs_rm.de.milefiz.game.model.minigames.DiceGame;
 import de.hs_rm.de.milefiz.game.model.minigames.MathGame;
 import de.hs_rm.de.milefiz.game.model.minigames.Quizgame.QuizGame;
+import de.hs_rm.de.milefiz.game.model.minigames.monkeytypegame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.game.model.minigames.RockPaperScissorsGame;
 import de.hs_rm.de.milefiz.game.model.minigames.SlotMachineGame;
-import de.hs_rm.de.milefiz.game.model.minigames.monkeyTypeGame.MonkeyTypeGame;
 import de.hs_rm.de.milefiz.messaging.FrontendMessagingService;
 import de.hs_rm.de.milefiz.messaging.LobbyMessage;
 import de.hs_rm.de.milefiz.messaging.events.FrontendBalloonGameUpdateEvent;
@@ -151,7 +151,6 @@ public class DuelServiceImpl implements DuelService {
         if (gameFactories.isEmpty()) {
             throw new IllegalStateException("No mini games registered.");
         }
-        logger.info("NEXT GAME: currentGameIndex = {}", this.currentGameIndex);
         MiniGame game = gameFactories.get(currentGameIndex).get();
 
         if (currentGameIndex < gameFactories.size()-1) {
@@ -187,7 +186,6 @@ public class DuelServiceImpl implements DuelService {
      */
     @Override
     public MiniGame assignGameToDuel(UUID duelId) {
-        logger.info("ASSIGN: selectRandomMinigame = {}", selectRandom);
         Duel duel = duels.get(duelId);
 
         if (duel == null) {
@@ -428,7 +426,6 @@ public class DuelServiceImpl implements DuelService {
 
     @Override
     public void setSelectRandom(boolean selectRandom) {
-        logger.info("SETTER selectRandomMinigame = {}", selectRandom);
         this.selectRandom = selectRandom;
     }
 

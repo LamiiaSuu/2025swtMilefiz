@@ -80,19 +80,16 @@ const onMouseMove = (e: MouseEvent) => {
   if (!props.useFirstPerson) return // Keine Maussteurung
 
   // PointerLock verlassen, wenn ein PopUp offen ist
-  if (milefizStore.popUpMenuOpen || milefizStore.popUpSettingsOpen || milefizStore.gameFinished || milefizStore.minimap.isMiniMapOpen) {
+  if (milefizStore.isAnyPopUpOpen) {
     if (document.pointerLockElement) {
       document.exitPointerLock()
     }
+    props.useFirstPerson
     return
   }
 
   
-  // Wenn ein Duell aktiv ist -> alle Steuerungen blockieren
-  if (Object.keys(milefizStore.activeDuels).length > 0) {
-    e.preventDefault()
-    return
-  }
+  
   // Horizontale Rotation - Dreht Charakter!
   horizontalRotation.value -= e.movementX * mouseSensitivity
   emit('rotateCharacter', horizontalRotation.value)
