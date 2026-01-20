@@ -104,15 +104,31 @@ public class PlantingServiceImpl implements PlantingService {
                     int yCeil = (int) Math.ceil(yShifted);
 
                     // Blockierung prüfen
-                    if (xFloor >= 0 && xCeil < blockedByPath.length &&
-                            yFloor >= 0 && yCeil < blockedByPath[0].length) {
-                        int isBlocked = blockedByPath[xFloor][yFloor] +
-                                blockedByPath[xFloor][yCeil] +
-                                blockedByPath[xCeil][yFloor] +
-                                blockedByPath[xCeil][yCeil];
-                        if (isBlocked > 0) {
-                            continue;
+                    boolean blocked = false;
+                    int w = blockedByPath.length;
+                    int h = blockedByPath[0].length;
+                    int searchRadius = 3;
+
+                    for (int xi = xFloor - searchRadius; xi <= xCeil + searchRadius && !blocked; xi++) {
+                        for (int yi = yFloor - searchRadius; yi <= yCeil + searchRadius; yi++) {
+                            if (xi < 0 || yi < 0 || xi >= w || yi >= h) {
+                                continue;
+                            }
+                            int cell = blockedByPath[xi][yi];
+                            if (cell > 0) {
+                                double dx = xShifted - xi;
+                                double dy = yShifted - yi;
+                                double dist = Math.hypot(dx, dy);
+                                double threshold = (cell == 2) ? 2.0 : 1.0;
+                                if (dist < threshold) { // strictly less -> block
+                                    blocked = true;
+                                    break;
+                                }
+                            }
                         }
+                    }
+                    if (blocked) {
+                        continue;
                     }
 
                     // Innerhalb oder außerhalb?
@@ -160,8 +176,9 @@ public class PlantingServiceImpl implements PlantingService {
      */
     private int[][] getBlockedPositions(BoardDTO boardDTO, int[] minPos, int offsetX, int offsetY) {
         int[] maxPos = getMaxPos(boardDTO);
-        int width = maxPos[0] - minPos[0] + 2 * 200; // +Border
-        int height = maxPos[1] - minPos[1] + 2 * 200;
+        int treeBorder = offsetX + minPos[0];
+        int width = maxPos[0] - minPos[0] + 2 * treeBorder;
+        int height = maxPos[1] - minPos[1] + 2 * treeBorder;
 
         int[][] res = new int[width + 4][height + 4];
 
@@ -172,11 +189,12 @@ public class PlantingServiceImpl implements PlantingService {
             int y = p.getY() + offsetY;
 
             if (x >= 0 && x < res.length && y >= 0 && y < res[0].length) {
-                res[x][y] = 1;
-
                 if (field.getType().isStart() || field.getType().isEnd()) {
                     res = blockSourrounding(2, x, y, res);
+                    res[x][y] = 2;
                     continue;
+                } else {
+                    res[x][y] = 1;
                 }
 
                 if (field.getNorth() != null && y + 1 < res[0].length) {

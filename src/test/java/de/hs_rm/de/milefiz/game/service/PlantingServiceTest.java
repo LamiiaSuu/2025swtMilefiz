@@ -1,9 +1,7 @@
 package de.hs_rm.de.milefiz.game.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -81,12 +79,12 @@ class PlantingServiceTest {
         for (PositionFloat treePos : treePositions) {
 
             for (Position fPos : fieldPositions) {
-                float deltaX = Math.abs(fPos.getX() - treePos.getX());
-                float deltaY = Math.abs(fPos.getY() - treePos.getY());
-                if (deltaX <= 0.5 && deltaY <= 0.5) {
-                    System.out.println("false");
-                }
-                assertFalse(deltaX <= 0.5 && deltaY <= 0.5);
+                double dx = fPos.getX() - treePos.getX();
+                double dy = fPos.getY() - treePos.getY();
+                double dist = Math.hypot(dx, dy);
+                // dist < 1.0 ist nicht erlaubt, aber 1.0 ist erlaubt
+                assertFalse(dist < 1.0,
+                        () -> "Baum bei " + treePos + " ist zu nah an Feld  " + fPos);
             }
         }
     }
@@ -97,7 +95,7 @@ class PlantingServiceTest {
 
         assertNotNull(boardDTO.getTrees());
         assertTrue(boardDTO.getTrees().isEmpty(),
-            "Bei Density 0 dürfen keine Bäume gepflanzt werden");
+                "Bei Density 0 dürfen keine Bäume gepflanzt werden");
     }
 
     @Test
@@ -106,7 +104,7 @@ class PlantingServiceTest {
 
         assertNotNull(boardDTO.getTrees());
         assertFalse(boardDTO.getTrees().isEmpty(),
-            "Bei positiver Density sollten Bäume gepflanzt werden");
+                "Bei positiver Density sollten Bäume gepflanzt werden");
     }
 
     @Test
@@ -129,15 +127,12 @@ class PlantingServiceTest {
             PositionFloat pos = tree.getTreePosition();
 
             assertTrue(
-                pos.getX() >= minX - 100 && pos.getX() <= maxX + 100,
-                "Baum-X liegt außerhalb des erwarteten Bereichs"
-            );
+                    pos.getX() >= minX - 100 && pos.getX() <= maxX + 100,
+                    "Baum-X liegt außerhalb des erwarteten Bereichs");
             assertTrue(
-                pos.getY() >= minY - 100 && pos.getY() <= maxY + 100,
-                "Baum-Y liegt außerhalb des erwarteten Bereichs"
-            );
+                    pos.getY() >= minY - 100 && pos.getY() <= maxY + 100,
+                    "Baum-Y liegt außerhalb des erwarteten Bereichs");
         }
     }
-
 
 }
