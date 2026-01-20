@@ -713,4 +713,20 @@ public class MiniGameController {
 
                 messaging.sendEvent(new LobbyMessage(lobby, event));
         }
+
+        @MessageMapping("/milefiz/lobby/{lobbyId}/duel/{duelId}/colorbrain/getColor")
+        public void handleGetColorEvent(
+                        @DestinationVariable UUID lobbyId,
+                        @DestinationVariable UUID duelId,
+                        Player player) throws LobbyNotFoundException {
+
+                logger.info("Player {} requesting color for colorbrain duel {}",
+                                player.getId(), duelId);
+
+                Lobby lobby = lobbyManager.getLobby(lobbyId);
+                ColorbrainGame game = (ColorbrainGame) duelService.getMiniGame(duelId);
+
+
+                broadcastColorbrainUpdate(lobby, duelId, game);
+        }
 }

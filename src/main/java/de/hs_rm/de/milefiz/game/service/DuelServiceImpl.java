@@ -254,24 +254,6 @@ public class DuelServiceImpl implements DuelService {
     }
 
     /**
-     * Initialisiert und schickt die Farben vom Colorbrain Minigame ans Frontend.
-     */
-    public void initColorBrain(Duel duel, Lobby lobby, ColorbrainGame game) {
-        var event = new FrontendColorbrainGameUpdateEvent(
-                duel.getId(),
-                game.getPlayer1(),
-                game.getPlayer2(),
-                game.getPlayer1Pick(),
-                game.getPlayer2Pick(),
-                game.getSelectedColorNames(), // hier sind die Farben
-                null, // noch kein Gewinner
-                false // noch nicht fertig
-        );
-
-        messaging.sendEvent(new LobbyMessage(lobby, event));
-    }
-
-    /**
      * Wird automatisch aufgerufen, wenn ein Mini-Game beendet ist.
      * <p>
      * Diese Methode:

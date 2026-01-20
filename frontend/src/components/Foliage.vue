@@ -1,10 +1,19 @@
 <script setup lang="ts">
 import { useGLTF } from '@tresjs/cientos'
-import { ref, watchEffect, watch, computed } from 'vue'
-import { BufferGeometry, DynamicDrawUsage, InstancedMesh, Material, Mesh, Object3D, Quaternion, Vector3 } from 'three'
+import { ref, watch, computed } from 'vue'
+import {
+  BufferGeometry,
+  DynamicDrawUsage,
+  InstancedMesh,
+  Material,
+  Mesh,
+  Object3D,
+  Quaternion,
+  Vector3,
+} from 'three'
 
-import { Sizes } from '@/stores/ITreeDTD';
-import { STANDARD_BOARD_ID, standardBoardAssets } from '@/types/BoardAsset';
+import { Sizes } from '@/stores/ITreeDTD'
+import { STANDARD_BOARD_ID, standardBoardAssets } from '@/types/BoardAsset'
 
 // Typ für Prop
 export type Element = {
@@ -16,15 +25,15 @@ type ElementWithScale = Element & { scale: number }
 
 // Typ für einzelne Meshes
 type Part = {
-  name: string,
-  geometry: BufferGeometry,
-  material: Material,
-  quaternion: Quaternion,
+  name: string
+  geometry: BufferGeometry
+  material: Material
+  quaternion: Quaternion
   type: Sizes
 }
 
 // Props
-const { elements, boardId } = defineProps<{ elements?: Element[], boardId?: string }>()
+const { elements, boardId } = defineProps<{ elements?: Element[]; boardId?: string }>()
 
 /**
  * Modelle
@@ -32,16 +41,39 @@ const { elements, boardId } = defineProps<{ elements?: Element[], boardId?: stri
  * variance – Varianz des Scalings um den in scale angegebenen wert in prozent (0 = Scaling wird 1:1 übernommen)
  */
 const models = {
-  [Sizes.Large]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.8, collisionRadius: 2.5 },
-  [Sizes.Medium]: { load: (useGLTF('/environment/trees/pine_high.glb', { draco: true })), scale: 1.2, collisionRadius: 2 },
-  [Sizes.Small]: { load: (useGLTF('/environment/trees/pine_low.glb', { draco: true })), scale: 1.2, collisionRadius: 1 },
-  [Sizes.Bush]: { load: (useGLTF('/environment/plants/bush_flowers.glb', { draco: true })), scale: 100, collisionRadius: 0.5 },
-  [Sizes.Mushroom]: { load: (useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true })), scale: 1, collisionRadius: 0.3 },
-  [Sizes.Grass_Smol]: { load: (useGLTF('/environment/plants/grass_smol.glb', { draco: true })), scale: 2, collisionRadius: 0.2 }
+  [Sizes.Large]: {
+    load: useGLTF('/environment/trees/pine_high.glb', { draco: true }),
+    scale: 1.8,
+    collisionRadius: 2.5,
+  },
+  [Sizes.Medium]: {
+    load: useGLTF('/environment/trees/pine_high.glb', { draco: true }),
+    scale: 1.2,
+    collisionRadius: 2,
+  },
+  [Sizes.Small]: {
+    load: useGLTF('/environment/trees/pine_low.glb', { draco: true }),
+    scale: 1.2,
+    collisionRadius: 1,
+  },
+  [Sizes.Bush]: {
+    load: useGLTF('/environment/plants/bush_flowers.glb', { draco: true }),
+    scale: 100,
+    collisionRadius: 0.5,
+  },
+  [Sizes.Mushroom]: {
+    load: useGLTF('/environment/mushrooms/mushroom_group.glb', { draco: true }),
+    scale: 1,
+    collisionRadius: 0.3,
+  },
+  [Sizes.Grass_Smol]: {
+    load: useGLTF('/environment/plants/grass_smol.glb', { draco: true }),
+    scale: 2,
+    collisionRadius: 0.2,
+  },
 }
 
 const imRefs = ref<InstancedMesh[]>([])
-
 
 // Dummy-Objekt für PLatzierung der einzelnen Elemente im InstancedMesh
 const dummy = new Object3D()
@@ -57,9 +89,7 @@ const isCollidingWithAsset = (element: Element): boolean => {
 
   const [tx, ty, tz] = element.position
 
-  // FIX: Verwende direkt standardBoardAssets statt BoardAsset.standardBoardAssets
-  for (let i = 0; i < standardBoardAssets.length; i++) {
-    const asset = standardBoardAssets[i]
+  for (const asset of standardBoardAssets) {
     if (!asset) continue
     const [ax, ay, az] = asset.position
 
@@ -75,19 +105,18 @@ const isCollidingWithAsset = (element: Element): boolean => {
   return false
 }
 
-
 /**
  * Gefilterte Elemente ohne Kollisionen
  */
 const filteredElements = computed(() => {
   if (!elements) return []
-  return elements.filter(e => !isCollidingWithAsset(e))
+  return elements.filter((e) => !isCollidingWithAsset(e))
 })
 
 /**
  * Sucht für den Angegebenen Type alle im zugehörigen Modell vorhandenen Meshes und gibt ein Array an
  * {@link Part} zurück
- * @param type 
+ * @param type
  */
 const getPartsForType = (type: Sizes) => {
   const model = models[type].load
@@ -96,19 +125,19 @@ const getPartsForType = (type: Sizes) => {
   if (!scene) return partsT
   scene.traverse((node) => {
     if ((node as Mesh).isMesh) {
-      const mesh = node as Mesh;
+      const mesh = node as Mesh
       const geom = mesh.geometry.clone() as BufferGeometry
-      const mat = (mesh.material as Material).clone();
+      const mat = (mesh.material as Material).clone()
       geom.computeVertexNormals()
 
       const meshWorldQuat = new Quaternion()
       mesh.getWorldQuaternion(meshWorldQuat)
-      const quat = meshWorldQuat.clone();
+      const quat = meshWorldQuat.clone()
 
       if (mat.transparent) {
-        mat.depthTest = true;
-        mat.alphaTest = 0.01;
-        mat.depthWrite = true;
+        mat.depthTest = true
+        mat.alphaTest = 0.01
+        mat.depthWrite = true
       }
       partsT.push({ name: mesh.name, geometry: geom, material: mat, quaternion: quat, type: type })
     }
@@ -118,7 +147,7 @@ const getPartsForType = (type: Sizes) => {
 
 const parts = computed<Part[]>(() => {
   const result: Part[] = []
-  
+
   for (const key of Object.values(Sizes)) {
     const type = key as Sizes
     const partsT = getPartsForType(type)
@@ -126,7 +155,7 @@ const parts = computed<Part[]>(() => {
       result.push(...partsT)
     }
   }
-  
+
   return result
 })
 
@@ -135,7 +164,6 @@ const getRef = (el: any, index: number) => {
   imRefs.value[index] = el
   el.instanceMatrix.setUsage(DynamicDrawUsage)
 }
-
 
 const Y_AXIS = new Vector3(0, 1, 0)
 
@@ -155,7 +183,7 @@ watch(
       const ref = imRefs.value[partIndex]
       if (!ref) return
 
-      const list = filteredElements.value.filter(e => e.type === part.type)
+      const list = filteredElements.value.filter((e) => e.type === part.type)
 
       ref.count = list.length
 
@@ -176,12 +204,18 @@ watch(
       ref.instanceMatrix.needsUpdate = true
     })
   },
-  { deep: true, flush: 'post' }
+  { deep: true, flush: 'post' },
 )
-
-
 </script>
 <template>
-  <TresInstancedMesh v-for="(part, index) in parts" :key="index" :ref="(el: any) => getRef(el, index)"
-    :args="[part.geometry, part.material, (filteredElements?.filter(e => e.type === part.type))?.length ?? 0]" />
+  <TresInstancedMesh
+    v-for="(part, index) in parts"
+    :key="index"
+    :ref="(el: any) => getRef(el, index)"
+    :args="[
+      part.geometry,
+      part.material,
+      filteredElements?.filter((e) => e.type === part.type)?.length ?? 0,
+    ]"
+  />
 </template>
