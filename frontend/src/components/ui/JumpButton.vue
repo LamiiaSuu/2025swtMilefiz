@@ -2,6 +2,7 @@
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, onServerPrefetch, onUnmounted, ref, watch } from "vue";
 import { useMilefizStore } from "@/stores/milefizstore";
 import { useAudioStore } from "@/stores/audioStore";
+import { useErrorHandler } from "@/composables/useErrorHandler";
 
 // Zugriff auf globalen PiniaStore
 const milefizStore = useMilefizStore()
@@ -9,6 +10,7 @@ const audio = useAudioStore()
 
 const isEnergyFull = computed(() => milefizStore.energy.isEnergyFull);
 const isJumping = computed(() => milefizStore.gamedata.isJumping)
+const { showWarning } = useErrorHandler()
 
 /**
  * - Registriert EventListener für Keyboard Input 
@@ -59,6 +61,8 @@ function jump() {
     if (disabled.value) {
         console.log("Hüpfen nicht erlaubt!")
         triggerErrorAnimation()
+        showWarning('CONSUME_ENERGY_ERROR')
+        return
     }
 
     console.log("Hüpfen Request gesendet.")
