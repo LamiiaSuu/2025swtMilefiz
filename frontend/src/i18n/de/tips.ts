@@ -3,7 +3,7 @@ export const TIPS_DE = [
   "Tipp: Bewege dich mit WASD über das Spielfeld.",
   "Tipp: Wechsle deine Figur mit 1–5, TAB für die nächste, Shift+TAB für die vorherige.",
   "Tipp: Drücke E, um zu würfeln – und dabei Energie zu sparen.",
-  "Tipp: Landest du mit deinem letzten Zug auf einem gegnerischen Feld, beginnt ein Duell.",
+  "Tipp: Landest du mit deinem letzten Schritt auf einem gegnerischen Feld, beginnt ein Duell.",
   "Tipp: In Duellen können auch beide verlieren.",
   "Tipp: Hüpfen kostet 6 Energie — plane voraus!",
   "Tipp: Der Sieg wartet auf dem Zielfeld. Sei zuerst dort!",

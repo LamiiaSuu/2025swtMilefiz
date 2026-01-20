@@ -159,8 +159,6 @@ public interface DuelService {
      */
     Duel getDuel(UUID duelId);
 
-    public void initColorBrain(Duel duel, Lobby lobby, ColorbrainGame game);
-
     /**
      * Setzt den Auswahlmodus für die Bestimmung des nächsten Minispiels.
      *

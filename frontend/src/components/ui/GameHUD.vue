@@ -86,8 +86,8 @@ function handleKeydown(e: KeyboardEvent) {
       return
     }
   } else { // ein beliebiges PopUp Offen
-    e.preventDefault()
     if (e.key === 'm' || e.key === 'M') { // M betätigt
+      e.preventDefault()
       if (milefizStore.isAnyMenuOpen) { // beliebiges Menü offen
         relockInProgress = true
         milefizStore.closePopUpMenu() // Menü(s) schließen
@@ -113,9 +113,10 @@ function handleKeydown(e: KeyboardEvent) {
       } else if (milefizStore.gameFinished) {
         e.stopPropagation()
         console.log("GAME FINISHED! CAN'T PERFORM PLAYER ACTIONS")
-      } else if (milefizStore.isAnyMenuOpen){
+      } else if (milefizStore.isAnyMenuOpen) {
         e.stopPropagation()
-        console.log("MENU OPEN! CAN'T PERFORM PLAYER ACTIONS")}
+        console.log("MENU OPEN! CAN'T PERFORM PLAYER ACTIONS")
+      }
     }
   }
   return
@@ -140,87 +141,88 @@ onUnmounted(() => {
 <template>
   <div class="hud-container">
     <template v-if="!milefizStore.gameFinished">
-      
-
-    <!-- Minimap Popup-->
-    <transition name="fade">
-      <MiniMapPopUp :is-open="milefizStore.minimap.isMiniMapOpen"
-        :selected-field-id="milefizStore.minimap.selectedFieldId"
-        :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId" @confirm="milefizStore.confirmMinimapSelection"
-        :style="{ '--own-color': colorToCss(milefizStore.minimap.ownColor) }">
-        <template #map>
-          <MiniMapGraph v-if="board" :board="board" :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
-            :selected-field-id="milefizStore.minimap.selectedFieldId" @select="milefizStore.selectMinimapField" />
-          <div v-else style="display:grid; place-items:center; width:100%; height:100%;">
-            Board lädt…
-          </div>
-        </template>
-
-      </MiniMapPopUp>
-    </transition>
-
-    <!-- Menu Popup -->
-    <transition name="fade">
-      <MenuPopUp
-        v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.popUpTutorialOpen" />
-    </transition>
-
-    <!-- Settings Popup -->
-    <transition name="fade">
-      <SettingsPopUp v-if="milefizStore.popUpSettingsOpen" />
-    </transition>
-
-    <!-- Tutorial Popup -->
-    <transition name="fade">
-      <TutorialPopUp v-if="milefizStore.popUpTutorialOpen" />
-    </transition>
-    <!-- Meeple Bar -->
-    <div style="position: absolute; top: 2vw; right: 0px;" class="meeple-icon-bar">
-      <MeepleBar />
-    </div>
-
-    <!-- Menu Button -->
-    <div>
-      <button class="ingame-menu-button" @click="openMenu()">
-        <img src="@/assets/hud/menus_white.png" class="ingame-menu-icon" alt="menu" />
-        <span class="ingame-hotkey">[ M ]</span>
-      </button>
-    </div>
 
 
-    <!-- Spielerliste -->
-    <div class="spielerliste-container">
-      <SpielerListe />
-    </div>
+      <!-- Minimap Popup-->
+      <transition name="fade">
+        <MiniMapPopUp :is-open="milefizStore.minimap.isMiniMapOpen"
+          :selected-field-id="milefizStore.minimap.selectedFieldId"
+          :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
+          @confirm="milefizStore.confirmMinimapSelection"
+          :style="{ '--own-color': colorToCss(milefizStore.minimap.ownColor) }">
+          <template #map>
+            <MiniMapGraph v-if="board" :board="board" :occupancy-by-field-id="milefizStore.minimap.occupancyByFieldId"
+              :selected-field-id="milefizStore.minimap.selectedFieldId" @select="milefizStore.selectMinimapField" />
+            <div v-else style="display:grid; place-items:center; width:100%; height:100%;">
+              Board lädt…
+            </div>
+          </template>
 
-    <!-- Würfelergebnis -->
-    <div class="dice-counter-container">
-      <DiceCounter />
-    </div>
+        </MiniMapPopUp>
+      </transition>
 
-    <div class="error-message-container">
-      <ErrorMessage />
-    </div>
+      <!-- Menu Popup -->
+      <transition name="fade">
+        <MenuPopUp
+          v-if="milefizStore.popUpMenuOpen && !milefizStore.popUpSettingsOpen && !milefizStore.popUpTutorialOpen" />
+      </transition>
 
-    <!-- Button Bar -->
-    <div style="position: absolute;bottom: 2vw; right: 0px;">
-      <div class="button-bar">
-        <SaveEnergyButton />
-        <JumpButton />
-        <DiceButton />
+      <!-- Settings Popup -->
+      <transition name="fade">
+        <SettingsPopUp v-if="milefizStore.popUpSettingsOpen" />
+      </transition>
+
+      <!-- Tutorial Popup -->
+      <transition name="fade">
+        <TutorialPopUp v-if="milefizStore.popUpTutorialOpen" />
+      </transition>
+      <!-- Meeple Bar -->
+      <div style="position: absolute; top: 2vw; right: 0px;" class="meeple-icon-bar">
+        <MeepleBar />
       </div>
-    </div>
 
-    <!-- Energy Bar -->
-    <div style="position: absolute;bottom: 3vw; left: 3vw;">
-      <div class="energy-bar-container">
-        <EnergyBar />
+      <!-- Menu Button -->
+      <div>
+        <button class="ingame-menu-button" @click="openMenu()">
+          <img src="@/assets/hud/menus_white.png" class="ingame-menu-icon" alt="menu" />
+          <span class="ingame-hotkey">[ M ]</span>
+        </button>
       </div>
-    </div>
+
+
+      <!-- Spielerliste -->
+      <div class="spielerliste-container">
+        <SpielerListe />
+      </div>
+
+      <!-- Würfelergebnis -->
+      <div class="dice-counter-container">
+        <DiceCounter />
+      </div>
+
+      <div class="error-message-container">
+        <ErrorMessage />
+      </div>
+
+      <!-- Button Bar -->
+      <div style="position: absolute;bottom: 2vw; right: 0px;">
+        <div class="button-bar">
+          <SaveEnergyButton />
+          <JumpButton />
+          <DiceButton />
+        </div>
+      </div>
+
+      <!-- Energy Bar -->
+      <div style="position: absolute;bottom: 3vw; left: 3vw;">
+        <div class="energy-bar-container">
+          <EnergyBar />
+        </div>
+      </div>
 
     </template>
 
-    
+
     <!-- Win Popup -->
     <transition name="fade">
       <WinPopUp v-if="milefizStore.gameFinished" />

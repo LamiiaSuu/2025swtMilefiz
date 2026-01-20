@@ -6,10 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import de.hs_rm.de.milefiz.game.model.Duel;
 import de.hs_rm.de.milefiz.game.model.MiniGame;
-import de.hs_rm.de.milefiz.messaging.LobbyMessage;
-import de.hs_rm.de.milefiz.messaging.events.FrontendColorbrainGameUpdateEvent;
 
 public class ColorbrainGame extends MiniGame {
 
@@ -40,6 +37,7 @@ public class ColorbrainGame extends MiniGame {
     private ColorbrainColor correctColor;
 
     /**
+     * Konstruktor
      * 
      * @param timeOut
      */
@@ -137,7 +135,7 @@ public class ColorbrainGame extends MiniGame {
     }
 
     /**
-     * 
+     * Prueft ob einer der beiden Spieler gewonnen hat.
      */
     private void checkWinCondition() {
         // erst auswerten wenn beide geklickt haben
@@ -158,8 +156,10 @@ public class ColorbrainGame extends MiniGame {
     /**
      * Prueft welcher der beiden Spieler gewonnen hat.
      * 
-     * @param player1Correct Wahr, wenn Spieler 1 die richtige Farbe geklickt hat, sonst falsch
-     * @param player2Correct Wahr, wenn Spieler 2 die richtige Farbe geklickt hat, sonst falsch
+     * @param player1Correct Wahr, wenn Spieler 1 die richtige Farbe geklickt hat,
+     *                       sonst falsch
+     * @param player2Correct Wahr, wenn Spieler 2 die richtige Farbe geklickt hat,
+     *                       sonst falsch
      */
     private void findWinner(boolean player1Correct, boolean player2Correct) {
         if (player1Correct && !player2Correct) {

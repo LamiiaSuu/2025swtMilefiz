@@ -2,7 +2,6 @@ package de.hs_rm.de.milefiz.game.model.minigames.monkeytypegame;
 
 import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +33,8 @@ import de.hs_rm.de.milefiz.game.service.MonkeyTypeWordService;
  * <h2>Timeout</h2>
  * Das Spiel endet automatisch nach {@link #getTimeOut()} Sekunden. In diesem
  * Fall wird
- * {@code winner = null} gesetzt. Der Timer wird über einen
- * {@link ScheduledExecutorService}
- * realisiert.
+ * {@code winner = null} gesetzt. Der eigentiche Timer wird im übergeordneten
+ * DuelService verwaltet.
  *
  * <h2>Validierung / Anti-Cheat</h2>
  * <ul>
