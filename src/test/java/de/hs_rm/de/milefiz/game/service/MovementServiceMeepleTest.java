@@ -6,12 +6,13 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import de.hs_rm.de.milefiz.game.lobby.LobbyManager;
 import de.hs_rm.de.milefiz.game.lobby.LobbyNotFoundException;
@@ -34,12 +35,16 @@ import de.hs_rm.de.milefiz.messaging.events.FrontendMoveWithLossEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendPlayerHasWonEvent;
 import de.hs_rm.de.milefiz.messaging.events.FrontendTriggerBarrierMoveEvent;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class MovementServiceMeepleTest {
 
     @Mock
     private LobbyManager lobbyManager;
     private DuelService duelService;
+
+    @Autowired
+    private MonkeyTypeWordService monkeyTypeWordService;
 
     private MovementService movementService;
     private Lobby lobby;
@@ -60,7 +65,7 @@ class MovementServiceMeepleTest {
 
     @BeforeEach
     void setUp() throws LobbyNotFoundException {
-        duelService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService);
+        duelService = new DuelServiceImpl(lobbyManager, messaging, duelResolutionService, monkeyTypeWordService);
         movementService = new MovementServiceImpl(lobbyManager, duelService);
 
         // Felder
@@ -509,7 +514,6 @@ class MovementServiceMeepleTest {
 
     // Duell, wenn man mit dem letzte Move auf einem Feld mit einem gegnerischen
     // Meeple landet
-    @Disabled("Failed für MonkeyType-Minigame wegen fehlender initialisierung")
     @Test
     void moveMeepleOnLastMoveOntoRivalMeepleTriggersDuelEvent() {
         player.setRemainingMoves(LAST_MOVE);

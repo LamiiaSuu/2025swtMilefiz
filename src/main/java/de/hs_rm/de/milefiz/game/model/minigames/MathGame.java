@@ -13,7 +13,7 @@ public class MathGame extends MiniGame {
 
     // Wahrscheinlichkeit (0.0 - 1.0), mit der ein schwerer Term ausgewählt wird
     @Value("${minigame.mathgame.schwerwahrs}")
-    private static double schwerwahrs;
+    private double schwerwahrs;
 
     private UUID player1; // ID des ersten Spielers, Initiator
     private UUID player2; // ID des zweiten Spielers
@@ -30,7 +30,8 @@ public class MathGame extends MiniGame {
      * @param timeOut Timeout in Sekunden, nach Ablauf wird {@link #forceMissingActions()} aufgerufen
      */
     public MathGame(int timeOut) {
-        this(timeOut, schwerwahrs, new Random());
+        super(3, "Kopfrechnen-Spiel", timeOut);
+        term = new Term(this.schwerwahrs, new Random());
     }
 
     public MathGame(int timeOut, double schwerwahrs, Random random) {
@@ -159,7 +160,7 @@ public class MathGame extends MiniGame {
         private Integer termElement1;
         private Integer termElement2;
         private Integer termValue;
-        private Operations operation;
+        
 
         /**
          * Schwere Terme
@@ -215,6 +216,7 @@ public class MathGame extends MiniGame {
          * Erzeugung eines zufälligen Terms aus Multiplikation, Addition oder Subtraktion
          */
         private void generateTerm() {
+            Operations operation;
 
             if (random.nextDouble() < schwerwahrs) {
                 GanzSchwer t = schwereTerme.get(random.nextInt(schwereTerme.size()));

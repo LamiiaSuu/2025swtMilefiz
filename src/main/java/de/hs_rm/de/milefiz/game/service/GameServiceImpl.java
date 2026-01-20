@@ -52,7 +52,7 @@ public class GameServiceImpl implements GameService {
      * 
      */
     public GameServiceImpl(DiceServiceImpl diceService, ApplicationEventPublisher publisher,
-            CooldownServiceImpl cooldownService, MovementService movementService, PlantingService plantingService)
+            CooldownServiceImpl cooldownService, MovementService movementService)
             throws IOException {
 
 
