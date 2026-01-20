@@ -119,11 +119,11 @@ public class GameServiceImpl implements GameService {
      * Verarbeitet ein Meeple-Bewegungskommando und delegiert die
      * Ausführung an den {@link MovementService}.
      *
-     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
+     * @param lobbyId die eindeutige ID der Lobby, in der der Schritt ausgeführt wird
      * @param moveCmd das Bewegungskommando mit Meeple-ID und Bewegungsrichtung
-     * @param player  der Spieler, der den Zug ausführt
+     * @param player  der Spieler, der den Schritt ausführt
      *
-     * @return ein {@link FrontendEvent}, das den Ausgang des Zuges beschreibt
+     * @return ein {@link FrontendEvent}, das den Ausgang des Schrittes beschreibt
      *
      * @see MovementService#moveMeeple(UUID, MovementCommand, Player)
      *

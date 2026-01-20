@@ -171,9 +171,9 @@ public class Player implements Principal {
      *
      * <p>
      * Ein Spieler kann sich bewegen, wenn er noch mindestens einen
-     * verbleibenden Zug ({@code remainingMoves > 0}) zur Verfügung hat. Die
+     * verbleibenden Schritt ({@code remainingMoves > 0}) zur Verfügung hat. Die
      * Anzahl der verfügbaren Züge wird normalerweise durch einen Würfelwurf
-     * bestimmt und nach jedem ausgeführten Zug mit {@link #useMove()}
+     * bestimmt und nach jedem ausgeführten Schritt mit {@link #useMove()}
      * reduziert.
      * </p>
      *
@@ -188,7 +188,7 @@ public class Player implements Principal {
     }
 
     /**
-     * Verbraucht einen Zug des Spielers.
+     * Verbraucht einen Schritt des Spielers.
      *
      * <p>
      * Reduziert die Anzahl der verbleibenden Züge ({@code remainingMoves}) um
