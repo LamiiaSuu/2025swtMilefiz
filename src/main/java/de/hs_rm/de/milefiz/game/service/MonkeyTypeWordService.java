@@ -110,7 +110,6 @@ public class MonkeyTypeWordService {
             return "404 Wort nicht gefunden.";
         }
         int randomIndex = ThreadLocalRandom.current().nextInt(words.size());
-        String word = words.get(randomIndex);
-        return word;
+        return words.get(randomIndex);
     }
 }

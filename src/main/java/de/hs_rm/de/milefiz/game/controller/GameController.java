@@ -62,7 +62,7 @@ public class GameController {
      */
     @PostMapping("/board/validate")
     public ResponseEntity<String> validateBoard(@RequestBody BoardDTO boardDTO) {
-        LOGGER.debug("Board zum Validieren: " + boardDTO.toString());
+        LOGGER.debug("Board zum Validieren: {}", boardDTO);
         Board board = BoardMapper.mapToBoard(boardDTO);
         try {
             boardService.validateBoard(board);
@@ -80,7 +80,7 @@ public class GameController {
      */
     @PostMapping("/board/generate")
     public BoardDTO generateTrees(@RequestBody BoardDTO boardDTO) {
-                LOGGER.debug("Generiere Bäume für Board: " + boardDTO.toString());
+                LOGGER.debug("Generiere Bäume für Board: {}", boardDTO);
                 boardDTO = this.plantingService.plantTrees(boardDTO, defaultPlantingDensity);
                 return boardDTO;
     }
