@@ -91,7 +91,7 @@ public class MovementServiceImpl implements MovementService {
      * Richtung.
      * 
      * Die Methode verarbeitet einen {@link MovementCommand} und prüft anhand der
-     * aktuellen Spielsituation, ob der Zug erlaubt ist. Dabei werden u.a. folgende
+     * aktuellen Spielsituation, ob der Schritt erlaubt ist. Dabei werden u.a. folgende
      * Regeln berücksichtigt:
      * 
      * +Der Spieler muss noch verbleibende Bewegungen besitzen.
@@ -114,12 +114,12 @@ public class MovementServiceImpl implements MovementService {
      * Bewegungs-Event oder ein spezielles Ablehnungs- bzw. Sonderereignis
      * (z.B. Sieg, Duell oder Barriereninteraktion) an das Frontend zurückgegeben.
      *
-     * @param lobbyId die eindeutige ID der Lobby, in der der Zug ausgeführt wird
+     * @param lobbyId die eindeutige ID der Lobby, in der der Schritt ausgeführt wird
      * @param moveCmd das Bewegungskommando mit Meeple-ID und Bewegungsrichtung
-     * @param player  der Spieler, der den Zug ausführt
+     * @param player  der Spieler, der den Schritt ausführt
      *
-     * @return ein {@link FrontendEvent}, das den Ausgang des Zuges beschreibt
-     *         (z.B. erfolgreiche Bewegung, Zugablehnung, Duell, Sieg oder
+     * @return ein {@link FrontendEvent}, das den Ausgang des Schrittes beschreibt
+     *         (z.B. erfolgreiche Bewegung, Schrittablehnung, Duell, Sieg oder
      *         Barriereninteraktion)
      *
      * @author Maximilian Ressel
@@ -255,12 +255,12 @@ public class MovementServiceImpl implements MovementService {
         // lastField wird jetzt im Meeple.setCurrentField aktualisiert
         meeple.setCurrentField(nextField);
 
-        // der erste Zug nach dem Würfeln und mehr als 1 move verfügbar
+        // der erste Schritt nach dem Würfeln und mehr als 1 move verfügbar
         if (isTurnBegin(player)) {
             player.setActiveMeeple(meeple);
         }
 
-        // Spieler nutzt einen Zug
+        // Spieler nutzt einen Schritt
         player.useMove();
         if (player.getRemainingMoves() == 0) {
             meeple.clearLastField();
@@ -289,8 +289,8 @@ public class MovementServiceImpl implements MovementService {
      * auf ein Start- noch auf ein Zielfeld gesetzt werden und das Zielfeld
      * darf nicht bereits durch einen Meeple oder eine andere Barriere belegt sein.
      * 
-     * Bei einem ungültigen Zug wird ein {@link FrontendMoveBarrierRejectedEvent}
-     * zurückgegeben. Ist der Zug gültig, wird die Barriere auf das Zielfeld gesetzt
+     * Bei einem ungültigen Schritt wird ein {@link FrontendMoveBarrierRejectedEvent}
+     * zurückgegeben. Ist der Schritt gültig, wird die Barriere auf das Zielfeld gesetzt
      * und ein {@link FrontendMoveBarrierEvent} erzeugt.
      *
      * @param lobbyId     die eindeutige ID der Lobby, in der die Barriere bewegt
@@ -300,7 +300,7 @@ public class MovementServiceImpl implements MovementService {
      * @param player      der Spieler, der die Aktion ausführt
      *
      * @return ein {@link FrontendEvent}, das entweder die erfolgreiche
-     *         Barrierenbewegung oder die Ablehnung des Zuges repräsentiert
+     *         Barrierenbewegung oder die Ablehnung des Schrittes repräsentiert
      *
      * @author Maximilian Ressel
      */
@@ -436,13 +436,13 @@ public class MovementServiceImpl implements MovementService {
      * Prüft, ob ein Spieler das Zielfeld betreten darf, und gibt das passende
      * FrontendEvent zurück.
      *
-     * Betritt der Spieler das Zielfeld mit dem letzten erlaubten Zug,
-     * wird der Sieg ausgelöst. Andernfalls wird der Zug abgelehnt.
+     * Betritt der Spieler das Zielfeld mit dem letzten erlaubten Schritt,
+     * wird der Sieg ausgelöst. Andernfalls wird der Schritt abgelehnt.
      *
      * @param meeple der Meeple, der bewegt werden soll
      * @param end    das Zielfeld
      * @param player der aktuelle Spieler
-     * @return ein FrontendEvent, das entweder den Sieg signalisiert oder den Zug
+     * @return ein FrontendEvent, das entweder den Sieg signalisiert oder den Schritt
      *         ablehnt
      * 
      * @author Maximilian Ressel
@@ -462,9 +462,9 @@ public class MovementServiceImpl implements MovementService {
     /**
      * Prüft, ob der Versuch, ein Feld mit einer Barriere zu betreten, erfolgreich
      * ist.
-     * Steht auf dem Barrierefeld bereits ein anderer Meeple, wird der Zug abgelehnt
+     * Steht auf dem Barrierefeld bereits ein anderer Meeple, wird der Schritt abgelehnt
      * Bei Erfolg darf die Barriere verschoben werden.
-     * Bei Misserfolg wird der Zug abgelehnt; steht auf dem aktuellen Feld ein
+     * Bei Misserfolg wird der Schritt abgelehnt; steht auf dem aktuellen Feld ein
      * gegnerischer Meeple, kann stattdessen ein Duell gestartet werden.
      *
      * @param meeple               der Meeple, der bewegt werden soll
@@ -514,9 +514,9 @@ public class MovementServiceImpl implements MovementService {
      * Prüft, ob der Zug auf einem Feld mit einem eigenen Meeple enden würde.
      *
      * @param player               der aktuelle Spieler
-     * @param targetField          das Zielfeld des Zuges
+     * @param targetField          das Zielfeld des Schrittes
      * @param otherOwnMeepleFields Felder, auf denen eigene (andere) Meeples stehen
-     * @return true, wenn es der letzte verbleibende Zug ist und das Zielfeld von
+     * @return true, wenn es der letzte verbleibende Schritte ist und das Zielfeld von
      *         einem eigenen Meeple belegt ist,
      *         sonst false
      * 
@@ -529,12 +529,12 @@ public class MovementServiceImpl implements MovementService {
 
     /**
      * Prüft, ob es in der gewählten Richtung noch legale Stop-Felder innerhalb der
-     * verbleibenden Züge gibt
+     * verbleibenden Schritte gibt
      * und ob der Meeple in eine Sackgasse läuft.
      *
      * Wenn innerhalb der Reichweite noch ein legales Endfeld existiert, wird
      * {@code Optional.empty()} zurückgegeben.
-     * Andernfalls wird der Zug ggf. abgelehnt (wenn das Zielfeld durch eigenen
+     * Andernfalls wird der Schritt ggf. abgelehnt (wenn das Zielfeld durch eigenen
      * Meeple oder duellierende Meeples blockiert ist)
      * oder der Zug endet auf dem Zielfeld (mit möglichem Duell bzw. Verlust-Event).
      *
@@ -592,8 +592,8 @@ public class MovementServiceImpl implements MovementService {
      *
      * @param player            der aktuelle Spieler
      * @param rivalMeepleFields Felder, auf denen gegnerische Meeples stehen
-     * @param targetField       das Zielfeld des Zuges
-     * @return true, wenn es der letzte verbleibende Zug ist und das Zielfeld von
+     * @param targetField       das Zielfeld des Schrittes
+     * @return true, wenn es der letzte verbleibende Schritt ist und das Zielfeld von
      *         einem gegnerischen Meeple belegt ist, sonst false
      * 
      * @author Maximilian Ressel
@@ -603,16 +603,16 @@ public class MovementServiceImpl implements MovementService {
     }
 
     /**
-     * Prüft, ob durch den Zug ein Duell ausgelöst wird, und leitet dieses
+     * Prüft, ob durch den Schritt ein Duell ausgelöst wird, und leitet dieses
      * gegebenenfalls ein.
      *
      * @param ownMeeple    der eigene Meeple, der bewegt wird
-     * @param targetField  das Zielfeld des Zuges
+     * @param targetField  das Zielfeld des Schrittes
      * @param player       der aktuelle Spieler
      * @param rivalMeeples alle gegnerischen Meeples
      * @param lobby        die aktuelle Lobby/Spielumgebung
      * @return Optional.empty(), wenn kein Duell ausgelöst wird; andernfalls ein
-     *         FrontendEvent zum Starten des Duells oder zur Ablehnung des Zuges
+     *         FrontendEvent zum Starten des Duells oder zur Ablehnung des Schrittes
      * 
      * @author Maximilian Ressel
      */
@@ -722,8 +722,8 @@ public class MovementServiceImpl implements MovementService {
      * Prüft, ob es sich um den Beginn eines neuen Zuges des Spielers handelt.
      *
      * @param player der aktuelle Spieler
-     * @return true, wenn der Spieler noch mehr als einen verbleibenden Zug hat
-     *         und in diesem Zug noch keine Bewegung durchgeführt wurde,
+     * @return true, wenn der Spieler noch mehr als einen verbleibenden Schritt hat
+     *         und in diesem Zug noch keinen Schritt durchgeführt wurde,
      *         sonst false
      * 
      * @author Maximilian Ressel
