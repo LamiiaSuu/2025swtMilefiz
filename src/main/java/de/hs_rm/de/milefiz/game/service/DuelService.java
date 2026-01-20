@@ -160,11 +160,6 @@ public interface DuelService {
     Duel getDuel(UUID duelId);
 
     /**
-     * Initialisiert und schickt die Farben vom Colorbrain Minigame ans Frontend.
-     */
-    public void initColorBrain(Duel duel, Lobby lobby, ColorbrainGame game);
-
-    /**
      * Setzt den Auswahlmodus für die Bestimmung des nächsten Minispiels.
      *
      * <p>

@@ -138,6 +138,16 @@ const handleColorClick = (color: string) => {
   )
 }
 
+const requestColor = () => {
+  if (!store.gamedata.lobby?.id || !props.duel?.duelId) return
+
+  store.sendLobbyMessage(
+    `/app/milefiz/lobby/${store.gamedata.lobby.id}/duel/${props.duel.duelId}/colorbrain/getColor`,
+    { playerId: store.gamedata.playerId }
+  )
+}
+
+
 /**
  * Findet welcher Spieler welche Farbe geklickt hat.
  * 
@@ -155,9 +165,13 @@ function getPlayerNameByColor(color: string) {
   if (props.duel?.state?.player2Pick === color) {
     clickedBy.push(String(getPlayerNameByMeeple(props.duel.secondMeeple)))
   }
-
+requestColor
   return clickedBy.join("& ") // falls beide dasselbe geklickt haben
 }
+
+onMounted(() => {
+  requestColor();
+})
 
 </script>
 

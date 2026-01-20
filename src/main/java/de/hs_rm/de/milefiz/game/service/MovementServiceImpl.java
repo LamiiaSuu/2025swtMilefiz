@@ -690,7 +690,6 @@ public class MovementServiceImpl implements MovementService {
             game.initPlayers(player, rivalPlayer);
         } else if (miniGame instanceof ColorbrainGame game) {
             game.initGame(player.getId(), rivalPlayer.getId());
-            duelService.initColorBrain(duel, lobby, game);
         }
         if (miniGame instanceof BalloonGame game) {
             game.initPlayers(player.getId(), rivalPlayer.getId());
