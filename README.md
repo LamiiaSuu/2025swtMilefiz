@@ -1,50 +1,83 @@
 # MI’lefiz
 
-MI’lefiz ist ein im Rahmen des Moduls **Softwaretechnik (Projekt 2025/26)** entwickeltes Mehrspieler-Spiel, das auf dem Brettspielklassiker **Malefiz** basiert und diesen um zusätzliche Mechaniken erweitert.  
-Im Fokus stehen eine saubere, erweiterbare Architektur, kontinuierliche Entwicklung im Scrum-Prozess sowie eine lauffähige Full-Stack-Anwendung mit eigenem Game-Server.
+MI’lefiz is a multiplayer game developed as part of the **Software Engineering module (Project 2025/26)**. It is based on the classic board game **Malefiz**, extended with additional mechanics and modern multiplayer features.  
+The project focuses on clean, extensible architecture, continuous development using Scrum, and a fully functional full-stack application with a dedicated game server.
 
-## Projektidee (fachlich)
+---
 
-Während klassisches Malefiz rundenbasiert gespielt wird, verfolgt MI’lefiz einen stärker interaktiven Ansatz:
+## Project Concept
 
-- **Mehrspieler-Spielinstanzen** auf einem serverseitig verwalteten Spielfeld (Map)
-- **3D-Spielansicht** aus Ego-Perspektive (umschaltbar zwischen eigenen Figuren)
-- **Bewegung entlang eines Wegenetzes** (Felder/Nodes)
-- **Nicht rundenbasiert**: Spieler können alle *n* Sekunden würfeln und eine Figur bewegen
-- **Begrenzte Sicht / keine vollständige Gegnerübersicht** (keine klassische Minimap)
-- **Duell-System**: Betritt eine Figur ein Feld einer gegnerischen Figur, wird ein Duell als Minigame ausgelöst
-- **Sperren-Mechanik**: Sperren können versetzt werden; belegte Felder werden im Auswahlmodus einheitlich markiert
+While classic Malefiz is strictly turn-based, MI’lefiz introduces a more interactive, real-time-oriented approach:
 
-Gewonnen hat, wer zuerst eine eigene Figur ins Zielfeld bringt.
+- **Multiplayer game sessions** managed on a server-side game map
+- **3D game view** from a first-person perspective (switchable between owned pieces)
+- **Movement along a defined path network** (fields/nodes)
+- **Not turn-based**: players can roll the dice every *n* seconds and move a piece
+- **Limited visibility**: no complete overview of opponent positions (no traditional minimap)
+- **Duel system**: entering a field occupied by an opponent triggers a duel as a minigame
+- **Block mechanic**: blocks can be repositioned; occupied fields are clearly highlighted during selection
 
-## Systemübersicht
+The goal is to be the first player to move one of their pieces to the target field.
 
-MI’lefiz besteht aus einem Web-Client (Frontend) und einem Spring-basierten Game-Server (Backend).  
-Die Kommunikation erfolgt sowohl über **REST** (z.B. initiale Requests, Aktionen/Commands) als auch über **WebSocket (STOMP / PubSub)** für Live-Updates des Spielzustands.
+---
 
-### Komponenten
+## System Overview
 
-- **Game Client**
-  - UI für Spielzustände, Interaktionen und Minigames
-  - 3D-Visualisierung des Spielfelds und der Figuren
-- **Game Server**
-  - Verwaltung von Spielinstanzen (Sessions)
-  - zentrale Spielregeln und Validierung
-  - Synchronisation der Clients (Events/State Updates)
-- **Map-/Editor-Funktionalität**
-  - Erstellung/Bearbeitung von Spielfeldern (Basen, Ziel, Sperren)
-  - Import/Export von Maps
+MI’lefiz consists of a web-based client (frontend) and a Spring-based game server (backend).  
+Communication is handled via **REST** and **WebSocket (STOMP / PubSub)** for real-time game state synchronization.
+
+### Components
+
+### Game Client
+- User interface for game state, interactions, and minigames
+- 3D visualization of the game board and pieces
+
+### Game Server
+- Management of game sessions
+- Centralized game rules and validation
+- Client synchronization via events and state updates
+
+### Map Editor
+- Creation and modification of game maps (bases, goal, blocks)
+- Map import and export functionality
+
+---
 
 ## Tech Stack
 
-**Backend**
-- Java 21
-- Spring Boot
-- WebSocket (STOMP)
-- REST API
-- automatisierte Tests (JUnit)
+### Backend
+- Java 21  
+- Spring Boot  
+- WebSocket (STOMP)  
+- REST API  
+- JUnit  
 
-**Frontend**
-- Vue 3 (Composition API)
-- TypeScript
-- three.js (bzw. Wrapper wie tres.js möglich)
+### Frontend
+- Vue 3 (Composition API)  
+- TypeScript  
+- three.js  
+
+---
+
+## Architecture Overview
+
+- **Frontend:** Vue 3 client with 3D rendering using three.js
+- **Backend:** Spring Boot game server managing sessions and game logic
+- **Communication:** REST for commands and WebSocket for real-time updates
+- **Architecture Goal:** Modular, extensible, and scalable multiplayer system
+
+---
+
+## Development Process
+
+- Scrum-based development
+- Iterative feature implementation
+- Focus on clean architecture and maintainability
+- Continuous integration of frontend and backend components
+
+---
+
+## Educational Context
+
+This project was developed as part of the **Software Engineering course in the Media Computer Science program**.
+It demonstrates full-stack development, real-time communication, multiplayer synchronization, and modern software engineering practices like Scrum.
